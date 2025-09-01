@@ -1,29 +1,30 @@
 import { createTamagui } from 'tamagui'
 import { tokens, themes } from '@tamagui/themes'
+import colors from './hooks/colors'
 
 const appTokens = {
   color: {
-    primary: { val: '#0E0E55' },
-    secondary: { val: '#8080FF' },
-    background: { val: '#F9F9FB' },
-    text: { val: '#1E1E1E' },
-    success: { val: '#22C55E' },  // green
-    warning: { val: '#FACC15' },  // yellow
-    danger: { val: '#EF4444' },   // red
+    primary: colors.primary,
+    secondary: colors.secondary,
+    background: colors.background,
+    text: colors.text,
+    success: colors.success,
+    warning: colors.warning,
+    danger: colors.danger,
   },
 }
 
 const appThemes = {
   light: {
-    background: appTokens.color.background.val,
-    color: appTokens.color.text.val,
-    primary: appTokens.color.primary.val,
-    secondary: appTokens.color.secondary.val,
+    background: colors.background,
+    color: colors.text,
+    primary: colors.primary,
+    secondary: colors.secondary,
   },
   dark: {
-    background: '#0E0E55',
-    color: '#FFFFFF',
-    primary: '#8080FF',
+    background: colors.primary,
+    color: colors.white,
+    primary: colors.secondary,
     secondary: '#B3B3FF',
   },
 }
@@ -31,39 +32,16 @@ const appThemes = {
 const config = createTamagui({
   tokens: {
     ...tokens,
-    color: {
-      primary: '#0E0E55' ,
-      secondary: '#8080FF' ,
-      background:'#ffffff',
-      text:'#000000',
-      success: '#4CAF50',
-      warning:'#FFC107',
-      danger:'#F44336',
-    },
+    ...appTokens,
   },
   themes: {
-    light: {
-      background: '#ffffff',
-      color: '#000000',
-    },
-    dark: {
-      background: '#000000',
-      color: '#ffffff',
-    },
+    ...themes,
+    ...appThemes,
   },
-    shorthands: {
-    p: 'padding',
-    m: 'margin',
-    w: 'width',
-    h: 'height',
-    f: 'flex',
-    ai: 'alignItems',
-    jc: 'justifyContent',
-  }
 })
 
-
 export type AppConfig = typeof config
+
 declare module 'tamagui' {
   interface TamaguiCustomConfig extends AppConfig {}
 }

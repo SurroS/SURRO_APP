@@ -7,8 +7,6 @@ export default function ResoucesLayout() {
           name='index'
       options={{
         headerTitle:"Resources",
-        headerStyle: { backgroundColor: '#0E0E55' },
-        headerTintColor: '#fff',
         headerTitleStyle: { fontWeight: 'bold' },
       }}
     />

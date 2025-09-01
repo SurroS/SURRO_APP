@@ -7,8 +7,6 @@ export default function HomeLayout() {
          name='index'
       options={{
         headerTitle:"Home",
-        headerStyle: { backgroundColor: '#0E0E55' },
-        headerTintColor: '#fff',
         headerTitleStyle: { fontWeight: 'bold' },
       }}
     />
