@@ -1,45 +1,54 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
+import { Tabs } from 'expo-router'
+import { Home, MessageCircle, Settings, LibraryBig } from '@tamagui/lucide-icons'
 
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
+        tabBarStyle: { backgroundColor: '#fff', borderTopWidth: 0 },
+        tabBarActiveTintColor: '#0E0E55', // our primary
+        tabBarInactiveTintColor: '#808080',
+      }}
+    >
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          tabBarIcon: ({ focused }) => (
+            <Home
+              color={focused ? '#0E0E55' : '#808080'}
+              
+            />
+          ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="chat"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Chat',
+          tabBarIcon: ({ focused }) => (
+            <MessageCircle  color={focused ? '#0E0E55' : '#808080'}
+               />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="resources"
+        options={{
+          title: 'Resources',
+          tabBarIcon: ({ focused}) => (<LibraryBig color={focused ? '#0E0E55' : '#808080'}
+              />),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Settings',
+          tabBarIcon: ({focused}) =>( <Settings color={focused ? '#0E0E55' : '#808080'}
+             />),
         }}
       />
     </Tabs>
-  );
+  )
 }
