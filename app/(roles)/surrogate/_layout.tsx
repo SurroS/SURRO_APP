@@ -10,9 +10,8 @@ export default function SurrogateLayout() {
         headerTitleStyle: { fontWeight: '600' },
       }}
     >
-      <Stack.Screen name="index" options={{ title: 'Surrogate Dashboard' }} />
-      <Stack.Screen name="profile" options={{ title: 'My Profile' }} />
-      <Stack.Screen name="offers" options={{ title: 'Offers' }} />
+      <Stack.Screen name="index" options={{ headerShown:false, title: 'Surrogate Dashboard' }} />
+      <Stack.Screen name="profile" options={{ headerShown:false, title: 'My Profile' }} />
     </Stack>
   )
 }

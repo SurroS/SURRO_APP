@@ -10,9 +10,8 @@ export default function ParentLayout() {
         headerTitleStyle: { fontWeight: '600' },
       }}
     >
-      <Stack.Screen name="index" options={{ title: 'Parent Dashboard' }} />
-      <Stack.Screen name="profile" options={{ title: 'Profile' }} />
-      <Stack.Screen name="matches" options={{ title: 'Matches' }} />
+      <Stack.Screen name="index" options={{headerShown:false,  title: 'Parent Dashboard' }} />
+      <Stack.Screen name="profile" options={{ headerShown:false, title: 'Profile' }} />
     </Stack>
   )
 }
