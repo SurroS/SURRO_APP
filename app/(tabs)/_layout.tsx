@@ -1,30 +1,28 @@
-import {
-  Home,
-  LibraryBig,
-  MessageCircle,
-  Settings,
-} from "@tamagui/lucide-icons";
 import { Tabs } from "expo-router";
+import { LibraryBig, MessageSquare, Settings } from "@tamagui/lucide-icons";
+import { Image } from "react-native";
+import colors from "../../hooks/colors";
+import Entypo from '@expo/vector-icons/Entypo';
 
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {  borderTopWidth: 0 },
-        tabBarActiveTintColor: "#0E0E55", // our primary
-        tabBarInactiveTintColor: "#808080",
+        tabBarStyle: { borderTopWidth: 0, backgroundColor: colors.white },
+        tabBarActiveTintColor: colors.primary as any,
+        tabBarInactiveTintColor: colors.gray as any,
       }}
     >
       <Tabs.Screen
         name="home"
         options={{
           title: "Home",
-          tabBarIcon: ({ focused }) => (
-            <Home
-              color={focused ? "#ffffffff" : "#808080"}
-              fill={focused ? "#0E0E55" : "#ffffffff"}
-              
+          tabBarIcon: ({ focused, size }) => (
+            <Entypo name="home"
+              size={size} 
+              color={(focused ? colors.primary : colors.gray) as any}
+              fill={(focused ? colors.primary : "transparent") as any}
             />
           ),
         }}
@@ -33,10 +31,11 @@ export default function TabsLayout() {
         name="chat"
         options={{
           title: "Chat",
-          tabBarIcon: ({ focused }) => (
-            <MessageCircle
-              color={focused ? "#ffffffff" : "#808080"}
-              fill={focused ? "#0E0E55" : "#ffffffff"}
+          tabBarIcon: ({ focused, size }) => (
+            <MessageSquare
+              size={size}
+              color={(focused ? colors.primary : colors.gray) as any}
+              fill={(focused ? colors.primary : "transparent") as any}
             />
           ),
         }}
@@ -45,11 +44,12 @@ export default function TabsLayout() {
         name="resources"
         options={{
           title: "Resources",
-          tabBarIcon: ({ focused }) => (
-            <LibraryBig 
-               color={focused ? '#ffffffff' : '#808080'}
-              fill={focused ? '#0E0E55' : "#ffffffff"}
-             />
+          tabBarIcon: ({ focused, size }) => (
+            <LibraryBig
+              size={size}
+              color={(focused ? colors.primary : colors.gray) as any}
+              fill={(focused ? colors.primary : "transparent") as any}
+            />
           ),
         }}
       />
@@ -57,10 +57,11 @@ export default function TabsLayout() {
         name="settings"
         options={{
           title: "Settings",
-          tabBarIcon: ({ focused }) => (
-            <Settings 
-               color={focused ? '#ffffffff' : '#808080'}
-              fill={focused ? '#0E0E55' : "#ffffffff"}
+          tabBarIcon: ({ focused, size }) => (
+            <Settings
+              size={size}
+              color={(focused ? colors.primary : colors.gray) as any}
+              fill={(focused ? colors.primary : "transparent") as any}
             />
           ),
         }}
