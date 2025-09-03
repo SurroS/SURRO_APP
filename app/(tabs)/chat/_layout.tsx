@@ -7,6 +7,7 @@ export default function ChatLayout() {
           name='index'
       options={{
         headerTitle:"Chat",
+        headerShown:false,
         headerTitleStyle: { fontWeight: 'bold' },
       }}
     />

@@ -7,6 +7,7 @@ export default function ResoucesLayout() {
           name='index'
       options={{
         headerTitle:"Resources",
+        headerShown:false,
         headerTitleStyle: { fontWeight: 'bold' },
       }}
     />
