@@ -1,80 +1,86 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Image, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+    Alert,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 
-const MailIcon = () => (
-    <Image 
-        source={require('../../assets/images/mail_icon.png')}
-        style={styles.mailIcon}
-    />
+// ✅ Reusable button
+const PrimaryButton = ({
+  title,
+  onPress,
+  loading,
+}: {
+  title: string;
+  onPress: () => void;
+  loading?: boolean;
+}) => (
+  <TouchableOpacity style={styles.primaryButton} onPress={onPress} disabled={loading}>
+    <Text style={styles.primaryButtonText}>{loading ? 'Please wait...' : title}</Text>
+  </TouchableOpacity>
 );
 
 export default function ForgotPasswordScreen() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  
-  const [currentStep, setCurrentStep] = useState('email');
-
-  const renderContent = () => {
-    switch (currentStep) {
-      case 'email':
-        return (
-          <>
-            <MailIcon />
-            <Text style={styles.subtitle}>
-              We sent a code to <Text style={styles.emailText}>****@gmail.com</Text>. Enter the code to reset your password.
-            </Text>
-            <View style={styles.otpContainer}>
-              <TextInput style={styles.otpInput} maxLength={1} keyboardType="numeric" />
-              <TextInput style={styles.otpInput} maxLength={1} keyboardType="numeric" />
-              <TextInput style={styles.otpInput} maxLength={1} keyboardType="numeric" />
-              <TextInput style={styles.otpInput} maxLength={1} keyboardType="numeric" />
-            </View>
-            <TouchableOpacity style={styles.primaryButton} onPress={() => setCurrentStep('resetPassword')}>
-              <Text style={styles.primaryButtonText}>Submit</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.resendButton}>
-              <Text style={styles.resendText}>Did not receive the verification code? <Text style={styles.resendLink}>Resend code</Text></Text>
-            </TouchableOpacity>
-          </>
-        );
-      case 'resetPassword':
-        return (
-          <>
-            <Text style={styles.header}>Reset password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="New password"
-              placeholderTextColor="#999"
-              secureTextEntry
-              value={newPassword}
-              onChangeText={setNewPassword}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Confirm new password"
-              placeholderTextColor="#999"
-              secureTextEntry
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-            />
-            <TouchableOpacity style={styles.primaryButton}>
-              <Text style={styles.primaryButtonText}>Submit</Text>
-            </TouchableOpacity>
-          </>
-        );
-      default:
-        return null;
+  const handleForgotPassword = () => {
+    if (!email) {
+      Alert.alert('Error', 'Please enter your email address.');
+      return;
     }
+
+    setLoading(true);
+
+    // Simulate API call
+    setTimeout(() => {
+      setLoading(false);
+      Alert.alert('Success', 'Password reset instructions sent to your email.');
+      router.push('/otp'); // ✅ Navigate to OTP screen
+    }, 1500);
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        {renderContent()}
-      </View>
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* Header with back button */}
+        <View style={styles.headerContainer}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={28} color="#000" />
+          </TouchableOpacity>
+          <Text style={styles.header}>Forgot Password</Text>
+        </View>
+
+        {/* Info Text */}
+        <Text style={styles.infoText}>
+          Enter your email address and we’ll send you a code to reset your password.
+        </Text>
+
+        {/* Email Input */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your email"
+            placeholderTextColor="#999"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
+
+        {/* Submit Button */}
+        <PrimaryButton title="Send Code" onPress={handleForgotPassword} loading={loading} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -85,79 +91,61 @@ const styles = StyleSheet.create({
     backgroundColor: '#F7F7F7',
   },
   container: {
-    flex: 1,
+    flexGrow: 1,
+    padding: 24,
+    paddingTop: 50,
+  },
+  headerContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
+    marginBottom: 30,
+    position: 'relative',
   },
-  mailIcon: {
-    width: 100,
-    height: 100,
-    marginBottom: 20,
-    tintColor: '#4A4676',
+  backButton: {
+    position: 'absolute',
+    left: 0,
+    padding: 4,
   },
   header: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 40,
-    textAlign: 'center',
+    color: '#000',
   },
-  subtitle: {
+  infoText: {
+    fontSize: 15,
+    color: '#555',
     textAlign: 'center',
-    color: '#666',
     marginBottom: 30,
-    lineHeight: 20,
+    lineHeight: 22,
   },
-  emailText: {
-    fontWeight: 'bold',
+  inputGroup: {
+    marginBottom: 20,
+  },
+  label: {
+    marginBottom: 6,
+    fontSize: 14,
+    fontWeight: '500',
     color: '#333',
-  },
-  otpContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '80%',
-    marginBottom: 30,
-  },
-  otpInput: {
-    width: 40,
-    height: 50,
-    textAlign: 'center',
-    borderBottomWidth: 2,
-    borderColor: '#ccc',
-    fontSize: 24,
-  },
-  primaryButton: {
-    backgroundColor: '#4A4676',
-    borderRadius: 8,
-    width: '100%',
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  primaryButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  resendButton: {
-    marginTop: 20,
-  },
-  resendText: {
-    color: '#666',
-  },
-  resendLink: {
-    color: '#4A4676',
-    fontWeight: 'bold',
   },
   input: {
     backgroundColor: '#EBEBEB',
     height: 50,
     borderRadius: 8,
     paddingHorizontal: 16,
-    marginBottom: 16,
-    width: '100%',
     fontSize: 16,
     color: '#333',
+  },
+  primaryButton: {
+    backgroundColor: '#0E0E55',
+    borderRadius: 8,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 30,
+  },
+  primaryButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });

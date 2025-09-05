@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Google from 'expo-auth-session/providers/google';
+import { useRouter } from 'expo-router'; // ✅ real navigation
 import * as WebBrowser from 'expo-web-browser';
 import React, { useEffect, useState } from 'react';
 import {
@@ -17,7 +18,6 @@ import {
 } from 'react-native';
 
 WebBrowser.maybeCompleteAuthSession();
-
 
 const SocialButton = ({
   title,
@@ -40,7 +40,6 @@ const SocialButton = ({
   </TouchableOpacity>
 );
 
-
 const PrimaryButton = ({
   title,
   onPress,
@@ -55,20 +54,11 @@ const PrimaryButton = ({
   </TouchableOpacity>
 );
 
-
 const useAuth = () => {
   const login = (token: string) => {
     console.log('Login successful! Token received:', token);
   };
   return { login };
-};
-
-const useNavigation = () => {
-  return {
-    goBack: () => console.log('Going back to the previous screen.'),
-    navigate: (screenName: string) =>
-      console.log(`Navigating to: ${screenName}`),
-  };
 };
 
 export default function LoginScreen() {
@@ -79,11 +69,10 @@ export default function LoginScreen() {
   const [error, setError] = useState(false);
 
   const { login } = useAuth();
-  const navigation = useNavigation();
+  const router = useRouter(); // ✅ expo-router navigation
 
   const API_BASE_URL = '';
 
-  
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: '',
   });
@@ -107,7 +96,6 @@ export default function LoginScreen() {
     }
   };
 
-  
   const handleAppleAuth = async () => {
     try {
       const credential = await AppleAuthentication.signInAsync({
@@ -132,7 +120,6 @@ export default function LoginScreen() {
     }
   };
 
-  
   const handleLogin = async () => {
     if (!username || !password) {
       setError(true);
@@ -177,10 +164,10 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
-        
+        {/* Header with back button */}
         <View style={styles.headerContainer}>
           <TouchableOpacity
-            onPress={() => navigation.goBack()}
+            onPress={() => router.back()} // ✅ navigate back
             style={styles.backButton}
           >
             <Ionicons name="arrow-back" size={28} color="#000" />
@@ -188,7 +175,7 @@ export default function LoginScreen() {
           <Text style={styles.header}>Log in</Text>
         </View>
 
-        
+        {/* Username */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Username / Email</Text>
           <TextInput
@@ -200,7 +187,7 @@ export default function LoginScreen() {
           />
         </View>
 
-        
+        {/* Password */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Password</Text>
           <View style={[styles.passwordContainer, error && styles.errorInput]}>
@@ -223,25 +210,28 @@ export default function LoginScreen() {
           </View>
         </View>
 
-        
+        {/* Error message */}
         {error && <Text style={styles.errorText}>Invalid username or password</Text>}
 
-        
-        <TouchableOpacity style={styles.forgotPasswordButton}>
+        {/* Forgot password */}
+        <TouchableOpacity
+          style={styles.forgotPasswordButton}
+          onPress={() => router.push('/forgot-password')} // ✅ navigate
+        >
           <Text style={styles.forgotPasswordText}>Forgot password?</Text>
         </TouchableOpacity>
 
-        
+        {/* Login button */}
         <PrimaryButton title="Log in" onPress={handleLogin} loading={loading} />
 
-        
+        {/* OR divider */}
         <View style={styles.orContainer}>
           <View style={styles.orLine} />
           <Text style={styles.orText}>OR</Text>
           <View style={styles.orLine} />
         </View>
 
-        
+        {/* Google button */}
         <SocialButton
           title="Continue with Google"
           icon={require('../../assets/images/google.png')}
@@ -249,12 +239,22 @@ export default function LoginScreen() {
           disabled={!request}
         />
 
-        
+        {/* Apple button */}
         <SocialButton
           title="Continue with Apple"
           icon={require('../../assets/images/apple.png')}
           onPress={handleAppleAuth}
         />
+
+        {/* Signup link */}
+        <TouchableOpacity
+          style={{ marginTop: 20, alignSelf: 'center' }}
+          onPress={() => router.push('/signup')} // ✅ navigate
+        >
+          <Text style={{ color: '#0E0E55', fontWeight: 'bold' }}>
+            Don’t have an account? Sign up
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     color: '#999',
     fontWeight: '600',
-    textTransform: 'uppercase', 
+    textTransform: 'uppercase',
   },
   socialButton: {
     flexDirection: 'row',
