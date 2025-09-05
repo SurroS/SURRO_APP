@@ -1,7 +1,8 @@
+import { createAuthSlice } from '@/store/auth/actions';
 import { AuthState } from '@/types/auth';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { AuthStore, createAuthSlice } from './actions';
+import { AuthStore } from './types';
 
 const initialState: AuthState = {
     user: null,
