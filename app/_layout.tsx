@@ -1,16 +1,16 @@
+import { useColorScheme } from '@/hooks/useColorScheme'
+import { defaultConfig } from '@tamagui/config/v4'
 import { useFonts } from 'expo-font'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import 'react-native-reanimated'
 import { TamaguiProvider, createTamagui } from 'tamagui'
-import { defaultConfig } from '@tamagui/config/v4'
-import { useColorScheme } from '@/hooks/useColorScheme'
 
 // 1. Create Tamagui config
 const config = createTamagui(defaultConfig)
 type Conf = typeof config
 declare module '@tamagui/core' {
-  interface TamaguiCustomConfig extends Conf {}
+  interface TamaguiCustomConfig extends Conf { }
 }
 
 export default function RootLayout() {
