@@ -3,6 +3,7 @@ export interface User {
     email: string;
     name: string;
     avatar?: string;
+    isVerified: boolean;
 }
 
 export interface AuthState {
@@ -11,6 +12,8 @@ export interface AuthState {
     isAuthenticated: boolean;
     isLoading: boolean;
     error: string | null;
+    requiresOtp: boolean;
+    tempEmail: string | null; // For OTP flows
 }
 
 export interface LoginCredentials {
@@ -19,13 +22,42 @@ export interface LoginCredentials {
 }
 
 export interface RegisterCredentials {
-    name: string;
     email: string;
     password: string;
     passwordConfirmation: string;
+    role: string;
+    refferalCode?: string;
+}
+
+export interface OtpVerification {
+    email: string;
+    code: string;
+}
+
+export interface ResetPasswordRequest {
+    email: string;
+}
+
+export interface ResetPasswordConfirm {
+    email: string;
+    otp: string;
+    newPassword: string;
+    newPasswordConfirmation: string;
+}
+
+export interface ChangePasswordRequest {
+    currentPassword: string;
+    newPassword: string;
+    newPasswordConfirmation: string;
+}
+
+export interface GoogleAppleAuth {
+    idToken: string;
+    role: string;
 }
 
 export interface ApiError {
     message: string;
     status?: number;
+    errors?: Record<string, string[]>;
 }
