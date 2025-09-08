@@ -10,6 +10,8 @@ const initialState: AuthState = {
     isAuthenticated: false,
     isLoading: false,
     error: null,
+    requiresOtp: false,
+    tempEmail: null
 };
 
 export const useAuthStore = create<AuthStore>()(
