@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar'
 import 'react-native-reanimated'
 import { TamaguiProvider, createTamagui } from 'tamagui'
 import { defaultConfig } from '@tamagui/config/v4'
-import { useColorScheme } from '@/hooks/useColorScheme'
+import { useColorScheme } from 'react-native'
 
 // 1. Create Tamagui config
 const config = createTamagui(defaultConfig)
