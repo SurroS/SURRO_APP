@@ -1,5 +1,5 @@
+import { themes, tokens } from '@tamagui/themes'
 import { createTamagui } from 'tamagui'
-import { tokens, themes } from '@tamagui/themes'
 import colors from './hooks/colors'
 
 const appTokens = {
@@ -43,7 +43,7 @@ const config = createTamagui({
 export type AppConfig = typeof config
 
 declare module 'tamagui' {
-  interface TamaguiCustomConfig extends AppConfig {}
+  interface TamaguiCustomConfig extends AppConfig { }
 }
 
 export default config

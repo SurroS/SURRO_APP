@@ -1,8 +1,7 @@
-import { Tabs } from "expo-router";
-import { LibraryBig, MessageSquare, Settings } from "@tamagui/lucide-icons";
-import { Image } from "react-native";
-import colors from "../../hooks/colors";
 import Entypo from '@expo/vector-icons/Entypo';
+import { LibraryBig, MessageSquare, Settings } from "@tamagui/lucide-icons";
+import { Tabs } from "expo-router";
+import colors from "../../hooks/colors";
 
 export default function TabsLayout() {
   return (
@@ -20,7 +19,7 @@ export default function TabsLayout() {
           title: "Home",
           tabBarIcon: ({ focused, size }) => (
             <Entypo name="home"
-              size={size} 
+              size={size}
               color={(focused ? colors.primary : colors.gray) as any}
               fill={(focused ? colors.primary : "transparent") as any}
             />

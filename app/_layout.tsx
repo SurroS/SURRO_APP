@@ -11,7 +11,7 @@ import { TamaguiProvider, createTamagui } from 'tamagui'
 const config = createTamagui(defaultConfig)
 type Conf = typeof config
 declare module '@tamagui/core' {
-  interface TamaguiCustomConfig extends Conf {}
+  interface TamaguiCustomConfig extends Conf { }
 }
 
 export default function RootLayout() {
