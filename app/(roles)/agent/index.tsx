@@ -1,10 +1,26 @@
-import { YStack, Text } from 'tamagui'
+import React from 'react';
+import { View, Text } from 'react-native';
+import { styled } from 'tamagui';
 
-export default function Resources() {
+const Container = styled(View, {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: 20,
+});
+
+const Title = styled(Text, {
+  fontSize: 24,
+  fontWeight: 'bold',
+  marginBottom: 20,
+  color: '#0E0E55',
+});
+
+export default function AgentScreen() {
   return (
-    <YStack flex={1} justify={'center'} items="center">
-      <Text color="$background" fontSize="$6" >agents</Text>
-    </YStack>
-  )
+    <Container>
+      <Title>Agent Dashboard</Title>
+      <Text>This is the Agent dashboard screen.</Text>
+    </Container>
+  );
 }
-

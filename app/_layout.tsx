@@ -1,45 +1,55 @@
-import { useColorScheme } from '@/hooks/useColorScheme'
-import { defaultConfig } from '@tamagui/config/v4'
-import { useFonts } from 'expo-font'
-import { Stack } from 'expo-router'
-import { StatusBar } from 'expo-status-bar'
-import React, { useState } from 'react'; // <--- ADDED useState
-import 'react-native-reanimated'
-import { TamaguiProvider, createTamagui } from 'tamagui'
+// app/_layout.tsx
+import { useColorScheme } from "@/hooks/useColorScheme";
+import config from "../tamagui.config";
+import { useFonts } from "expo-font";
+import { Stack, Slot } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import React, { createContext, useContext, useState } from "react";
+import "react-native-reanimated";
+import { TamaguiProvider } from "tamagui";
 
-// 1. Create Tamagui config
-const config = createTamagui(defaultConfig)
-type Conf = typeof config
-declare module '@tamagui/core' {
-  interface TamaguiCustomConfig extends Conf { }
-}
+// --- Auth Context ---
+const AuthContext = createContext({
+  isAuthenticated: false,
+  setIsAuthenticated: (_value: boolean) => {},
+});
+
+export const useAuth = () => useContext(AuthContext);
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme()
+  const colorScheme = useColorScheme();
 
-  // 2. Load fonts
   const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  })
+    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+  });
 
-  // 3. ADD THIS LINE: State to manage authentication status
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  // ⛔ Don’t block Slot with null — allow navigation tree to mount first
   if (!loaded) {
-    return null
+    return <StatusBar style="auto" />;
   }
 
   return (
-    <TamaguiProvider config={config} defaultTheme={colorScheme === 'dark' ? 'dark' : 'light'}>
-      <Stack>
-        {isAuthenticated ? ( // <--- Conditional rendering starts here
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        ) : (
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} /> // <--- ADDED auth stack
-        )}
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </TamaguiProvider>
-  )
+    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated }}>
+      <TamaguiProvider
+        config={config}
+        defaultTheme={colorScheme === "dark" ? "dark" : "light"}
+      >
+        {/* Navigation tree */}
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="onboarding" />
+          <Stack.Screen name="role-selection" />
+          <Stack.Screen name="how-did-you-hear" />
+          <Stack.Screen name="(auth)" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+
+        {/* Safe StatusBar */}
+        <StatusBar style="auto" />
+      </TamaguiProvider>
+    </AuthContext.Provider>
+  );
 }

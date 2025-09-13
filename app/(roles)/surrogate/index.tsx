@@ -1,9 +1,21 @@
-import { YStack, Text } from 'tamagui'
+import React from 'react';
+import { Text, YStack } from 'tamagui';
+import ScreenContentWrapper from '../../../components/ScreenContentWrapper';
 
-export default function HomeScreen() {
+export default function SurrogateScreen() {
   return (
-    <YStack flex={1} justify={'center'} items="center">
-      <Text color="$background" fontSize="$6" >Surrogate</Text>
-    </YStack>
-  )
+    <ScreenContentWrapper>
+      <YStack flex={1} justifyContent="center" alignItems="center">
+        <Text
+          fontSize="$6" // Use Tamagui's fontSize tokens
+          fontWeight="bold"
+          marginBottom="$4" // Use Tamagui's space tokens
+          color="$primary" // Use Tamagui's color tokens
+        >
+          Surrogate Dashboard
+        </Text>
+        <Text>This is the Surrogate dashboard screen.</Text>
+      </YStack>
+    </ScreenContentWrapper>
+  );
 }

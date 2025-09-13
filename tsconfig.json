@@ -1,27 +1,10 @@
 {
-  "extends": "expo/tsconfig.base",
+  "extends": "expo/tsconfig.base.json",
   "compilerOptions": {
-    "jsx": "react",
-    "jsx": "react",
-    "jsx": "react",
-    "jsx": "react",
-    "jsx": "react",
-    "jsx": "react",
-    "jsx": "react",
-    "jsx": "react",
-    "jsx": "react",
-    "jsx": "react",
-    "jsx": "react",
-    "jsx": "react",
-    "jsx": "react",
-    "jsx": "react",
-    "jsx": "react",
     "jsx": "react",
     "strict": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [

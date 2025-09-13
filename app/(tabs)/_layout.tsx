@@ -1,3 +1,4 @@
+import React from 'react';
 import Entypo from '@expo/vector-icons/Entypo';
 import { LibraryBig, MessageSquare, Settings } from "@tamagui/lucide-icons";
 import { Tabs } from "expo-router";

@@ -1,18 +1,10 @@
-import { Stack } from 'expo-router'
-import colors from '../../../hooks/colors'
+import React from 'react';
+import { Stack } from 'expo-router';
 
 export default function AgentLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerStyle: { backgroundColor: colors.text },
-        headerTintColor: colors.white,
-        headerTitleStyle: { fontWeight: '600' },
-      }}
-    >
+    <Stack>
       <Stack.Screen name="index" options={{ title: 'Agent Dashboard' }} />
-      <Stack.Screen name="roster" options={{ title: 'Roster' }} />
-      <Stack.Screen name="requests" options={{ title: 'Requests' }} />
     </Stack>
-  )
+  );
 }

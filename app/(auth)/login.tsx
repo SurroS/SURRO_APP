@@ -167,7 +167,7 @@ export default function LoginScreen() {
         {/* Header with back button */}
         <View style={styles.headerContainer}>
           <TouchableOpacity
-            onPress={() => router.back()} // ✅ navigate back
+            onPress={() => router.back()} // Navigate back to previous screen
             style={styles.backButton}
           >
             <Ionicons name="arrow-back" size={28} color="#000" />
