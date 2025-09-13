@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Google from 'expo-auth-session/providers/google';
-import { useRouter } from 'expo-router'; // ✅ real navigation
+import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useEffect, useState } from 'react';
 import {
@@ -69,7 +69,7 @@ export default function LoginScreen() {
   const [error, setError] = useState(false);
 
   const { login } = useAuth();
-  const router = useRouter(); // ✅ expo-router navigation
+  const router = useRouter(); //  
 
   const API_BASE_URL = '';
 
@@ -216,7 +216,7 @@ export default function LoginScreen() {
         {/* Forgot password */}
         <TouchableOpacity
           style={styles.forgotPasswordButton}
-          onPress={() => router.push('/forgot-password')} // ✅ navigate
+          onPress={() => router.push('/forgot-password')} 
         >
           <Text style={styles.forgotPasswordText}>Forgot password?</Text>
         </TouchableOpacity>

@@ -108,8 +108,8 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   header: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: "heavy",
     color: '#000',
   },
   infoText: {

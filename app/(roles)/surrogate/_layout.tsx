@@ -1,3 +1,4 @@
+import React from 'react'
 import { Stack } from 'expo-router'
 import colors from '../../../hooks/colors'
 
@@ -10,8 +11,7 @@ export default function SurrogateLayout() {
         headerTitleStyle: { fontWeight: '600' },
       }}
     >
-      <Stack.Screen name="index" options={{ headerShown:false, title: 'Surrogate Dashboard' }} />
-      <Stack.Screen name="profile" options={{ headerShown:false, title: 'My Profile' }} />
+      <Stack.Screen name="index" options={{ headerShown:false, title: 'Surrogate Dashboard' }} /> 
     </Stack>
   )
 }
