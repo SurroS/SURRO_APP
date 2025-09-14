@@ -74,7 +74,8 @@ export default function LoginScreen() {
 
     try {
       await login(formData);
-      // Navigation will be handled by the auth store state changes
+      // Navigation will be handled automatically by the auth store state changes
+      // The index.tsx will detect authentication and navigate to the appropriate role dashboard
     } catch (err) {
       console.error('Login error:', err);
       // Error is already handled by the auth store
@@ -142,7 +143,7 @@ export default function LoginScreen() {
 
         <TouchableOpacity
           style={styles.signupLink}
-          onPress={() => router.push('/signup')}
+          onPress={() => router.push('/(auth)/signup')}
         >
           <Text style={styles.signupLinkText}>
             Don&apos;t have an account? Sign up

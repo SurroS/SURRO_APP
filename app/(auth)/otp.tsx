@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import {
   Alert,
   Image,
@@ -49,7 +49,8 @@ export default function OTPScreen() {
         email: tempEmail,
         code: getOtpCode(),
       });
-      // Navigation will be handled by the auth store state changes
+      // Navigation will be handled automatically by the auth store state changes
+      // The index.tsx will detect authentication and navigate to the appropriate role dashboard
     } catch (err) {
       console.error('OTP verification error:', err);
       // Error is already handled by the auth store

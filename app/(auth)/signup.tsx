@@ -2,7 +2,7 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Google from 'expo-auth-session/providers/google';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   Alert,
   SafeAreaView,
@@ -75,7 +75,8 @@ export default function SignupScreen() {
 
     try {
       await register(formData);
-      // Navigation will be handled by the auth store state changes
+      // Navigation will be handled automatically by the auth store state changes
+      // The index.tsx will detect authentication and navigate to the appropriate role dashboard
     } catch (err) {
       console.error('Signup error:', err);
       // Error is already handled by the auth store
@@ -120,14 +121,10 @@ export default function SignupScreen() {
           errorMessage={errors.passwordConfirmation}
         />
 
-        <InputField
-          label="Role"
-          value={formData.role}
-          onChangeText={(text) => updateField('role', text)}
-          placeholder="Enter your role (surrogate, parent, agent)"
-          error={!!errors.role}
-          errorMessage={errors.role}
-        />
+        {/* Role is automatically set from role selection, so we don't show it as an input */}
+        <Text style={styles.roleDisplay}>
+          Role: {formData.role.charAt(0).toUpperCase() + formData.role.slice(1)}
+        </Text>
 
         {formData.refferalCode && (
           <InputField
@@ -165,7 +162,7 @@ export default function SignupScreen() {
 
         <TouchableOpacity
           style={styles.loginLink}
-          onPress={() => router.push('/')}
+          onPress={() => router.push('/(auth)/login')}
         >
           <Text style={styles.loginLinkText}>
             Already have an account? Log in
@@ -190,6 +187,13 @@ const styles = StyleSheet.create({
     color: 'red',
     marginTop: -10,
     marginBottom: 15,
+    textAlign: 'center',
+  },
+  roleDisplay: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#0E0E55',
+    marginBottom: 20,
     textAlign: 'center',
   },
   loginLink: {

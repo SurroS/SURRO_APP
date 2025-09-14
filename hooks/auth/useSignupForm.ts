@@ -1,12 +1,14 @@
+import { useAuth } from '@/hooks/useAuth';
 import { RegisterCredentials } from '@/types/auth';
 import { useState } from 'react';
 
 export const useSignupForm = () => {
+    const { user } = useAuth();
     const [formData, setFormData] = useState<RegisterCredentials>({
         email: '',
         password: '',
         passwordConfirmation: '',
-        role: 'surrogate', // Default role
+        role: user?.role || 'surrogate', // Use role from auth store
         refferalCode: '',
     });
     const [errors, setErrors] = useState<Partial<RegisterCredentials>>({});
@@ -53,7 +55,7 @@ export const useSignupForm = () => {
             email: '',
             password: '',
             passwordConfirmation: '',
-            role: 'surrogate',
+            role: user?.role || 'surrogate',
             refferalCode: '',
         });
         setErrors({});

@@ -1,26 +1,18 @@
-import React from 'react'
-import { YStack, Text, Button } from 'tamagui'
-import { useState } from 'react'
+import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'expo-router'
-
-// We should use proper routing instead of direct component imports
-// The role should be managed in a global store
-const role: 'parent' | 'surrogate' | 'agent' = 'surrogate'
+import React from 'react'
+import { Text, YStack } from 'tamagui'
 
 export default function Home() {
   const router = useRouter()
-  
-  // For now, we'll redirect to the appropriate role dashboard
-  // In a real implementation, this would be handled by the app's state management
+  const { user } = useAuth()
+
+  // Redirect to the appropriate role dashboard based on user's actual role
   React.useEffect(() => {
-    if (role === 'parent') {
-      router.replace('/(roles)/parent')
-    } else if (role === 'surrogate') {
-      router.replace('/(roles)/surrogate')
-    } else {
-      router.replace('/(roles)/agent')
+    if (user?.role) {
+      router.replace(`/(roles)/${user.role}`)
     }
-  }, [])
+  }, [user?.role])
 
   return (
     <YStack flex={1} justifyContent="center" alignItems="center">

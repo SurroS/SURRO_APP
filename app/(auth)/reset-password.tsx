@@ -1,5 +1,4 @@
 import { useRouter } from 'expo-router';
-import React from 'react';
 import {
     Alert,
     SafeAreaView,
@@ -35,7 +34,8 @@ export default function ResetPasswordScreen() {
                 email: tempEmail,
             });
             Alert.alert('Success', 'Password has been reset successfully.');
-            router.push('/'); // Navigate back to login
+            // Navigation will be handled automatically by the auth store state changes
+            // The index.tsx will detect authentication and navigate to the appropriate role dashboard
         } catch (err) {
             console.error('Reset password error:', err);
             // Error is already handled by the auth store

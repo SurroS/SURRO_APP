@@ -1,3 +1,4 @@
+import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, SafeAreaView, StyleSheet } from "react-native";
@@ -23,19 +24,19 @@ const ROLE_ITEMS = [
   // { key: "fertility-clinic", label: "Fertility clinic", image: "#082A9A" },
 ] as const;
 
-// Strongly typed role-to-route mapping
-const roleRouteMap = {
-  "intending-parent": "/(roles)/parent",
-  // "intending-parent-individual": "/(roles)/parent",
-  agent: "/(roles)/agent",
-  // "fertility-clinic": "/(roles)/fertility-clinic",
+// Map role keys to actual role values for auth store
+const roleMapping = {
+  "intending-parent": "parent",
+  agent: "agent",
+  surrogate: "surrogate",
 } as const;
 
-type RoleKey = keyof typeof roleRouteMap | "surrogate";
+type RoleKey = keyof typeof roleMapping;
 
 export default function RoleSelection() {
   const router = useRouter();
   const [selectedRole, setSelectedRole] = useState<RoleKey | null>(null);
+  const { setUser } = useAuth();
 
   const onSelect = (key: RoleKey) => {
     setSelectedRole(key);
@@ -44,16 +45,24 @@ export default function RoleSelection() {
   const onNext = () => {
     if (!selectedRole) return;
 
-    // Special case for surrogate
+    // Store the selected role in auth store
+    const role = roleMapping[selectedRole];
+
+    // Create a temporary user object with the selected role
+    setUser({
+      id: '',
+      email: '',
+      name: '',
+      role: role,
+      isVerified: false,
+    });
+
+    // Navigate to auth screens based on role
     if (selectedRole === "surrogate") {
       router.push("/how-did-you-hear");
-      return;
-    }
-
-    // All other roles use the route map
-    const route = roleRouteMap[selectedRole as keyof typeof roleRouteMap];
-    if (route) {
-      router.push(route);
+    } else {
+      // For parent and agent, go directly to auth screens
+      router.push("/(auth)/signup");
     }
   };
 
