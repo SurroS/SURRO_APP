@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { Pressable, StyleSheet } from "react-native";
-import { YStack, XStack, Text, Button } from "tamagui";
 import { useRouter } from "expo-router";
+import { useState } from "react";
+import { Pressable, StyleSheet } from "react-native";
+import { Button, Text, XStack, YStack } from "tamagui";
 
 const ROLE_ITEMS = [
   { key: "surrogate", label: "Surrogate", color: "#0FB1A6" },
@@ -46,29 +46,26 @@ export default function RoleSelection() {
   };
 
   return (
-    <YStack flex={1} padding="$4" backgroundColor="$background">
+    <YStack
+      flex={1}
+      padding="$4"
+      backgroundColor="$background"
+      justifyContent="center"
+    >
       {/* Header */}
-      <YStack
-        width={317}
-        height={150}
-        alignSelf="center"
-        justifyContent="center"
-        marginTop="$5"
-      >
+      <YStack height={80} >
         <Text
-  fontWeight="600"
-  fontSize={20}
-  lineHeight={23}
-  textAlign="center"
-  color="$color.text" // resolves to black in light theme
->
-  Which of the following role best describes you
-</Text>
-
+          fontWeight="700"
+          fontSize={20}
+          textAlign="center"
+          color="$color.text" // resolves to black in light theme
+        >
+          Which of the following role best describes you
+        </Text>
       </YStack>
 
       {/* Roles container */}
-      <YStack width={352} alignSelf="center" space="$4" marginTop="$4">
+      <YStack width={'100%'} alignSelf="center" space="$4" marginTop="$4">
         {ROLE_ITEMS.map((item) => (
           <Pressable
             key={item.key}
@@ -84,7 +81,7 @@ export default function RoleSelection() {
               alignItems="center"
               justifyContent="space-between"
             >
-              <XStack alignItems="center" space={12} style={{ flex: 1 }}>
+              <XStack alignItems="center" gap={12} style={{ flex: 1 }}>
                 <YStack
                   width={36}
                   height={30}
@@ -138,7 +135,7 @@ export default function RoleSelection() {
 
       {/* Next button */}
       <Button
-        width={353}
+        width={'100%'}
         height={55}
         borderRadius={8}
         alignSelf="center"
