@@ -122,23 +122,21 @@ export default function Screen1() {
   ).current;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#ffffffff", justifyContent:"center", alignItems:"center" }}>
       <YStack
         flex={1}
         backgroundColor="$background"
         paddingHorizontal="$4"
-        paddingBottom="$4"
-        justifyContent="center"
-        alignItems="center"
+
       >
         {/* Header */}
-        <YStack alignItems="center" paddingTop="$1" space="$1">
+        <YStack alignItems="center" paddingTop="$4">
           <Image
-            source={require("../../assets/images/icon.png")}
-            width={SCREEN_WIDTH * 0.13}
-            height={SCREEN_WIDTH * 0.13}
+            source={require("../../assets/images/adaptive-icon2.png")}
+            width={SCREEN_WIDTH * 0.19}
+            height={SCREEN_WIDTH * 0.19}
           />
-          <Text fontSize={20} fontWeight="800" color="$primary">
+          <Text fontSize={22} fontWeight="800" color="$primary">
             SURRO
           </Text>
         </YStack>
@@ -154,7 +152,7 @@ export default function Screen1() {
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
           contentContainerStyle={{
-            paddingHorizontal: CARD_SPACING/2,
+            paddingHorizontal: CARD_SPACING / 2,
             marginTop: 10, // moves carousel closer to app name
             paddingBottom: 5,
           }}

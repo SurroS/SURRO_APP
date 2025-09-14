@@ -2,7 +2,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { KeyboardAvoidingView, Pressable } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable } from "react-native";
 import { Button, Card, Input, ScrollView, Text, XStack, YStack } from "tamagui";
 
 // Ordered list from Figma + PRD
@@ -68,7 +68,7 @@ export default function HowDidYouHear() {
 
   return (
     <ScrollView flex={1} >
-      <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={100} >
+      <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={Platform.OS==="ios"?100:0} >
       <YStack  backgroundColor="$background" padding="$2">
         {/* Header */}
         <YStack  marginBottom="$4" marginTop="$6">

@@ -1,14 +1,26 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, StyleSheet } from "react-native";
-import { Button, Text, XStack, YStack } from "tamagui";
+import { Pressable, SafeAreaView, StyleSheet } from "react-native";
+import { Button, Image, Text, XStack, YStack } from "tamagui";
 
 const ROLE_ITEMS = [
-  { key: "surrogate", label: "Surrogate", color: "#0FB1A6" },
-  { key: "intending-parent", label: "Intending parent", color: "#9B1CA9" },
-  // { key: "intending-parent-individual", label: "Intending parent (Individual)", color: "#22B573" },
-  // { key: "fertility-clinic", label: "Fertility clinic", color: "#082A9A" },
-  { key: "agent", label: "Agent", color: "#B71C1C" },
+  {
+    key: "surrogate",
+    label: "Surrogate",
+    image: require("../assets/images/surrogate-icon.png"),
+  },
+  {
+    key: "intending-parent",
+    label: "Intending parent",
+    image: require("../assets/images/parent-icon.png"),
+  },
+  {
+    key: "agent",
+    label: "Agent",
+    image: require("../assets/images/agent-icon.png"),
+  },
+  // { key: "intending-parent-individual", label: "Intending parent (Individual)", image: "#22B573" },
+  // { key: "fertility-clinic", label: "Fertility clinic", image: "#082A9A" },
 ] as const;
 
 // Strongly typed role-to-route mapping
@@ -46,113 +58,95 @@ export default function RoleSelection() {
   };
 
   return (
-    <YStack
-      flex={1}
-      padding="$4"
-      backgroundColor="$background"
-      justifyContent="center"
-    >
-      {/* Header */}
-      <YStack height={80} >
+    <SafeAreaView>
+      <YStack padding={"$4"} marginTop={"$5"} backgroundColor="$background">
+        {/* Header */}
         <Text
-          fontWeight="700"
           fontSize={20}
+          marginTop={20}
+          fontWeight={"500"}
           textAlign="center"
           color="$color.text" // resolves to black in light theme
         >
           Which of the following role best describes you
         </Text>
-      </YStack>
 
-      {/* Roles container */}
-      <YStack width={'100%'} alignSelf="center" space="$4" marginTop="$4">
-        {ROLE_ITEMS.map((item) => (
-          <Pressable
-            key={item.key}
-            onPress={() => onSelect(item.key as RoleKey)}
-            style={styles.pressable}
-            android_ripple={{ color: "rgba(0,0,0,0.04)" }}
-          >
-            <XStack
-              width="100%"
-              minHeight={40}
-              borderRadius={8}
-              style={styles.card}
-              alignItems="center"
-              justifyContent="space-between"
+        {/* Roles container */}
+        <YStack width={"100%"} alignSelf="center" space="$4" marginTop="$4">
+          {ROLE_ITEMS.map((item) => (
+            <Pressable
+              key={item.key}
+              onPress={() => onSelect(item.key as RoleKey)}
+              style={styles.pressable}
+              android_ripple={{ color: "rgba(0,0,0,0.04)" }}
             >
-              <XStack alignItems="center" gap={12} style={{ flex: 1 }}>
+              <XStack
+                width="100%"
+                minHeight={40}
+                borderRadius={8}
+                style={styles.card}
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <XStack alignItems="center" gap={12} style={{ flex: 1 }}>
+                  <Image source={item.image} />
+                  <Text
+                    fontSize={16}
+                    fontWeight="500"
+                    color="#111111"
+                    style={{ flexShrink: 1 }}
+                  >
+                    {item.label}
+                  </Text>
+                </XStack>
+
                 <YStack
-                  width={36}
-                  height={30}
-                  borderRadius={18}
+                  width={24}
+                  height={24}
+                  borderRadius={12}
                   justifyContent="center"
                   alignItems="center"
-                  backgroundColor={item.color}
+                  borderWidth={2}
+                  borderColor={
+                    selectedRole === item.key ? "$primary" : "#CFCFCF"
+                  }
+                  backgroundColor="#FFFFFF"
                 >
-                  <Text fontSize={14} fontWeight="600" color="#FFFFFF">
-                    {item.label
-                      .split(" ")
-                      .map((w) => w[0])
-                      .slice(0, 2)
-                      .join("")}
-                  </Text>
+                  {selectedRole === item.key && (
+                    <YStack
+                      width={12}
+                      height={12}
+                      borderRadius={6}
+                      backgroundColor="$primary"
+                    />
+                  )}
                 </YStack>
-
-                <Text
-                  fontSize={16}
-                  fontWeight="500"
-                  color="#111111"
-                  style={{ flexShrink: 1 }}
-                >
-                  {item.label}
-                </Text>
               </XStack>
+            </Pressable>
+          ))}
+        </YStack>
 
-              <YStack
-                width={24}
-                height={24}
-                borderRadius={12}
-                justifyContent="center"
-                alignItems="center"
-                borderWidth={2}
-                borderColor={selectedRole === item.key ? "$primary" : "#CFCFCF"}
-                backgroundColor="#FFFFFF"
-              >
-                {selectedRole === item.key && (
-                  <YStack
-                    width={12}
-                    height={12}
-                    borderRadius={6}
-                    backgroundColor="$primary"
-                  />
-                )}
-              </YStack>
-            </XStack>
-          </Pressable>
-        ))}
-      </YStack>
-
-      {/* Next button */}
-      <Button
-        width={'100%'}
-        height={55}
-        borderRadius={8}
-        alignSelf="center"
-        marginTop="$5"
-        onPress={onNext}
-        disabled={!selectedRole}
-        backgroundColor={selectedRole ? "$primary" : "#EDEDEC"}
-      >
-        <Text
-          fontSize={16}
-          fontWeight="600"
-          color={selectedRole ? "$background" : "#9E9E9E"}
+        {/* Next button */}
+        <Button
+          width={"100%"}
+          height={55}
+          borderRadius={8}
+          alignSelf="center"
+          marginTop="$5"
+          onPress={onNext}
+          disabled={!selectedRole}
+          backgroundColor={selectedRole ? "$primary" : "#EDEDEC"}
         >
-          Next
-        </Text>
-      </Button>
-    </YStack>
+          <Text
+            fontSize={16}
+            fontWeight="600"
+            color={selectedRole ? "$background" : "#9E9E9E"}
+          >
+            Next
+          </Text>
+        </Button>
+      </YStack>
+    </SafeAreaView>
   );
 }
 
