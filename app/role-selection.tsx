@@ -57,13 +57,8 @@ export default function RoleSelection() {
       isVerified: false,
     });
 
-    // Navigate to auth screens based on role
-    if (selectedRole === "surrogate") {
-      router.push("/how-did-you-hear");
-    } else {
-      // For parent and agent, go directly to auth screens
-      router.push("/(auth)/signup");
-    }
+    // Navigate to "how did you hear" page for all roles
+    router.push("/how-did-you-hear");
   };
 
   return (

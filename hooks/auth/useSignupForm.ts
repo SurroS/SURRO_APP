@@ -3,13 +3,13 @@ import { RegisterCredentials } from '@/types/auth';
 import { useState } from 'react';
 
 export const useSignupForm = () => {
-    const { user } = useAuth();
+    const { user, referralCode } = useAuth();
     const [formData, setFormData] = useState<RegisterCredentials>({
         email: '',
         password: '',
         passwordConfirmation: '',
         role: user?.role || 'surrogate', // Use role from auth store
-        refferalCode: '',
+        refferalCode: referralCode || '', // Use referral code from auth store
     });
     const [errors, setErrors] = useState<Partial<RegisterCredentials>>({});
 
@@ -56,7 +56,7 @@ export const useSignupForm = () => {
             password: '',
             passwordConfirmation: '',
             role: user?.role || 'surrogate',
-            refferalCode: '',
+            refferalCode: referralCode || '',
         });
         setErrors({});
     };
