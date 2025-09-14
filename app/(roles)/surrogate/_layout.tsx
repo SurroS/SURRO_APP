@@ -13,5 +13,5 @@ export default function SurrogateLayout() {
     >
       <Stack.Screen name="index" options={{ headerShown:false, title: 'Surrogate Dashboard' }} /> 
     </Stack>
-  )
+  );
 }

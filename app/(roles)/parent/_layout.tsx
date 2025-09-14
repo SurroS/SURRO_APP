@@ -1,17 +1,10 @@
-import { Stack } from 'expo-router'
-import colors from '../../../hooks/colors'
+import React from 'react';
+import { Stack } from 'expo-router';
 
 export default function ParentLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerStyle: { backgroundColor: colors.primary },
-        headerTintColor: colors.white,
-        headerTitleStyle: { fontWeight: '600' },
-      }}
-    >
-      <Stack.Screen name="index" options={{headerShown:false,  title: 'Parent Dashboard' }} />
-      <Stack.Screen name="profile" options={{ headerShown:false, title: 'Profile' }} />
+    <Stack>
+      <Stack.Screen name="index" options={{ title: 'Parent Dashboard' }} />
     </Stack>
-  )
+  );
 }
