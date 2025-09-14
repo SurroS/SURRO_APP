@@ -1,76 +1,100 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useRef } from 'react';
 import {
-    Alert,
-    Image,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+
+import { useAuth } from '@/hooks/useAuth';
+import { PrimaryButton } from '../../components/auth/PrimaryButton';
+import { ScreenHeader } from '../../components/auth/ScreenHeader';
+import { useOtpForm } from '../../hooks/auth/useOtpForm';
 
 export default function OTPScreen() {
   const router = useRouter();
-  const [otp, setOtp] = useState(['', '', '', '']);
+  const { otp, error, updateOtpDigit, validateOtp, getOtpCode } = useOtpForm();
+  const { verifyOtp, resendOtp, tempEmail, isLoading, clearError } = useAuth();
+
+  // Refs for focusing inputs
+  const inputs = useRef<(TextInput | null)[]>([]);
 
   const handleChange = (text: string, index: number) => {
-    const newOtp = [...otp];
-    newOtp[index] = text.slice(-1); // allow only 1 digit
-    setOtp(newOtp);
+    updateOtpDigit(index, text);
 
     // Auto focus next input if not last
     if (text && index < otp.length - 1) {
-      const nextInput = `otp-${index + 1}`;
-      // @ts-ignore
-      inputs[nextInput]?.focus();
+      inputs.current[index + 1]?.focus();
     }
   };
 
-  // Refs for focusing inputs
-  const inputs: { [key: string]: TextInput | null } = {};
-
-  const handleVerify = () => {
-    const code = otp.join('');
-    if (code.length !== 4) {
-      Alert.alert('Error', 'Please enter the 4-digit OTP code.');
+  const handleVerify = async () => {
+    if (!validateOtp()) {
       return;
     }
-    Alert.alert('Success', `OTP Verified: ${code}`);
-    router.push('/reset-password'); // go to reset password page
+
+    if (!tempEmail) {
+      Alert.alert('Error', 'No email found. Please restart the process.');
+      return;
+    }
+
+    try {
+      await verifyOtp({
+        email: tempEmail,
+        code: getOtpCode(),
+      });
+      // Navigation will be handled automatically by the auth store state changes
+      // The index.tsx will detect authentication and navigate to the appropriate role dashboard
+    } catch (err) {
+      console.error('OTP verification error:', err);
+      // Error is already handled by the auth store
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (!tempEmail) {
+      Alert.alert('Error', 'No email found. Please restart the process.');
+      return;
+    }
+
+    try {
+      await resendOtp(tempEmail);
+      Alert.alert('Success', 'OTP code has been resent to your email.');
+    } catch (err) {
+      console.error('Resend OTP error:', err);
+      Alert.alert('Error', 'Failed to resend OTP. Please try again.');
+    }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
-        {/* Header */}
-        <View style={styles.headerContainer}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={28} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.header}>Enter OTP</Text>
-        </View>
+        <ScreenHeader title="Enter OTP" onBackPress={() => router.back()} />
 
-        {/* Image */}
         <Image
           source={require('../../assets/images/openemail.png')}
           style={styles.image}
         />
 
-        {/* Info text */}
         <Text style={styles.infoText}>
-          We’ve sent a 4-digit verification code to your email.
+          We&apos;ve sent a 4-digit verification code to {tempEmail || 'your email'}.
         </Text>
 
-        {/* OTP input fields */}
         <View style={styles.otpContainer}>
           {otp.map((digit, index) => (
             <TextInput
               key={index}
-              ref={(ref) => (inputs[`otp-${index}`] = ref)}
+              ref={(ref) => {
+                if (ref) {
+                  inputs.current[index] = ref;
+                }
+              }}
               style={styles.otpInput}
               keyboardType="numeric"
               maxLength={1}
@@ -80,15 +104,19 @@ export default function OTPScreen() {
           ))}
         </View>
 
-        {/* Verify button */}
-        <TouchableOpacity style={styles.primaryButton} onPress={handleVerify}>
-          <Text style={styles.primaryButtonText}>Verify</Text>
-        </TouchableOpacity>
+        {error && (
+          <Text style={styles.errorText}>{error}</Text>
+        )}
 
-        {/* Resend */}
-        <TouchableOpacity style={{ marginTop: 20 }}>
+        <PrimaryButton
+          title="Verify"
+          onPress={handleVerify}
+          loading={isLoading}
+        />
+
+        <TouchableOpacity style={styles.resendButton} onPress={handleResendOtp}>
           <Text style={styles.resendText}>
-            Didn’t get the code? <Text style={{ color: '#0E0E55', fontWeight: 'bold' }}>Resend</Text>
+            Didn&apos;t get the code? <Text style={styles.resendLink}>Resend</Text>
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -106,24 +134,6 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingTop: 50,
     alignItems: 'center',
-  },
-  headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 30,
-    position: 'relative',
-    alignSelf: 'stretch',
-  },
-  backButton: {
-    position: 'absolute',
-    left: 0,
-    padding: 4,
-  },
-  header: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#000',
   },
   image: {
     width: 120,
@@ -152,23 +162,22 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#333',
   },
-  primaryButton: {
-    backgroundColor: '#0E0E55',
-    borderRadius: 8,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    alignItems: 'center',
-    alignSelf: 'stretch',
-    marginTop: 20,
+  errorText: {
+    color: 'red',
+    marginTop: -10,
+    marginBottom: 15,
+    textAlign: 'center',
   },
-  primaryButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
+  resendButton: {
+    marginTop: 20,
   },
   resendText: {
     fontSize: 14,
     color: '#333',
     textAlign: 'center',
+  },
+  resendLink: {
+    color: '#0E0E55',
+    fontWeight: 'bold',
   },
 });

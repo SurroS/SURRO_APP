@@ -4,6 +4,7 @@ export interface User {
     name: string;
     avatar?: string;
     isVerified: boolean;
+    role: 'parent' | 'surrogate' | 'agent';
 }
 
 export interface AuthState {

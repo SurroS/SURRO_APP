@@ -1,15 +1,24 @@
 // app/index.tsx
-import React, { useEffect } from "react";
-import { YStack } from "tamagui";
+import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "expo-router";
+import { useEffect } from "react";
+import { YStack } from "tamagui";
 
 export default function Index() {
   const router = useRouter();
+  const { isAuthenticated, user, isLoading } = useAuth();
 
   useEffect(() => {
-    // Navigate directly to the first onboarding screen after splash
-    router.replace("/onboarding/screen1");
-  }, []);
+    if (!isLoading) {
+      if (isAuthenticated && user?.role) {
+        // User is authenticated, navigate to role-specific dashboard
+        router.replace(`/(roles)/${user.role}`);
+      } else {
+        // User is not authenticated, start with onboarding
+        router.replace("/onboarding/screen1");
+      }
+    }
+  }, [isAuthenticated, user?.role, isLoading]);
 
   return (
     <YStack flex={1} justifyContent="center" alignItems="center" padding="$4">
