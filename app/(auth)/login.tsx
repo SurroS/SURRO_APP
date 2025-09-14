@@ -2,7 +2,7 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Google from 'expo-auth-session/providers/google';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   Alert,
   SafeAreaView,

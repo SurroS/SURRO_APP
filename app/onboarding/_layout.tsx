@@ -9,10 +9,6 @@ export default function OnboardingLayout() {
         name="screen1"
         options={{ title: "Welcome to Surro" }}
       />
-      <Stack.Screen
-        name="screen2"
-        options={{ title: "Our Core Values" }}
-      />
     </Stack>
   );
 }

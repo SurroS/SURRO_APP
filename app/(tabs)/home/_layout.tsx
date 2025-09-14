@@ -8,6 +8,7 @@ export default function HomeLayout() {
          name='index'
       options={{
         headerTitle:"Home",
+        headerShown:false,
         headerTitleStyle: { fontWeight: 'bold' },
       }}
     />
