@@ -1,80 +1,34 @@
-import { Ionicons } from '@expo/vector-icons';
-import axios from 'axios';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Google from 'expo-auth-session/providers/google';
-import { useRouter } from 'expo-router'; // ✅ real navigation
+import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
-    Alert,
-    Image,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity
 } from 'react-native';
+
+import { useAuth } from '@/hooks/useAuth';
+import { InputField } from '../../components/auth/InputField';
+import { OrDivider } from '../../components/auth/OrDivider';
+import { PrimaryButton } from '../../components/auth/PrimaryButton';
+import { ScreenHeader } from '../../components/auth/ScreenHeader';
+import { SocialButton } from '../../components/auth/SocialButton';
+import { useLoginForm } from '../../hooks/auth/useLoginForm';
 
 WebBrowser.maybeCompleteAuthSession();
 
-const SocialButton = ({
-  title,
-  icon,
-  onPress,
-  disabled,
-}: {
-  title: string;
-  icon: any;
-  onPress: () => void;
-  disabled?: boolean;
-}) => (
-  <TouchableOpacity
-    style={[styles.socialButton, disabled && { opacity: 0.5 }]}
-    onPress={onPress}
-    disabled={disabled}
-  >
-    <Image source={icon} style={styles.socialIcon} />
-    <Text style={styles.socialButtonText}>{title}</Text>
-  </TouchableOpacity>
-);
-
-const PrimaryButton = ({
-  title,
-  onPress,
-  loading,
-}: {
-  title: string;
-  onPress: () => void;
-  loading?: boolean;
-}) => (
-  <TouchableOpacity style={styles.primaryButton} onPress={onPress} disabled={loading}>
-    <Text style={styles.primaryButtonText}>{loading ? 'Please wait...' : title}</Text>
-  </TouchableOpacity>
-);
-
-const useAuth = () => {
-  const login = (token: string) => {
-    console.log('Login successful! Token received:', token);
-  };
-  return { login };
-};
-
 export default function LoginScreen() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState(false);
-
-  const { login } = useAuth();
-  const router = useRouter(); // ✅ expo-router navigation
-
-  const API_BASE_URL = '';
+  const router = useRouter();
+  const { formData, errors, updateField, validateForm } = useLoginForm();
+  const { login, googleLogin, appleLogin, isLoading, error, clearError } = useAuth();
 
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: '',
+    clientId: '', // Add your Google client ID here
   });
 
   useEffect(() => {
@@ -85,11 +39,8 @@ export default function LoginScreen() {
 
   const handleGoogleAuth = async (accessToken: string) => {
     try {
-      const res = await axios.post(``, { accessToken });
-      if (res.data?.token) {
-        login(res.data.token);
-        Alert.alert('Success', 'Logged in with Google');
-      }
+      await googleLogin({ idToken: accessToken, role: 'surrogate' });
+      Alert.alert('Success', 'Logged in with Google');
     } catch (err) {
       console.error('Google login error:', err);
       Alert.alert('Google Login Failed', 'Please try again.');
@@ -105,12 +56,8 @@ export default function LoginScreen() {
         ],
       });
 
-      const res = await axios.post(``, {
-        identityToken: credential.identityToken,
-      });
-
-      if (res.data?.token) {
-        login(res.data.token);
+      if (credential.identityToken) {
+        await appleLogin({ idToken: credential.identityToken, role: 'surrogate' });
         Alert.alert('Success', 'Logged in with Apple');
       }
     } catch (err: any) {
@@ -121,117 +68,65 @@ export default function LoginScreen() {
   };
 
   const handleLogin = async () => {
-    if (!username || !password) {
-      setError(true);
-      Alert.alert('Error', 'Please enter your username and password.');
+    if (!validateForm()) {
       return;
     }
-
-    if (password.length < 8) {
-      setError(true);
-      Alert.alert('Error', 'Password must be at least 8 characters.');
-      return;
-    }
-
-    setLoading(true);
-    setError(false);
 
     try {
-      const API_ENDPOINT = ``;
-      const response = await axios.post(API_ENDPOINT, {
-        username: username,
-        password: password,
-      });
-
-      if (response.data && response.data.token) {
-        login(response.data.token);
-      } else {
-        setError(true);
-        Alert.alert('Login Failed', 'Invalid credentials. Please try again.');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      setError(true);
-      Alert.alert(
-        'Login Failed',
-        'An error occurred during login. Please check your internet connection and try again.'
-      );
-    } finally {
-      setLoading(false);
+      await login(formData);
+      // Navigation will be handled by the auth store state changes
+    } catch (err) {
+      console.error('Login error:', err);
+      // Error is already handled by the auth store
     }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
-        {/* Header with back button */}
-        <View style={styles.headerContainer}>
-          <TouchableOpacity
-            onPress={() => router.back()} // Navigate back to previous screen
-            style={styles.backButton}
-          >
-            <Ionicons name="arrow-back" size={28} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.header}>Log in</Text>
-        </View>
+        <ScreenHeader title="Log in" onBackPress={() => router.back()} />
 
-        {/* Username */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Username / Email</Text>
-          <TextInput
-            style={[styles.input, error && styles.errorInput]}
-            placeholder="Enter your username or email"
-            placeholderTextColor="#999"
-            value={username}
-            onChangeText={setUsername}
-          />
-        </View>
+        <InputField
+          label="Email"
+          value={formData.email}
+          onChangeText={(text) => updateField('email', text)}
+          placeholder="Enter your email"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          error={!!errors.email}
+          errorMessage={errors.email}
+        />
 
-        {/* Password */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Password</Text>
-          <View style={[styles.passwordContainer, error && styles.errorInput]}>
-            <TextInput
-              style={[styles.input, { flex: 1, borderRadius: 0 }]}
-              placeholder="Enter your 8-digit password"
-              placeholderTextColor="#999"
-              secureTextEntry={!showPassword}
-              value={password}
-              onChangeText={setPassword}
-            />
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-              <Ionicons
-                name={showPassword ? 'eye' : 'eye-off'}
-                size={24}
-                color="#666"
-                style={styles.eyeIcon}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
+        <InputField
+          label="Password"
+          value={formData.password}
+          onChangeText={(text) => updateField('password', text)}
+          placeholder="Enter your password"
+          secureTextEntry
+          showPasswordToggle
+          error={!!errors.password}
+          errorMessage={errors.password}
+        />
 
-        {/* Error message */}
-        {error && <Text style={styles.errorText}>Invalid username or password</Text>}
+        {error && (
+          <Text style={styles.errorText}>{error}</Text>
+        )}
 
-        {/* Forgot password */}
         <TouchableOpacity
           style={styles.forgotPasswordButton}
-          onPress={() => router.push('/forgot-password')} // ✅ navigate
+          onPress={() => router.push('/forgot-password')}
         >
           <Text style={styles.forgotPasswordText}>Forgot password?</Text>
         </TouchableOpacity>
 
-        {/* Login button */}
-        <PrimaryButton title="Log in" onPress={handleLogin} loading={loading} />
+        <PrimaryButton
+          title="Log in"
+          onPress={handleLogin}
+          loading={isLoading}
+        />
 
-        {/* OR divider */}
-        <View style={styles.orContainer}>
-          <View style={styles.orLine} />
-          <Text style={styles.orText}>OR</Text>
-          <View style={styles.orLine} />
-        </View>
+        <OrDivider />
 
-        {/* Google button */}
         <SocialButton
           title="Continue with Google"
           icon={require('../../assets/images/google.png')}
@@ -239,20 +134,18 @@ export default function LoginScreen() {
           disabled={!request}
         />
 
-        {/* Apple button */}
         <SocialButton
           title="Continue with Apple"
           icon={require('../../assets/images/apple.png')}
           onPress={handleAppleAuth}
         />
 
-        {/* Signup link */}
         <TouchableOpacity
-          style={{ marginTop: 20, alignSelf: 'center' }}
-          onPress={() => router.push('/signup')} // ✅ navigate
+          style={styles.signupLink}
+          onPress={() => router.push('/signup')}
         >
-          <Text style={{ color: '#0E0E55', fontWeight: 'bold' }}>
-            Don’t have an account? Sign up
+          <Text style={styles.signupLinkText}>
+            Don&apos;t have an account? Sign up
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -270,50 +163,6 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingTop: 50,
   },
-  headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 40,
-    position: 'relative',
-  },
-  backButton: {
-    position: 'absolute',
-    left: 0,
-    padding: 4,
-  },
-  header: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    marginBottom: 6,
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-  },
-  input: {
-    backgroundColor: '#EBEBEB',
-    height: 50,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: '#333',
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#EBEBEB',
-    borderRadius: 8,
-    paddingRight: 10,
-  },
-  eyeIcon: {
-    marginLeft: 8,
-  },
   forgotPasswordButton: {
     alignSelf: 'flex-end',
     marginBottom: 20,
@@ -322,62 +171,18 @@ const styles = StyleSheet.create({
     color: '#0E0E55',
     fontWeight: 'bold',
   },
-  primaryButton: {
-    backgroundColor: '#0E0E55',
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 40,
-  },
-  primaryButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  errorInput: {
-    borderWidth: 1,
-    borderColor: 'red',
-  },
   errorText: {
     color: 'red',
     marginTop: -10,
     marginBottom: 15,
+    textAlign: 'center',
   },
-  orContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20,
+  signupLink: {
+    marginTop: 20,
+    alignSelf: 'center',
   },
-  orLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#DEDEDE',
-  },
-  orText: {
-    marginHorizontal: 10,
-    color: '#999',
-    fontWeight: '600',
-    textTransform: 'uppercase',
-  },
-  socialButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#000',
-    borderRadius: 8,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    marginBottom: 12,
-    justifyContent: 'center',
-  },
-  socialIcon: {
-    width: 24,
-    height: 24,
-    resizeMode: 'contain',
-    marginRight: 10,
-  },
-  socialButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+  signupLinkText: {
+    color: '#0E0E55',
+    fontWeight: 'bold',
   },
 });

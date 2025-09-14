@@ -1,17 +1,17 @@
 // app/_layout.tsx
 import { useColorScheme } from "@/hooks/useColorScheme";
-import config from "../tamagui.config";
 import { useFonts } from "expo-font";
-import { Stack, Slot } from "expo-router";
+import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { createContext, useContext, useState } from "react";
 import "react-native-reanimated";
 import { TamaguiProvider } from "tamagui";
+import config from "../tamagui.config";
 
 // --- Auth Context ---
 const AuthContext = createContext({
   isAuthenticated: false,
-  setIsAuthenticated: (_value: boolean) => {},
+  setIsAuthenticated: (_value: boolean) => { },
 });
 
 export const useAuth = () => useContext(AuthContext);
