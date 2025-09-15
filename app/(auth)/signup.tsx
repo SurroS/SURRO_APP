@@ -128,7 +128,7 @@ export default function SignupScreen() {
 
         {formData.refferalCode && (
           <InputField
-            label="Referral Code (Optional)"
+            label="Referral Code"
             value={formData.refferalCode}
             onChangeText={(text) => updateField('refferalCode', text)}
             placeholder="Enter referral code"

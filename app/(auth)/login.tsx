@@ -143,7 +143,7 @@ export default function LoginScreen() {
 
         <TouchableOpacity
           style={styles.signupLink}
-          onPress={() => router.push('/(auth)/signup')}
+          onPress={() => router.back()}
         >
           <Text style={styles.signupLinkText}>
             Don&apos;t have an account? Sign up

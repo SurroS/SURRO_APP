@@ -15,6 +15,8 @@ export interface AuthState {
     error: string | null;
     requiresOtp: boolean;
     tempEmail: string | null; // For OTP flows
+    referralSource: string | null; // How user heard about us
+    referralCode: string | null; // Referral code if applicable
 }
 
 export interface LoginCredentials {

@@ -20,6 +20,8 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
     isLoading: false,
     requiresOtp: false,
     tempEmail: null,
+    referralSource: null,
+    referralCode: null,
     error: null,
 
     login: async (credentials: LoginCredentials) => {
@@ -268,6 +270,8 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
             isLoading: false,
             requiresOtp: false,
             tempEmail: null,
+            referralSource: null,
+            referralCode: null,
             error: null,
         });
     },
@@ -282,4 +286,11 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
     },
 
     clearTempEmail: () => set({ tempEmail: null }),
+
+    setReferralInfo: (source: string, code?: string) => set({
+        referralSource: source,
+        referralCode: code || null
+    }),
+
+    clearReferralInfo: () => set({ referralSource: null, referralCode: null }),
 });

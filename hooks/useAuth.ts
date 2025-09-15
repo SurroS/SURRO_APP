@@ -9,6 +9,8 @@ export const useAuth = () => {
         error,
         requiresOtp,
         tempEmail,
+        referralSource,
+        referralCode,
         login,
         register,
         verifyOtp,
@@ -23,6 +25,8 @@ export const useAuth = () => {
         setUser,
         setToken,
         clearTempEmail,
+        setReferralInfo,
+        clearReferralInfo,
     } = useAuthStore();
 
     return {
@@ -33,6 +37,8 @@ export const useAuth = () => {
         error,
         requiresOtp,
         tempEmail,
+        referralSource,
+        referralCode,
         login,
         register,
         verifyOtp,
@@ -47,5 +53,7 @@ export const useAuth = () => {
         setUser,
         setToken,
         clearTempEmail,
+        setReferralInfo,
+        clearReferralInfo,
     };
 };

@@ -25,6 +25,8 @@ export interface AuthActions {
     setUser: (user: User) => void;
     setToken: (token: string) => void;
     clearTempEmail: () => void;
+    setReferralInfo: (source: string, code?: string) => void;
+    clearReferralInfo: () => void;
 }
 
 export type AuthStore = AuthState & AuthActions;
