@@ -1,14 +1,14 @@
 import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'expo-router'
-import React from 'react'
+import { useEffect } from 'react'
 import { Text, YStack } from 'tamagui'
 
 export default function Home() {
   const router = useRouter()
   const { user } = useAuth()
 
-  // Redirect to the appropriate role dashboard based on user's actual role
-  React.useEffect(() => {
+  // Redirect to the appropriate role dashboard based on user's role
+  useEffect(() => {
     if (user?.role) {
       router.replace(`/(roles)/${user.role}`)
     }
