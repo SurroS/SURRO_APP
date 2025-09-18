@@ -2,32 +2,25 @@ import { Stack } from 'expo-router'
 
 export default function HomeLayout() {
   return (
-    <Stack>
-      {/* Home (index.tsx) */}
+    <Stack screenOptions={{ headerBackTitle: 'Back' }}>
+      {/* Home */}
       <Stack.Screen
         name="index"
-        options={{
-          headerShown: false, // no header on home
-        }}
+        options={{ headerShown: false }}
       />
 
-      {/* Page 1 */}
+      {/* Page 1 - No header */}
       <Stack.Screen
         name="page1"
-        options={{
-          headerTitle: "Page One",
-          headerTitleStyle: { fontWeight: 'bold' },
-          headerBackTitle: "Back",
-        }}
+        options={{ headerShown: false }}
       />
 
       {/* Page 2 */}
       <Stack.Screen
         name="page2"
         options={{
-          headerTitle: "Page Two",
+          headerTitle: 'Page Two',
           headerTitleStyle: { fontWeight: 'bold' },
-          headerBackTitle: "Back",
         }}
       />
 
@@ -35,9 +28,8 @@ export default function HomeLayout() {
       <Stack.Screen
         name="page3"
         options={{
-          headerTitle: "Page Three",
+          headerTitle: 'Page Three',
           headerTitleStyle: { fontWeight: 'bold' },
-          headerBackTitle: "Back",
         }}
       />
     </Stack>
