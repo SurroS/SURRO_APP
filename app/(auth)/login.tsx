@@ -9,10 +9,9 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity
+  TouchableOpacity,
 } from 'react-native';
 
-import { useAuth } from '@/hooks/useAuth';
 import { InputField } from '../../components/auth/InputField';
 import { OrDivider } from '../../components/auth/OrDivider';
 import { PrimaryButton } from '../../components/auth/PrimaryButton';
@@ -25,27 +24,18 @@ WebBrowser.maybeCompleteAuthSession();
 export default function LoginScreen() {
   const router = useRouter();
   const { formData, errors, updateField, validateForm } = useLoginForm();
-  const { login, googleLogin, appleLogin, isLoading, error, clearError } = useAuth();
 
+  // Google setup (kept in case you still want to use later)
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: '', // Add your Google client ID here
+    clientId: '', // Add your Google client ID here if you enable it
   });
 
   useEffect(() => {
     if (response?.type === 'success') {
-      handleGoogleAuth(response.authentication?.accessToken || '');
+      Alert.alert('Success', 'Logged in with Google');
+      router.replace('/(tabs)/home'); // go to home page
     }
   }, [response]);
-
-  const handleGoogleAuth = async (accessToken: string) => {
-    try {
-      await googleLogin({ idToken: accessToken, role: 'surrogate' });
-      Alert.alert('Success', 'Logged in with Google');
-    } catch (err) {
-      console.error('Google login error:', err);
-      Alert.alert('Google Login Failed', 'Please try again.');
-    }
-  };
 
   const handleAppleAuth = async () => {
     try {
@@ -57,29 +47,21 @@ export default function LoginScreen() {
       });
 
       if (credential.identityToken) {
-        await appleLogin({ idToken: credential.identityToken, role: 'surrogate' });
         Alert.alert('Success', 'Logged in with Apple');
+        router.replace('/(tabs)/home'); // go to home page
       }
     } catch (err: any) {
       if (err.code === 'ERR_CANCELED') return;
-      console.error('Apple login error:', err);
       Alert.alert('Apple Login Failed', 'Please try again.');
     }
   };
 
-  const handleLogin = async () => {
-    if (!validateForm()) {
-      return;
-    }
+  const handleLogin = () => {
+    if (!validateForm()) return;
 
-    try {
-      await login(formData);
-      // Navigation will be handled automatically by the auth store state changes
-      // The index.tsx will detect authentication and navigate to the appropriate role dashboard
-    } catch (err) {
-      console.error('Login error:', err);
-      // Error is already handled by the auth store
-    }
+    // 🚀 Fake login: no backend, just navigate
+    Alert.alert('Success', 'Logged in successfully');
+    router.replace('/(tabs)/home'); // redirect to your home stack
   };
 
   return (
@@ -88,7 +70,7 @@ export default function LoginScreen() {
         <ScreenHeader title="Log in" onBackPress={() => router.back()} />
 
         <InputField
-          label="Email"
+          label="Username/Email"
           value={formData.email}
           onChangeText={(text) => updateField('email', text)}
           placeholder="Enter your email"
@@ -109,10 +91,6 @@ export default function LoginScreen() {
           errorMessage={errors.password}
         />
 
-        {error && (
-          <Text style={styles.errorText}>{error}</Text>
-        )}
-
         <TouchableOpacity
           style={styles.forgotPasswordButton}
           onPress={() => router.push('/forgot-password')}
@@ -120,11 +98,7 @@ export default function LoginScreen() {
           <Text style={styles.forgotPasswordText}>Forgot password?</Text>
         </TouchableOpacity>
 
-        <PrimaryButton
-          title="Log in"
-          onPress={handleLogin}
-          loading={isLoading}
-        />
+        <PrimaryButton title="Log in" onPress={handleLogin} />
 
         <OrDivider />
 
@@ -143,7 +117,7 @@ export default function LoginScreen() {
 
         <TouchableOpacity
           style={styles.signupLink}
-          onPress={() => router.back()}
+          onPress={() => router.push('/signup')}
         >
           <Text style={styles.signupLinkText}>
             Don&apos;t have an account? Sign up
@@ -171,12 +145,6 @@ const styles = StyleSheet.create({
   forgotPasswordText: {
     color: '#0E0E55',
     fontWeight: 'bold',
-  },
-  errorText: {
-    color: 'red',
-    marginTop: -10,
-    marginBottom: 15,
-    textAlign: 'center',
   },
   signupLink: {
     marginTop: 20,
