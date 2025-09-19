@@ -5,11 +5,13 @@ import * as WebBrowser from 'expo-web-browser';
 import { useEffect } from 'react';
 import {
   Alert,
+  KeyboardAvoidingView,
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity
+  TouchableOpacity,
 } from 'react-native';
 
 import { useAuth } from '@/hooks/useAuth';
@@ -69,106 +71,108 @@ export default function SignupScreen() {
   };
 
   const handleSignup = async () => {
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
       await register(formData);
-      // Navigation will be handled automatically by the auth store state changes
-      // The index.tsx will detect authentication and navigate to the appropriate role dashboard
     } catch (err) {
       console.error('Signup error:', err);
-      // Error is already handled by the auth store
     }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <ScreenHeader title="Sign Up" onBackPress={() => router.back()} />
-
-        <InputField
-          label="Email"
-          value={formData.email}
-          onChangeText={(text) => updateField('email', text)}
-          placeholder="Enter your email"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          error={!!errors.email}
-          errorMessage={errors.email}
-        />
-
-        <InputField
-          label="Password"
-          value={formData.password}
-          onChangeText={(text) => updateField('password', text)}
-          placeholder="Enter your password"
-          secureTextEntry
-          showPasswordToggle
-          error={!!errors.password}
-          errorMessage={errors.password}
-        />
-
-        <InputField
-          label="Confirm Password"
-          value={formData.passwordConfirmation}
-          onChangeText={(text) => updateField('passwordConfirmation', text)}
-          placeholder="Confirm your password"
-          secureTextEntry
-          showPasswordToggle
-          error={!!errors.passwordConfirmation}
-          errorMessage={errors.passwordConfirmation}
-        />
-
-        {/* Role is automatically set from role selection, so we don't show it as an input */}
-        <Text style={styles.roleDisplay}>
-          Role: {formData.role.charAt(0).toUpperCase() + formData.role.slice(1)}
-        </Text>
-
-        {formData.refferalCode && (
-          <InputField
-            label="Referral Code"
-            value={formData.refferalCode}
-            onChangeText={(text) => updateField('refferalCode', text)}
-            placeholder="Enter referral code"
-          />
-        )}
-
-        {error && (
-          <Text style={styles.errorText}>{error}</Text>
-        )}
-
-        <PrimaryButton
-          title="Sign up"
-          onPress={handleSignup}
-          loading={isLoading}
-        />
-
-        <OrDivider />
-
-        <SocialButton
-          title="Sign in with Google"
-          icon={require('../../assets/images/google.png')}
-          onPress={() => promptAsync()}
-          disabled={!request}
-        />
-
-        <SocialButton
-          title="Sign in with Apple"
-          icon={require('../../assets/images/apple.png')}
-          onPress={handleAppleAuth}
-        />
-
-        <TouchableOpacity
-          style={styles.loginLink}
-          onPress={() => router.push('/(auth)/login')}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        {/* Entire page scrollable */}
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.loginLinkText}>
-            Already have an account? Log in
+          <ScreenHeader title="Sign Up" onBackPress={() => router.back()} />
+
+          <InputField
+            label="Email"
+            value={formData.email}
+            onChangeText={(text) => updateField('email', text)}
+            placeholder="Enter your email"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            error={!!errors.email}
+            errorMessage={errors.email}
+          />
+
+          <InputField
+            label="Password"
+            value={formData.password}
+            onChangeText={(text) => updateField('password', text)}
+            placeholder="Enter your password"
+            secureTextEntry
+            showPasswordToggle
+            error={!!errors.password}
+            errorMessage={errors.password}
+          />
+
+          <InputField
+            label="Confirm Password"
+            value={formData.passwordConfirmation}
+            onChangeText={(text) => updateField('passwordConfirmation', text)}
+            placeholder="Confirm your password"
+            secureTextEntry
+            showPasswordToggle
+            error={!!errors.passwordConfirmation}
+            errorMessage={errors.passwordConfirmation}
+          />
+
+          <Text style={styles.roleDisplay}>
+            Role: {formData.role.charAt(0).toUpperCase() + formData.role.slice(1)}
           </Text>
-        </TouchableOpacity>
-      </ScrollView>
+
+          {formData.refferalCode && (
+            <InputField
+              label="Referral Code"
+              value={formData.refferalCode}
+              onChangeText={(text) => updateField('refferalCode', text)}
+              placeholder="Enter referral code"
+            />
+          )}
+
+          {error && <Text style={styles.errorText}>{error}</Text>}
+
+          <PrimaryButton
+            title="Sign up"
+            onPress={handleSignup}
+            loading={isLoading}
+          />
+
+          <OrDivider />
+
+          <SocialButton
+            title="Sign in with Google"
+            icon={require('../../assets/images/google.png')}
+            onPress={() => promptAsync()}
+            disabled={!request}
+          />
+
+          <SocialButton
+            title="Sign in with Apple"
+            icon={require('../../assets/images/apple.png')}
+            onPress={handleAppleAuth}
+          />
+
+          <TouchableOpacity
+            style={styles.loginLink}
+            onPress={() => router.push('/(auth)/login')}
+          >
+            <Text style={styles.loginLinkText}>
+              Already have an account? Log in
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

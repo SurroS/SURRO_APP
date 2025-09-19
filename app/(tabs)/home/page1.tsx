@@ -10,10 +10,10 @@ export default function Page1() {
     <ScrollView
       flex={1}
       backgroundColor="#FFFFFF"
-      contentContainerStyle={{ alignItems: 'center', padding: 16, marginTop: 0 }} // 🔹 push everything downward
+      contentContainerStyle={{ alignItems: 'center', padding: 16, marginTop: 0 }} // 🔹 control page vertical offset here
       showsVerticalScrollIndicator={false}
     >
-      {/* 🔹 Top Left Avatar + Horizontal Shape */}
+      {/* 🔹 Top Left Avatar + Progress Shape */}
       <XStack position="absolute" top={60} left={20} alignItems="center" gap={10}>
         {/* Avatar Shape */}
         <YStack
@@ -34,14 +34,14 @@ export default function Page1() {
           />
         </YStack>
 
-        {/* Horizontal Shape (92px x 23px) */}
+        {/* Progress Shape */}
         <XStack
           height={23}
           paddingHorizontal={8}
           borderRadius={12}
           borderWidth={1}
-          borderColor="#6A1B4D"   // outline color
-          backgroundColor="#FFF3FA" // background color
+          borderColor="#6A1B4D"
+          backgroundColor="#FFF3FA"
           alignItems="center"
           justifyContent="center"
           gap={10}
@@ -65,11 +65,11 @@ export default function Page1() {
         justifyContent="center"
         padding={12}
       >
-        {/* Menu Icon (smaller) */}
-        <Ionicons name="menu" size={18} color="#FFFFFF" />
+        {/* Menu Icon */}
+        <Ionicons name="menu" size={16} color="#FFFFFF" />
 
         {/* Search Icon overlapping top-right */}
-        <YStack position="absolute" top={-2} right={-2}>
+        <YStack position="absolute" top={-4} right={-4}>
           <Ionicons name="search" size={14} color="#FFFFFF" />
         </YStack>
       </YStack>
@@ -78,9 +78,9 @@ export default function Page1() {
       <ImageBackground
         source={require('@/assets/images/page.jpg')}
         style={{
-          width: 353,
-          height: 526,
-          marginTop: 120, // 🔹 shifted downward
+          width: 335,
+          height: 500,
+          marginTop: 120, // 🔹 adjust to push entire image down
           borderRadius: 8,
           overflow: 'hidden',
           justifyContent: 'flex-start',
@@ -93,7 +93,7 @@ export default function Page1() {
             Michelle John
           </Text>
 
-          {/* Location with icon */}
+          {/* Location */}
           <XStack alignItems="center" gap={6}>
             <Ionicons name="location-sharp" size={16} color="white" />
             <Text fontSize={16} color="white">
@@ -101,7 +101,7 @@ export default function Page1() {
             </Text>
           </XStack>
 
-          {/* Calendar with icon */}
+          {/* Calendar */}
           <XStack alignItems="center" gap={6}>
             <Ionicons name="calendar" size={16} color="white" />
             <Text fontSize={16} color="white">
@@ -112,29 +112,36 @@ export default function Page1() {
       </ImageBackground>
 
       {/* 🔹 Action Buttons */}
-      <XStack marginTop="$6" gap="$4">
+      <XStack marginTop="$6" gap="$4" width="100%">
+        {/* Ignore */}
         <Button
-          size="$4"
+          size="$6"
           backgroundColor="#EBF4FE"
-          color="#0E0E55"
+          borderRadius={8}
           flex={1}
-          onPress={() => console.log('Ignore pressed')}
+          pressStyle={{ backgroundColor: '#D8EAFE' }}
         >
-          Ignore
+          <Text color="#0E0E55" fontWeight="00">
+            Ignore
+          </Text>
         </Button>
 
+        {/* View Profile */}
         <Button
           size="$4"
           backgroundColor="#0E0E55"
-          color="#8E8EE0"
+          borderRadius={8}
           flex={1}
+          pressStyle={{ backgroundColor: '#080836' }}
           onPress={() => console.log('View Profile pressed')}
         >
-          View Profile
+          <Text color="white" fontWeight="600">
+            View Profile
+          </Text>
         </Button>
       </XStack>
 
-      {/* Navigation Button */}
+      {/* 🔹 Navigation Button */}
       <Button size="$5" marginTop="$6" onPress={() => router.push('/home/page2')}>
         Next
       </Button>

@@ -9,7 +9,7 @@ export default function HomeLayout() {
         options={{ headerShown: false }}
       />
 
-      {/* Page 1 - No header */}
+      {/* Page 1 */}
       <Stack.Screen
         name="page1"
         options={{ headerShown: false }}
@@ -18,19 +18,13 @@ export default function HomeLayout() {
       {/* Page 2 */}
       <Stack.Screen
         name="page2"
-        options={{
-          headerTitle: 'Page Two',
-          headerTitleStyle: { fontWeight: 'bold' },
-        }}
+        options={{ headerShown: false }}
       />
 
       {/* Page 3 */}
       <Stack.Screen
         name="page3"
-        options={{
-          headerTitle: 'Page Three',
-          headerTitleStyle: { fontWeight: 'bold' },
-        }}
+        options={{ headerShown: false }}
       />
     </Stack>
   )
