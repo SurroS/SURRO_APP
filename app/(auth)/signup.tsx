@@ -79,7 +79,8 @@ export default function SignupScreen() {
       // The index.tsx will detect authentication and navigate to the appropriate role dashboard
     } catch (err) {
       console.error('Signup error:', err);
-      // Error is already handled by the auth store
+      // Error is already handled by the auth 
+      Alert.alert('Signup Failed', 'Please try again.');
     }
   };
 
