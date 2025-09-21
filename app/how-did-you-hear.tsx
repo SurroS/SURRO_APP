@@ -1,68 +1,39 @@
 // app/onboarding/how-did-you-hear.tsx
+
 import { useAuth } from "@/hooks/useAuth";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable } from "react-native";
-import { Button, Card, Input, ScrollView, Text, XStack, YStack } from "tamagui";
+import { KeyboardAvoidingView, Platform, Pressable, View } from "react-native";
+import { Button, Card, Input, ScrollView, Text, XStack, YStack, Image } from "tamagui";
 
-// Ordered list from Figma + PRD
+// SVG + PNG assets
+import FacebookIcon from "../assets/images/facebook (1).svg";
+import InstagramIcon from "../assets/images/instagramsvg (1).svg";
+import TikTokIcon from "../assets/images/tiktok (1).svg";
+import XIcon from "../assets/images/x_logo.svg.svg";
+import ReferralIcon from "../assets/images/referralIcon.png";
+
+// Source options for "How did you hear about us?"
 const SOURCE_ITEMS = [
-  {
-    key: "Friend",
-    label: "From a friend/family",
-    bg: "#F2F2F2",
-    fg: "#0E0E55",
-    iconText: "person-icon",
-  },
-  { key: "X", label: "X", bg: "#000000", fg: "#ffffff", iconText: "x-logo" },
-  {
-    key: "Facebook",
-    label: "Facebook",
-    bg: "#1877F2",
-    fg: "#ffffff",
-    iconText: "facebook-logo",
-  },
-  {
-    key: "Instagram",
-    label: "Instagram",
-    bg: "#E1306C",
-    fg: "#ffffff",
-    iconText: "instagram-logo",
-  },
-  {
-    key: "TikTok",
-    label: "TikTok",
-    bg: "#000000",
-    fg: "#ffffff",
-    iconText: "tiktok-logo",
-  },
-  {
-    key: "YouTube",
-    label: "YouTube",
-    bg: "#FF0000",
-    fg: "#ffffff",
-    iconText: "youtube-logo",
-  },
-  {
-    key: "Referral",
-    label: "Referral",
-    bg: "#EAEAF6",
-    fg: "#0E0E55",
-    iconText: "R",
-  },
+  { key: "Friend", label: "From a friend/family", bg: "#F2F2F2", fg: "#0E0E55", type: "ionicon", iconName: "people" },
+  { key: "X", label: "X", bg: "#00000007", fg: "#ffffff", type: "svg", Icon: XIcon },
+  { key: "Facebook", label: "Facebook", bg: "#1877F2", fg: "#ffffff", type: "svg", Icon: FacebookIcon },
+  { key: "Instagram", label: "Instagram", bg: "#daadad83", fg: "#ffffffcb", type: "svg", Icon: InstagramIcon },
+  { key: "TikTok", label: "TikTok", bg: "#0000001f", fg: "#ffffff", type: "svg", Icon: TikTokIcon },
+  { key: "YouTube", label: "YouTube", bg: "#FF0000", fg: "#ffffff", type: "ionicon", iconName: "logo-youtube" },
+  { key: "Referral", label: "Referral", bg: "#EAEAF6", fg: "#0E0E55", type: "png", Icon: ReferralIcon },
 ];
 
 export default function HowDidYouHear() {
   const router = useRouter();
   const { setReferralInfo } = useAuth();
-  const [selectedSource, setSelectedSource] = useState<string | undefined>(
-    undefined
-  );
-  const [referralCode, setReferralCode] = useState<string>("");
 
+  const [selectedSource, setSelectedSource] = useState<string | undefined>(undefined); // selected option
+  const [referralCode, setReferralCode] = useState<string>(""); // referral input
+
+  // Handles finishing onboarding
   const completeOnboarding = () => {
-    // Store referral information in auth store
     if (selectedSource) {
       if (selectedSource === "Referral" && referralCode) {
         setReferralInfo(selectedSource, referralCode);
@@ -70,37 +41,49 @@ export default function HowDidYouHear() {
         setReferralInfo(selectedSource);
       }
     }
-    // Navigate to signup page after completing "how did you hear"
     router.replace("/(auth)/signup");
   };
 
+  // Render icon for each option
+  const renderIcon = (item: typeof SOURCE_ITEMS[0]) => {
+    if (item.type === "ionicon") return <Ionicons name={item.iconName as any} size={24} color={item.fg} />;
+    if (item.type === "svg") {
+      const SvgIcon = item.Icon as React.FC<{ width?: number; height?: number }>;
+      return <SvgIcon width={24} height={24} />;
+    }
+    if (item.type === "png") return <Image source={item.Icon} width={24} height={24} alt={item.label} />;
+    return null;
+  };
+
   return (
-    <ScrollView flex={1} >
-      <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0} >
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"} // move view above keyboard
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0} // adjust for status bar
+    >
+      {/* Scrollable main content */}
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
+      >
         <YStack backgroundColor="$background" padding="$2">
           {/* Header */}
-          <YStack marginBottom="$4" marginTop="$6">
-            <Text
-              fontSize={23}
-              lineHeight={32}
-              fontWeight="600"
-              textAlign="center"
-              color="$text"
-            >
+          <YStack marginBottom="$1" marginTop="$15">
+            <Text fontSize={25} lineHeight={30} fontWeight="600" textAlign="center" color="$text">
               How did you hear about us?
             </Text>
           </YStack>
 
-          {/* Options List */}
+          {/* Options Card */}
           <Card
             width="100%"
             maxWidth={500}
             alignSelf="center"
-            padding="$3"
+            padding="$5"
             borderRadius={12}
             backgroundColor="$background"
             marginVertical="$2"
-            marginTop="$4"
           >
             <YStack width="100%">
               {SOURCE_ITEMS.map((item, index) => {
@@ -111,9 +94,7 @@ export default function HowDidYouHear() {
                     onPress={() => setSelectedSource(item.key)}
                     accessibilityRole="radio"
                     accessibilityState={{ selected: isSelected }}
-                    style={{
-                      marginBottom: index === SOURCE_ITEMS.length - 1 ? 0 : 20,
-                    }}
+                    style={{ marginBottom: index === SOURCE_ITEMS.length - 1 ? 0 : 20 }}
                   >
                     <XStack
                       alignItems="center"
@@ -126,8 +107,8 @@ export default function HowDidYouHear() {
                       borderColor={isSelected ? "$primary" : "#E6E6E6"}
                       backgroundColor={isSelected ? "#F4F7FF" : "$background"}
                     >
+                      {/* Left: Icon + Label */}
                       <XStack alignItems="center" gap={12}>
-                        {/* Left icon */}
                         <YStack
                           width={40}
                           height={40}
@@ -136,49 +117,9 @@ export default function HowDidYouHear() {
                           alignItems="center"
                           backgroundColor={item.bg}
                         >
-                          {item.iconText === "person-icon" ? (
-                            <Ionicons name="person" size={24} color="#0E0E55" />
-                          ) : item.iconText === "x-logo" ? (
-                            <Ionicons
-                              name="logo-xbox"
-                              size={24}
-                              color="#ffffff"
-                            />
-                          ) : item.iconText === "facebook-logo" ? (
-                            <Ionicons
-                              name="logo-facebook"
-                              size={24}
-                              color="#ffffff"
-                            />
-                          ) : item.iconText === "instagram-logo" ? (
-                            <Ionicons
-                              name="logo-instagram"
-                              size={24}
-                              color="#ffffff"
-                            />
-                          ) : item.iconText === "tiktok-logo" ? (
-                            <Ionicons
-                              name="logo-tiktok"
-                              size={24}
-                              color="#ffffff"
-                            />
-                          ) : item.iconText === "youtube-logo" ? (
-                            <Ionicons
-                              name="logo-youtube"
-                              size={24}
-                              color="#ffffff"
-                            />
-                          ) : item.iconText === "no-icon" ? null : (
-                            <Text color={item.fg} fontWeight="700">
-                              {item.iconText}
-                            </Text>
-                          )}
+                          {renderIcon(item)}
                         </YStack>
-
-                        {/* Label */}
-                        <Text fontSize={16} color="#212121">
-                          {item.label}
-                        </Text>
+                        <Text fontSize={16} color="#212121">{item.label}</Text>
                       </XStack>
 
                       {/* Radio circle */}
@@ -192,80 +133,71 @@ export default function HowDidYouHear() {
                         alignItems="center"
                         backgroundColor={isSelected ? "$primary" : "$background"}
                       >
-                        {isSelected && (
-                          <YStack
-                            width={10}
-                            height={10}
-                            borderRadius={5}
-                            backgroundColor="$background"
-                          />
-                        )}
+                        {isSelected && <YStack width={10} height={10} borderRadius={5} backgroundColor="$background" />}
                       </YStack>
                     </XStack>
                   </Pressable>
                 );
               })}
 
-              {/* === Conditional Referral Input === */}
+              {/* Conditional referral input */}
               {selectedSource === "Referral" && (
                 <YStack gap="$2" marginTop="$3">
-                  <Text fontSize={16} fontWeight="500" color="$gray11">
-                    Referral Code
-                  </Text>
+                  <Text fontSize={16} fontWeight="500" color="black">Referral Code</Text>
                   <Input
                     placeholder="Enter your code"
                     value={referralCode}
                     onChangeText={setReferralCode}
                     style={{
-                      height: 48, // number (px)
-                      paddingHorizontal: 12, // number (px)
-                      fontSize: 16, // number (px)
-                      borderRadius: 8, // number (px)
+                      height: 48,
+                      paddingHorizontal: 12,
+                      fontSize: 16,
+                      borderRadius: 8,
                       borderWidth: 1,
-                      borderColor: "#CFCFCF", // hex color instead of "$gray8"
+                      borderColor: "black",
+                      backgroundColor: "white",
+                      color: "black",
                     }}
                   />
                 </YStack>
               )}
             </YStack>
           </Card>
-
-          {/* Next + Skip Buttons */}
-          <YStack
-            gap="$3"
-            width="100%"
-            maxWidth={355}
-            alignSelf="center"
-            marginTop="$4"
-          >
-            <Button
-              width="95%"
-              height={55}
-              borderRadius={8}
-              backgroundColor="$primary"
-              onPress={completeOnboarding}
-              disabled={!selectedSource}
-              opacity={selectedSource ? 1 : 0.6}
-            >
-              <Text color="$background" fontWeight="600">
-                Next
-              </Text>
-            </Button>
-            <Button
-              width="95%"
-              height={55}
-              borderRadius={8}
-              backgroundColor="$secondary"
-              onPress={() => router.replace("/(auth)/signup") as any}
-            >
-              <Text color="$color12" fontWeight="600">
-                Skip
-              </Text>
-            </Button>
-
-          </YStack>
         </YStack>
-      </KeyboardAvoidingView>
-    </ScrollView>
+      </ScrollView>
+
+      {/* (Next + Skip) */}
+      <View
+        style={{
+          padding: 16,
+          backgroundColor: "#fff",
+          borderTopWidth: 0,
+          borderColor: "#E6E6E6",
+        }}
+      >
+        <Button
+          width="95%"
+          height={55}
+          borderRadius={8}
+          backgroundColor="$primary"
+          onPress={completeOnboarding}
+          disabled={!selectedSource}
+          opacity={selectedSource ? 1 : 0.6}
+          marginBottom="$2"
+        >
+          <Text color="$background" fontWeight="600">Next</Text>
+        </Button>
+
+        <Button
+          width="95%"
+          height={55}
+          borderRadius={8}
+          backgroundColor="$secondary"
+          onPress={() => router.replace("/(auth)/signup") as any}
+        >
+          <Text color="$color12" fontWeight="600">Skip</Text>
+        </Button>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
