@@ -6,12 +6,14 @@ import { useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable } from "react-native";
 import { Button, Card, Input, ScrollView, Text, XStack, YStack } from "tamagui";
 
+
+
 // Ordered list from Figma + PRD
 const SOURCE_ITEMS = [
   {
     key: "Friend",
     label: "From a friend/family",
-    bg: "#F2F2F2",
+    bg: "#0E0E55",
     fg: "#0E0E55",
     iconText: "person-icon",
   },
@@ -47,9 +49,9 @@ const SOURCE_ITEMS = [
   {
     key: "Referral",
     label: "Referral",
-    bg: "#EAEAF6",
+    bg: "#0E0E55",
     fg: "#0E0E55",
-    iconText: "R",
+    iconText: "referal-logo",
   },
 ];
 
@@ -76,15 +78,16 @@ export default function HowDidYouHear() {
 
   return (
     <ScrollView flex={1} >
-      <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0} >
-        <YStack backgroundColor="$background" padding="$2">
+      <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 1} >
+        <YStack gap={"$3"} padding="$3" justifyContent="center"alignItems="center">
           {/* Header */}
-          <YStack marginBottom="$4" marginTop="$6">
+          <YStack  marginTop="$6">
             <Text
-              fontSize={23}
+              fontSize={23} 
               lineHeight={32}
               fontWeight="600"
               textAlign="center"
+              marginTop={"$3"}
               color="$text"
             >
               How did you hear about us?
@@ -99,8 +102,7 @@ export default function HowDidYouHear() {
             padding="$3"
             borderRadius={12}
             backgroundColor="$background"
-            marginVertical="$2"
-            marginTop="$4"
+            marginTop="$2"
           >
             <YStack width="100%">
               {SOURCE_ITEMS.map((item, index) => {
@@ -137,7 +139,7 @@ export default function HowDidYouHear() {
                           backgroundColor={item.bg}
                         >
                           {item.iconText === "person-icon" ? (
-                            <Ionicons name="person" size={24} color="#0E0E55" />
+                            <Ionicons name="people" size={24} color="#ffffff"/>
                           ) : item.iconText === "x-logo" ? (
                             <Ionicons
                               name="logo-xbox"
@@ -168,10 +170,12 @@ export default function HowDidYouHear() {
                               size={24}
                               color="#ffffff"
                             />
-                          ) : item.iconText === "no-icon" ? null : (
-                            <Text color={item.fg} fontWeight="700">
-                              {item.iconText}
-                            </Text>
+                          ) : item.iconText === "referal" ? null : (
+                                    <Ionicons
+                              name="person-add"
+                              size={24}
+                              color="#ffffff"
+                            />
                           )}
                         </YStack>
 
@@ -231,15 +235,8 @@ export default function HowDidYouHear() {
           </Card>
 
           {/* Next + Skip Buttons */}
-          <YStack
-            gap="$3"
-            width="100%"
-            maxWidth={355}
-            alignSelf="center"
-            marginTop="$4"
-          >
             <Button
-              width="95%"
+              width="100%"
               height={55}
               borderRadius={8}
               backgroundColor="$primary"
@@ -252,18 +249,17 @@ export default function HowDidYouHear() {
               </Text>
             </Button>
             <Button
-              width="95%"
+              width="100%"
               height={55}
               borderRadius={8}
               backgroundColor="$secondary"
               onPress={() => router.replace("/(auth)/signup") as any}
             >
-              <Text color="$color12" fontWeight="600">
+              <Text color="#9E9E9E" fontWeight="600">
                 Skip
               </Text>
             </Button>
 
-          </YStack>
         </YStack>
       </KeyboardAvoidingView>
     </ScrollView>

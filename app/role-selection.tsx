@@ -2,6 +2,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, SafeAreaView, StyleSheet } from "react-native";
+import { SafeAreaFrameContext } from "react-native-safe-area-context";
 import { Button, Image, Text, XStack, YStack } from "tamagui";
 
 const ROLE_ITEMS = [
@@ -62,8 +63,7 @@ export default function RoleSelection() {
   };
 
   return (
-    <SafeAreaView>
-      <YStack padding={"$4"} marginTop={"$5"} backgroundColor="$background">
+      <YStack flex={1} padding={"$4"} marginTop={"$5"} backgroundColor="$background">
         {/* Header */}
         <Text
           fontSize={20}
@@ -76,7 +76,7 @@ export default function RoleSelection() {
         </Text>
 
         {/* Roles container */}
-        <YStack width={"100%"} alignSelf="center" space="$4" marginTop="$4">
+        <YStack width={"100%"} alignSelf="center" gap="$4" marginTop="$4">
           {ROLE_ITEMS.map((item) => (
             <Pressable
               key={item.key}
@@ -150,7 +150,6 @@ export default function RoleSelection() {
           </Text>
         </Button>
       </YStack>
-    </SafeAreaView>
   );
 }
 
