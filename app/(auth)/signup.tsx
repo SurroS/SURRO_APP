@@ -77,6 +77,8 @@ export default function SignupScreen() {
       await register(formData);
     } catch (err) {
       console.error('Signup error:', err);
+      // Error is already handled by the auth 
+      Alert.alert('Signup Failed', 'Please try again.');
     }
   };
 

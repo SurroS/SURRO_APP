@@ -11,7 +11,9 @@ const initialState: AuthState = {
     isLoading: false,
     error: null,
     requiresOtp: false,
-    tempEmail: null
+    tempEmail: null,
+    referralSource: null,
+    referralCode: null
 };
 
 export const useAuthStore = create<AuthStore>()(
