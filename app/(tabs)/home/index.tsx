@@ -1,22 +1,19 @@
-import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'expo-router'
-import React from 'react'
-import { Text, YStack } from 'tamagui'
+import { useEffect } from 'react'
+import { Spinner, Text, YStack } from 'tamagui'
 
-export default function Home() {
+export default function HomeIndex() {
   const router = useRouter()
-  const { user } = useAuth()
 
-  // Redirect to the appropriate role dashboard based on user's actual role
-  React.useEffect(() => {
-    if (user?.role) {
-      router.replace(`/(roles)/${user.role}`)
-    }
-  }, [user?.role])
+  // Redirect immediately to Page1 when home is opened
+  useEffect(() => {
+    router.replace('/home/page1')
+  }, [])
 
   return (
     <YStack flex={1} justifyContent="center" alignItems="center">
-      <Text>Loading dashboard...</Text>
+      <Spinner size="large" />
+      <Text>Loading Home...</Text>
     </YStack>
   )
 }
