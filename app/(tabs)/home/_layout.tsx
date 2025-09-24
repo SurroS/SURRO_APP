@@ -23,7 +23,7 @@ export default function HomeLayout() {
 
       {/* Page 3 */}
       <Stack.Screen
-        name="page3"
+        name="verifieduser"
         options={{ headerShown: false }}
       />
     </Stack>
