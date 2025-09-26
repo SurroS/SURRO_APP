@@ -10,7 +10,7 @@ const ConnectivityTest = () => {
     const test = async () => {
       try {
         // Change to an endpoint you know exists
-        const res = await api.post("/auth/sign_in", {
+        const res = await api.post("/auth/register", {
           email: "test@example.com",
           password: "wrongpassword",
         });
