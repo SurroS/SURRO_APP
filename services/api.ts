@@ -1,7 +1,9 @@
 import { useAuthStore } from '@/store/auth';
 import axios from 'axios';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
+// const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ||'https://localhost:3000/api/'; 
+const API_BASE_URL = "https://api.delve.fun/api/v1";
+
 
 const api = axios.create({
     baseURL: API_BASE_URL,

@@ -6,13 +6,14 @@ import { Dimensions, FlatList, ViewToken } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Image, Text, XStack, YStack } from "tamagui";
 
+
 // Screen dimensions
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 // Adjustable constants
 const CARD_WIDTH_DEFAULT = SCREEN_WIDTH * 0.85; // 85% of screen width
 const CARD_HEIGHT_DEFAULT = SCREEN_HEIGHT * 0.45; // 45% of screen height
-const CARD_SPACING = SCREEN_WIDTH * 0.06; // 4% of screen width
+const CARD_SPACING = SCREEN_WIDTH * 0.06; // spacing between cards
 const TEXT_CONTAINER_WIDTH = SCREEN_WIDTH * 0.9;
 const BUTTON_WIDTH = SCREEN_WIDTH * 0.9;
 const BUTTON_HEIGHT = SCREEN_HEIGHT * 0.07;
@@ -83,13 +84,13 @@ const ImageCard = ({
     <YStack
       width={TEXT_CONTAINER_WIDTH}
       alignSelf="center"
-      marginTop="$4" // <-- you can change this value
-      gap="$4" // spacing between title & description
+      marginTop="$4"
+      gap="$4"
       justifyContent="center"
       alignItems="center"
     >
       <Text
-        fontSize={SCREEN_WIDTH * 0.05} // title size
+        fontSize={SCREEN_WIDTH * 0.05}
         fontWeight="bold"
         textAlign="center"
         color="$primary"
@@ -97,10 +98,10 @@ const ImageCard = ({
         {header}
       </Text>
       <Text
-        fontSize={SCREEN_WIDTH * 0.035} // description size
+        fontSize={SCREEN_WIDTH * 0.035}
         fontWeight="500"
         textAlign="center"
-        lineHeight={SCREEN_HEIGHT * 0.02} // spacing between lines
+        lineHeight={SCREEN_HEIGHT * 0.02}
         color="#737373"
       >
         {message}
@@ -109,7 +110,7 @@ const ImageCard = ({
   </YStack>
 );
 
-export default function Screen1() {
+export default function Screen2() {
   const router = useRouter();
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -122,13 +123,15 @@ export default function Screen1() {
   ).current;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#ffffffff", justifyContent:"center", alignItems:"center" }}>
-      <YStack
-        flex={1}
-        backgroundColor="$background"
-        paddingHorizontal="$4"
-
-      >
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: "#ffffffff",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    > 
+      <YStack flex={1} backgroundColor="$background" paddingHorizontal="$4">
         {/* Header */}
         <YStack alignItems="center" paddingTop="$4">
           <Image
@@ -138,11 +141,10 @@ export default function Screen1() {
           />
           <Text fontSize={22} fontWeight="800" color="$primary">
             SURRO
-          </Text>
+          </Text> 
         </YStack>
 
         {/* Image Carousel */}
-
         <FlatList
           data={SLIDES}
           horizontal
@@ -152,11 +154,11 @@ export default function Screen1() {
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
           contentContainerStyle={{
-            paddingHorizontal: CARD_SPACING / 2,
-            marginTop: 10, // moves carousel closer to app name
+            paddingHorizontal: CARD_SPACING / 1,
+            marginTop: 10,
             paddingBottom: 5,
           }}
-          renderItem={({ item, index }) => (
+          renderItem={({ item }) => (
             <ImageCard
               img1={item.img1}
               img2={item.img2}
@@ -169,21 +171,14 @@ export default function Screen1() {
         />
 
         {/* Indicator Dots */}
-        <XStack
-          justifyContent="center"
-          alignItems="center"
-          gap="$2"
-          marginTop="$3"
-        >
+        <XStack justifyContent="center" alignItems="center" gap="$2" marginTop="$3">
           {SLIDES.map((_, index) => (
             <YStack
               key={index}
               width={index === activeIndex ? 20 : 8}
               height={8}
               borderRadius={12}
-              backgroundColor={
-                index === activeIndex ? "$primary" : "$secondary"
-              }
+              backgroundColor={index === activeIndex ? "$primary" : "$secondary"}
             />
           ))}
         </XStack>
@@ -192,18 +187,13 @@ export default function Screen1() {
         <Button
           width={BUTTON_WIDTH}
           height={BUTTON_HEIGHT}
-          borderRadius={8}
+          borderRadius={12}
           backgroundColor="$primary"
           alignSelf="center"
-          marginTop="$6"
+          marginVertical="$6"
           onPress={() => router.push("/role-selection")}
         >
-          <Text
-            color="$color"
-            fontWeight="600"
-            fontSize={20}
-            textAlign="center"
-          >
+          <Text color='#ffffff' fontWeight="600" fontSize={20} textAlign="center">
             Get started
           </Text>
         </Button>

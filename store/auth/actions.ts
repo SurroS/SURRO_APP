@@ -23,12 +23,14 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
     referralSource: null,
     referralCode: null,
     error: null,
+    
 
     login: async (credentials: LoginCredentials) => {
         try {
             set({ isLoading: true, error: null });
 
             const response = await api.post('/auth/login', credentials);
+           
             const { user, token, requiresOtp } = response.data;
 
             if (requiresOtp) {
@@ -65,19 +67,21 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
             set({ isLoading: true, error: null });
 
             await api.post('/auth/register', credentials);
-
             set({
                 isLoading: false,
                 requiresOtp: true,
                 tempEmail: credentials.email,
                 error: null,
             });
+            console.log("Credentials =",{credentials})
         } catch (error: any) {
             set({
                 isLoading: false,
                 error: error.response?.data?.message || 'Registration failed'
             });
+            console.log("Credentials =",{credentials})
             throw error;
+            
         }
     },
 
@@ -112,7 +116,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
         try {
             set({ isLoading: true, error: null });
 
-            await api.post('/auth/resend-otp', { email });
+            await api.post('/auth/resend_otp', { email });
 
             set({
                 isLoading: false,
@@ -132,7 +136,6 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
             set({ isLoading: true, error: null });
 
             await api.post('/auth/forgot-password', request);
-
             set({
                 isLoading: false,
                 requiresOtp: true,
@@ -153,6 +156,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
             set({ isLoading: true, error: null });
 
             await api.post('/auth/reset-password', request);
+        
 
             set({
                 isLoading: false,

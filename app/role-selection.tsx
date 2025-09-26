@@ -66,9 +66,9 @@ export default function RoleSelection() {
       <YStack flex={1} padding={"$4"} marginTop={"$5"} backgroundColor="$background">
         {/* Header */}
         <Text
-          fontSize={20}
+          fontSize={22}
           marginTop={20}
-          fontWeight={"500"}
+          fontWeight={"800"}
           textAlign="center"
           color="$color.text" // resolves to black in light theme
         >
