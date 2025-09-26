@@ -63,23 +63,29 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
     },
 
     register: async (credentials: RegisterCredentials) => {
+        const data ={
+                "email":credentials.email,
+                "password":credentials.password,
+                "role":credentials.role,
+                "referralCode":credentials.refferalCode 
+            }
         try {
             set({ isLoading: true, error: null });
 
-            await api.post('/auth/register', credentials);
+            await api.post('/auth/register', data);
             set({
                 isLoading: false,
                 requiresOtp: true,
                 tempEmail: credentials.email,
                 error: null,
             });
-            console.log("Credentials =",{credentials})
+            console.log("Credentials =",{data})
         } catch (error: any) {
             set({
                 isLoading: false,
                 error: error.response?.data?.message || 'Registration failed'
             });
-            console.log("Credentials =",{credentials})
+            console.log("Credentials =",{data})
             throw error;
             
         }
