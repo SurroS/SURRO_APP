@@ -6,6 +6,7 @@ import { Dimensions, FlatList, ViewToken } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Image, Text, XStack, YStack } from "tamagui";
 
+
 // Screen dimensions
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -129,7 +130,7 @@ export default function Screen2() {
         justifyContent: "center",
         alignItems: "center",
       }}
-    >
+    > 
       <YStack flex={1} backgroundColor="$background" paddingHorizontal="$4">
         {/* Header */}
         <YStack alignItems="center" paddingTop="$4">
@@ -140,7 +141,7 @@ export default function Screen2() {
           />
           <Text fontSize={22} fontWeight="800" color="$primary">
             SURRO
-          </Text>
+          </Text> 
         </YStack>
 
         {/* Image Carousel */}
@@ -189,10 +190,10 @@ export default function Screen2() {
           borderRadius={12}
           backgroundColor="$primary"
           alignSelf="center"
-          marginTop="$6"
+          marginVertical="$6"
           onPress={() => router.push("/role-selection")}
         >
-          <Text color="$color" fontWeight="600" fontSize={20} textAlign="center">
+          <Text color='#ffffff' fontWeight="600" fontSize={20} textAlign="center">
             Get started
           </Text>
         </Button>

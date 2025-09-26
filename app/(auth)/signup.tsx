@@ -6,14 +6,13 @@ import { useEffect } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
+  Platform, 
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
 } from 'react-native';
-
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/hooks/useAuth';
 import { InputField } from '../../components/auth/InputField';
 import { OrDivider } from '../../components/auth/OrDivider';
@@ -21,6 +20,8 @@ import { PrimaryButton } from '../../components/auth/PrimaryButton';
 import { ScreenHeader } from '../../components/auth/ScreenHeader';
 import { SocialButton } from '../../components/auth/SocialButton';
 import { useSignupForm } from '../../hooks/auth/useSignupForm';
+import ConnectivityTest from "@/components/connectivityTest";
+          
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -129,9 +130,10 @@ export default function SignupScreen() {
             errorMessage={errors.passwordConfirmation}
           />
 
-          <Text style={styles.roleDisplay}>
+          {/* <Text style={styles.roleDisplay}>
             Role: {formData.role.charAt(0).toUpperCase() + formData.role.slice(1)}
-          </Text>
+          </Text> */}
+           <ConnectivityTest/>
 
           {formData.refferalCode && (
             <InputField
