@@ -66,7 +66,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
         try {
             set({ isLoading: true, error: null });
 
-            await api.post('/auth/sign_up', credentials);
+            await api.post('/auth/register', credentials);
             set({
                 isLoading: false,
                 requiresOtp: true,
