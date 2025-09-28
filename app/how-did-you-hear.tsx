@@ -1,76 +1,98 @@
 // app/onboarding/how-did-you-hear.tsx
-
 import { useAuth } from "@/hooks/useAuth";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable } from "react-native";
-import { Button, Card, Input, ScrollView, Text, XStack, YStack } from "tamagui";
+import React, { useState } from "react";
+import {
+  FlatList, 
+  Platform,
+  Pressable,
+  ScrollView
+} from "react-native";
+import { Button, Card, Input, Text, XStack, YStack } from "tamagui";
+import {KeyboardAwareScrollView} from 'react-native-keyboard-controller'
+// Ordered list from Figma + PRD
 
-
-
-// SVG + PNG assets
-import FacebookIcon from "../assets/images/facebook (1).svg";
-import InstagramIcon from "../assets/images/instagramsvg (1).svg";
-import TikTokIcon from "../assets/images/tiktok (1).svg";
-import XIcon from "../assets/images/x_logo.svg.svg";
-import ReferralIcon from "../assets/images/referralIcon.png";
-
-// Source options for "How did you hear about us?"
 const SOURCE_ITEMS = [
-  {
-    key: "Friend",
-    label: "From a friend/family",
-    bg: "#0E0E55",
-    fg: "#0E0E55",
-    iconText: "person-icon",
-  },
-  { key: "X", label: "X", bg: "#000000", fg: "#ffffff", iconText: "x-logo" },
-  {
-    key: "Facebook",
-    label: "Facebook",
-    bg: "#1877F2",
-    fg: "#ffffff",
-    iconText: "facebook-logo",
-  },
-  {
-    key: "Instagram",
-    label: "Instagram",
-    bg: "#E1306C",
-    fg: "#ffffff",
-    iconText: "instagram-logo",
-  },
-  {
-    key: "TikTok",
-    label: "TikTok",
-    bg: "#000000",
-    fg: "#ffffff",
-    iconText: "tiktok-logo",
-  },
-  {
-    key: "YouTube",
-    label: "YouTube",
-    bg: "#FF0000",
-    fg: "#ffffff",
-    iconText: "youtube-logo",
-  },
-  {
-    key: "Referral",
-    label: "Referral",
-    bg: "#0E0E55",
-    fg: "#0E0E55",
-    iconText: "referal-logo",
-  },
+  { key: "Friend", label: "From a friend/family", bg: "#0E0E55", fg: "#F2F2F2", icon: "person" },
+  { key: "X", label: "X", bg: "#000000", fg: "#ffffff", icon: "logo-xbox" },
+  { key: "Facebook", label: "Facebook", bg: "#1877F2", fg: "#ffffff", icon: "logo-facebook" },
+  { key: "Instagram", label: "Instagram", bg: "#E1306C", fg: "#ffffff", icon: "logo-instagram" },
+  { key: "TikTok", label: "TikTok", bg: "#000000", fg: "#ffffff", icon: "logo-tiktok" },
+  { key: "YouTube", label: "YouTube", bg: "#FF0000", fg: "#ffffff", icon: "logo-youtube" },
+  { key: "Referral", label: "Referral", bg: "#0E0E55", fg: "#EAEAF6", icon: null  },
 ];
+
+type SourceOptionProps = {
+  item: typeof SOURCE_ITEMS[number];
+  isSelected: boolean;
+  onPress: () => void;
+};
+
+const SourceOption = ({ item, isSelected, onPress }: SourceOptionProps) => (
+  <Pressable
+    onPress={onPress}
+    accessibilityRole="radio"
+    accessibilityState={{ selected: isSelected }}
+    style={{ marginBottom: 16 }}
+  >
+    <XStack
+      alignItems="center"
+      justifyContent="space-between"
+      paddingVertical={14}
+      paddingHorizontal={14}
+      borderRadius={8}
+      borderWidth={1}
+      borderColor={isSelected ? "#0E0E55" : "#E6E6E6"}
+      backgroundColor={isSelected ? "#F4F7FF" : "white"}
+    >
+      <XStack alignItems="center" gap={12}>
+        <YStack
+          width={40}
+          height={40}
+          borderRadius={8}
+          justifyContent="center"
+          alignItems="center"
+          backgroundColor={item.bg}
+        >
+          {item.icon ? (
+            <Ionicons name={item.icon as any} size={24} color={item.fg} />
+          ) : (
+            <Text color={item.fg} fontWeight="700">
+              R
+            </Text>
+          )}
+        </YStack>
+        <Text fontSize={16} color="#212121">
+          {item.label}
+        </Text>
+      </XStack>
+
+      {/* Radio circle */}
+      <YStack
+        width={20}
+        height={20}
+        borderRadius={10}
+        borderWidth={2}
+        borderColor={isSelected ? "#0E0E55" : "#CFCFCF"}
+        justifyContent="center"
+        alignItems="center"
+        backgroundColor={isSelected ? "#0E0E55" : "white"}
+      >
+        {isSelected && (
+          <YStack width={10} height={10} borderRadius={5} backgroundColor="white" />
+        )}
+      </YStack>
+    </XStack>
+  </Pressable>
+);
 
 export default function HowDidYouHear() {
   const router = useRouter();
   const { setReferralInfo } = useAuth();
+  const [selectedSource, setSelectedSource] = useState<string>();
+  const [referralCode, setReferralCode] = useState<string>("");
 
-  const [selectedSource, setSelectedSource] = useState<string | undefined>(undefined); // selected option
-  const [referralCode, setReferralCode] = useState<string>(""); // referral input
-
-  // Handles finishing onboarding
   const completeOnboarding = () => {
     if (selectedSource) {
       if (selectedSource === "Referral" && referralCode) {
@@ -82,190 +104,82 @@ export default function HowDidYouHear() {
     router.replace("/(auth)/signup");
   };
 
-  // Render icon for each option
-  const renderIcon = (item: typeof SOURCE_ITEMS[0]) => {
-    if (item.type === "ionicon") return <Ionicons name={item.iconName as any} size={24} color={item.fg} />;
-    if (item.type === "svg") {
-      const SvgIcon = item.Icon as React.FC<{ width?: number; height?: number }>;
-      return <SvgIcon width={24} height={24} />;
-    }
-    if (item.type === "png") return <Image source={item.Icon} width={24} height={24} alt={item.label} />;
-    return null;
-  };
-
   return (
-    <ScrollView flex={1} >
-      <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 1} >
-        <YStack gap={"$3"} padding="$3" justifyContent="center"alignItems="center">
-          {/* Header */}
-          <YStack  marginTop="$6">
-            <Text
-              fontSize={23} 
-              lineHeight={32}
-              fontWeight="600"
-              textAlign="center"
-              marginTop={"$3"}
-              color="$text"
-            >
-              How did you hear about us?
-            </Text>
-          </YStack>
+    <ScrollView>
+    <KeyboardAwareScrollView
+    style={{flex:1, marginBottom:62}}
+    bottomOffset={60}
+    >
+      <YStack flex={1} padding="$4" backgroundColor="$background">
+        <Text
+          fontSize={23}
+          lineHeight={32}
+          fontWeight="600"
+          textAlign="center"
+          marginBottom="$4"
+        >
+          How did you hear about us?
+        </Text>
 
-          {/* Options Card */}
-          <Card
-            width="100%"
-            maxWidth={500}
-            alignSelf="center"
-            padding="$5"
-            borderRadius={12}
-            backgroundColor="$background"
-            marginTop="$2"
-          >
-            <YStack width="100%">
-              {SOURCE_ITEMS.map((item, index) => {
-                const isSelected = selectedSource === item.key;
-                return (
-                  <Pressable
-                    key={item.key}
-                    onPress={() => setSelectedSource(item.key)}
-                    accessibilityRole="radio"
-                    accessibilityState={{ selected: isSelected }}
-                    style={{ marginBottom: index === SOURCE_ITEMS.length - 1 ? 0 : 20 }}
-                  >
-                    <XStack
-                      alignItems="center"
-                      justifyContent="space-between"
-                      height={50}
-                      paddingVertical={14}
-                      paddingHorizontal={14}
-                      borderRadius={8}
-                      borderWidth={1}
-                      borderColor={isSelected ? "$primary" : "#E6E6E6"}
-                      backgroundColor={isSelected ? "#F4F7FF" : "$background"}
-                    >
-                      {/* Left: Icon + Label */}
-                      <XStack alignItems="center" gap={12}>
-                        <YStack
-                          width={40}
-                          height={40}
-                          borderRadius={8}
-                          justifyContent="center"
-                          alignItems="center"
-                          backgroundColor={item.bg}
-                        >
-                          {item.iconText === "person-icon" ? (
-                            <Ionicons name="people" size={24} color="#ffffff"/>
-                          ) : item.iconText === "x-logo" ? (
-                            <Ionicons
-                              name="logo-xbox"
-                              size={24}
-                              color="#ffffff"
-                            />
-                          ) : item.iconText === "facebook-logo" ? (
-                            <Ionicons
-                              name="logo-facebook"
-                              size={24}
-                              color="#ffffff"
-                            />
-                          ) : item.iconText === "instagram-logo" ? (
-                            <Ionicons
-                              name="logo-instagram"
-                              size={24}
-                              color="#ffffff"
-                            />
-                          ) : item.iconText === "tiktok-logo" ? (
-                            <Ionicons
-                              name="logo-tiktok"
-                              size={24}
-                              color="#ffffff"
-                            />
-                          ) : item.iconText === "youtube-logo" ? (
-                            <Ionicons
-                              name="logo-youtube"
-                              size={24}
-                              color="#ffffff"
-                            />
-                          ) : item.iconText === "referal" ? null : (
-                                    <Ionicons
-                              name="person-add"
-                              size={24}
-                              color="#ffffff"
-                            />
-                          )}
-                        </YStack>
-                        <Text fontSize={16} color="#212121">{item.label}</Text>
-                      </XStack>
+        <Card width="100%" maxWidth={500} alignSelf="center" padding="$3" borderRadius={12}>
+          <FlatList
+            data={SOURCE_ITEMS}
+            keyExtractor={(item) => item.key}
+            renderItem={({ item }) => (
+              <SourceOption
+                item={item}
+                isSelected={selectedSource === item.key}
+                onPress={() => setSelectedSource(item.key)}
+              />
+            )}
+          />
 
-                      {/* Radio circle */}
-                      <YStack
-                        width={20}
-                        height={20}
-                        borderRadius={10}
-                        borderWidth={2}
-                        borderColor={isSelected ? "$primary" : "#CFCFCF"}
-                        justifyContent="center"
-                        alignItems="center"
-                        backgroundColor={isSelected ? "$primary" : "$background"}
-                      >
-                        {isSelected && <YStack width={10} height={10} borderRadius={5} backgroundColor="$background" />}
-                      </YStack>
-                    </XStack>
-                  </Pressable>
-                );
-              })}
-
-              {/* Conditional referral input */}
-              {selectedSource === "Referral" && (
-                <YStack gap="$2" marginTop="$3">
-                  <Text fontSize={16} fontWeight="500" color="black">Referral Code</Text>
-                  <Input
-                    placeholder="Enter your code"
-                    value={referralCode}
-                    onChangeText={setReferralCode}
-                    style={{
-                      height: 48,
-                      paddingHorizontal: 12,
-                      fontSize: 16,
-                      borderRadius: 8,
-                      borderWidth: 1,
-                      borderColor: "black",
-                      backgroundColor: "white",
-                      color: "black",
-                    }}
-                  />
-                </YStack>
-              )}
+          {selectedSource === "Referral" && (
+            <YStack gap="$2" marginTop="$3">
+              <Text fontSize={16} fontWeight="500" color="$gray11">
+                Referral Code
+              </Text>
+              <Input
+                placeholder="Enter your code"
+                value={referralCode}
+                onChangeText={setReferralCode}
+                height={48}
+                paddingHorizontal={12}
+                fontSize={16}
+                borderRadius={8}
+                borderWidth={1}
+                borderColor="#CFCFCF"
+              />
             </YStack>
-          </Card>
+          )}
+        </Card>
 
-          {/* Next + Skip Buttons */}
-            <Button
-              width="100%"
-              height={55}
-              borderRadius={8}
-              backgroundColor="$primary"
-              onPress={completeOnboarding}
-              disabled={!selectedSource}
-              opacity={selectedSource ? 1 : 0.6}
-            >
-              <Text color="$background" fontWeight="600">
-                Next
-              </Text>
-            </Button>
-            <Button
-              width="100%"
-              height={55}
-              borderRadius={8}
-              backgroundColor="$secondary"
-              onPress={() => router.replace("/(auth)/signup") as any}
-            >
-              <Text color="#9E9E9E" fontWeight="600">
-                Skip
-              </Text>
-            </Button>
-
+        <YStack gap="$3" width="100%" maxWidth={355} alignSelf="center" marginTop="$4">
+          <Button
+            height={55}
+            borderRadius={8}
+            backgroundColor="$primary"
+            onPress={completeOnboarding}
+            disabled={!selectedSource}
+            opacity={selectedSource ? 1 : 0.6}
+          >
+            <Text color="white" fontWeight="600">
+              Next
+            </Text>
+          </Button>
+          <Button
+            height={55}
+            borderRadius={8}
+            backgroundColor="$secondary"
+            onPress={() => router.replace("/(auth)/signup")}
+          >
+            <Text color="$color12" fontWeight="600">
+              Skip
+            </Text>
+          </Button>
         </YStack>
-      </KeyboardAvoidingView>
+      </YStack>
+    </KeyboardAwareScrollView>
     </ScrollView>
   );
 }

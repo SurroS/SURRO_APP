@@ -27,9 +27,9 @@ const ROLE_ITEMS = [
 
 // Map role keys to actual role values for auth store
 const roleMapping = {
-  "intending-parent": "parent",
-  agent: "agent",
-  surrogate: "surrogate",
+  "intending-parent": "PARENT",
+  agent: "AGENT",
+  surrogate: "SURROGATE",
 } as const;
 
 type RoleKey = keyof typeof roleMapping;
