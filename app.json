@@ -25,12 +25,10 @@
           "NSAllowsArbitraryLoads": true,
           "NSExceptionDomains": {
             "localhost": {
-              "NSIncludesSubdomains": true,
-              "NSTemporaryExceptionAllowsInsecureHTTPLoads": true
+              "NSIncludesSubdomains": true
             },
             "10.0.2.2": {
-              "NSIncludesSubdomains": true,
-              "NSTemporaryExceptionAllowsInsecureHTTPLoads": true
+              "NSIncludesSubdomains": true
             }
           }
         },
@@ -50,11 +48,6 @@
         }
       }
     },
-    "extra": {
-      "eas": {
-        "projectId": "50b5b0d5-9fbd-46ea-8769-ca33f946ef88"
-      }
-    },
     "android": {
       "package": "com.surrosantara.mobileapp",
        "permissions": [
@@ -62,6 +55,52 @@
         "android.permission.USE_FINGERPRINT",
         "android.permission.RECORD_AUDIO"
       ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "newArchEnabled": true
+          },
+          "android": {
+            "newArchEnabled": true
+          }
+        }
+      ],
+      "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow Surro to use Face ID."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Surro to access your photos",
+          "cameraPermission": "Allow Surro to access your camera"
+        }
+      ],
+      [
+        "expo-contacts",
+        {
+          "contactsPermission": "Allow Surro to access your contacts."
+        }
+      ],
+      [
+        "expo-document-picker",
+        {
+          "iCloudContainerEnvironment": "Production"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "50b5b0d5-9fbd-46ea-8769-ca33f946ef88"
+      }
     }
   }
 }
