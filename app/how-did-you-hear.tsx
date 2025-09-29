@@ -1,40 +1,18 @@
-// app/onboarding/how-did-you-hear.tsx
 import { useAuth } from "@/hooks/useAuth";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import {
-  FlatList, 
-  Platform,
-  Pressable,
-  ScrollView
-} from "react-native";
+import React, { useState, useRef } from "react";
+import { Platform, TextInput, Pressable } from "react-native";
 import { Button, Card, Input, Text, XStack, YStack } from "tamagui";
-import {KeyboardAwareScrollView} from 'react-native-keyboard-controller'
-// Ordered list from Figma + PRD
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
-const SOURCE_ITEMS = [
-  { key: "Friend", label: "From a friend/family", bg: "#0E0E55", fg: "#F2F2F2", icon: "person" },
-  { key: "X", label: "X", bg: "#000000", fg: "#ffffff", icon: "logo-xbox" },
-  { key: "Facebook", label: "Facebook", bg: "#1877F2", fg: "#ffffff", icon: "logo-facebook" },
-  { key: "Instagram", label: "Instagram", bg: "#E1306C", fg: "#ffffff", icon: "logo-instagram" },
-  { key: "TikTok", label: "TikTok", bg: "#000000", fg: "#ffffff", icon: "logo-tiktok" },
-  { key: "YouTube", label: "YouTube", bg: "#FF0000", fg: "#ffffff", icon: "logo-youtube" },
-  { key: "Referral", label: "Referral", bg: "#0E0E55", fg: "#EAEAF6", icon: null  },
-];
 
-type SourceOptionProps = {
-  item: typeof SOURCE_ITEMS[number];
-  isSelected: boolean;
-  onPress: () => void;
-};
-
-const SourceOption = ({ item, isSelected, onPress }: SourceOptionProps) => (
+const SourceOption = ({ item, isSelected, onPress }: any) => (
   <Pressable
     onPress={onPress}
+    style={{ marginBottom: 16 }}
     accessibilityRole="radio"
     accessibilityState={{ selected: isSelected }}
-    style={{ marginBottom: 16 }}
   >
     <XStack
       alignItems="center"
@@ -68,7 +46,6 @@ const SourceOption = ({ item, isSelected, onPress }: SourceOptionProps) => (
         </Text>
       </XStack>
 
-      {/* Radio circle */}
       <YStack
         width={20}
         height={20}
@@ -93,6 +70,8 @@ export default function HowDidYouHear() {
   const [selectedSource, setSelectedSource] = useState<string>();
   const [referralCode, setReferralCode] = useState<string>("");
 
+  const referralInputRef = useRef<TextInput>(null);
+
   const completeOnboarding = () => {
     if (selectedSource) {
       if (selectedSource === "Referral" && referralCode) {
@@ -105,12 +84,14 @@ export default function HowDidYouHear() {
   };
 
   return (
-    <ScrollView>
     <KeyboardAwareScrollView
-    style={{flex:1, marginBottom:62}}
-    bottomOffset={60}
+      style={{ flex: 1, backgroundColor: "$white" }}
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 40, paddingHorizontal: 16 }}
+      enableOnAndroid
+      extraScrollHeight={Platform.OS === "ios" ? 80 : 60}
+      keyboardShouldPersistTaps="handled"
     >
-      <YStack flex={1} padding="$4" backgroundColor="$background">
+      <YStack flex={1}>
         <Text
           fontSize={23}
           lineHeight={32}
@@ -122,24 +103,32 @@ export default function HowDidYouHear() {
         </Text>
 
         <Card width="100%" maxWidth={500} alignSelf="center" padding="$3" borderRadius={12}>
-          <FlatList
-            data={SOURCE_ITEMS}
-            keyExtractor={(item) => item.key}
-            renderItem={({ item }) => (
-              <SourceOption
-                item={item}
-                isSelected={selectedSource === item.key}
-                onPress={() => setSelectedSource(item.key)}
-              />
-            )}
-          />
+          {/* Source options */}
+          {[
+            { key: "Friend", label: "From a friend/family", bg: "#0E0E55", fg: "#F2F2F2", icon: "person" },
+            { key: "X", label: "X", bg: "#000000", fg: "#ffffff", icon: "logo-xbox" },
+            { key: "Facebook", label: "Facebook", bg: "#1877F2", fg: "#ffffff", icon: "logo-facebook" },
+            { key: "Instagram", label: "Instagram", bg: "#E1306C", fg: "#ffffff", icon: "logo-instagram" },
+            { key: "TikTok", label: "TikTok", bg: "#000000", fg: "#ffffff", icon: "logo-tiktok" },
+            { key: "YouTube", label: "YouTube", bg: "#FF0000", fg: "#ffffff", icon: "logo-youtube" },
+            { key: "Referral", label: "Referral", bg: "#0E0E55", fg: "#EAEAF6", icon: null },
+          ].map((item) => (
+            <SourceOption
+              key={item.key}
+              item={item}
+              isSelected={selectedSource === item.key}
+              onPress={() => setSelectedSource(item.key)}
+            />
+          ))}
 
+          {/* Referral input */}
           {selectedSource === "Referral" && (
             <YStack gap="$2" marginTop="$3">
               <Text fontSize={16} fontWeight="500" color="$gray11">
                 Referral Code
               </Text>
               <Input
+                ref={referralInputRef}
                 placeholder="Enter your code"
                 value={referralCode}
                 onChangeText={setReferralCode}
@@ -180,6 +169,5 @@ export default function HowDidYouHear() {
         </YStack>
       </YStack>
     </KeyboardAwareScrollView>
-    </ScrollView>
   );
 }

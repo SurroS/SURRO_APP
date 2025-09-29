@@ -1,8 +1,8 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Pressable, SafeAreaView, StyleSheet } from "react-native";
-import { SafeAreaFrameContext } from "react-native-safe-area-context";
+import { Pressable, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Image, Text, XStack, YStack } from "tamagui";
 
 const ROLE_ITEMS = [
@@ -27,9 +27,9 @@ const ROLE_ITEMS = [
 
 // Map role keys to actual role values for auth store
 const roleMapping = {
-  "intending-parent": "PARENT",
-  agent: "AGENT",
-  surrogate: "SURROGATE",
+  "intending-parent": "INTENDED_PARENT",
+  "agent": "AGENT",
+  "surrogate": "SURROGATE",
 } as const;
 
 type RoleKey = keyof typeof roleMapping;
@@ -63,6 +63,12 @@ export default function RoleSelection() {
   };
 
   return (
+    <SafeAreaView
+          style={{
+        flex: 1, 
+        
+          }}
+    >
       <YStack flex={1} padding={"$4"} marginTop={"$5"} backgroundColor="$background">
         {/* Header */}
         <Text
@@ -150,6 +156,7 @@ export default function RoleSelection() {
           </Text>
         </Button>
       </YStack>
+      </SafeAreaView>
   );
 }
 

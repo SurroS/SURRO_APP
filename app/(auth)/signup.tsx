@@ -5,6 +5,7 @@ import * as Google from "expo-auth-session/providers/google";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect } from "react";
+import { YStack } from "tamagui";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -30,7 +31,7 @@ export default function SignupScreen() {
   const { register, googleLogin, appleLogin, isLoading, error } = useAuth();
 
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: "", // Add your Google client ID here
+    clientId:"321354387399-trkjkc1s00kpls3mvib35l5ieke5mig3.apps.googleusercontent.com", // Add your Google client ID here
   });
 
   useEffect(() => {
@@ -73,17 +74,16 @@ export default function SignupScreen() {
     }
   };
 
-  const handleSignup = async () => {
-    if (!validateForm()) return;
-
-    try {
-      await register(formData);
-    } catch (err) {
-      console.error("Signup error:", err);
-      // Error is already handled by the auth
-      Alert.alert("Signup Failed", "Please try again.");
-    }
-  };
+const handleSignup = async () => {
+  if (!validateForm()) return; // stop if form is invalid
+  try {
+    await register(formData); // attempt registration
+    router.push("/(auth)/otp"); // replace with your actual OTP route
+  } catch (err) {
+    console.error("Signup error:", err);
+    Alert.alert("Signup Failed", "Please try again.");
+  }
+};
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -135,7 +135,7 @@ export default function SignupScreen() {
           {/* <Text style={styles.roleDisplay}>
             Role: {formData.role.charAt(0).toUpperCase() + formData.role.slice(1)}
           </Text> */}
-          <ConnectivityTest />
+          {/* <ConnectivityTest /> */}
 
           {formData.refferalCode && (
             <InputField
@@ -156,11 +156,19 @@ export default function SignupScreen() {
 
           <OrDivider />
           {Platform.OS == "ios" ? (
+            <YStack>
             <SocialButton
               title="Sign in with Apple"
               icon={require("../../assets/images/apple.png")}
               onPress={handleAppleAuth}
             />
+              <SocialButton
+              title="Sign in with Google"
+              icon={require("../../assets/images/google.png")}
+              onPress={() => promptAsync()}
+              disabled={!request}
+            />
+            </YStack>
           ) : (
             <SocialButton
               title="Sign in with Google"

@@ -4,18 +4,19 @@
     "slug": "surro",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/icon1.png",
     "splash": {
-      "image": "./assets/images/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#374DA0"
+      "image": "./assets/images/adaptive-icon.png",
+      "resizeMode": 200,
+      "backgroundColor": "#0E0E55"
     },
     "scheme": "surro",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.surrosantara.mobileapp",
+      "bundleIdentifier": "com.surrosantara.mobile",
       "usesAppleSignIn": true,
       "associatedDomains": [
         "applinks:surro.app"
@@ -35,27 +36,27 @@
         "CFBundleURLTypes": [
           {
             "CFBundleURLSchemes": [
-              "321354387399-seshh2oha2amisist1b9nu7k7h2806cj.apps.googleusercontent.com",
-              "surro"
+              "321354387399-rnp7n1va8r5gqdohnboht72pcqu3et44.apps.googleusercontent.com"
             ]
           }
         ],
         "NSFaceIDUsageDescription": "Sign in with Apple requires FaceID to confirm your identity."
-      },
-      "config": {
-        "googleSignIn": {
-          "reservedClientId": "321354387399-trkjkc1s00kpls3mvib35l5ieke5mig3.apps.googleusercontent.com"
-        }
       }
     },
     "android": {
-      "package": "com.surrosantara.mobileapp",
-       "permissions": [
+      "package": "com.surrosantara.mobile",
+      "permissions": [
         "android.permission.USE_BIOMETRIC",
         "android.permission.USE_FINGERPRINT",
         "android.permission.RECORD_AUDIO"
-      ]
-    },
+      ],
+      "config": {
+        "googleSignIn": {
+          "reservedClientId": "321354387399-pni8pf1pm86riopsg3ng2nlqoq4hmfjg.apps.googleusercontent.com"
+        }
+      }
+    }
+  },
     "plugins": [
       "expo-router",
       "expo-font",
@@ -103,4 +104,3 @@
       }
     }
   }
-}

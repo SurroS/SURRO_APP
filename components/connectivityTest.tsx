@@ -11,10 +11,10 @@ const ConnectivityTest = () => {
       try {
         // Change to an endpoint you know exists
         const res = await api.post("/auth/register", {
-          email: "emizlife2014@gmail.com",
+          email: "emizlife014@gmail.com",
           password: "1234678",
           referralCode: "", 
-          role: "surrogate"
+          role: "AGENT"
         });
 
         setMessage("✅ API reachable, response: " + JSON.stringify(res.data));

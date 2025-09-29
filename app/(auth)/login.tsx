@@ -28,7 +28,7 @@ export default function LoginScreen() {
 
   // Google setup (kept in case you still want to use later)
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: "", // Add your Google client ID here if you enable it
+    clientId: "321354387399-trkjkc1s00kpls3mvib35l5ieke5mig3.apps.googleusercontent.com", // Add your Google client ID here if you enable it
   });
 
   useEffect(() => {
@@ -65,7 +65,7 @@ export default function LoginScreen() {
     router.replace("/(tabs)/home"); // redirect to your home stack
   };
 
-  return (
+  return ( 
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
         <ScreenHeader title="Log in" onBackPress={() => router.back()} />

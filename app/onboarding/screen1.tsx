@@ -154,9 +154,9 @@ export default function Screen2() {
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
           contentContainerStyle={{
-            paddingHorizontal: CARD_SPACING / 1,
+            paddingHorizontal: CARD_SPACING / 2,
             marginTop: 10,
-            paddingBottom: 5,
+            paddingBottom: 15,
           }}
           renderItem={({ item }) => (
             <ImageCard
