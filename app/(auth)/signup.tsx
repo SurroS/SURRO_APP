@@ -1,13 +1,9 @@
-import ConnectivityTest from "@/components/connectivityTest";
-import { useAuth } from '@/hooks/useAuth';
-import ConnectivityTest from "@/components/connectivityTest";
 import { useAuth } from "@/hooks/useAuth";
 import * as AppleAuthentication from "expo-apple-authentication";
 import * as Google from "expo-auth-session/providers/google";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { useCallback, useEffect } from "react";
-import { YStack } from "tamagui";
+import { useEffect } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -18,6 +14,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { YStack } from "tamagui";
 import { InputField } from '../../components/auth/InputField';
 import { OrDivider } from '../../components/auth/OrDivider';
 import { PrimaryButton } from '../../components/auth/PrimaryButton';
@@ -52,7 +49,7 @@ export default function SignupScreen() {
       console.error("Google signup error:", err);
       Alert.alert("Google Sign-in Failed", "Please try again.");
     }
-  }, [googleLogin, formData.role]);
+  };
 
   useEffect(() => {
     if (response?.type === 'success') {
