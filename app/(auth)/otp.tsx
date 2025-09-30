@@ -35,6 +35,7 @@ export default function OTPScreen() {
   };
 
   const handleVerify = async () => {
+    console.log("handleVerify =", validateOtp());
     if (!validateOtp()) {
       return;
     }
@@ -44,7 +45,10 @@ export default function OTPScreen() {
       return;
     }
 
+    console.log("handleVerify =", getOtpCode());
+    console.log("handleVerify =", tempEmail);
     try {
+
       await verifyOtp({
         email: tempEmail,
         code: getOtpCode(),
@@ -52,6 +56,7 @@ export default function OTPScreen() {
       // Navigation will be handled automatically by the auth store state changes
       // The index.tsx will detect authentication and navigate to the appropriate role dashboard
     } catch (err) {
+      console.log("handleVerify =", err);
       console.error('OTP verification error:', err);
       // Error is already handled by the auth store
     }

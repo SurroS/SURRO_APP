@@ -93,6 +93,8 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
     },
 
     verifyOtp: async (verification: OtpVerification) => {
+        console.log("verifyOtp =", verification);
+
         try {
             set({ isLoading: true, error: null });
 
@@ -111,6 +113,8 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
 
             await secureSet('auth_token', token);
         } catch (error: any) {
+            console.log("error =", error);
+
             set({
                 isLoading: false,
                 error: error.response?.data?.message || 'OTP verification failed'
