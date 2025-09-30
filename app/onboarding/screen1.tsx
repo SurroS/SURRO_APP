@@ -82,12 +82,13 @@ const ImageCard = ({
     </XStack>
 
     <YStack
-      width={TEXT_CONTAINER_WIDTH}
+      width={TEXT_CONTAINER_WIDTH -5}
       alignSelf="center"
-      marginTop="$4"
+      marginRight="$4"
       gap="$4"
       justifyContent="center"
       alignItems="center"
+      paddingHorizontal={10}
     >
       <Text
         fontSize={SCREEN_WIDTH * 0.05}
@@ -154,9 +155,9 @@ export default function Screen2() {
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
           contentContainerStyle={{
-            paddingHorizontal: CARD_SPACING / 1,
+            paddingHorizontal: CARD_SPACING / 2,
             marginTop: 10,
-            paddingBottom: 5,
+            paddingBottom: 15,
           }}
           renderItem={({ item }) => (
             <ImageCard
@@ -191,7 +192,7 @@ export default function Screen2() {
           backgroundColor="$primary"
           alignSelf="center"
           marginVertical="$6"
-          onPress={() => router.push("/role-selection")}
+          onPress={() => router.push("/onboarding/role-selection")}
         >
           <Text color='#ffffff' fontWeight="600" fontSize={20} textAlign="center">
             Get started

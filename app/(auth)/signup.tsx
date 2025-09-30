@@ -1,10 +1,13 @@
 import ConnectivityTest from "@/components/connectivityTest";
 import { useAuth } from '@/hooks/useAuth';
-import * as AppleAuthentication from 'expo-apple-authentication';
-import * as Google from 'expo-auth-session/providers/google';
-import { useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
-import { useCallback, useEffect } from 'react';
+import ConnectivityTest from "@/components/connectivityTest";
+import { useAuth } from "@/hooks/useAuth";
+import * as AppleAuthentication from "expo-apple-authentication";
+import * as Google from "expo-auth-session/providers/google";
+import { useRouter } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
+import { useCallback, useEffect } from "react";
+import { YStack } from "tamagui";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -31,16 +34,23 @@ export default function SignupScreen() {
   const { register, googleLogin, appleLogin, isLoading, error, requiresOtp } = useAuth();
 
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: '', // Add your Google client ID here
+    clientId: "321354387399-pni8pf1pm86riopsg3ng2nlqoq4hmfjg.apps.googleusercontent.com", // Add your Google client ID here
   });
 
-  const handleGoogleAuth = useCallback(async (accessToken: string) => {
+  useEffect(() => {
+    if (response?.type === "success") {
+      const token = response.authentication?.accessToken || "";
+      handleGoogleAuth(token);
+    }
+  }, [response]);
+
+  const handleGoogleAuth = async (accessToken: string) => {
     try {
       await googleLogin({ idToken: accessToken, role: formData.role });
-      Alert.alert('Success', 'Signed in with Google');
+      Alert.alert("Success", "Signed in with Google");
     } catch (err) {
-      console.error('Google signup error:', err);
-      Alert.alert('Google Sign-in Failed', 'Please try again.');
+      console.error("Google signup error:", err);
+      Alert.alert("Google Sign-in Failed", "Please try again.");
     }
   }, [googleLogin, formData.role]);
 
@@ -70,27 +80,28 @@ export default function SignupScreen() {
       });
 
       if (credential.identityToken) {
-        await appleLogin({ idToken: credential.identityToken, role: formData.role });
-        Alert.alert('Success', 'Signed in with Apple');
+        await appleLogin({
+          idToken: credential.identityToken,
+          role: formData.role,
+        });
+        Alert.alert("Success", "Signed in with Apple");
       }
     } catch (err: any) {
-      if (err?.code === 'ERR_CANCELED') return;
-      console.error('Apple signup error:', err);
-      Alert.alert('Apple Sign-in Failed', 'Please try again.');
+      if (err?.code === "ERR_CANCELED") return;
+      console.error("Apple signup error:", err);
+      Alert.alert("Apple Sign-in Failed", "Please try again.");
     }
   };
 
   const handleSignup = async () => {
-    if (!validateForm()) return;
-
+    if (!validateForm()) return; // stop if form is invalid
     try {
-      console.log('Starting signup process...');
-      await register(formData);
-      console.log('Signup completed, checking requiresOtp state...');
+      await register(formData); // attempt registration
+      router.push("/(auth)/otp"); // replace with your actual OTP route
+
     } catch (err) {
-      console.error('Signup error:', err);
-      // Error is already handled by the auth 
-      Alert.alert('Signup Failed', 'Please try again.');
+      console.error("Signup error:", err);
+      Alert.alert("Signup Failed", "Please try again.");
     }
   };
 
@@ -98,7 +109,7 @@ export default function SignupScreen() {
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         {/* Entire page scrollable */}
         <ScrollView
@@ -111,7 +122,7 @@ export default function SignupScreen() {
           <InputField
             label="Email"
             value={formData.email}
-            onChangeText={(text) => updateField('email', text)}
+            onChangeText={(text) => updateField("email", text)}
             placeholder="Enter your email"
             keyboardType="email-address"
             autoCapitalize="none"
@@ -122,7 +133,7 @@ export default function SignupScreen() {
           <InputField
             label="Password"
             value={formData.password}
-            onChangeText={(text) => updateField('password', text)}
+            onChangeText={(text) => updateField("password", text)}
             placeholder="Enter your password"
             secureTextEntry
             showPasswordToggle
@@ -133,7 +144,7 @@ export default function SignupScreen() {
           <InputField
             label="Confirm Password"
             value={formData.passwordConfirmation}
-            onChangeText={(text) => updateField('passwordConfirmation', text)}
+            onChangeText={(text) => updateField("passwordConfirmation", text)}
             placeholder="Confirm your password"
             secureTextEntry
             showPasswordToggle
@@ -141,10 +152,6 @@ export default function SignupScreen() {
             errorMessage={errors.passwordConfirmation}
           />
 
-          {/* <Text style={styles.roleDisplay}>
-            Role: {formData.role.charAt(0).toUpperCase() + formData.role.slice(1)}
-          </Text> */}
-          <ConnectivityTest />
 
           {formData.referralCode && (
             <InputField
@@ -164,23 +171,32 @@ export default function SignupScreen() {
           />
 
           <OrDivider />
-
-          <SocialButton
-            title="Sign in with Google"
-            icon={require('../../assets/images/google.png')}
-            onPress={() => promptAsync()}
-            disabled={!request}
-          />
-
-          <SocialButton
-            title="Sign in with Apple"
-            icon={require('../../assets/images/apple.png')}
-            onPress={handleAppleAuth}
-          />
+          {Platform.OS == "ios" ? (
+            <YStack>
+              <SocialButton
+                title="Sign in with Apple"
+                icon={require("../../assets/images/apple.png")}
+                onPress={handleAppleAuth}
+              />
+              <SocialButton
+                title="Sign in with Google"
+                icon={require("../../assets/images/google.png")}
+                onPress={() => promptAsync()}
+                disabled={!request}
+              />
+            </YStack>
+          ) : (
+            <SocialButton
+              title="Sign in with Google"
+              icon={require("../../assets/images/google.png")}
+              onPress={() => promptAsync()}
+              disabled={!request}
+            />
+          )}
 
           <TouchableOpacity
             style={styles.loginLink}
-            onPress={() => router.push('/(auth)/login')}
+            onPress={() => router.push("/(auth)/login")}
           >
             <Text style={styles.loginLinkText}>
               Already have an account? Log in
@@ -205,7 +221,7 @@ export default function SignupScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F7F7F7',
+    backgroundColor: "#F7F7F7",
   },
   container: {
     flexGrow: 1,
@@ -213,24 +229,24 @@ const styles = StyleSheet.create({
     paddingTop: 50,
   },
   errorText: {
-    color: 'red',
+    color: "red",
     marginTop: -10,
     marginBottom: 15,
-    textAlign: 'center',
+    textAlign: "center",
   },
   roleDisplay: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#0E0E55',
+    fontWeight: "500",
+    color: "#0E0E55",
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   loginLink: {
     marginTop: 20,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   loginLinkText: {
-    color: '#0E0E55',
-    fontWeight: 'bold',
+    color: "#0E0E55",
+    fontWeight: "bold",
   },
 });

@@ -1,21 +1,21 @@
-import { useRouter } from 'expo-router';
-import { useRef } from 'react';
+import { useRouter } from "expo-router";
+import { useRef } from "react";
 import {
   Alert,
   Image,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useAuth } from '@/hooks/useAuth';
-import { PrimaryButton } from '../../components/auth/PrimaryButton';
-import { ScreenHeader } from '../../components/auth/ScreenHeader';
-import { useOtpForm } from '../../hooks/auth/useOtpForm';
+import { useAuth } from "@/hooks/useAuth";
+import { PrimaryButton } from "../../components/auth/PrimaryButton";
+import { ScreenHeader } from "../../components/auth/ScreenHeader";
+import { useOtpForm } from "../../hooks/auth/useOtpForm";
 
 export default function OTPScreen() {
   const router = useRouter();
@@ -41,7 +41,7 @@ export default function OTPScreen() {
     }
 
     if (!tempEmail) {
-      Alert.alert('Error', 'No email found. Please restart the process.');
+      Alert.alert("Error", "No email found. Please restart the process.");
       return;
     }
 
@@ -53,27 +53,23 @@ export default function OTPScreen() {
         email: tempEmail,
         code: getOtpCode(),
       });
-      // Navigation will be handled automatically by the auth store state changes
-      // The index.tsx will detect authentication and navigate to the appropriate role dashboard
     } catch (err) {
-      console.log("handleVerify =", err);
-      console.error('OTP verification error:', err);
-      // Error is already handled by the auth store
+      console.error("OTP verification error:", err);
     }
   };
 
   const handleResendOtp = async () => {
     if (!tempEmail) {
-      Alert.alert('Error', 'No email found. Please restart the process.');
+      Alert.alert("Error", "No email found. Please restart the process.");
       return;
     }
 
     try {
       await resendOtp(tempEmail);
-      Alert.alert('Success', 'OTP code has been resent to your email.');
+      Alert.alert("Success", "OTP code has been resent to your email.");
     } catch (err) {
-      console.error('Resend OTP error:', err);
-      Alert.alert('Error', 'Failed to resend OTP. Please try again.');
+      console.error("Resend OTP error:", err);
+      Alert.alert("Error", "Failed to resend OTP. Please try again.");
     }
   };
 
@@ -83,7 +79,7 @@ export default function OTPScreen() {
         <ScreenHeader title="Enter OTP" onBackPress={() => router.back()} />
 
         <Image
-          source={require('../../assets/images/openemail.png')}
+          source={require("../../assets/images/openemail.png")}
           style={styles.image}
         />
 
@@ -109,9 +105,7 @@ export default function OTPScreen() {
           ))}
         </View>
 
-        {error && (
-          <Text style={styles.errorText}>{error}</Text>
-        )}
+        {error && <Text style={styles.errorText}>{error}</Text>}
 
         <PrimaryButton
           title="Verify"
@@ -121,7 +115,8 @@ export default function OTPScreen() {
 
         <TouchableOpacity style={styles.resendButton} onPress={handleResendOtp}>
           <Text style={styles.resendText}>
-            Didn&apos;t get the code? <Text style={styles.resendLink}>Resend</Text>
+            Didn&apos;t get the code?{" "}
+            <Text style={styles.resendLink}>Resend</Text>
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -132,24 +127,23 @@ export default function OTPScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F7F7F7',
+    backgroundColor: "#F7F7F7",
   },
   container: {
-    flexGrow: 1,
     padding: 24,
-    paddingTop: 50,
-    alignItems: 'center',
+    paddingTop: 30,
   },
   image: {
     width: 120,
     height: 120,
     marginBottom: 20,
-    resizeMode: 'contain',
+    resizeMode: "contain",
+    alignSelf: "center",
   },
   infoText: {
     fontSize: 16,
-    color: '#555',
-    textAlign: 'center',
+    color: "#555",
+    textAlign: "center",
     marginBottom: 30,
   },
   otpContainer: {
@@ -157,7 +151,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
     marginBottom: 30,
-    width: '100%',
+    width: "100%",
+    alignSelf: "center",
   },
   otpInput: {
     width: 50,
@@ -165,25 +160,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#EBEBEB',
     borderRadius: 8,
     fontSize: 22,
-    textAlign: 'center',
-    color: '#333',
+    textAlign: "center",
+    color: "#333",
   },
   errorText: {
-    color: 'red',
+    color: "red",
     marginTop: -10,
     marginBottom: 15,
-    textAlign: 'center',
+    textAlign: "center",
   },
   resendButton: {
     marginTop: 20,
   },
   resendText: {
     fontSize: 14,
-    color: '#333',
-    textAlign: 'center',
+    color: "#333",
+    textAlign: "center",
   },
   resendLink: {
-    color: '#0E0E55',
-    fontWeight: 'bold',
+    color: "#0E0E55",
+    fontWeight: "bold",
   },
 });

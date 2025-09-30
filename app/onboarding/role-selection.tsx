@@ -8,17 +8,17 @@ const ROLE_ITEMS = [
   {
     key: "SURROGATE",
     label: "Surrogate",
-    image: require("../assets/images/surrogate-icon.png"),
+    image: require("../../assets/images/surrogate-icon.png"),
   },
   {
     key: "INTENDED_PARENT",
     label: "Intending parent",
-    image: require("../assets/images/parent-icon.png"),
+    image: require("../../assets/images/parent-icon.png"),
   },
   {
     key: "AGENT",
     label: "Agent",
-    image: require("../assets/images/agent-icon.png"),
+    image: require("../../assets/images/agent-icon.png"),
   },
   // { key: "intending-parent-individual", label: "Intending parent (Individual)", image: "#22B573" },
   // { key: "fertility-clinic", label: "Fertility clinic", image: "#082A9A" },
@@ -58,7 +58,7 @@ export default function RoleSelection() {
     });
 
     // Navigate to "how did you hear" page for all roles
-    router.push("/how-did-you-hear");
+    router.push("/onboarding/how-did-you-hear");
   };
 
   return (

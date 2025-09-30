@@ -1,45 +1,49 @@
-import * as AppleAuthentication from 'expo-apple-authentication';
-import * as Google from 'expo-auth-session/providers/google';
-import { useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
-import { useEffect } from 'react';
+import * as AppleAuthentication from "expo-apple-authentication";
+import * as Google from "expo-auth-session/providers/google";
+import { useRouter } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
+import { useEffect } from "react";
 import {
+  Alert,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+  TouchableOpacity,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useAuth } from "@/hooks/useAuth";
 import { Toast } from 'toastify-react-native';
 import { ToastType } from 'toastify-react-native/utils/interfaces';
-import { InputField } from '../../components/auth/InputField';
-import { OrDivider } from '../../components/auth/OrDivider';
-import { PrimaryButton } from '../../components/auth/PrimaryButton';
-import { ScreenHeader } from '../../components/auth/ScreenHeader';
-import { SocialButton } from '../../components/auth/SocialButton';
-import { useLoginForm } from '../../hooks/auth/useLoginForm';
+import { InputField } from "../../components/auth/InputField";
+import { OrDivider } from "../../components/auth/OrDivider";
+import { PrimaryButton } from "../../components/auth/PrimaryButton";
+import { ScreenHeader } from "../../components/auth/ScreenHeader";
+import { SocialButton } from "../../components/auth/SocialButton";
+import { useLoginForm } from "../../hooks/auth/useLoginForm";
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
   const router = useRouter();
   const { formData, errors, updateField, validateForm } = useLoginForm();
-
+  const { login, googleLogin, appleLogin, isLoading, error } = useAuth();
   // Google setup (kept in case you still want to use later)
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: '', // Add your Google client ID here if you enable it
+    clientId:
+      "321354387399-pni8pf1pm86riopsg3ng2nlqoq4hmfjg.apps.googleusercontent.com", // Add your Google client ID here if you enable it
   });
 
   useEffect(() => {
-    if (response?.type === 'success') {
-      // Alert.alert('Success', 'Logged in with Google');
+    if (response?.type === "success") {
+      // Alert.alert("Success", "Logged in with Google");
       Toast.show({
         text1: 'Logged in with Google',
         type: 'customSuccess' as ToastType,
         text2: 'Logged in with Google successfully!',
       });
-      router.replace('/(tabs)/home'); // go to home page
+      router.replace("/(tabs)/home"); // go to home page
     }
   }, [response]);
 
@@ -53,17 +57,17 @@ export default function LoginScreen() {
       });
 
       if (credential.identityToken) {
-        // Alert.alert('Success', 'Logged in with Apple');
+        // Alert.alert("Success", "Logged in with Apple");
         Toast.show({
           text1: 'Logged in with Apple',
           type: 'customSuccess' as ToastType,
           text2: 'Logged in with Apple successfully!',
         });
-        router.replace('/(tabs)/home'); // go to home page
+        router.replace("/(tabs)/home"); // go to home page
       }
     } catch (err: any) {
-      if (err.code === 'ERR_CANCELED') return;
-      // Alert.alert('Apple Login Failed', 'Please try again.');
+      if (err.code === "ERR_CANCELED") return;
+      // Alert.alert("Apple Login Failed", "Please try again.");
       Toast.show({
         text1: 'Apple Login Failed',
         type: 'customError' as ToastType,
@@ -72,17 +76,21 @@ export default function LoginScreen() {
     }
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!validateForm()) return;
-
-    // 🚀 Fake login: no backend, just navigate
-    // Alert.alert('Success', 'Logged in successfully');
-    Toast.show({
-      text1: 'Logged in successfully',
-      type: 'customSuccess' as ToastType,
-      text2: 'Logged in successfully!',
-    });
-    router.replace('/(tabs)/home'); // redirect to your home stack
+    try {
+      // await login(formData); // attempt registration
+      // Alert.alert("Success", "Logged in successfully");
+      Toast.show({
+        text1: 'Logged in successfully',
+        type: 'customSuccess' as ToastType,
+        text2: 'Logged in successfully!',
+      });
+      router.push("/(tabs)/home"); // redirect to your home stack
+    } catch (err) {
+      console.error("login error:", err);
+      Alert.alert("failed", `${err}`)
+    }
   };
 
   return (
@@ -93,7 +101,7 @@ export default function LoginScreen() {
         <InputField
           label="Username/Email"
           value={formData.email}
-          onChangeText={(text) => updateField('email', text)}
+          onChangeText={(text) => updateField("email", text)}
           placeholder="Enter your email"
           keyboardType="email-address"
           autoCapitalize="none"
@@ -104,7 +112,7 @@ export default function LoginScreen() {
         <InputField
           label="Password"
           value={formData.password}
-          onChangeText={(text) => updateField('password', text)}
+          onChangeText={(text) => updateField("password", text)}
           placeholder="Enter your password"
           secureTextEntry
           showPasswordToggle
@@ -114,7 +122,7 @@ export default function LoginScreen() {
 
         <TouchableOpacity
           style={styles.forgotPasswordButton}
-          onPress={() => router.push('/forgot-password')}
+          onPress={() => router.push("/forgot-password")}
         >
           <Text style={styles.forgotPasswordText}>Forgot password?</Text>
         </TouchableOpacity>
@@ -122,23 +130,24 @@ export default function LoginScreen() {
         <PrimaryButton title="Log in" onPress={handleLogin} />
 
         <OrDivider />
-
-        <SocialButton
-          title="Continue with Google"
-          icon={require('../../assets/images/google.png')}
-          onPress={() => promptAsync()}
-          disabled={!request}
-        />
-
-        <SocialButton
-          title="Continue with Apple"
-          icon={require('../../assets/images/apple.png')}
-          onPress={handleAppleAuth}
-        />
+        {Platform.OS == "ios" ? (
+          <SocialButton
+            title="Continue with Apple"
+            icon={require("../../assets/images/apple.png")}
+            onPress={handleAppleAuth}
+          />
+        ) : (
+          <SocialButton
+            title="Continue with Google"
+            icon={require("../../assets/images/google.png")}
+            onPress={() => promptAsync()}
+            disabled={!request}
+          />
+        )}
 
         <TouchableOpacity
           style={styles.signupLink}
-          onPress={() => router.push('/signup')}
+          onPress={() => router.push("/signup")}
         >
           <Text style={styles.signupLinkText}>
             Don&apos;t have an account? Sign up
@@ -152,7 +161,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F7F7F7',
+    backgroundColor: "#F7F7F7",
   },
   container: {
     flexGrow: 1,
@@ -160,19 +169,19 @@ const styles = StyleSheet.create({
     paddingTop: 50,
   },
   forgotPasswordButton: {
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
     marginBottom: 20,
   },
   forgotPasswordText: {
-    color: '#0E0E55',
-    fontWeight: 'bold',
+    color: "#0E0E55",
+    fontWeight: "bold",
   },
   signupLink: {
     marginTop: 20,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   signupLinkText: {
-    color: '#0E0E55',
-    fontWeight: 'bold',
+    color: "#0E0E55",
+    fontWeight: "bold",
   },
 });
