@@ -1,8 +1,8 @@
 import { useAuthStore } from '@/store/auth';
 import axios from 'axios';
 
-// const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ||'https://localhost:3000/api/'; 
-const API_BASE_URL = "http://13.61.177.16/api/v1";
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://13.61.177.16/api/v1';
+// const API_BASE_URL = "https://13.61.177.16/api/v1";
 
 
 const api = axios.create({

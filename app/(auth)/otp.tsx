@@ -83,7 +83,7 @@ export default function OTPScreen() {
         />
 
         <Text style={styles.infoText}>
-          We&apos;ve sent a 4-digit verification code to {tempEmail || 'your email'}.
+          We&apos;ve sent a 6-digit verification code to {tempEmail || 'your email'}.
         </Text>
 
         <View style={styles.otpContainer}>
@@ -149,13 +149,14 @@ const styles = StyleSheet.create({
   },
   otpContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
+    justifyContent: 'space-around',
     marginBottom: 30,
-    width: '80%',
+    width: '100%',
   },
   otpInput: {
-    width: 60,
-    height: 60,
+    width: 50,
+    height: 50,
     backgroundColor: '#EBEBEB',
     borderRadius: 8,
     fontSize: 22,

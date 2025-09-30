@@ -4,7 +4,7 @@ export interface User {
     name: string;
     avatar?: string;
     isVerified: boolean;
-    role: 'PARENT' | 'SURROGATE' | 'AGENT';
+    role: 'INTENDED_PARENT' | 'SURROGATE' | 'AGENT';
 }
 
 export interface AuthState {
@@ -29,7 +29,7 @@ export interface RegisterCredentials {
     password: string;
     passwordConfirmation: string;
     role: string;
-    refferalCode?: string;
+    referralCode?: string;
 }
 
 export interface OtpVerification {

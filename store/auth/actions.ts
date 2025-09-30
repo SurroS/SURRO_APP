@@ -23,14 +23,14 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
     referralSource: null,
     referralCode: null,
     error: null,
-    
+
 
     login: async (credentials: LoginCredentials) => {
         try {
             set({ isLoading: true, error: null });
 
             const response = await api.post('/auth/login', credentials);
-           
+
             const { user, token, requiresOtp } = response.data;
 
             if (requiresOtp) {
@@ -63,12 +63,13 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
     },
 
     register: async (credentials: RegisterCredentials) => {
-        const data ={
-                "email":credentials.email,
-                "password":credentials.password,
-                "role":credentials.role,
-                "referralCode":credentials.refferalCode 
-            }
+        console.log("Credentials =", { credentials });
+        const data = {
+            "email": credentials.email,
+            "password": credentials.password,
+            "role": credentials.role,
+            "referralCode": credentials.referralCode
+        }
         try {
             set({ isLoading: true, error: null });
 
@@ -79,15 +80,15 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
                 tempEmail: credentials.email,
                 error: null,
             });
-            console.log("Credentials =",{data})
+            console.log("Credentials =", { data })
         } catch (error: any) {
             set({
                 isLoading: false,
                 error: error.response?.data?.message || 'Registration failed'
             });
-            console.log("Credentials =",{data})
+            console.log("Credentials =", { data })
             throw error;
-            
+
         }
     },
 
@@ -97,7 +98,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
 
             const response = await api.post('/auth/verify-otp', verification);
             const { user, token } = response.data;
-
+            console.log("response =", response.data)
             set({
                 user,
                 token,
@@ -162,7 +163,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
             set({ isLoading: true, error: null });
 
             await api.post('/auth/reset-password', request);
-        
+
 
             set({
                 isLoading: false,
