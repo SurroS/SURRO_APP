@@ -31,7 +31,7 @@ export default function SignupScreen() {
   const { register, googleLogin, appleLogin, isLoading, error } = useAuth();
 
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId:"321354387399-trkjkc1s00kpls3mvib35l5ieke5mig3.apps.googleusercontent.com", // Add your Google client ID here
+    clientId:"321354387399-pni8pf1pm86riopsg3ng2nlqoq4hmfjg.apps.googleusercontent.com", // Add your Google client ID here
   });
 
   useEffect(() => {
@@ -79,6 +79,7 @@ const handleSignup = async () => {
   try {
     await register(formData); // attempt registration
     router.push("/(auth)/otp"); // replace with your actual OTP route
+     
   } catch (err) {
     console.error("Signup error:", err);
     Alert.alert("Signup Failed", "Please try again.");
@@ -132,10 +133,6 @@ const handleSignup = async () => {
             errorMessage={errors.passwordConfirmation}
           />
 
-          {/* <Text style={styles.roleDisplay}>
-            Role: {formData.role.charAt(0).toUpperCase() + formData.role.slice(1)}
-          </Text> */}
-          {/* <ConnectivityTest /> */}
 
           {formData.refferalCode && (
             <InputField

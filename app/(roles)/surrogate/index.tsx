@@ -1,13 +1,13 @@
 import { useAuth } from '@/hooks/useAuth';
 import { Button, Text, YStack } from 'tamagui';
-import ScreenContentWrapper from '../../../components/ScreenContentWrapper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function SurrogateScreen() {
   const { user, logout } = useAuth();
 
   return (
-    <ScreenContentWrapper>
-      <YStack flex={1} justifyContent="center" alignItems="center" padding="$4">
+    <SafeAreaView >
+      <YStack justifyContent="center" alignItems="center"  padding="$4">
         <Text
           fontSize="$6"
           fontWeight="bold"
@@ -19,22 +19,22 @@ export default function SurrogateScreen() {
 
         {user && (
           <YStack alignItems="center" marginBottom="$4">
-            <Text fontSize="$4" marginBottom="$2">
+            <Text color={"balck"} fontSize="$4" marginBottom="$2">
               Welcome, {user.name}!
             </Text>
-            <Text fontSize="$3" color="$gray10">
+            <Text  color={"balck"}  fontSize="$3" >
               Email: {user.email}
             </Text>
-            <Text fontSize="$3" color="$gray10">
+            <Text  color={"balck"}  fontSize="$3">
               Role: {user.role}
             </Text>
-            <Text fontSize="$3" color="$gray10">
+            <Text  color={"balck"}  fontSize="$3" >
               Verified: {user.isVerified ? 'Yes' : 'No'}
             </Text>
           </YStack>
         )}
 
-        <Text marginBottom="$4" textAlign="center">
+        <Text marginBottom="$4" textAlign="center" color={'black'}>
           This is the Surrogate dashboard screen. Here you can manage your surrogate journey.
         </Text>
 
@@ -47,6 +47,6 @@ export default function SurrogateScreen() {
           Logout
         </Button>
       </YStack>
-    </ScreenContentWrapper>
+      </SafeAreaView>
   );
 }

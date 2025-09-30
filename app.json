@@ -13,7 +13,6 @@
     "scheme": "surro",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.surrosantara.mobile",
@@ -55,52 +54,57 @@
           "reservedClientId": "321354387399-pni8pf1pm86riopsg3ng2nlqoq4hmfjg.apps.googleusercontent.com"
         }
       }
-    }
-  },
-    "plugins": [
-      "expo-router",
-      "expo-font",
-      [
-        "expo-build-properties",
-        {
-          "ios": {
-            "newArchEnabled": true
-          },
-          "android": {
-            "newArchEnabled": true
-          }
-        }
-      ],
-      "expo-secure-store",
-      [
-        "expo-local-authentication",
-        {
-          "faceIDPermission": "Allow Surro to use Face ID."
-        }
-      ],
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "Allow Surro to access your photos",
-          "cameraPermission": "Allow Surro to access your camera"
-        }
-      ],
-      [
-        "expo-contacts",
-        {
-          "contactsPermission": "Allow Surro to access your contacts."
-        }
-      ],
-      [
-        "expo-document-picker",
-        {
-          "iCloudContainerEnvironment": "Production"
-        }
-      ]
-    ],
+    },
     "extra": {
       "eas": {
         "projectId": "50b5b0d5-9fbd-46ea-8769-ca33f946ef88"
       }
     }
+  },
+  "plugins": [
+    "expo-router",
+    "expo-font",
+    [
+      "expo-build-properties",
+      {
+        "ios": {
+          "newArchEnabled": true
+        },
+        "android": {
+          "newArchEnabled": true
+        }
+      }
+    ],
+    "expo-secure-store",
+    [
+      "expo-local-authentication",
+      {
+        "faceIDPermission": "Allow Surro to use Face ID."
+      }
+    ],
+    [
+      "expo-image-picker",
+      {
+        "photosPermission": "Allow Surro to access your photos",
+        "cameraPermission": "Allow Surro to access your camera"
+      }
+    ],
+    [
+      "expo-contacts",
+      {
+        "contactsPermission": "Allow Surro to access your contacts."
+      }
+    ],
+    [
+      "expo-document-picker",
+      {
+        "iCloudContainerEnvironment": "Production"
+      }
+    ]
+  ],
+  "extra": {
+    "eas": {
+      "projectId": "50b5b0d5-9fbd-46ea-8769-ca33f946ef88"
+    }
   }
+}

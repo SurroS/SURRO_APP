@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useAuth } from "@/hooks/useAuth";
 import { InputField } from "../../components/auth/InputField";
 import { OrDivider } from "../../components/auth/OrDivider";
 import { PrimaryButton } from "../../components/auth/PrimaryButton";
@@ -25,10 +26,11 @@ WebBrowser.maybeCompleteAuthSession();
 export default function LoginScreen() {
   const router = useRouter();
   const { formData, errors, updateField, validateForm } = useLoginForm();
-
+  const { login, googleLogin, appleLogin, isLoading, error } = useAuth();
   // Google setup (kept in case you still want to use later)
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: "321354387399-trkjkc1s00kpls3mvib35l5ieke5mig3.apps.googleusercontent.com", // Add your Google client ID here if you enable it
+    clientId:
+      "321354387399-pni8pf1pm86riopsg3ng2nlqoq4hmfjg.apps.googleusercontent.com", // Add your Google client ID here if you enable it
   });
 
   useEffect(() => {
@@ -57,15 +59,19 @@ export default function LoginScreen() {
     }
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!validateForm()) return;
-
-    // 🚀 Fake login: no backend, just navigate
-    Alert.alert("Success", "Logged in successfully");
-    router.replace("/(tabs)/home"); // redirect to your home stack
+    try {
+      // await login(formData); // attempt registration
+      Alert.alert("Success", "Logged in successfully");
+      router.push("/(tabs)/home"); // redirect to your home stack
+    } catch (err) {
+      console.error("login error:", err);
+       Alert.alert("failed", `${err}`)
+    }
   };
 
-  return ( 
+  return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
         <ScreenHeader title="Log in" onBackPress={() => router.back()} />

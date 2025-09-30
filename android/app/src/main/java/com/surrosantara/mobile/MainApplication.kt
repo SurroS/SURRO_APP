@@ -1,4 +1,4 @@
-package com.surrosantara.mobileapp
+package com.surrosantara.mobile
 
 import android.app.Application
 import android.content.res.Configuration

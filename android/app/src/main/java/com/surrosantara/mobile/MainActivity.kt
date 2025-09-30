@@ -1,4 +1,4 @@
-package com.surrosantara.mobileapp
+package com.surrosantara.mobile
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build
