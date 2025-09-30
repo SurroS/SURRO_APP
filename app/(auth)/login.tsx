@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Toast } from 'toastify-react-native';
+import { ToastType } from 'toastify-react-native/utils/interfaces';
 import { InputField } from '../../components/auth/InputField';
 import { OrDivider } from '../../components/auth/OrDivider';
 import { PrimaryButton } from '../../components/auth/PrimaryButton';
@@ -35,7 +36,7 @@ export default function LoginScreen() {
       // Alert.alert('Success', 'Logged in with Google');
       Toast.show({
         text1: 'Logged in with Google',
-        type: 'customSuccess',
+        type: 'customSuccess' as ToastType,
         text2: 'Logged in with Google successfully!',
       });
       router.replace('/(tabs)/home'); // go to home page
@@ -55,7 +56,7 @@ export default function LoginScreen() {
         // Alert.alert('Success', 'Logged in with Apple');
         Toast.show({
           text1: 'Logged in with Apple',
-          type: 'customSuccess',
+          type: 'customSuccess' as ToastType,
           text2: 'Logged in with Apple successfully!',
         });
         router.replace('/(tabs)/home'); // go to home page
@@ -65,7 +66,7 @@ export default function LoginScreen() {
       // Alert.alert('Apple Login Failed', 'Please try again.');
       Toast.show({
         text1: 'Apple Login Failed',
-        type: 'customError',
+        type: 'customError' as ToastType,
         text2: 'Apple Login Failed! Please try again.',
       });
     }
@@ -78,7 +79,7 @@ export default function LoginScreen() {
     // Alert.alert('Success', 'Logged in successfully');
     Toast.show({
       text1: 'Logged in successfully',
-      type: 'customSuccess',
+      type: 'customSuccess' as ToastType,
       text2: 'Logged in successfully!',
     });
     router.replace('/(tabs)/home'); // redirect to your home stack
