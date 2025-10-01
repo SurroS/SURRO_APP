@@ -1,17 +1,29 @@
 {
   "extends": "expo/tsconfig.base.json",
   "compilerOptions": {
-    "jsx": "react-jsx",
-    "strict": true,
+    "jsx": "react-jsx",                 // React 18 JSX transform
+    "strict": true,                     // Strict type checking
+    "esModuleInterop": true,            // Enable compatibility for CommonJS modules
+    "skipLibCheck": true,               // Skip type checking of library files
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",                     // For absolute imports
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    "types": ["react-native", "tamagui"], // Include types for RN + Tamagui
+    "allowSyntheticDefaultImports": true
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "**/*.d.ts",            // 👈 add this
+    "**/*.d.ts",                 // Include type declaration files
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js"
   ]
 }
