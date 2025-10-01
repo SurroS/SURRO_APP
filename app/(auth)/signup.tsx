@@ -1,7 +1,8 @@
 import ConnectivityTest from "@/components/connectivityTest";
 import { useAuth } from "@/hooks/useAuth";
 import * as AppleAuthentication from "expo-apple-authentication";
-import * as Google from "expo-auth-session/providers/google";
+import * as Google from "expo-auth-session/providers/google"; 
+import * as AuthSession from "expo-auth-session";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect } from "react";
@@ -30,26 +31,41 @@ export default function SignupScreen() {
   const { formData, errors, updateField, validateForm } = useSignupForm();
   const { register, googleLogin, appleLogin, isLoading, error } = useAuth();
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId:"321354387399-pni8pf1pm86riopsg3ng2nlqoq4hmfjg.apps.googleusercontent.com", // Add your Google client ID here
-  });
+  const redirectUri = AuthSession.makeRedirectUri({
+  scheme: "surro",  
+  path: "redirect",
+} as any);
 
-  useEffect(() => {
-    if (response?.type === "success") {
-      const token = response.authentication?.accessToken || "";
-      handleGoogleAuth(token);
-    }
-  }, [response]);
+const [request, response, promptAsync] = Google.useAuthRequest({
+  iosClientId: "321354387399-rnp7n1va8r5gqdohnboht72pcqu3et44.apps.googleusercontent.com",
+  androidClientId: "321354387399-8mh3tsrl9ji8a6164si406unp6uilq52.apps.googleusercontent.com",
+  webClientId: "321354387399-8mh3tsrl9ji8a6164si406unp6uilq52.apps.googleusercontent.com",
+   redirectUri
+});
 
-  const handleGoogleAuth = async (accessToken: string) => {
-    try {
-      await googleLogin({ idToken: accessToken, role: formData.role });
-      Alert.alert("Success", "Signed in with Google");
-    } catch (err) {
-      console.error("Google signup error:", err);
-      Alert.alert("Google Sign-in Failed", "Please try again.");
+useEffect(() => {
+  if (response?.type === "success") {
+    // ✅ Use ID token (JWT) not accessToken
+    const idToken = response.params?.id_token;
+
+    if (idToken) {
+      handleGoogleAuth(idToken);
+    } else {
+      console.error("No id_token returned:", response);
+      Alert.alert("Google Sign-in Failed", "No ID token received.");
     }
-  };
+  }
+}, [response]);
+
+const handleGoogleAuth = async (idToken: string) => {
+  try {
+    await googleLogin({ idToken, role: formData.role });
+    Alert.alert("Success", "Signed in with Google");
+  } catch (err) {
+    console.error("Google signup error:", err);
+    Alert.alert("Google Sign-in Failed", "Please try again.");
+  }
+};
 
   const handleAppleAuth = async () => {
     try {
