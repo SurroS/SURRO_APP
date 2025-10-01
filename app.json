@@ -32,13 +32,6 @@
             }
           }
         },
-        "CFBundleURLTypes": [
-          {
-            "CFBundleURLSchemes": [
-              "321354387399-rnp7n1va8r5gqdohnboht72pcqu3et44.apps.googleusercontent.com"
-            ]
-          }
-        ],
         "NSFaceIDUsageDescription": "Sign in with Apple requires FaceID to confirm your identity."
       }
     },
@@ -64,6 +57,12 @@
   "plugins": [
     "expo-router",
     "expo-font",
+         [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "321354387399-rnp7n1va8r5gqdohnboht72pcqu3et44.apps.googleusercontent.com"
+        }
+      ],
     [
       "expo-build-properties",
       {
