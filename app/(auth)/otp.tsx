@@ -13,7 +13,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useAuth } from "@/hooks/useAuth";
-import OtpInput from "react-otp-input";
 import { PrimaryButton } from "../../components/auth/PrimaryButton";
 import { ScreenHeader } from "../../components/auth/ScreenHeader";
 import { useOtpForm } from "../../hooks/auth/useOtpForm";
@@ -36,6 +35,7 @@ export default function OTPScreen() {
   };
 
   const handleVerify = async () => {
+    console.log("handleVerify =", validateOtp());
     if (!validateOtp()) {
       return;
     }
@@ -45,7 +45,10 @@ export default function OTPScreen() {
       return;
     }
 
+    console.log("handleVerify =", getOtpCode());
+    console.log("handleVerify =", tempEmail);
     try {
+
       await verifyOtp({
         email: tempEmail,
         code: getOtpCode(),
@@ -81,8 +84,7 @@ export default function OTPScreen() {
         />
 
         <Text style={styles.infoText}>
-          We&apos;ve sent a 4-digit verification code to{" "}
-          {tempEmail || "your email"}.
+          We&apos;ve sent a 6-digit verification code to {tempEmail || 'your email'}.
         </Text>
 
         <View style={styles.otpContainer}>
@@ -145,16 +147,17 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   otpContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
     marginBottom: 30,
-    width: "80%",
+    width: "100%",
     alignSelf: "center",
   },
   otpInput: {
     width: 50,
-    height: 60,
-    backgroundColor: "#EBEBEB",
+    height: 50,
+    backgroundColor: '#EBEBEB',
     borderRadius: 8,
     fontSize: 22,
     textAlign: "center",

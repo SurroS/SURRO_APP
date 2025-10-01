@@ -1,4 +1,3 @@
-import ConnectivityTest from "@/components/connectivityTest";
 import { useAuth } from "@/hooks/useAuth";
 import * as AppleAuthentication from "expo-apple-authentication";
 import * as Google from "expo-auth-session/providers/google"; 
@@ -6,7 +5,6 @@ import * as AuthSession from "expo-auth-session";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect } from "react";
-import { YStack } from "tamagui";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -15,14 +13,17 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { InputField } from "../../components/auth/InputField";
-import { OrDivider } from "../../components/auth/OrDivider";
-import { PrimaryButton } from "../../components/auth/PrimaryButton";
-import { ScreenHeader } from "../../components/auth/ScreenHeader";
-import { SocialButton } from "../../components/auth/SocialButton";
-import { useSignupForm } from "../../hooks/auth/useSignupForm";
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { YStack } from "tamagui";
+import { InputField } from '../../components/auth/InputField';
+import { OrDivider } from '../../components/auth/OrDivider';
+import { PrimaryButton } from '../../components/auth/PrimaryButton';
+import { ScreenHeader } from '../../components/auth/ScreenHeader';
+import { SocialButton } from '../../components/auth/SocialButton';
+import { useSignupForm } from '../../hooks/auth/useSignupForm';
+ import Constants from "expo-constants";
+
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -31,10 +32,15 @@ export default function SignupScreen() {
   const { formData, errors, updateField, validateForm } = useSignupForm();
   const { register, googleLogin, appleLogin, isLoading, error } = useAuth();
 
-  const redirectUri = AuthSession.makeRedirectUri({
-  scheme: "surro",  
-  path: "redirect",
-} as any);
+
+
+const isExpoGo = Constants.executionEnvironment === "storeClient";
+
+const redirectUri = isExpoGo
+  ? AuthSession.makeRedirectUri({}) // Expo Go uses proxy
+  : AuthSession.makeRedirectUri({ scheme: "surro" }); // Dev/Prod build uses scheme
+
+console.log("Redirect URI:", redirectUri);
 
 const [request, response, promptAsync] = Google.useAuthRequest({
   iosClientId: "321354387399-rnp7n1va8r5gqdohnboht72pcqu3et44.apps.googleusercontent.com",
@@ -44,6 +50,8 @@ const [request, response, promptAsync] = Google.useAuthRequest({
 });
 
 useEffect(() => {
+  const redirectUri = AuthSession.makeRedirectUri();
+  console.log("uri -", redirectUri)
   if (response?.type === "success") {
     // ✅ Use ID token (JWT) not accessToken
     const idToken = response.params?.id_token;
@@ -90,17 +98,17 @@ const handleGoogleAuth = async (idToken: string) => {
     }
   };
 
-const handleSignup = async () => {
-  if (!validateForm()) return; // stop if form is invalid
-  try {
-    await register(formData); // attempt registration
-    router.push("/(auth)/otp"); // replace with your actual OTP route
-     
-  } catch (err) {
-    console.error("Signup error:", err);
-    Alert.alert("Signup Failed", "Please try again.");
-  }
-};
+  const handleSignup = async () => {
+    if (!validateForm()) return; // stop if form is invalid
+    try {
+      await register(formData); // attempt registration
+      router.push("/(auth)/otp"); // replace with your actual OTP route
+
+    } catch (err) {
+      console.error("Signup error:", err);
+      Alert.alert("Signup Failed", "Please try again.");
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -150,11 +158,11 @@ const handleSignup = async () => {
           />
 
 
-          {formData.refferalCode && (
+          {formData.referralCode && (
             <InputField
               label="Referral Code"
-              value={formData.refferalCode}
-              onChangeText={(text) => updateField("refferalCode", text)}
+              value={formData.referralCode}
+              onChangeText={(text) => updateField('referralCode', text)}
               placeholder="Enter referral code"
             />
           )}
@@ -170,17 +178,17 @@ const handleSignup = async () => {
           <OrDivider />
           {Platform.OS == "ios" ? (
             <YStack>
-            <SocialButton
-              title="Sign in with Apple"
-              icon={require("../../assets/images/apple.png")}
-              onPress={handleAppleAuth}
-            />
               <SocialButton
-              title="Sign in with Google"
-              icon={require("../../assets/images/google.png")}
-              onPress={() => promptAsync()}
-              disabled={!request}
-            />
+                title="Sign in with Apple"
+                icon={require("../../assets/images/apple.png")}
+                onPress={handleAppleAuth}
+              />
+              <SocialButton
+                title="Sign in with Google"
+                icon={require("../../assets/images/google.png")}
+                onPress={() => promptAsync()}
+                disabled={!request}
+              />
             </YStack>
           ) : (
             <SocialButton
@@ -199,6 +207,16 @@ const handleSignup = async () => {
               Already have an account? Log in
             </Text>
           </TouchableOpacity>
+
+          {/* Debug: Manual OTP navigation button */}
+          {/* <TouchableOpacity
+            style={[styles.loginLink, { marginTop: 10 }]}
+            onPress={() => router.push('/(auth)/otp')}
+          >
+            <Text style={[styles.loginLinkText, { color: '#666' }]}>
+              Debug: Go to OTP Screen
+            </Text>
+          </TouchableOpacity> */}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

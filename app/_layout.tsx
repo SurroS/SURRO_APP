@@ -1,10 +1,12 @@
 // app/_layout.tsx
+import toastConfig from "@/components/toastConfig";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import { TamaguiProvider } from "tamagui";
+import ToastManager from "toastify-react-native";
 import config from "../tamagui.config";
 import {KeyboardProvider} from "react-native-keyboard-controller"
 import { Slot } from "expo-router";
@@ -40,6 +42,11 @@ export default function RootLayout() {
 
       {/* Safe StatusBar */}
       <StatusBar style="auto" />
+      <ToastManager config={toastConfig}
+        position="top"
+        animationStyle="slide"
+        isRTL={true}
+      />
     </TamaguiProvider>
     </KeyboardProvider>
   );

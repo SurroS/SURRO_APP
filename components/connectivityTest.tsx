@@ -1,7 +1,7 @@
 // ConnectivityTest.tsx
-import React, { useEffect } from "react";
-import { View, Text } from "react-native";
 import api from "@/services/api"; // <-- your axios instance
+import React, { useEffect } from "react";
+import { Text, View } from "react-native";
 
 const ConnectivityTest = () => {
   const [message, setMessage] = React.useState("Testing...");
@@ -25,6 +25,7 @@ const ConnectivityTest = () => {
             `✅ API reachable, but error response: ${err.response.status} ${err.response.data?.message}`
           );
         } else if (err.request) {
+          console.log(err.request)
           // The request was made but no response received
           setMessage("❌ No response from server: " + err.message);
         } else {

@@ -55,7 +55,7 @@ export default function ResetPasswordScreen() {
                     label="OTP Code"
                     value={formData.otp}
                     onChangeText={(text) => updateField('otp', text)}
-                    placeholder="Enter 4-digit OTP"
+                    placeholder="Enter 6-digit OTP"
                     keyboardType="numeric"
                     error={!!errors.otp}
                     errorMessage={errors.otp}

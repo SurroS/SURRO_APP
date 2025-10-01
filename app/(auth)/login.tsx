@@ -14,6 +14,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useAuth } from "@/hooks/useAuth";
+import { Toast } from 'toastify-react-native';
+import { ToastType } from 'toastify-react-native/utils/interfaces';
 import { InputField } from "../../components/auth/InputField";
 import { OrDivider } from "../../components/auth/OrDivider";
 import { PrimaryButton } from "../../components/auth/PrimaryButton";
@@ -35,7 +37,12 @@ export default function LoginScreen() {
 
   useEffect(() => {
     if (response?.type === "success") {
-      Alert.alert("Success", "Logged in with Google");
+      // Alert.alert("Success", "Logged in with Google");
+      Toast.show({
+        text1: 'Logged in with Google',
+        type: 'customSuccess' as ToastType,
+        text2: 'Logged in with Google successfully!',
+      });
       router.replace("/(tabs)/home"); // go to home page
     }
   }, [response]);
@@ -50,12 +57,22 @@ export default function LoginScreen() {
       });
 
       if (credential.identityToken) {
-        Alert.alert("Success", "Logged in with Apple");
+        // Alert.alert("Success", "Logged in with Apple");
+        Toast.show({
+          text1: 'Logged in with Apple',
+          type: 'customSuccess' as ToastType,
+          text2: 'Logged in with Apple successfully!',
+        });
         router.replace("/(tabs)/home"); // go to home page
       }
     } catch (err: any) {
       if (err.code === "ERR_CANCELED") return;
-      Alert.alert("Apple Login Failed", "Please try again.");
+      // Alert.alert("Apple Login Failed", "Please try again.");
+      Toast.show({
+        text1: 'Apple Login Failed',
+        type: 'customError' as ToastType,
+        text2: 'Apple Login Failed! Please try again.',
+      });
     }
   };
 
@@ -63,11 +80,16 @@ export default function LoginScreen() {
     if (!validateForm()) return;
     try {
       // await login(formData); // attempt registration
-      Alert.alert("Success", "Logged in successfully");
+      // Alert.alert("Success", "Logged in successfully");
+      Toast.show({
+        text1: 'Logged in successfully',
+        type: 'customSuccess' as ToastType,
+        text2: 'Logged in successfully!',
+      });
       router.push("/(tabs)/home"); // redirect to your home stack
     } catch (err) {
       console.error("login error:", err);
-       Alert.alert("failed", `${err}`)
+      Alert.alert("failed", `${err}`)
     }
   };
 
