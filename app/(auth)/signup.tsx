@@ -5,7 +5,6 @@ import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect } from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -15,6 +14,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { YStack } from "tamagui";
+import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 import { InputField } from '../../components/auth/InputField';
 import { OrDivider } from '../../components/auth/OrDivider';
 import { PrimaryButton } from '../../components/auth/PrimaryButton';
@@ -44,10 +45,18 @@ export default function SignupScreen() {
   const handleGoogleAuth = async (accessToken: string) => {
     try {
       await googleLogin({ idToken: accessToken, role: formData.role });
-      Alert.alert("Success", "Signed in with Google");
+      Toast.show({
+        text1: 'Signed in with Google',
+        type: 'customSuccess' as ToastType,
+        text2: 'Signed in with Google successfully!',
+      });
     } catch (err) {
       console.error("Google signup error:", err);
-      Alert.alert("Google Sign-in Failed", "Please try again.");
+      Toast.show({
+        text1: 'Google Sign-in Failed',
+        type: 'customError' as ToastType,
+        text2: 'Google Sign-in Failed! Please try again.',
+      });
     }
   };
 
@@ -81,12 +90,20 @@ export default function SignupScreen() {
           idToken: credential.identityToken,
           role: formData.role,
         });
-        Alert.alert("Success", "Signed in with Apple");
+        Toast.show({
+          text1: 'Signed in with Apple',
+          type: 'customSuccess' as ToastType,
+          text2: 'Signed in with Apple successfully!',
+        });
       }
     } catch (err: any) {
       if (err?.code === "ERR_CANCELED") return;
       console.error("Apple signup error:", err);
-      Alert.alert("Apple Sign-in Failed", "Please try again.");
+      Toast.show({
+        text1: 'Apple Sign-in Failed',
+        type: 'customError' as ToastType,
+        text2: 'Apple Sign-in Failed! Please try again.',
+      });
     }
   };
 
@@ -98,7 +115,11 @@ export default function SignupScreen() {
 
     } catch (err) {
       console.error("Signup error:", err);
-      Alert.alert("Signup Failed", "Please try again.");
+      Toast.show({
+        text1: 'Signup Failed',
+        type: 'customError' as ToastType,
+        text2: 'Signup Failed! Please try again.',
+      });
     }
   };
 

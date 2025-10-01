@@ -15,7 +15,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
         if (!isLoading) {
             if (isAuthenticated && user?.role) {
                 // User is authenticated, navigate to role-specific dashboard
-                router.replace(`/(roles)/${user.role}`);
+                router.replace(`/(tabs)/home`);
             } else if (!isAuthenticated) {
                 // User is not authenticated, navigate to auth flow
                 router.replace('/role-selection');

@@ -23,13 +23,13 @@ export default function Index() {
         //authenticated user
         if (Role && Role in roleMapping) {
           const path = roleMapping[Role as RoleKey];
-         router.replace(`/(roles)/${Role}`);
-    
+          router.replace(`/(tabs)/home`);
+
         }
       } else {
         // User is not authenticated, start with onboarding
-        router.replace("/onboarding/screen1");
-           
+        router.replace("/onboarding/role-selection");
+
       }
     }
   }, [isAuthenticated, user?.role, isLoading]);
