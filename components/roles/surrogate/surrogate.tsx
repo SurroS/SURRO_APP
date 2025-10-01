@@ -1,18 +1,20 @@
 import { useAuth } from '@/hooks/useAuth';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Text, YStack } from 'tamagui';
 
-export default function AgentScreen() {
+export default function SurrogateScreen() {
   const { user, logout } = useAuth();
 
-  return ( 
-      <YStack justifyContent="center" alignItems="center"  padding="$4">
+  return (
+    <SafeAreaView >
+      <YStack justifyContent="center" alignItems="center" padding="$4">
         <Text
           fontSize="$6"
           fontWeight="bold"
           marginBottom="$4"
           color="$primary"
         >
-          Agent Dashboard
+          Surrogate Dashboard
         </Text>
 
         {user && (
@@ -20,20 +22,20 @@ export default function AgentScreen() {
             <Text color={"balck"} fontSize="$4" marginBottom="$2">
               Welcome, {user.name}!
             </Text>
-            <Text  color={"balck"}  fontSize="$3" >
+            <Text color={"balck"} fontSize="$3" >
               Email: {user.email}
             </Text>
-            <Text  color={"balck"}  fontSize="$3">
+            <Text color={"balck"} fontSize="$3">
               Role: {user.role}
             </Text>
-            <Text  color={"balck"}  fontSize="$3" >
+            <Text color={"balck"} fontSize="$3" >
               Verified: {user.isVerified ? 'Yes' : 'No'}
             </Text>
           </YStack>
         )}
 
         <Text marginBottom="$4" textAlign="center" color={'black'}>
-          This is the Agents dashboard screen. Here you can manage your Agent's journey.
+          This is the Surrogate dashboard screen. Here you can manage your surrogate journey.
         </Text>
 
         <Button
@@ -44,6 +46,7 @@ export default function AgentScreen() {
         >
           Logout
         </Button>
-      </YStack> 
+      </YStack>
+    </SafeAreaView>
   );
 }
