@@ -50,10 +50,7 @@ const [request, response, promptAsync] = Google.useAuthRequest({
 });
 
 useEffect(() => {
-  const redirectUri = AuthSession.makeRedirectUri();
-  console.log("uri -", redirectUri)
   if (response?.type === "success") {
-    // ✅ Use ID token (JWT) not accessToken
     const idToken = response.params?.id_token;
 
     if (idToken) {
