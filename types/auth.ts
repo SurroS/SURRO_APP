@@ -2,6 +2,10 @@ export interface User {
     id: string;
     email: string;
     name: string;
+    username: string;
+    location: string;
+    status: string;
+    dob: string;
     avatar?: string;
     isVerified: boolean;
     role: 'INTENDED_PARENT' | 'SURROGATE' | 'AGENT';
