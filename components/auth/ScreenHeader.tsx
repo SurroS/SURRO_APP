@@ -23,6 +23,7 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
 
 const styles = StyleSheet.create({
     container: {
+        width: '100%',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',

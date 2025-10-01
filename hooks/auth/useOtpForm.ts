@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 export const useOtpForm = () => {
-    const [otp, setOtp] = useState(['', '', '', '']);
+    const [otp, setOtp] = useState(['', '', '', '', '', '']);
     const [error, setError] = useState<string | null>(null);
 
     const updateOtpDigit = (index: number, value: string) => {
@@ -17,8 +17,8 @@ export const useOtpForm = () => {
 
     const validateOtp = (): boolean => {
         const code = otp.join('');
-        if (code.length !== 4) {
-            setError('Please enter the complete 4-digit code');
+        if (code.length !== 6) {
+            setError('Please enter the complete 6-digit code');
             return false;
         }
         return true;
@@ -29,7 +29,7 @@ export const useOtpForm = () => {
     };
 
     const resetOtp = () => {
-        setOtp(['', '', '', '']);
+        setOtp(['', '', '', '', '', '']);
         setError(null);
     };
 

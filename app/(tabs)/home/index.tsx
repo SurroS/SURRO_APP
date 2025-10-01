@@ -14,13 +14,14 @@ export default function HomeIndex() {
   } as const;
 
   type RoleKey = keyof typeof roleMapping;
-const k = (Role && Role in roleMapping)
-  useEffect(() => {console.log(Role)
+  const k = (Role && Role in roleMapping)
+  useEffect(() => {
+    console.log(Role)
     console.log(k)
     if (Role && Role in roleMapping) {
       const path = roleMapping[Role as RoleKey];
       router.replace(`/(roles)/${path}`);
-      
+
     }
   }, [Role]);
 

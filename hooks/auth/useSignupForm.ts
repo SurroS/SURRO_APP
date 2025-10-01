@@ -8,8 +8,8 @@ export const useSignupForm = () => {
         email: '',
         password: '',
         passwordConfirmation: '',
-        role: user?.role || 'surrogate', // Use role from auth store
-        refferalCode: referralCode || '', // Use referral code from auth store
+        role: user?.role || 'SURROGATE', // Use role from auth store
+        referralCode: referralCode || '', // Use referral code from auth store
     });
     const [errors, setErrors] = useState<Partial<RegisterCredentials>>({});
 
@@ -55,8 +55,8 @@ export const useSignupForm = () => {
             email: '',
             password: '',
             passwordConfirmation: '',
-            role: user?.role || 'surrogate',
-            refferalCode: referralCode || '',
+            role: user?.role || 'SURROGATE',
+            referralCode: referralCode || '',
         });
         setErrors({});
     };

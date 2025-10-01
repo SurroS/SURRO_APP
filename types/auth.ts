@@ -29,7 +29,7 @@ export interface RegisterCredentials {
     password: string;
     passwordConfirmation: string;
     role: string;
-    refferalCode?: string;
+    referralCode?: string;
 }
 
 export interface OtpVerification {

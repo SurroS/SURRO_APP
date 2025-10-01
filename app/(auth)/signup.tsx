@@ -1,11 +1,9 @@
-import ConnectivityTest from "@/components/connectivityTest";
 import { useAuth } from "@/hooks/useAuth";
 import * as AppleAuthentication from "expo-apple-authentication";
 import * as Google from "expo-auth-session/providers/google";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect } from "react";
-import { YStack } from "tamagui";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -14,24 +12,26 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { InputField } from "../../components/auth/InputField";
-import { OrDivider } from "../../components/auth/OrDivider";
-import { PrimaryButton } from "../../components/auth/PrimaryButton";
-import { ScreenHeader } from "../../components/auth/ScreenHeader";
-import { SocialButton } from "../../components/auth/SocialButton";
-import { useSignupForm } from "../../hooks/auth/useSignupForm";
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { YStack } from "tamagui";
+import { InputField } from '../../components/auth/InputField';
+import { OrDivider } from '../../components/auth/OrDivider';
+import { PrimaryButton } from '../../components/auth/PrimaryButton';
+import { ScreenHeader } from '../../components/auth/ScreenHeader';
+import { SocialButton } from '../../components/auth/SocialButton';
+import { useSignupForm } from '../../hooks/auth/useSignupForm';
+
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function SignupScreen() {
   const router = useRouter();
   const { formData, errors, updateField, validateForm } = useSignupForm();
-  const { register, googleLogin, appleLogin, isLoading, error } = useAuth();
+  const { register, googleLogin, appleLogin, isLoading, error, requiresOtp } = useAuth();
 
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId:"321354387399-pni8pf1pm86riopsg3ng2nlqoq4hmfjg.apps.googleusercontent.com", // Add your Google client ID here
+    clientId: "321354387399-pni8pf1pm86riopsg3ng2nlqoq4hmfjg.apps.googleusercontent.com", // Add your Google client ID here
   });
 
   useEffect(() => {
@@ -50,6 +50,22 @@ export default function SignupScreen() {
       Alert.alert("Google Sign-in Failed", "Please try again.");
     }
   };
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const token = response.authentication?.accessToken || '';
+      handleGoogleAuth(token);
+    }
+  }, [response, handleGoogleAuth]);
+
+  // Navigate to OTP screen when signup is successful
+  useEffect(() => {
+    console.log('Signup useEffect - requiresOtp:', requiresOtp);
+    if (requiresOtp) {
+      console.log('Navigating to OTP screen...');
+      router.push('/(auth)/otp');
+    }
+  }, [requiresOtp, router]);
 
   const handleAppleAuth = async () => {
     try {
@@ -74,17 +90,17 @@ export default function SignupScreen() {
     }
   };
 
-const handleSignup = async () => {
-  if (!validateForm()) return; // stop if form is invalid
-  try {
-    await register(formData); // attempt registration
-    router.push("/(auth)/otp"); // replace with your actual OTP route
-     
-  } catch (err) {
-    console.error("Signup error:", err);
-    Alert.alert("Signup Failed", "Please try again.");
-  }
-};
+  const handleSignup = async () => {
+    if (!validateForm()) return; // stop if form is invalid
+    try {
+      await register(formData); // attempt registration
+      router.push("/(auth)/otp"); // replace with your actual OTP route
+
+    } catch (err) {
+      console.error("Signup error:", err);
+      Alert.alert("Signup Failed", "Please try again.");
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -134,11 +150,11 @@ const handleSignup = async () => {
           />
 
 
-          {formData.refferalCode && (
+          {formData.referralCode && (
             <InputField
               label="Referral Code"
-              value={formData.refferalCode}
-              onChangeText={(text) => updateField("refferalCode", text)}
+              value={formData.referralCode}
+              onChangeText={(text) => updateField('referralCode', text)}
               placeholder="Enter referral code"
             />
           )}
@@ -154,17 +170,17 @@ const handleSignup = async () => {
           <OrDivider />
           {Platform.OS == "ios" ? (
             <YStack>
-            <SocialButton
-              title="Sign in with Apple"
-              icon={require("../../assets/images/apple.png")}
-              onPress={handleAppleAuth}
-            />
               <SocialButton
-              title="Sign in with Google"
-              icon={require("../../assets/images/google.png")}
-              onPress={() => promptAsync()}
-              disabled={!request}
-            />
+                title="Sign in with Apple"
+                icon={require("../../assets/images/apple.png")}
+                onPress={handleAppleAuth}
+              />
+              <SocialButton
+                title="Sign in with Google"
+                icon={require("../../assets/images/google.png")}
+                onPress={() => promptAsync()}
+                disabled={!request}
+              />
             </YStack>
           ) : (
             <SocialButton
@@ -181,6 +197,16 @@ const handleSignup = async () => {
           >
             <Text style={styles.loginLinkText}>
               Already have an account? Log in
+            </Text>
+          </TouchableOpacity>
+
+          {/* Debug: Manual OTP navigation button */}
+          <TouchableOpacity
+            style={[styles.loginLink, { marginTop: 10 }]}
+            onPress={() => router.push('/(auth)/otp')}
+          >
+            <Text style={[styles.loginLinkText, { color: '#666' }]}>
+              Debug: Go to OTP Screen
             </Text>
           </TouchableOpacity>
         </ScrollView>
