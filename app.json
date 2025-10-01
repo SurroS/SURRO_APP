@@ -35,7 +35,7 @@
         "CFBundleURLTypes": [
           {
             "CFBundleURLSchemes": [
-              "321354387399-rnp7n1va8r5gqdohnboht72pcqu3et44.apps.googleusercontent.com"
+              "321354387399-u4qsn500nvnj8738hnr3imnpp7rkg7t4.apps.googleusercontent.com"
             ]
           }
         ],
@@ -51,7 +51,7 @@
       ],
       "config": {
         "googleSignIn": {
-          "reservedClientId": "321354387399-pni8pf1pm86riopsg3ng2nlqoq4hmfjg.apps.googleusercontent.com"
+          "reservedClientId": "321354387399-t6ahu1dmgjm7gcfi1p90leteos4bpqp8.apps.googleusercontent.com"
         }
       }
     },

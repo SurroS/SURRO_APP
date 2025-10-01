@@ -1,7 +1,6 @@
 import { useRouter } from "expo-router";
 import { useRef } from "react";
 import {
-  Alert,
   Image,
   ScrollView,
   StyleSheet,
@@ -13,6 +12,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useAuth } from "@/hooks/useAuth";
+import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 import { PrimaryButton } from "../../components/auth/PrimaryButton";
 import { ScreenHeader } from "../../components/auth/ScreenHeader";
 import { useOtpForm } from "../../hooks/auth/useOtpForm";
@@ -41,7 +42,11 @@ export default function OTPScreen() {
     }
 
     if (!tempEmail) {
-      Alert.alert("Error", "No email found. Please restart the process.");
+      Toast.show({
+        text1: 'No email found. Please restart the process.',
+        type: 'customError' as ToastType,
+        text2: 'No email found. Please restart the process!',
+      });
       return;
     }
 
@@ -60,16 +65,28 @@ export default function OTPScreen() {
 
   const handleResendOtp = async () => {
     if (!tempEmail) {
-      Alert.alert("Error", "No email found. Please restart the process.");
+      Toast.show({
+        text1: 'No email found. Please restart the process.',
+        type: 'customError' as ToastType,
+        text2: 'No email found. Please restart the process!',
+      });
       return;
     }
 
     try {
       await resendOtp(tempEmail);
-      Alert.alert("Success", "OTP code has been resent to your email.");
+      Toast.show({
+        text1: 'OTP code has been resent to your email.',
+        type: 'customSuccess' as ToastType,
+        text2: 'OTP code has been resent to your email!',
+      });
     } catch (err) {
       console.error("Resend OTP error:", err);
-      Alert.alert("Error", "Failed to resend OTP. Please try again.");
+      Toast.show({
+        text1: 'Failed to resend OTP. Please try again.',
+        type: 'customError' as ToastType,
+        text2: 'Failed to resend OTP. Please try again!',
+      });
     }
   };
 
