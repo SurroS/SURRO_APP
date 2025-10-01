@@ -12,7 +12,7 @@ const ProfileData = () => {
 
     return (
 
-        <XStack gap="$4" alignItems="flex-start">
+        <XStack gap="$4" alignItems="flex-start" paddingVertical="$4" >
             <Image
                 source={user?.avatar ? { uri: user.avatar } : require('@/assets/images/avatar.jpg')}
                 width={145}
