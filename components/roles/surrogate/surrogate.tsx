@@ -1,6 +1,7 @@
 import { StyleSheet } from 'react-native';
 import { YStack } from 'tamagui';
 import About from './about';
+import Contact from './contact';
 import ProfileData from './profile-data';
 
 export default function SurrogateScreen() {
@@ -9,6 +10,7 @@ export default function SurrogateScreen() {
     <YStack padding="$4" gap="$4">
       <ProfileData />
       <About />
+      <Contact />
     </YStack>
   );
 }
