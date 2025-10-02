@@ -1,9 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import * as AppleAuthentication from "expo-apple-authentication";
-import * as Google from "expo-auth-session/providers/google"; 
-import * as AuthSession from "expo-auth-session";
 import { useRouter } from "expo-router";
-import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -22,104 +19,88 @@ import { PrimaryButton } from '../../components/auth/PrimaryButton';
 import { ScreenHeader } from '../../components/auth/ScreenHeader';
 import { SocialButton } from '../../components/auth/SocialButton';
 import { useSignupForm } from '../../hooks/auth/useSignupForm';
- import Constants from "expo-constants";
- import {
+
+import {
   GoogleSignin,
-  GoogleSigninButton,
-  isSuccessResponse,
   statusCodes,
+  isSuccessResponse,
   isErrorWithCode,
 } from '@react-native-google-signin/google-signin';
-import { Toast } from "toastify-react-native";
 
-
-WebBrowser.maybeCompleteAuthSession();
+GoogleSignin.configure({
+  iosClientId: "321354387399-u4qsn500nvnj8738hnr3imnpp7rkg7t4.apps.googleusercontent.com",
+  webClientId: "321354387399-8mh3tsrl9ji8a6164si406unp6uilq52.apps.googleusercontent.com",
+  scopes:['https://www.googleapis.com/auth/drive.readonly',],
+  offlineAccess:true,
+  forceCodeForRefreshToken:true
+});
 
 export default function SignupScreen() {
   const router = useRouter();
   const { formData, errors, updateField, validateForm } = useSignupForm();
-  const { register, googleLogin, appleLogin, isLoading, error } = useAuth();
+  const { register, isLoading, error } = useAuth();
 
+  const [userToken, setUserToken] = useState<any>(null);
 
+  const handleGoogleSignup = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
 
+      if (isSuccessResponse(response)) {
+        const idToken = response.data?.idToken;
+        setUserToken(idToken);
+        console.log(userToken)
 
-GoogleSignin.configure({
-  iosClientId: "321354387399-rnp7n1va8r5gqdohnboht72pcqu3et44.apps.googleusercontent.com", 
-  webClientId: "321354387399-8mh3tsrl9ji8a6164si406unp6uilq52.apps.googleusercontent.com",
-});
+        // 🔑 Send token to backend
+        const backendResponse = await fetch(
+          "https://dev.surrosantara.space/api/v1/auth/google",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              idToken,
+              role: "INTENDED_PARENT", // or dynamic role
+            }),
+          }
+        );
 
-const isExpoGo = Constants.executionEnvironment === "storeClient";
+        if (!backendResponse.ok) {
+          throw new Error("Backend auth failed");
+        }
 
-const redirectUri = isExpoGo
-  ? AuthSession.makeRedirectUri({}) // Expo Go uses proxy
-  : AuthSession.makeRedirectUri({ scheme: "surro" }); // Dev/Prod build uses scheme
+        const data = await backendResponse.json();
+        console.log("Backend login success:", data);
 
-console.log("Redirect URI:", redirectUri);
-
-
-const  {userToken, setUserToken} = useState<any>(null)
-
-
-const handleGoogleSignup =async ()=>{
-  try {
-    await GoogleSignin.hasPlayServices();
-    const response = await GoogleSignin.signIn();
-    if (isSuccessResponse(response)) {
-      setUserToken(response.data);
-      console.log(userToken) //action
-    } else {
-      console.log("auth was rejected by user")
-    }
-  } catch (error) {
-    if (isErrorWithCode(error)) {
-      switch (error.code) {
-        case statusCodes.IN_PROGRESS:
-          Alert.alert("wait...\n signing in progress")
-          console.log("wait...\n signing in progress")
-          break;
-        case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-          Alert.alert("play service not available")
-          console.log("play service not available")
-          break;
-        default:
-         console.log("something else happened")
+        // Continue navigation
+        router.push("/(auth)/otp");
+      } else {
+        console.log("Google auth was rejected by user");
       }
-    } else {
-       Alert.alert("something else stopped the process") 
+    } catch (error) {
+      if (isErrorWithCode(error)) {
+        switch (error.code) {
+          case statusCodes.IN_PROGRESS:
+            Alert.alert("Sign-in already in progress...");
+            break;
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            Alert.alert("Play Services not available or outdated");
+              console.log("Google auth was rejected by user");
+            break;
+          default:
+            console.log("error", error);
+        }
+      } else {
+        Alert.alert("Unknown error occurred during Google login");
+      }
     }
-  }
-};
-
-
-  // const handleAppleAuth = async () => {
-  //   try {
-  //     const credential = await AppleAuthentication.signInAsync({
-  //       requestedScopes: [
-  //         AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-  //         AppleAuthentication.AppleAuthenticationScope.EMAIL,
-  //       ],
-  //     });
-
-  //     if (credential.identityToken) {
-  //       await appleLogin({
-  //         idToken: credential.identityToken,
-  //         role: formData.role,
-  //       });
-  //       Alert.alert("Success", "Signed in with Apple");
-  //     }
-  //   } catch (err: any) {
-  //     if (err?.code === "ERR_CANCELED") return;
-  //     console.error("Apple signup error:", err);
-  //     Alert.alert("Apple Sign-in Failed", "Please try again.");
-  //   }
-  // };
+  };
 
   const handleSignup = async () => {
-    if (!validateForm()) return; // stop if form is invalid
+    if (!validateForm()) return;
     try {
-      await register(formData); // attempt registration
-      router.push("/(auth)/otp"); // replace with your actual OTP route
-
+      await register(formData);
+      router.push("/(auth)/otp");
     } catch (err) {
       console.error("Signup error:", err);
       Alert.alert("Signup Failed", "Please try again.");
@@ -132,7 +113,6 @@ const handleGoogleSignup =async ()=>{
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        {/* Entire page scrollable */}
         <ScrollView
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
@@ -173,12 +153,11 @@ const handleGoogleSignup =async ()=>{
             errorMessage={errors.passwordConfirmation}
           />
 
-
           {formData.referralCode && (
             <InputField
               label="Referral Code"
               value={formData.referralCode}
-              onChangeText={(text) => updateField('referralCode', text)}
+              onChangeText={(text) => updateField("referralCode", text)}
               placeholder="Enter referral code"
             />
           )}
@@ -192,28 +171,12 @@ const handleGoogleSignup =async ()=>{
           />
 
           <OrDivider />
-          {Platform.OS == "ios" ? (
-            <YStack>
-              {/* <SocialButton
-                title="Sign in with Apple"
-                icon={require("../../assets/images/apple.png")}
-                onPress={handleAppleAuth}
-              />
-              <SocialButton
-                title="Sign in with Google"
-                icon={require("../../assets/images/google.png")}
-                onPress={() => promptAsync()}
-                disabled={!request}
-              /> */}
-            </YStack>
-          ) : (
-            <SocialButton
-              title="Sign in with Google"
-              icon={require("../../assets/images/google.png")}
-              onPress={() => {handleGoogleSignup}}
-              // disabled={!request}
-            />
-          )}
+
+          <SocialButton
+            title="Sign in with Google"
+            icon={require("../../assets/images/google.png")}
+            onPress={handleGoogleSignup}
+          />
 
           <TouchableOpacity
             style={styles.loginLink}
@@ -223,16 +186,6 @@ const handleGoogleSignup =async ()=>{
               Already have an account? Log in
             </Text>
           </TouchableOpacity>
-
-          {/* Debug: Manual OTP navigation button */}
-          {/* <TouchableOpacity
-            style={[styles.loginLink, { marginTop: 10 }]}
-            onPress={() => router.push('/(auth)/otp')}
-          >
-            <Text style={[styles.loginLinkText, { color: '#666' }]}>
-              Debug: Go to OTP Screen
-            </Text>
-          </TouchableOpacity> */}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -240,67 +193,9 @@ const handleGoogleSignup =async ()=>{
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#F7F7F7",
-  },
-  container: {
-    flexGrow: 1,
-    padding: 24,
-    paddingTop: 50,
-  },
-  errorText: {
-    color: "red",
-    marginTop: -10,
-    marginBottom: 15,
-    textAlign: "center",
-  },
-  roleDisplay: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#0E0E55",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  loginLink: {
-    marginTop: 20,
-    alignSelf: "center",
-  },
-  loginLinkText: {
-    color: "#0E0E55",
-    fontWeight: "bold",
-  },
+  safeArea: { flex: 1, backgroundColor: "#F7F7F7" },
+  container: { flexGrow: 1, padding: 24, paddingTop: 50 },
+  errorText: { color: "red", marginTop: -10, marginBottom: 15, textAlign: "center" },
+  loginLink: { marginTop: 20, alignSelf: "center" },
+  loginLinkText: { color: "#0E0E55", fontWeight: "bold" },
 });
-
-// const [request, response, promptAsync] = Google.useAuthRequest({
-//   iosClientId: "321354387399-rnp7n1va8r5gqdohnboht72pcqu3et44.apps.googleusercontent.com",
-//   androidClientId: "321354387399-8mh3tsrl9ji8a6164si406unp6uilq52.apps.googleusercontent.com",
-//   webClientId: "321354387399-8mh3tsrl9ji8a6164si406unp6uilq52.apps.googleusercontent.com",
-//    redirectUri
-// });
-
-// useEffect(() => {
-//   const redirectUri = AuthSession.makeRedirectUri();
-//   console.log("uri -", redirectUri)
-//   if (response?.type === "success") {
-//     // ✅ Use ID token (JWT) not accessToken
-//     const idToken = response.params?.id_token;
-
-//     if (idToken) {
-//       handleGoogleAuth(idToken);
-//     } else {
-//       console.error("No id_token returned:", response);
-//       Alert.alert("Google Sign-in Failed", "No ID token received.");
-//     }
-//   }
-// }, [response]);
-
-// const handleGoogleAuth = async (idToken: string) => {
-//   try {
-//     await googleLogin({ idToken, role: formData.role });
-//     Alert.alert("Success", "Signed in with Google");
-//   } catch (err) {
-//     console.error("Google signup error:", err);
-//     Alert.alert("Google Sign-in Failed", "Please try again.");
-//   }
-// };
