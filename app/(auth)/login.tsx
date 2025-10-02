@@ -79,14 +79,14 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     if (!validateForm()) return;
     try {
-      // await login(formData); // attempt registration
+      await login(formData); // attempt registration
       // Alert.alert("Success", "Logged in successfully");
       Toast.show({
         text1: 'Logged in successfully',
         type: 'customSuccess' as ToastType,
         text2: 'Logged in successfully!',
       });
-      router.push("/(tabs)/home"); // redirect to your home stack
+      router.replace("/(tabs)/home"); // redirect to your home stack
     } catch (err) {
       console.error("login error:", err);
       Alert.alert("failed", `${err}`)

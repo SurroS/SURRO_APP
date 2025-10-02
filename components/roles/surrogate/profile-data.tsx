@@ -14,7 +14,7 @@ const ProfileData = () => {
 
         <XStack gap="$4" alignItems="flex-start" paddingVertical="$4" >
             <Image
-                source={user?.avatar ? { uri: user.avatar } : require('@/assets/images/avatar.jpg')}
+                source={user?.profilePictureUrl ? { uri: user.profilePictureUrl } : require('@/assets/images/avatar.jpg')}
                 width={145}
                 height={145}
                 borderRadius="$3"
@@ -23,7 +23,7 @@ const ProfileData = () => {
             <YStack flex={1} gap="$3">
                 <XStack alignItems="center" gap="$2">
                     <Text color="black" fontSize="$5">
-                        {user?.name || 'No Name'}
+                        {user?.name || user?.email || 'No Name'}
                     </Text>
                     {user?.isVerified && (
                         <MaterialIcons name="verified" size={18} color="#22C55E" />
@@ -52,7 +52,7 @@ const ProfileData = () => {
 
                 <TouchableOpacity onPress={handleStatusPress} style={styles.statusButton}>
                     <Text color="black" fontSize="$3">
-                        Status: {user?.status || 'Not Available'}
+                        KYC Status: {user?.kycStatus || 'Not Available'}
                     </Text>
                 </TouchableOpacity>
             </YStack>

@@ -7,7 +7,7 @@ import ProfileData from './profile-data';
 export default function SurrogateScreen() {
 
   return (
-    <YStack padding="$4" gap="$4">
+    <YStack padding="$2" gap="$4">
       <ProfileData />
       <About />
       <Contact />
