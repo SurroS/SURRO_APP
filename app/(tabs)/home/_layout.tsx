@@ -17,8 +17,6 @@ export default function HomeLayout() {
       {/* Placeholder for future pages */}
        <Stack.Screen name="GalleryScreen" />
 
-       {/* Placeholder for future pages */}
-       <Stack.Screen name="DeletConfirmScreen" />
     </Stack>
   )
 }
