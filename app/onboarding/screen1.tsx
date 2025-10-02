@@ -6,6 +6,7 @@ import { Dimensions, FlatList, ViewToken } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Image, Text, XStack, YStack } from "tamagui";
 
+
 // Screen dimensions
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -81,12 +82,13 @@ const ImageCard = ({
     </XStack>
 
     <YStack
-      width={TEXT_CONTAINER_WIDTH}
+      width={TEXT_CONTAINER_WIDTH -5}
       alignSelf="center"
-      marginTop="$4"
+      marginRight="$4"
       gap="$4"
       justifyContent="center"
       alignItems="center"
+      paddingHorizontal={10}
     >
       <Text
         fontSize={SCREEN_WIDTH * 0.05}
@@ -129,7 +131,7 @@ export default function Screen2() {
         justifyContent: "center",
         alignItems: "center",
       }}
-    >
+    > 
       <YStack flex={1} backgroundColor="$background" paddingHorizontal="$4">
         {/* Header */}
         <YStack alignItems="center" paddingTop="$4">
@@ -140,7 +142,7 @@ export default function Screen2() {
           />
           <Text fontSize={22} fontWeight="800" color="$primary">
             SURRO
-          </Text>
+          </Text> 
         </YStack>
 
         {/* Image Carousel */}
@@ -153,9 +155,9 @@ export default function Screen2() {
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
           contentContainerStyle={{
-            paddingHorizontal: CARD_SPACING / 1,
+            paddingHorizontal: CARD_SPACING / 2,
             marginTop: 10,
-            paddingBottom: 5,
+            paddingBottom: 15,
           }}
           renderItem={({ item }) => (
             <ImageCard
@@ -189,10 +191,10 @@ export default function Screen2() {
           borderRadius={12}
           backgroundColor="$primary"
           alignSelf="center"
-          marginTop="$6"
-          onPress={() => router.push("/role-selection")}
+          marginVertical="$6"
+          onPress={() => router.push("/onboarding/role-selection")}
         >
-          <Text color="$color" fontWeight="600" fontSize={20} textAlign="center">
+          <Text color='#ffffff' fontWeight="600" fontSize={20} textAlign="center">
             Get started
           </Text>
         </Button>

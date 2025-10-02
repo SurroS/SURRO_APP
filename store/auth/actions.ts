@@ -1,4 +1,4 @@
-import api from '@/services/api';
+import authApi, { makeAuthenticatedAuthRequest } from '@/services/authApi';
 import {
     ChangePasswordRequest,
     GoogleAppleAuth,
@@ -24,11 +24,13 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
     referralCode: null,
     error: null,
 
+
     login: async (credentials: LoginCredentials) => {
         try {
             set({ isLoading: true, error: null });
 
-            const response = await api.post('/auth/login', credentials);
+            const response = await authApi.post('/auth/login', credentials);
+
             const { user, token, requiresOtp } = response.data;
 
             if (requiresOtp) {
@@ -61,33 +63,44 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
     },
 
     register: async (credentials: RegisterCredentials) => {
+        console.log("Credentials =", { credentials });
+        const data = {
+            "email": credentials.email,
+            "password": credentials.password,
+            "role": credentials.role,
+            "referralCode": credentials.referralCode
+        }
         try {
             set({ isLoading: true, error: null });
 
-            await api.post('/auth/register', credentials);
-
+            await authApi.post('/auth/register', data);
             set({
                 isLoading: false,
                 requiresOtp: true,
                 tempEmail: credentials.email,
                 error: null,
             });
+            console.log("Credentials =", { data })
         } catch (error: any) {
             set({
                 isLoading: false,
                 error: error.response?.data?.message || 'Registration failed'
             });
+            console.log("Credentials =", { data })
             throw error;
+
         }
     },
 
     verifyOtp: async (verification: OtpVerification) => {
+        console.log("verifyOtp =", verification);
+
         try {
             set({ isLoading: true, error: null });
 
-            const response = await api.post('/auth/verify-otp', verification);
+            const response = await authApi.post('/auth/verify-otp', verification);
             const { user, token } = response.data;
-
+            console.log("response =", response.data)
             set({
                 user,
                 token,
@@ -100,6 +113,8 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
 
             await secureSet('auth_token', token);
         } catch (error: any) {
+            console.log("error =", error);
+
             set({
                 isLoading: false,
                 error: error.response?.data?.message || 'OTP verification failed'
@@ -112,7 +127,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
         try {
             set({ isLoading: true, error: null });
 
-            await api.post('/auth/resend-otp', { email });
+            await authApi.post('/auth/resend_otp', { email });
 
             set({
                 isLoading: false,
@@ -131,8 +146,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
         try {
             set({ isLoading: true, error: null });
 
-            await api.post('/auth/forgot-password', request);
-
+            await authApi.post('/auth/forgot-password', request);
             set({
                 isLoading: false,
                 requiresOtp: true,
@@ -152,7 +166,8 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
         try {
             set({ isLoading: true, error: null });
 
-            await api.post('/auth/reset-password', request);
+            await authApi.post('/auth/reset-password', request);
+
 
             set({
                 isLoading: false,
@@ -173,7 +188,12 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
         try {
             set({ isLoading: true, error: null });
 
-            await api.post('/auth/change-password', request);
+            const { token } = get();
+            if (!token) {
+                throw new Error('No authentication token available');
+            }
+
+            await makeAuthenticatedAuthRequest(token, '/auth/change-password', request);
 
             set({
                 isLoading: false,
@@ -192,7 +212,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
         try {
             set({ isLoading: true, error: null });
 
-            const response = await api.post('/auth/google', { accessToken });
+            const response = await authApi.post('/auth/google', { accessToken });
             const { user, token, requiresOtp } = response.data;
 
             if (requiresOtp) {
@@ -228,7 +248,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
         try {
             set({ isLoading: true, error: null });
 
-            const response = await api.post('/auth/apple', { identityToken });
+            const response = await authApi.post('/auth/apple', { identityToken });
             const { user, token, requiresOtp } = response.data;
 
             if (requiresOtp) {

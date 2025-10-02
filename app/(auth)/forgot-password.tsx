@@ -1,6 +1,5 @@
 import { useRouter } from 'expo-router';
 import {
-  Alert,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -12,6 +11,8 @@ import { PrimaryButton } from '@/components/auth/PrimaryButton';
 import { ScreenHeader } from '@/components/auth/ScreenHeader';
 import { useForgotPasswordForm } from '@/hooks/auth/useForgotPasswordForm';
 import { useAuth } from '@/hooks/useAuth';
+import { Toast } from 'toastify-react-native';
+import { ToastType } from 'toastify-react-native/utils/interfaces';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
@@ -25,9 +26,18 @@ export default function ForgotPasswordScreen() {
 
     try {
       await forgotPassword({ email });
-      Alert.alert('Success', 'Password reset instructions sent to your email.');
+      Toast.show({
+        text1: 'Password reset instructions sent to your email.',
+        type: 'customSuccess' as ToastType,
+        text2: 'Password reset instructions sent to your email!',
+      });
       // Navigation will be handled by the auth store state changes
     } catch (err) {
+      Toast.show({
+        text1: 'Password reset instructions sent to your email.',
+        type: 'customError' as ToastType,
+        text2: 'Password reset instructions sent to your email! Please try again.',
+      });
       console.error('Forgot password error:', err);
       // Error is already handled by the auth store
     }

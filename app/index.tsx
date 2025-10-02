@@ -7,15 +7,29 @@ import { YStack } from "tamagui";
 export default function Index() {
   const router = useRouter();
   const { isAuthenticated, user, isLoading } = useAuth();
+  const Role = useAuth().user?.role?.trim(); // trim in case of trailing spaces
+
+  const roleMapping = {
+    "INTENDED-PARENT": "parent",
+    AGENT: "agent",
+    SURROGATE: "surrogate",
+  } as const;
+
+  type RoleKey = keyof typeof roleMapping;
 
   useEffect(() => {
     if (!isLoading) {
       if (isAuthenticated && user?.role) {
-        // User is authenticated, navigate to role-specific dashboard
-        router.replace(`/(roles)/${user.role}`);
+        //authenticated user
+        if (Role && Role in roleMapping) {
+          const path = roleMapping[Role as RoleKey];
+          router.replace(`/(tabs)/home`);
+
+        }
       } else {
         // User is not authenticated, start with onboarding
-        router.replace("/onboarding/screen1");
+        router.replace("/onboarding/role-selection");
+
       }
     }
   }, [isAuthenticated, user?.role, isLoading]);

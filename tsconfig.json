@@ -8,22 +8,14 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",                     // For absolute imports
     "paths": {
-      "@/*": ["./*"]
-    },
-    "types": ["react-native", "tamagui"], // Include types for RN + Tamagui
-    "allowSyntheticDefaultImports": true
+      "@/*": [
+        "./*"
+      ]
+    }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "**/*.d.ts",                 // Include type declaration files
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "babel.config.js",
-    "metro.config.js",
-    "jest.config.js"
+    "**/*.d.ts"
   ]
 }
