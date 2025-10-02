@@ -7,7 +7,7 @@ export default function HomeIndex() {
 
   // Redirect immediately to Page1 when home is opened
   useEffect(() => {
-    router.replace('/home/page1')
+    router.replace('/home/HomeGallery')
   }, [])
 
   return (

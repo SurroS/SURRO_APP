@@ -5,14 +5,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, View } from "react-native";
-import { Button, Card, Input, ScrollView, Text, XStack, YStack, Image } from "tamagui";
+import { Button, Card, Image, Input, ScrollView, Text, XStack, YStack } from "tamagui";
 
 // SVG + PNG assets
-import FacebookIcon from "../assets/images/facebook (1).svg";
+import FacebookIcon from "../assets/images/facebook.svg";
 import InstagramIcon from "../assets/images/instagramsvg (1).svg";
+import ReferralIcon from "../assets/images/referralIcon.png";
 import TikTokIcon from "../assets/images/tiktok (1).svg";
 import XIcon from "../assets/images/x_logo.svg.svg";
-import ReferralIcon from "../assets/images/referralIcon.png";
 
 // Source options for "How did you hear about us?"
 const SOURCE_ITEMS = [

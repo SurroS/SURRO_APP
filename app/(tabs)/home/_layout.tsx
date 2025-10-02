@@ -1,31 +1,24 @@
+// app/home/_layout.tsx
 import { Stack } from 'expo-router'
 
 export default function HomeLayout() {
   return (
-    <Stack screenOptions={{ headerBackTitle: 'Back' }}>
-      {/* Home */}
-      <Stack.Screen
-        name="index"
-        options={{ headerShown: false }}
-      />
+    <Stack
+      screenOptions={{
+        headerShown: false, // Hide headers for a clean UI
+      }}
+    >
+      {/* Redirect entry (index) */}
+      <Stack.Screen name="index" />
 
-      {/* Page 1 */}
-      <Stack.Screen
-        name="page1"
-        options={{ headerShown: false }}
-      />
+      {/* Main page with images */}
+      <Stack.Screen name="HomeGallery" />
 
-      {/* Page 2 */}
-      <Stack.Screen
-        name="page2"
-        options={{ headerShown: false }}
-      />
+      {/* Placeholder for future pages */}
+       <Stack.Screen name="GalleryScreen" />
 
-      {/* Page 3 */}
-      <Stack.Screen
-        name="verifieduser"
-        options={{ headerShown: false }}
-      />
+       {/* Placeholder for future pages */}
+       <Stack.Screen name="DeletConfirmScreen" />
     </Stack>
   )
 }
