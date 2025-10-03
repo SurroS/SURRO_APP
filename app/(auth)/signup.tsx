@@ -1,7 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
-import * as AppleAuthentication from "expo-apple-authentication";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -10,37 +9,39 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { YStack } from "tamagui";
-import { InputField } from '../../components/auth/InputField';
-import { OrDivider } from '../../components/auth/OrDivider';
-import { PrimaryButton } from '../../components/auth/PrimaryButton';
-import { ScreenHeader } from '../../components/auth/ScreenHeader';
-import { SocialButton } from '../../components/auth/SocialButton';
-import { useSignupForm } from '../../hooks/auth/useSignupForm';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
+import { InputField } from "../../components/auth/InputField";
+import { OrDivider } from "../../components/auth/OrDivider";
+import { PrimaryButton } from "../../components/auth/PrimaryButton";
+import { ScreenHeader } from "../../components/auth/ScreenHeader";
+import { SocialButton } from "../../components/auth/SocialButton";
+import { useSignupForm } from "../../hooks/auth/useSignupForm";
 
 import {
   GoogleSignin,
-  statusCodes,
-  isSuccessResponse,
   isErrorWithCode,
-} from '@react-native-google-signin/google-signin';
+  isSuccessResponse,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 
 GoogleSignin.configure({
-  iosClientId: "321354387399-u4qsn500nvnj8738hnr3imnpp7rkg7t4.apps.googleusercontent.com",
-  webClientId: "321354387399-8mh3tsrl9ji8a6164si406unp6uilq52.apps.googleusercontent.com",
-  scopes:['https://www.googleapis.com/auth/drive.readonly',],
-  offlineAccess:true,
-  forceCodeForRefreshToken:true
+  iosClientId:
+    "321354387399-u4qsn500nvnj8738hnr3imnpp7rkg7t4.apps.googleusercontent.com",
+  webClientId:
+    "321354387399-8mh3tsrl9ji8a6164si406unp6uilq52.apps.googleusercontent.com",
+  scopes: ["https://www.googleapis.com/auth/drive.readonly"],
+  offlineAccess: true,
+  forceCodeForRefreshToken: true,
 });
 
 export default function SignupScreen() {
   const router = useRouter();
   const { formData, errors, updateField, validateForm } = useSignupForm();
-  const { register, isLoading, error } = useAuth();
-
-  const [userToken, setUserToken] = useState<any>(null);
+  const { register, googleLogin, appleLogin, isLoading, error, requiresOtp } =
+    useAuth();
 
   const handleGoogleSignup = async () => {
     try {
@@ -48,32 +49,28 @@ export default function SignupScreen() {
       const response = await GoogleSignin.signIn();
 
       if (isSuccessResponse(response)) {
-        const idToken = response.data?.idToken;
-        setUserToken(idToken);
-        console.log(userToken)
-
-        // 🔑 Send token to backend
-        const backendResponse = await fetch(
-          "https://dev.surrosantara.space/api/v1/auth/google",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              idToken,
-              role: "INTENDED_PARENT", // or dynamic role
-            }),
-          }
-        );
-
-        if (!backendResponse.ok) {
-          throw new Error("Backend auth failed");
+        let idToken = response.data?.idToken; 
+        // If idToken is missing, fetch tokens manually
+        if (!idToken) {
+          const tokens = await GoogleSignin.getTokens();
+          idToken = tokens.idToken;
         }
 
-        const data = await backendResponse.json();
-        console.log("Backend login success:", data);
+        if (!idToken) {
+          throw new Error("Google returned null idToken");
+        }
+          console.log( "google auth code",response.data?.serverAuthCode)
+          console.log( "google Id token",response.data?.idToken)
+          console.log( "google user",response.data?.user)
+          console.log( "google auth scopes",response.data?.scopes)
 
-        // Continue navigation
-        router.push("/(auth)/otp");
+        await googleLogin({ idToken: idToken, role: formData.role });
+        Toast.show({
+          text1: "Signed in with Google",
+          type: "customSuccess" as ToastType,
+          text2: "Signed in with Google successfully!",
+        });
+        
       } else {
         console.log("Google auth was rejected by user");
       }
@@ -81,29 +78,46 @@ export default function SignupScreen() {
       if (isErrorWithCode(error)) {
         switch (error.code) {
           case statusCodes.IN_PROGRESS:
-            Alert.alert("Sign-in already in progress...");
+            Toast.show({
+              text1: "Google Sign-in in progress",
+              type: "customError" as ToastType,
+              text2: "Google Sign-in still in progress...",
+            });
             break;
           case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-            Alert.alert("Play Services not available or outdated");
-              console.log("Google auth was rejected by user");
+            Toast.show({
+              text1: "Play Services not available or outdated",
+              type: "customError" as ToastType,
+              text2: "You cancelled, please use the signup form",
+            });
+            console.log("Play Services not available or outdated");
             break;
           default:
-            console.log("error", error);
+            console.log("Google Sign-In error:", error);
         }
       } else {
-        Alert.alert("Unknown error occurred during Google login");
+        Toast.show({
+          text1: "Unknown error occurred during Google login",
+          type: "customError" as ToastType,
+          text2: "Unknown error occurred during Google login",
+        });
+        console.log("Unknown error occurred during Google login");
       }
     }
   };
 
-  const handleSignup = async () => {
-    if (!validateForm()) return;
+const handleSignup = async () => {
+    if (!validateForm()) return; // stop if form is invalid
     try {
-      await register(formData);
-      router.push("/(auth)/otp");
+      await register(formData); // attempt registration
+      router.push("/(auth)/otp"); // replace with your actual OTP route
     } catch (err) {
       console.error("Signup error:", err);
-      Alert.alert("Signup Failed", "Please try again.");
+      Toast.show({
+        text1: 'Signup Failed',
+        type: 'customError' as ToastType,
+        text2: 'Signup Failed! Please try again.',
+      });
     }
   };
 
@@ -195,7 +209,12 @@ export default function SignupScreen() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "#F7F7F7" },
   container: { flexGrow: 1, padding: 24, paddingTop: 50 },
-  errorText: { color: "red", marginTop: -10, marginBottom: 15, textAlign: "center" },
+  errorText: {
+    color: "red",
+    marginTop: -10,
+    marginBottom: 15,
+    textAlign: "center",
+  },
   loginLink: { marginTop: 20, alignSelf: "center" },
   loginLinkText: { color: "#0E0E55", fontWeight: "bold" },
 });

@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import { YStack } from "tamagui";
 import { useAuth } from "@/hooks/useAuth";
 import { Toast } from 'toastify-react-native';
 import { ToastType } from 'toastify-react-native/utils/interfaces';
@@ -22,59 +22,95 @@ import { PrimaryButton } from "../../components/auth/PrimaryButton";
 import { ScreenHeader } from "../../components/auth/ScreenHeader";
 import { SocialButton } from "../../components/auth/SocialButton";
 import { useLoginForm } from "../../hooks/auth/useLoginForm";
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  isSuccessResponse,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 
 WebBrowser.maybeCompleteAuthSession();
+
 
 export default function LoginScreen() {
   const router = useRouter();
   const { formData, errors, updateField, validateForm } = useLoginForm();
   const { login, googleLogin, appleLogin, isLoading, error } = useAuth();
-  // Google setup (kept in case you still want to use later)
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId:
-      "321354387399-pni8pf1pm86riopsg3ng2nlqoq4hmfjg.apps.googleusercontent.com", // Add your Google client ID here if you enable it
-  });
+ 
+ 
+  GoogleSignin.configure({
+  iosClientId:
+    "321354387399-u4qsn500nvnj8738hnr3imnpp7rkg7t4.apps.googleusercontent.com",
+  webClientId:
+    "321354387399-8mh3tsrl9ji8a6164si406unp6uilq52.apps.googleusercontent.com",
+  scopes: ["https://www.googleapis.com/auth/drive.readonly"],
+  offlineAccess: true,
+  forceCodeForRefreshToken: true,
+});
 
-  useEffect(() => {
-    if (response?.type === "success") {
-      // Alert.alert("Success", "Logged in with Google");
-      Toast.show({
-        text1: 'Logged in with Google',
-        type: 'customSuccess' as ToastType,
-        text2: 'Logged in with Google successfully!',
-      });
-      router.replace("/(tabs)/home"); // go to home page
-    }
-  }, [response]);
-
-  const handleAppleAuth = async () => {
+const handleGoogleSignin = async () => {
     try {
-      const credential = await AppleAuthentication.signInAsync({
-        requestedScopes: [
-          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-          AppleAuthentication.AppleAuthenticationScope.EMAIL,
-        ],
-      });
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
 
-      if (credential.identityToken) {
-        // Alert.alert("Success", "Logged in with Apple");
+      if (isSuccessResponse(response)) {
+        let idToken = response.data?.idToken; 
+        // If idToken is missing, fetch tokens manually
+        if (!idToken) {
+          const tokens = await GoogleSignin.getTokens();
+          idToken = tokens.idToken;
+        }
+
+        if (!idToken) {
+          throw new Error("Google returned null idToken");
+        }
+          console.log( "google auth code",response.data?.serverAuthCode)
+          console.log( "google Id token",response.data?.idToken)
+          console.log( "google user",response.data?.user)
+          console.log( "google auth scopes",response.data?.scopes)
+
+        await googleLogin({ idToken: idToken, role: formData.role });
         Toast.show({
-          text1: 'Logged in with Apple',
-          type: 'customSuccess' as ToastType,
-          text2: 'Logged in with Apple successfully!',
+          text1: "Signed in with Google",
+          type: "customSuccess" as ToastType,
+          text2: "Signed in with Google successfully!",
         });
-        router.replace("/(tabs)/home"); // go to home page
+        
+      } else {
+        console.log("Google auth was rejected by user");
       }
-    } catch (err: any) {
-      if (err.code === "ERR_CANCELED") return;
-      // Alert.alert("Apple Login Failed", "Please try again.");
-      Toast.show({
-        text1: 'Apple Login Failed',
-        type: 'customError' as ToastType,
-        text2: 'Apple Login Failed! Please try again.',
-      });
+    } catch (error) {
+      if (isErrorWithCode(error)) {
+        switch (error.code) {
+          case statusCodes.IN_PROGRESS:
+            Toast.show({
+              text1: "Google Sign-in in progress",
+              type: "customError" as ToastType,
+              text2: "Google Sign-in still in progress...",
+            });
+            break;
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            Toast.show({
+              text1: "Play Services not available or outdated",
+              type: "customError" as ToastType,
+              text2: "You cancelled, please use the signup form",
+            });
+            console.log("Play Services not available or outdated");
+            break;
+          default:
+            console.log("Google Sign-In error:", error);
+        }
+      } else {
+        Toast.show({
+          text1: "Unknown error occurred during Google login",
+          type: "customError" as ToastType,
+          text2: "Unknown error occurred during Google login",
+        });
+        console.log("Unknown error occurred during Google login");
+      }
     }
   };
+
 
   const handleLogin = async () => {
     if (!validateForm()) return;
@@ -130,20 +166,12 @@ export default function LoginScreen() {
         <PrimaryButton title="Log in" onPress={handleLogin} />
 
         <OrDivider />
-        {Platform.OS == "ios" ? (
-          <SocialButton
-            title="Continue with Apple"
-            icon={require("../../assets/images/apple.png")}
-            onPress={handleAppleAuth}
-          />
-        ) : (
-          <SocialButton
+
+           <SocialButton
             title="Continue with Google"
             icon={require("../../assets/images/google.png")}
-            onPress={() => promptAsync()}
-            disabled={!request}
+            onPress={() => handleGoogleSignin} 
           />
-        )}
 
         <TouchableOpacity
           style={styles.signupLink}
