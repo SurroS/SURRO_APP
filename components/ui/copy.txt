@@ -1,20 +1,30 @@
 // app/onboarding/how-did-you-hear.tsx
 
-import { useAuth } from "@/hooks/useAuth";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, View } from "react-native";
-import { Button, Card, Input, ScrollView, Text, XStack, YStack, Image } from "tamagui";
+import { KeyboardAvoidingView, Platform, Pressable } from "react-native";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import {
+  Button,
+  Card,
+  Input,
+  ScrollView,
+  Text,
+  XStack,
+  YStack,
+  Image,
+} from "tamagui";
 
-// SVG + PNG assets
+import { useAuth } from "@/hooks/useAuth";
+
+// Assets
 import FacebookIcon from "../assets/images/facebook (1).svg";
 import InstagramIcon from "../assets/images/instagramsvg (1).svg";
 import TikTokIcon from "../assets/images/tiktok (1).svg";
 import XIcon from "../assets/images/x_logo.svg.svg";
 import ReferralIcon from "../assets/images/referralIcon.png";
 
-// Source options for "How did you hear about us?"
+// Source options
 const SOURCE_ITEMS = [
   { key: "Friend", label: "From a friend/family", bg: "#F2F2F2", fg: "#0E0E55", type: "ionicon", iconName: "people" },
   { key: "X", label: "X", bg: "#00000007", fg: "#ffffff", type: "svg", Icon: XIcon },
@@ -29,10 +39,9 @@ export default function HowDidYouHear() {
   const router = useRouter();
   const { setReferralInfo } = useAuth();
 
-  const [selectedSource, setSelectedSource] = useState<string | undefined>(undefined); // selected option
-  const [referralCode, setReferralCode] = useState<string>(""); // referral input
+  const [selectedSource, setSelectedSource] = useState<string>();
+  const [referralCode, setReferralCode] = useState<string>("");
 
-  // Handles finishing onboarding
   const completeOnboarding = () => {
     if (selectedSource) {
       if (selectedSource === "Referral" && referralCode) {
@@ -44,24 +53,26 @@ export default function HowDidYouHear() {
     router.replace("/(auth)/signup");
   };
 
-  // Render icon for each option
   const renderIcon = (item: typeof SOURCE_ITEMS[0]) => {
-    if (item.type === "ionicon") return <Ionicons name={item.iconName as any} size={24} color={item.fg} />;
+    if (item.type === "ionicon") {
+      return <Ionicons name={item.iconName as any} size={24} color={item.fg} />;
+    }
     if (item.type === "svg") {
       const SvgIcon = item.Icon as React.FC<{ width?: number; height?: number }>;
       return <SvgIcon width={24} height={24} />;
     }
-    if (item.type === "png") return <Image source={item.Icon} width={24} height={24} alt={item.label} />;
+    if (item.type === "png") {
+      return <Image source={item.Icon} width={24} height={24} alt={item.label} />;
+    }
     return null;
   };
 
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"} // move view above keyboard
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0} // adjust for status bar
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
     >
-      {/* Scrollable main content */}
       <ScrollView
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -70,7 +81,7 @@ export default function HowDidYouHear() {
         <YStack backgroundColor="$background" padding="$2">
           {/* Header */}
           <YStack marginBottom="$1" marginTop="$15">
-            <Text fontSize={25} lineHeight={30} fontWeight="600" textAlign="center" color="$text">
+            <Text fontSize={25} lineHeight={30} fontWeight="800" textAlign="center" color="$text">
               How did you hear about us?
             </Text>
           </YStack>
@@ -108,16 +119,9 @@ export default function HowDidYouHear() {
                       borderColor={isSelected ? "$primary" : "#E6E6E6"}
                       backgroundColor={isSelected ? "#F4F7FF" : "$background"}
                     >
-                      {/* Left: Icon + Label */}
+                      {/* Icon + Label */}
                       <XStack alignItems="center" gap={12}>
-                        <YStack
-                          width={40}
-                          height={40}
-                          borderRadius={8}
-                          justifyContent="center"
-                          alignItems="center"
-                          backgroundColor={item.bg}
-                        >
+                        <YStack width={40} height={40} borderRadius={8} justifyContent="center" alignItems="center" backgroundColor={item.bg}>
                           {renderIcon(item)}
                         </YStack>
                         <Text fontSize={16} color="#212121">{item.label}</Text>
@@ -141,7 +145,7 @@ export default function HowDidYouHear() {
                 );
               })}
 
-              {/* Conditional referral input */}
+              {/* Referral input */}
               {selectedSource === "Referral" && (
                 <YStack gap="$2" marginTop="$3">
                   <Text fontSize={16} fontWeight="500" color="black">Referral Code</Text>
@@ -167,34 +171,40 @@ export default function HowDidYouHear() {
         </YStack>
       </ScrollView>
 
-      {/* (Next + Skip) */}
-      <View
-        style={{
-          padding: 16,
-          backgroundColor: "#fff",
-          borderTopWidth: 0,
-          borderColor: "#E6E6E6",
-        }}
-      >
+      {/* Footer actions */}
+      <YStack padding="$4" backgroundColor="$background" borderTopWidth={0} borderColor="#E6E6E6" gap="$2">
+        {/* Next button */}
         <Button
-          width="95%"
           height={55}
           borderRadius={8}
           backgroundColor="$primary"
-          onPress={completeOnboarding}
+          onPress={() => {
+            if (__DEV__) {
+              router.push("/(tabs)/home/referral" as any);
+            } else {
+              completeOnboarding();
+            }
+          }}
           disabled={!selectedSource}
           opacity={selectedSource ? 1 : 0.6}
-          marginBottom="$2"
+          width="100%"
         >
           <Text color="$background" fontWeight="600">Next</Text>
         </Button>
 
+        {/* Skip button */}
         <Button
-          width="95%"
           height={55}
           borderRadius={8}
           backgroundColor="$secondary"
-          onPress={() => router.replace("/(auth)/signup") as any}
+          onPress={() => {
+            if (__DEV__) {
+              router.push("/(tabs)/home/referral" as any);
+            } else {
+              router.replace("/(auth)/signup");
+            }
+          }}
+          width="100%"
         >
           <Text color="$color12" fontWeight="600">Skip</Text>
         </Button>

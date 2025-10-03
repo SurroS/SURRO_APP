@@ -1,7 +1,7 @@
 // theme/colors.ts
 const colors = {
   primary: '#0E0E55',
-  secondary: '#EAEAEA',
+  secondray: '#EAEAEA',
   background: '#F9F9FB',
   text: '#1E1E1E',
   success: '#22C55E',

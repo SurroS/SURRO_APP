@@ -4,7 +4,6 @@ import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect } from "react";
 import {
-  Alert,
   Platform,
   ScrollView,
   StyleSheet,
@@ -29,21 +28,19 @@ export default function LoginScreen() {
   const router = useRouter();
   const { formData, errors, updateField, validateForm } = useLoginForm();
   const { login, googleLogin, appleLogin, isLoading, error } = useAuth();
-  // Google setup (kept in case you still want to use later)
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId:
-      "321354387399-pni8pf1pm86riopsg3ng2nlqoq4hmfjg.apps.googleusercontent.com", // Add your Google client ID here if you enable it
+      "321354387399-pni8pf1pm86riopsg3ng2nlqoq4hmfjg.apps.googleusercontent.com",
   });
 
   useEffect(() => {
     if (response?.type === "success") {
-      // Alert.alert("Success", "Logged in with Google");
       Toast.show({
         text1: 'Logged in with Google',
         type: 'customSuccess' as ToastType,
         text2: 'Logged in with Google successfully!',
       });
-      router.replace("/(tabs)/home"); // go to home page
+      router.replace("/(tabs)/home");
     }
   }, [response]);
 
@@ -57,17 +54,15 @@ export default function LoginScreen() {
       });
 
       if (credential.identityToken) {
-        // Alert.alert("Success", "Logged in with Apple");
         Toast.show({
           text1: 'Logged in with Apple',
           type: 'customSuccess' as ToastType,
           text2: 'Logged in with Apple successfully!',
         });
-        router.replace("/(tabs)/home"); // go to home page
+        router.replace("/(tabs)/home");
       }
     } catch (err: any) {
       if (err.code === "ERR_CANCELED") return;
-      // Alert.alert("Apple Login Failed", "Please try again.");
       Toast.show({
         text1: 'Apple Login Failed',
         type: 'customError' as ToastType,
@@ -79,17 +74,21 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     if (!validateForm()) return;
     try {
-      // await login(formData); // attempt registration
-      // Alert.alert("Success", "Logged in successfully");
+      await login(formData);
       Toast.show({
         text1: 'Logged in successfully',
         type: 'customSuccess' as ToastType,
         text2: 'Logged in successfully!',
       });
-      router.push("/(tabs)/home"); // redirect to your home stack
+      router.replace("/(tabs)/home");
     } catch (err) {
+      Toast.show({
+        text1: 'Login Failed',
+        type: 'customError' as ToastType,
+        text2: 'Login Failed! Please try again.',
+      });
       console.error("login error:", err);
-      Alert.alert("failed", `${err}`)
+      // Alert.alert("failed", `${err}`)
     }
   };
 
