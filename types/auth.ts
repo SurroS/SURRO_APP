@@ -1,10 +1,27 @@
 export interface User {
     id: string;
     email: string;
-    name: string;
-    avatar?: string;
+    password?: string; // Only present in API responses, not in frontend state
+    role: 'INTENDED_PARENT' | 'SURROGATE' | 'AGENT';
     isVerified: boolean;
-    role: 'parent' | 'surrogate' | 'agent';
+    isApproved: boolean;
+    createdAt: string;
+    updatedAt: string;
+    isOnline: boolean;
+    lastSeen: string;
+    googleId?: string | null;
+    appleId?: string | null;
+    profilePictureUrl?: string | null;
+    kycStatus: 'NOT_STARTED' | 'PENDING' | 'APPROVED' | 'REJECTED';
+    referralCode: string;
+    referredById?: string | null;
+    // Optional fields that might be added later
+    name?: string;
+    username?: string;
+    location?: string;
+    status?: string;
+    dob?: string;
+    avatar?: string;
 }
 
 export interface AuthState {
@@ -29,7 +46,7 @@ export interface RegisterCredentials {
     password: string;
     passwordConfirmation: string;
     role: string;
-    refferalCode?: string;
+    referralCode?: string;
 }
 
 export interface OtpVerification {

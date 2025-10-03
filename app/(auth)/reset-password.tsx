@@ -1,17 +1,18 @@
 import { useRouter } from 'expo-router';
 import {
-    Alert,
-    SafeAreaView,
     ScrollView,
     StyleSheet,
     Text,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { InputField } from '@/components/auth/InputField';
 import { PrimaryButton } from '@/components/auth/PrimaryButton';
 import { ScreenHeader } from '@/components/auth/ScreenHeader';
 import { useResetPasswordForm } from '@/hooks/auth/useResetPasswordForm';
 import { useAuth } from '@/hooks/useAuth';
+import { Toast } from 'toastify-react-native';
+import { ToastType } from 'toastify-react-native/utils/interfaces';
 
 export default function ResetPasswordScreen() {
     const router = useRouter();
@@ -24,7 +25,11 @@ export default function ResetPasswordScreen() {
         }
 
         if (!tempEmail) {
-            Alert.alert('Error', 'No email found. Please restart the process.');
+            Toast.show({
+                text1: 'No email found. Please restart the process.',
+                type: 'customError' as ToastType,
+                text2: 'No email found. Please restart the process!',
+            });
             return;
         }
 
@@ -33,7 +38,11 @@ export default function ResetPasswordScreen() {
                 ...formData,
                 email: tempEmail,
             });
-            Alert.alert('Success', 'Password has been reset successfully.');
+            Toast.show({
+                text1: 'Password has been reset successfully.',
+                type: 'customSuccess' as ToastType,
+                text2: 'Password has been reset successfully!',
+            });
             // Navigation will be handled automatically by the auth store state changes
             // The index.tsx will detect authentication and navigate to the appropriate role dashboard
         } catch (err) {
@@ -55,7 +64,7 @@ export default function ResetPasswordScreen() {
                     label="OTP Code"
                     value={formData.otp}
                     onChangeText={(text) => updateField('otp', text)}
-                    placeholder="Enter 4-digit OTP"
+                    placeholder="Enter 6-digit OTP"
                     keyboardType="numeric"
                     error={!!errors.otp}
                     errorMessage={errors.otp}

@@ -1,0 +1,209 @@
+// app/onboarding/how-did-you-hear.tsx
+
+import { useState } from "react";
+app/how-did-you-hear.tsx
+import { KeyboardAvoidingView, Platform, Pressable, View } from "react-native";
+import { Button, Card, Image, Input, ScrollView, Text, XStack, YStack } from "tamagui";
+
+// SVG + PNG assets
+import FacebookIcon from "../assets/images/facebook.svg";
+
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+
+
+import { useAuth } from "@/hooks/useAuth";
+
+// Assets
+import InstagramIcon from "../assets/images/instagramsvg (1).svg";
+import ReferralIcon from "../assets/images/referralIcon.png";
+import TikTokIcon from "../assets/images/tiktok (1).svg";
+import XIcon from "../assets/images/x_logo.svg.svg";
+
+// Source options
+const SOURCE_ITEMS = [
+  { key: "Friend", label: "From a friend/family", bg: "#F2F2F2", fg: "#0E0E55", type: "ionicon", iconName: "people" },
+  { key: "X", label: "X", bg: "#00000007", fg: "#ffffff", type: "svg", Icon: XIcon },
+  { key: "Facebook", label: "Facebook", bg: "#1877F2", fg: "#ffffff", type: "svg", Icon: FacebookIcon },
+  { key: "Instagram", label: "Instagram", bg: "#daadad83", fg: "#ffffffcb", type: "svg", Icon: InstagramIcon },
+  { key: "TikTok", label: "TikTok", bg: "#0000001f", fg: "#ffffff", type: "svg", Icon: TikTokIcon },
+  { key: "YouTube", label: "YouTube", bg: "#FF0000", fg: "#ffffff", type: "ionicon", iconName: "logo-youtube" },
+  { key: "Referral", label: "Referral", bg: "#EAEAF6", fg: "#0E0E55", type: "png", Icon: ReferralIcon },
+];
+
+export default function HowDidYouHear() {
+  const router = useRouter();
+  const { setReferralInfo } = useAuth();
+
+  const [selectedSource, setSelectedSource] = useState<string>();
+  const [referralCode, setReferralCode] = useState<string>("");
+
+  const completeOnboarding = () => {
+    if (selectedSource) {
+      if (selectedSource === "Referral" && referralCode) {
+        setReferralInfo(selectedSource, referralCode);
+      } else {
+        setReferralInfo(selectedSource);
+      }
+    }
+    router.replace("/(auth)/signup");
+  };
+
+  const renderIcon = (item: typeof SOURCE_ITEMS[0]) => {
+    if (item.type === "ionicon") {
+      return <Ionicons name={item.iconName as any} size={24} color={item.fg} />;
+    }
+    if (item.type === "svg") {
+      const SvgIcon = item.Icon as React.FC<{ width?: number; height?: number }>;
+      return <SvgIcon width={24} height={24} />;
+    }
+    if (item.type === "png") {
+      return <Image source={item.Icon} width={24} height={24} alt={item.label} />;
+    }
+    return null;
+  };
+
+  return (
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+    >
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
+      >
+        <YStack backgroundColor="$background" padding="$2">
+          {/* Header */}
+          <YStack marginBottom="$1" marginTop="$15">
+            <Text fontSize={25} lineHeight={30} fontWeight="800" textAlign="center" color="$text">
+              How did you hear about us?
+            </Text>
+          </YStack>
+
+          {/* Options Card */}
+          <Card
+            width="100%"
+            maxWidth={500}
+            alignSelf="center"
+            padding="$5"
+            borderRadius={12}
+            backgroundColor="$background"
+            marginTop="$2"
+            marginVertical="$2"
+          >
+            <YStack width="100%">
+              {SOURCE_ITEMS.map((item, index) => {
+                const isSelected = selectedSource === item.key;
+                return (
+                  <Pressable
+                    key={item.key}
+                    onPress={() => setSelectedSource(item.key)}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: isSelected }}
+                    style={{ marginBottom: index === SOURCE_ITEMS.length - 1 ? 0 : 20 }}
+                  >
+                    <XStack
+                      alignItems="center"
+                      justifyContent="space-between"
+                      height={50}
+                      paddingVertical={14}
+                      paddingHorizontal={14}
+                      borderRadius={8}
+                      borderWidth={1}
+                      borderColor={isSelected ? "$primary" : "#E6E6E6"}
+                      backgroundColor={isSelected ? "#F4F7FF" : "$background"}
+                    >
+                      {/* Icon + Label */}
+                      <XStack alignItems="center" gap={12}>
+                        <YStack width={40} height={40} borderRadius={8} justifyContent="center" alignItems="center" backgroundColor={item.bg}>
+                          {renderIcon(item)}
+                        </YStack>
+                        <Text fontSize={16} color="#212121">{item.label}</Text>
+                      </XStack>
+
+                      {/* Radio circle */}
+                      <YStack
+                        width={20}
+                        height={20}
+                        borderRadius={10}
+                        borderWidth={2}
+                        borderColor={isSelected ? "$primary" : "#CFCFCF"}
+                        justifyContent="center"
+                        alignItems="center"
+                        backgroundColor={isSelected ? "$primary" : "$background"}
+                      >
+                        {isSelected && <YStack width={10} height={10} borderRadius={5} backgroundColor="$background" />}
+                      </YStack>
+                    </XStack>
+                  </Pressable>
+                );
+              })}
+
+              {/* Referral input */}
+              {selectedSource === "Referral" && (
+                <YStack gap="$2" marginTop="$3">
+                  <Text fontSize={16} fontWeight="500" color="black">Referral Code</Text>
+                  <Input
+                    placeholder="Enter your code"
+                    value={referralCode}
+                    onChangeText={setReferralCode}
+                    style={{
+                      height: 48,
+                      paddingHorizontal: 12,
+                      fontSize: 16,
+                      borderRadius: 8,
+                      borderWidth: 1,
+                      borderColor: "black",
+                      backgroundColor: "white",
+                      color: "black",
+                    }}
+                  />
+                </YStack>
+              )}
+            </YStack>
+          </Card>
+        </YStack>
+      </ScrollView>
+
+      {/* Footer actions */}
+      <YStack padding="$4" backgroundColor="$background" borderTopWidth={0} borderColor="#E6E6E6" gap="$2">
+        {/* Next button */}
+        <Button
+          height={55}
+          borderRadius={8}
+          backgroundColor="$primary"
+          onPress={() => {
+            if (__DEV__) {
+              router.push("/(tabs)/home/referral" as any);
+            } else {
+              completeOnboarding();
+            }
+          }}
+          disabled={!selectedSource}
+          opacity={selectedSource ? 1 : 0.6}
+          width="100%"
+        >
+          <Text color="$background" fontWeight="600">Next</Text>
+        </Button>
+
+        {/* Skip button */}
+        <Button
+          height={55}
+          borderRadius={8}
+          backgroundColor="$secondary"
+          onPress={() => {
+            if (__DEV__) {
+              router.push("/(tabs)/home/referral" as any);
+            } else {
+              router.replace("/(auth)/signup");
+            }
+          }}
+          width="100%"
+        >
+          <Text color="$color12" fontWeight="600">Skip</Text>
+        </Button>
+      </View>
+    </KeyboardAvoidingView>  );
+}

@@ -29,8 +29,8 @@ export const useResetPasswordForm = () => {
 
         if (!formData.otp.trim()) {
             newErrors.otp = 'OTP code is required';
-        } else if (formData.otp.length !== 4) {
-            newErrors.otp = 'OTP must be 4 digits';
+        } else if (formData.otp.length !== 6) {
+            newErrors.otp = 'OTP must be 6 digits';
         }
 
         if (!formData.newPassword.trim()) {

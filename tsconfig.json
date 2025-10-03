@@ -1,17 +1,21 @@
 {
   "extends": "expo/tsconfig.base.json",
   "compilerOptions": {
-    "jsx": "react-jsx",
-    "strict": true,
+    "jsx": "react-jsx",                 // React 18 JSX transform
+    "strict": true,                     // Strict type checking
+    "esModuleInterop": true,            // Enable compatibility for CommonJS modules
+    "skipLibCheck": true,               // Skip type checking of library files
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",                     // For absolute imports
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "**/*.d.ts",            // 👈 add this
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "**/*.d.ts"
   ]
 }
