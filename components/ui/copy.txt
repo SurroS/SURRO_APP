@@ -20,9 +20,9 @@ import { useAuth } from "@/hooks/useAuth";
 // Assets
 import FacebookIcon from "../assets/images/facebook (1).svg";
 import InstagramIcon from "../assets/images/instagramsvg (1).svg";
+import ReferralIcon from "../assets/images/referralIcon.png";
 import TikTokIcon from "../assets/images/tiktok (1).svg";
 import XIcon from "../assets/images/x_logo.svg.svg";
-import ReferralIcon from "../assets/images/referralIcon.png";
 
 // Source options
 const SOURCE_ITEMS = [

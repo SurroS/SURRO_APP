@@ -74,7 +74,7 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     if (!validateForm()) return;
     try {
-      await login(formData);
+      // await login(formData);
       Toast.show({
         text1: 'Logged in successfully',
         type: 'customSuccess' as ToastType,
