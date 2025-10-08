@@ -1,10 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
-import * as AppleAuthentication from "expo-apple-authentication";
-import * as Google from "expo-auth-session/providers/google";
-import * as AuthSession from "expo-auth-session";
 import { useRouter } from "expo-router";
-import * as WebBrowser from "expo-web-browser";
-import { useEffect } from "react";
+import { useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -14,7 +10,6 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { YStack } from "tamagui";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { InputField } from "../../components/auth/InputField";
@@ -23,123 +18,122 @@ import { PrimaryButton } from "../../components/auth/PrimaryButton";
 import { ScreenHeader } from "../../components/auth/ScreenHeader";
 import { SocialButton } from "../../components/auth/SocialButton";
 import { useSignupForm } from "../../hooks/auth/useSignupForm";
-import Constants from "expo-constants";
 
-WebBrowser.maybeCompleteAuthSession();
+
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  isSuccessResponse,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
+
+GoogleSignin.configure({
+  iosClientId: process.env.GOOGLE_IOS_CLIENT_ID,
+  webClientId: process.env.GOOGLE_WEB_CLIENT_ID,
+  scopes: ["https://www.googleapis.com/auth/drive.readonly"],
+  offlineAccess: true,
+});
+
 
 export default function SignupScreen() {
   const router = useRouter();
-  const { formData, errors, updateField, validateForm } = useSignupForm();
-  const { register, googleLogin, appleLogin, isLoading, error } = useAuth();
+  const { signupFormData, errors, updateField, validateForm } = useSignupForm();
+  const { register, googleLogin, appleLogin, isLoading, error, requiresOtp } =
+    useAuth();
 
-
-const isExpoGo = Constants.executionEnvironment === "storeClient";
-
-const redirectUri = isExpoGo
-  ? AuthSession.makeRedirectUri({ useProxy: true })
-  : AuthSession.makeRedirectUri({ scheme: "surro" }); // must match app.json
-
-console.log("Redirect URI:", redirectUri);
-
-const [request, response, promptAsync] = Google.useAuthRequest({
-  iosClientId:
-    "321354387399-u4qsn500nvnj8738hnr3imnpp7rkg7t4.apps.googleusercontent.com",
-  androidClientId:
-    "321354387399-t6ahu1dmgjm7gcfi1p90leteos4bpqp8.apps.googleusercontent.com",
-  webClientId:
-    "321354387399-8mh3tsrl9ji8a6164si406unp6uilq52.apps.googleusercontent.com",
-  redirectUri,
-});
-
-// ✅ Handle Google response ONCE
-useEffect(() => {
-  if (response?.type === "success") {
-    const idToken = response.authentication?.idToken;
-
-    if (idToken) {
-      handleGoogleAuth(idToken);
-    } else {
-      console.error("No idToken returned:", response);
-      Toast.show({
-        text1: "Google Sign-in Failed",
-        type: "customError" as ToastType,
-        text2: "No ID token received.",
-      });
-    }
-  }
-}, [response]);
-
-// --- Google handler ---
-const handleGoogleAuth = async (idToken: string) => {
-  try {
-    await googleLogin({ idToken, role: formData.role });
-
-    Toast.show({
-      text1: "Signed in with Google",
-      type: "customSuccess" as ToastType,
-      text2: "Google signup successful!",
-    });
-
-    router.push("/(auth)/otp");
-  } catch (err) {
-    console.error("Google signup error:", err);
-    Toast.show({
-      text1: "Google Sign-in Failed",
-      type: "customError" as ToastType,
-      text2: "Please try again.",
-    });
-  }
-};
-  // -------- Handlers -------- //
-
-  const handleSignup = async () => {
-    if (!validateForm()) return;
+  const handleGoogleSignup = async () => {
     try {
-      await register(formData);
-      router.push("/(auth)/otp"); // Always go to OTP after signup
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
+
+      if (isSuccessResponse(response)) {
+        let idToken = response.data?.idToken;
+
+        // Sometimes idToken isn’t directly included
+        if (!idToken) {
+          const tokens = await GoogleSignin.getTokens();
+          idToken = tokens.idToken;
+        }
+
+        if (!idToken) {
+          throw new Error("Google returned null idToken");
+        }
+
+        console.log("====== GOOGLE LOGIN SUCCESS ======");
+        console.log("ID Token:", idToken);
+        console.log("User Info:", response.data?.user);
+
+        // Call the store action (handles backend + state)
+        await googleLogin({
+          idToken,
+          role: signupFormData?.role, // Only used if signing up
+        });
+
+        Toast.show({
+          text1: "Google Sign-In Success",
+          type: "customSuccess" as ToastType,
+          text2: "Welcome back!",
+        });
+
+        router.replace("/(tabs)/home");
+      } else {
+        console.log("Google auth was rejected by user");
+        Toast.show({
+          text1: "Sign-in cancelled",
+          type: "customError" as ToastType,
+          text2: "You cancelled the Google sign-in process.",
+        });
+      }
+    } catch (error) {
+      if (isErrorWithCode(error)) {
+        switch (error.code) {
+          case statusCodes.IN_PROGRESS:
+            Toast.show({
+              text1: "Google Sign-in in progress",
+              type: "customWarning" as ToastType,
+              text2: "Please wait while sign-in completes.",
+            });
+            break;
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            Toast.show({
+              text1: "Play Services not available",
+              type: "customError" as ToastType,
+              text2: "Your Google Play Services may be outdated.",
+            });
+            break;
+          default:
+            console.log("Google Sign-In error:", error);
+            Toast.show({
+              text1: "Google Sign-in failed",
+              type: "customError" as ToastType,
+              text2: "An unexpected error occurred.",
+            });
+        }
+      } else {
+        console.log("Unknown Google Sign-In error:", error);
+        Toast.show({
+          text1: "Sign-in failed",
+          type: "customError" as ToastType,
+          text2: "Unknown error occurred during Google login",
+        });
+      }
+    }
+  };
+
+const handleSignup = async () => {
+    if (!validateForm()) return; // stop if form is invalid
+    try {
+      await register(signupFormData); // attempt registration
+      router.push("/(auth)/otp"); // replace with your actual OTP route
     } catch (err) {
       console.error("Signup error:", err);
       Toast.show({
-        text1: "Signup Failed",
-        type: "customError" as ToastType,
-        text2: "Signup Failed! Please try again.",
+        text1: 'Signup Failed',
+        type: 'customError' as ToastType,
+        text2: 'Signup Failed! Please try again.',
       });
     }
   };
-
-
-  const handleAppleAuth = async () => {
-    try {
-      const credential = await AppleAuthentication.signInAsync({
-        requestedScopes: [
-          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-          AppleAuthentication.AppleAuthenticationScope.EMAIL,
-        ],
-      });
-
-      if (credential.identityToken) {
-        await appleLogin({
-          idToken: credential.identityToken,
-          role: formData.role,
-        });
-        Toast.show({
-          text1: "Signed in with Apple",
-          type: "customSuccess" as ToastType,
-          text2: "Apple signup successful!",
-        });
-        router.push("/(auth)/otp");
-      }
-    } catch (err: any) {
-      if (err?.code === "ERR_CANCELED") return;
-      console.error("Apple signup error:", err);
-      Toast.show({
-        text1: "Apple Sign-in Failed",
-        type: "customError" as ToastType,
-        text2: "Please try again.",
-      });
-    }
-  };
-
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -156,7 +150,7 @@ const handleGoogleAuth = async (idToken: string) => {
 
           <InputField
             label="Email"
-            value={formData.email}
+            value={signupFormData.email}
             onChangeText={(text) => updateField("email", text)}
             placeholder="Enter your email"
             keyboardType="email-address"
@@ -167,7 +161,7 @@ const handleGoogleAuth = async (idToken: string) => {
 
           <InputField
             label="Password"
-            value={formData.password}
+            value={signupFormData.password}
             onChangeText={(text) => updateField("password", text)}
             placeholder="Enter your password"
             secureTextEntry
@@ -178,7 +172,7 @@ const handleGoogleAuth = async (idToken: string) => {
 
           <InputField
             label="Confirm Password"
-            value={formData.passwordConfirmation}
+            value={signupFormData.passwordConfirmation}
             onChangeText={(text) => updateField("passwordConfirmation", text)}
             placeholder="Confirm your password"
             secureTextEntry
@@ -187,16 +181,15 @@ const handleGoogleAuth = async (idToken: string) => {
             errorMessage={errors.passwordConfirmation}
           />
 
-          {formData.referralCode && (
+          {signupFormData.referralCode && (
             <InputField
               label="Referral Code"
-              value={formData.referralCode}
+              value={signupFormData.referralCode}
               onChangeText={(text) => updateField("referralCode", text)}
               placeholder="Enter referral code"
             />
           )}
 
-          {error && <Text style={styles.errorText}>{error}</Text>}
 
           <PrimaryButton
             title="Sign up"
@@ -206,28 +199,11 @@ const handleGoogleAuth = async (idToken: string) => {
 
           <OrDivider />
 
-          {Platform.OS === "ios" ? (
-            <YStack>
-              <SocialButton
-                title="Sign in with Apple"
-                icon={require("../../assets/images/apple.png")}
-                onPress={handleAppleAuth}
-              />
-              <SocialButton
-                title="Sign in with Google"
-                icon={require("../../assets/images/google.png")}
-                onPress={() => promptAsync()}
-                disabled={!request}
-              />
-            </YStack>
-          ) : (
-            <SocialButton
-              title="Sign in with Google"
-              icon={require("../../assets/images/google.png")}
-              onPress={() => promptAsync()}
-              disabled={!request}
-            />
-          )}
+          <SocialButton
+            title="Continue with Google"
+            icon={require("../../assets/images/google.png")}
+            onPress={handleGoogleSignup}
+          />
 
           <TouchableOpacity
             style={styles.loginLink}
@@ -244,27 +220,14 @@ const handleGoogleAuth = async (idToken: string) => {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#F7F7F7",
-  },
-  container: {
-    flexGrow: 1,
-    padding: 24,
-    paddingTop: 50,
-  },
+  safeArea: { flex: 1, backgroundColor: "#F7F7F7" },
+  container: { flexGrow: 1, padding: 24, paddingTop: 50 },
   errorText: {
     color: "red",
     marginTop: -10,
     marginBottom: 15,
     textAlign: "center",
   },
-  loginLink: {
-    marginTop: 20,
-    alignSelf: "center",
-  },
-  loginLinkText: {
-    color: "#0E0E55",
-    fontWeight: "bold",
-  },
+  loginLink: { marginTop: 20, alignSelf: "center" },
+  loginLinkText: { color: "#0E0E55", fontWeight: "bold" },
 });

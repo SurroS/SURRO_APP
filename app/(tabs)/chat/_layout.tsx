@@ -7,7 +7,7 @@ export default function ChatLayout() {
       options={{
         headerTitle:"Chat",
         headerShown:false,
-        headerTitleStyle: { fontWeight: 'bold' },
+        headerTitleStyle: { fontWeight: 'bold' }
       }}
     />
     </Stack>

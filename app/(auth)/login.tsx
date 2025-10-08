@@ -1,20 +1,17 @@
-import * as AppleAuthentication from "expo-apple-authentication";
-import * as Google from "expo-auth-session/providers/google";
+import { useSignupForm } from "@/hooks/auth";
+import { useAuth } from "@/hooks/useAuth"; 
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  isSuccessResponse,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { useEffect } from "react";
-import {
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import { useAuth } from "@/hooks/useAuth";
-import { Toast } from 'toastify-react-native';
-import { ToastType } from 'toastify-react-native/utils/interfaces';
+import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 import { InputField } from "../../components/auth/InputField";
 import { OrDivider } from "../../components/auth/OrDivider";
 import { PrimaryButton } from "../../components/auth/PrimaryButton";
@@ -24,71 +21,117 @@ import { useLoginForm } from "../../hooks/auth/useLoginForm";
 
 WebBrowser.maybeCompleteAuthSession();
 
+GoogleSignin.configure({
+  iosClientId: process.env.GOOGLE_IOS_CLIENT_ID,
+  webClientId: process.env.GOOGLE_WEB_CLIENT_ID,
+  scopes: ["https://www.googleapis.com/auth/drive.readonly"],
+  offlineAccess: true,
+});
+
 export default function LoginScreen() {
   const router = useRouter();
   const { formData, errors, updateField, validateForm } = useLoginForm();
-  const { login, googleLogin, appleLogin, isLoading, error } = useAuth();
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId:
-      "321354387399-pni8pf1pm86riopsg3ng2nlqoq4hmfjg.apps.googleusercontent.com",
-  });
+  const { signupFormData } = useSignupForm();
+  const { login, googleLogin, isLoading } = useAuth();
 
-  useEffect(() => {
-    if (response?.type === "success") {
-      Toast.show({
-        text1: 'Logged in with Google',
-        type: 'customSuccess' as ToastType,
-        text2: 'Logged in with Google successfully!',
-      });
-      router.replace("/(tabs)/home");
-    }
-  }, [response]);
-
-  const handleAppleAuth = async () => {
+  // Centralized Google Sign-In using the store action
+  const handleGoogleSignin = async () => {
     try {
-      const credential = await AppleAuthentication.signInAsync({
-        requestedScopes: [
-          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-          AppleAuthentication.AppleAuthenticationScope.EMAIL,
-        ],
-      });
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
 
-      if (credential.identityToken) {
-        Toast.show({
-          text1: 'Logged in with Apple',
-          type: 'customSuccess' as ToastType,
-          text2: 'Logged in with Apple successfully!',
+      if (isSuccessResponse(response)) {
+        let idToken = response.data?.idToken;
+
+        // Sometimes idToken isn’t directly included
+        if (!idToken) {
+          const tokens = await GoogleSignin.getTokens();
+          idToken = tokens.idToken;
+        }
+
+        if (!idToken) {
+          throw new Error("Google returned null idToken");
+        }
+
+        console.log("====== GOOGLE LOGIN SUCCESS ======");
+        console.log("ID Token:", idToken);
+        console.log("User Info:", response.data?.user);
+
+        // Call the store action (handles backend + state)
+        await googleLogin({
+          idToken,
+          role: signupFormData?.role, // Only used if signing up
         });
+
+        Toast.show({
+          text1: "Google Sign-In Success",
+          type: "customSuccess" as ToastType,
+          text2: "Welcome back!",
+        });
+
         router.replace("/(tabs)/home");
+      } else {
+        console.log("Google auth was rejected by user");
+        Toast.show({
+          text1: "Sign-in cancelled",
+          type: "customError" as ToastType,
+          text2: "You cancelled the Google sign-in process.",
+        });
       }
-    } catch (err: any) {
-      if (err.code === "ERR_CANCELED") return;
-      Toast.show({
-        text1: 'Apple Login Failed',
-        type: 'customError' as ToastType,
-        text2: 'Apple Login Failed! Please try again.',
-      });
+    } catch (error) {
+      if (isErrorWithCode(error)) {
+        switch (error.code) {
+          case statusCodes.IN_PROGRESS:
+            Toast.show({
+              text1: "Google Sign-in in progress",
+              type: "customWarning" as ToastType,
+              text2: "Please wait while sign-in completes.",
+            });
+            break;
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            Toast.show({
+              text1: "Play Services not available",
+              type: "customError" as ToastType,
+              text2: "Your Google Play Services may be outdated.",
+            });
+            break;
+          default:
+            console.log("Google Sign-In error:", error);
+            Toast.show({
+              text1: "Google Sign-in failed",
+              type: "customError" as ToastType,
+              text2: "An unexpected error occurred.",
+            });
+        }
+      } else {
+        console.log("Unknown Google Sign-In error:", error);
+        Toast.show({
+          text1: "Sign-in failed",
+          type: "customError" as ToastType,
+          text2: "Unknown error occurred during Google login",
+        });
+      }
     }
   };
 
+  // Regular email/password login
   const handleLogin = async () => {
     if (!validateForm()) return;
     try {
-      // await login(formData);
+      await login(formData);
       Toast.show({
-        text1: 'Logged in successfully',
-        type: 'customSuccess' as ToastType,
-        text2: 'Logged in successfully!',
+        text1: "Logged in successfully",
+        type: "customSuccess" as ToastType,
+        text2: "Welcome back!",
       });
       router.replace("/(tabs)/home");
     } catch (err) {
+      console.error("Login error:", err);
       Toast.show({
-        text1: 'Login Failed',
-        type: 'customError' as ToastType,
-        text2: 'Login Failed! Please try again.',
+        text1: "Login Failed",
+        type: "customError" as ToastType,
+        text2: "Invalid credentials. Please try again.",
       });
-      console.error("login error:", err);
-      // Alert.alert("failed", `${err}`)
     }
   };
 
@@ -126,23 +169,19 @@ export default function LoginScreen() {
           <Text style={styles.forgotPasswordText}>Forgot password?</Text>
         </TouchableOpacity>
 
-        <PrimaryButton title="Log in" onPress={handleLogin} />
+        <PrimaryButton
+          title="Log in"
+          onPress={handleLogin}
+          loading={isLoading}
+        />
 
         <OrDivider />
-        {Platform.OS == "ios" ? (
-          <SocialButton
-            title="Continue with Apple"
-            icon={require("../../assets/images/apple.png")}
-            onPress={handleAppleAuth}
-          />
-        ) : (
-          <SocialButton
-            title="Continue with Google"
-            icon={require("../../assets/images/google.png")}
-            onPress={() => promptAsync()}
-            disabled={!request}
-          />
-        )}
+
+        <SocialButton
+          title="Continue with Google"
+          icon={require("../../assets/images/google.png")}
+          onPress={handleGoogleSignin}
+        />
 
         <TouchableOpacity
           style={styles.signupLink}
@@ -158,29 +197,10 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#F7F7F7",
-  },
-  container: {
-    flexGrow: 1,
-    padding: 24,
-    paddingTop: 50,
-  },
-  forgotPasswordButton: {
-    alignSelf: "flex-end",
-    marginBottom: 20,
-  },
-  forgotPasswordText: {
-    color: "#0E0E55",
-    fontWeight: "bold",
-  },
-  signupLink: {
-    marginTop: 20,
-    alignSelf: "center",
-  },
-  signupLinkText: {
-    color: "#0E0E55",
-    fontWeight: "bold",
-  },
+  safeArea: { flex: 1, backgroundColor: "#F7F7F7" },
+  container: { flexGrow: 1, padding: 24, paddingTop: 50 },
+  forgotPasswordButton: { alignSelf: "flex-end", marginBottom: 20 },
+  forgotPasswordText: { color: "#0E0E55", fontWeight: "bold" },
+  signupLink: { marginTop: 20, alignSelf: "center" },
+  signupLinkText: { color: "#0E0E55", fontWeight: "bold" },
 });

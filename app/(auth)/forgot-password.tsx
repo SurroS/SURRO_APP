@@ -1,11 +1,11 @@
 import { useRouter } from 'expo-router';
 import {
-  SafeAreaView,
+  Alert,
   ScrollView,
   StyleSheet,
   Text
 } from 'react-native';
-
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { InputField } from '@/components/auth/InputField';
 import { PrimaryButton } from '@/components/auth/PrimaryButton';
 import { ScreenHeader } from '@/components/auth/ScreenHeader';
@@ -26,11 +26,10 @@ export default function ForgotPasswordScreen() {
 
     try {
       await forgotPassword({ email });
-      Toast.show({
-        text1: 'Password reset instructions sent to your email.',
-        type: 'customSuccess' as ToastType,
-        text2: 'Password reset instructions sent to your email!',
-      });
+      Alert.alert('Success', 'Password reset instructions sent to your email.');
+      console.log(updateEmail)
+      console.log(validateForm)
+      console.log(email)
       // Navigation will be handled by the auth store state changes
     } catch (err) {
       Toast.show({
@@ -39,6 +38,9 @@ export default function ForgotPasswordScreen() {
         text2: 'Password reset instructions sent to your email! Please try again.',
       });
       console.error('Forgot password error:', err);
+      console.log(updateEmail)
+      console.log(validateForm)
+      console.log(email)
       // Error is already handled by the auth store
     }
   };
