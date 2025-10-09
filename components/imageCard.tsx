@@ -19,7 +19,8 @@ const BUTTON_HEIGHT = SCREEN_HEIGHT * 0.07;
 const img1 = require("../../assets/images/image1.png")
 const img2 = require("../../assets/images/image2.png") 
 const img3 = require("../../assets/images/image2.png") 
-const img4 = require("../../assets/images/image2.png") 
+const img4 = require("../../assets/images/image2.png")
+const img5 = require("../../assets/images/profile-icon.png")  
 
 
 export const ImageCard = ({

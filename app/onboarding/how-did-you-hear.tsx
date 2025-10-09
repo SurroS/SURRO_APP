@@ -160,7 +160,7 @@ export default function HowDidYouHear() {
             height={55}
             borderRadius={8}
             backgroundColor="$secondary"
-            onPress={() => router.replace("/(auth)/signup")}
+            onPress={() => router.push("/(tabs)/home/guessview")}
           >
             <Text color="$color12" fontWeight="600">
               Skip
@@ -171,3 +171,4 @@ export default function HowDidYouHear() {
     </KeyboardAwareScrollView>
   );
 }
+
