@@ -16,6 +16,9 @@ export default function HomeLayout() {
 
       {/* Placeholder for future pages */}
        <Stack.Screen name="GalleryScreen" />
+        <Stack.Screen name="InviteScreen" />
+
+       
 
     </Stack>
   )

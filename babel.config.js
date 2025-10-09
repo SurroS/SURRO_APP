@@ -14,8 +14,15 @@ module.exports = function (api) {
           allowUndefined: true,
         },
       ],
-      // Optional but recommended for Expo Router
-      "expo-router/babel",
+      [
+        "module-resolver",
+        {
+          alias: {
+            "@": "./",  
+          },
+        },
+      ],
+      // Keep this LAST (required for Reanimated)
       "react-native-reanimated/plugin",
     ],
   };

@@ -1,17 +1,18 @@
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
-import { Alert, Clipboard, Image, Linking, ScrollView } from 'react-native'
+import { Alert, Image, Linking, ScrollView } from 'react-native'
+import * as Clipboard from 'expo-clipboard'
 import { Button, Text, XStack, YStack } from 'tamagui'
 
 export default function InviteScreen() {
   const router = useRouter()
-  const [inviteLink] = useState('https://yourapp.com/invite/abcd1234') // replace or set dynamically
+  const [inviteLink] = useState('https://surrosantara.com/invite/12345')
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
     try {
-      await Clipboard.setString(inviteLink)
+      await Clipboard.setStringAsync(inviteLink)
       setCopied(true)
       setTimeout(() => setCopied(false), 1800)
       Alert.alert('Copied', 'Invite link copied to clipboard')
@@ -22,21 +23,21 @@ export default function InviteScreen() {
   }
 
   const handleShare = (mode: 'whatsapp' | 'facebook' | 'mail' | 'x') => {
-    // lightweight share actions - replace with real share module as needed
+    const encoded = encodeURIComponent(inviteLink)
     switch (mode) {
       case 'whatsapp':
-        Linking.openURL(`whatsapp://send?text=${encodeURIComponent(inviteLink)}`).catch(() =>
+        Linking.openURL(`whatsapp://send?text=${encoded}`).catch(() =>
           Alert.alert('Unable', 'WhatsApp not available')
         )
         break
       case 'facebook':
-        Linking.openURL(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(inviteLink)}`)
+        Linking.openURL(`https://www.facebook.com/sharer/sharer.php?u=${encoded}`)
         break
       case 'mail':
-        Linking.openURL(`mailto:?subject=Join%20me&body=${encodeURIComponent(inviteLink)}`)
+        Linking.openURL(`mailto:?subject=Join%20me&body=${encoded}`)
         break
       case 'x':
-        Linking.openURL(`https://twitter.com/intent/tweet?text=${encodeURIComponent(inviteLink)}`)
+        Linking.openURL(`https://twitter.com/intent/tweet?text=${encoded}`)
         break
     }
   }
@@ -62,13 +63,11 @@ export default function InviteScreen() {
           Refer a friend
         </Text>
 
-        {/* placeholder for alignment */}
         <YStack width={36} />
       </XStack>
 
-      {/* Hero row: gift image (tilted) + title & redeem button */}
+      {/* Hero Section */}
       <XStack alignItems="center" gap={12} marginBottom={18}>
-        {/* Rotated gift card (keeps design consistency) */}
         <YStack
           width={120}
           height={120}
@@ -79,7 +78,9 @@ export default function InviteScreen() {
           style={{ transform: [{ rotate: '-3deg' }] }}
           backgroundColor="#FFF"
           shadowColor="#000"
-          // subtle shadow
+          shadowOpacity={0.1}
+          shadowOffset={{ width: 0, height: 2 }}
+          elevation={3}
         >
           <Image
             source={require('@/assets/images/gift.png')}
@@ -100,7 +101,7 @@ export default function InviteScreen() {
             onPress={() => Alert.alert('Redeem', 'Redeem flow placeholder')}
           >
             <Text color="#0E0E55" fontWeight="600">
-              Redeem price
+              Redeem prize
             </Text>
           </Button>
         </YStack>
@@ -160,7 +161,7 @@ export default function InviteScreen() {
             style={{ paddingHorizontal: 12 }}
           >
             <Image
-              source={require('../../assets/images/google.png')}
+              source={require('@/assets/images/x-icon.png')}
               style={{ width: 22, height: 22 }}
             />
           </Button>
@@ -173,7 +174,7 @@ export default function InviteScreen() {
             style={{ paddingHorizontal: 12 }}
           >
             <Image
-              source={require('../../assets/images/facebook.svg')}
+              source={require('@/assets/images/facebook.png')}
               style={{ width: 22, height: 22 }}
             />
           </Button>
@@ -186,7 +187,7 @@ export default function InviteScreen() {
             style={{ paddingHorizontal: 12 }}
           >
             <Image
-              source={require('../../assets/images/mail_icon.png')}
+              source={require('@/assets/images/mail_icon.png')}
               style={{ width: 22, height: 22 }}
             />
           </Button>
@@ -199,8 +200,13 @@ export default function InviteScreen() {
           How it works
         </Text>
 
-        <YStack gap={8}>
-          <XStack gap={10} alignItems="flex-start">
+        {[
+          { step: 1, title: 'Invite a Friend', desc: 'Share your referral link above with a friend.' },
+          { step: 2, title: 'They Join', desc: 'Your friend registers and verifies their account.' },
+          { step: 3, title: 'They Take Action', desc: 'They complete a qualifying action to unlock your reward.' },
+          { step: 4, title: 'You Earn', desc: 'Your reward becomes available once all steps are done.' },
+        ].map(({ step, title, desc }) => (
+          <XStack key={step} gap={10} alignItems="flex-start">
             <YStack
               width={28}
               height={28}
@@ -210,91 +216,22 @@ export default function InviteScreen() {
               justifyContent="center"
             >
               <Text color="#fff" fontSize={12} fontWeight="700">
-                1
+                {step}
               </Text>
             </YStack>
             <YStack flex={1}>
               <Text fontSize={14} fontWeight="600" color="#111">
-                Invite a Friend
+                {title}
               </Text>
               <Text color="#666" fontSize={13}>
-                Share your referral link above with a friend
+                {desc}
               </Text>
             </YStack>
           </XStack>
-
-          <XStack gap={10} alignItems="flex-start">
-            <YStack
-              width={28}
-              height={28}
-              borderRadius={14}
-              backgroundColor="#0E0E55"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <Text color="#fff" fontSize={12} fontWeight="700">
-                2
-              </Text>
-            </YStack>
-            <YStack flex={1}>
-              <Text fontSize={14} fontWeight="600" color="#111">
-                They Join
-              </Text>
-              <Text color="#666" fontSize={13}>
-                Your friend registers and verifies their account.
-              </Text>
-            </YStack>
-          </XStack>
-
-          <XStack gap={10} alignItems="flex-start">
-            <YStack
-              width={28}
-              height={28}
-              borderRadius={14}
-              backgroundColor="#0E0E55"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <Text color="#fff" fontSize={12} fontWeight="700">
-                3
-              </Text>
-            </YStack>
-            <YStack flex={1}>
-              <Text fontSize={14} fontWeight="600" color="#111">
-                They Take Action
-              </Text>
-              <Text color="#666" fontSize={13}>
-                To activate your reward, your friend must complete a qualifying action.
-              </Text>
-            </YStack>
-          </XStack>
-
-          <XStack gap={10} alignItems="flex-start">
-            <YStack
-              width={28}
-              height={28}
-              borderRadius={14}
-              backgroundColor="#0E0E55"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <Text color="#fff" fontSize={12} fontWeight="700">
-                4
-              </Text>
-            </YStack>
-            <YStack flex={1}>
-              <Text fontSize={14} fontWeight="600" color="#111">
-                You Earn
-              </Text>
-              <Text color="#666" fontSize={13}>
-                Once all steps are completed, your reward is unlocked.
-              </Text>
-            </YStack>
-          </XStack>
-        </YStack>
+        ))}
       </YStack>
 
-      {/* Footer / bottom actions */}
+      {/* Footer button */}
       <YStack marginBottom={36} alignItems="center">
         <Button
           size="$4"
