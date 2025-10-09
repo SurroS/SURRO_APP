@@ -1,9 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
-import * as AppleAuthentication from "expo-apple-authentication";
-import * as Google from "expo-auth-session/providers/google";
 import { useRouter } from "expo-router";
-import * as WebBrowser from "expo-web-browser";
-import { useEffect } from "react";
+import { useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -11,108 +8,123 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { YStack } from "tamagui";
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
-import { InputField } from '../../components/auth/InputField';
-import { OrDivider } from '../../components/auth/OrDivider';
-import { PrimaryButton } from '../../components/auth/PrimaryButton';
-import { ScreenHeader } from '../../components/auth/ScreenHeader';
-import { SocialButton } from '../../components/auth/SocialButton';
-import { useSignupForm } from '../../hooks/auth/useSignupForm';
+import { InputField } from "../../components/auth/InputField";
+import { OrDivider } from "../../components/auth/OrDivider";
+import { PrimaryButton } from "../../components/auth/PrimaryButton";
+import { ScreenHeader } from "../../components/auth/ScreenHeader";
+import { SocialButton } from "../../components/auth/SocialButton";
+import { useSignupForm } from "../../hooks/auth/useSignupForm";
 
 
-WebBrowser.maybeCompleteAuthSession();
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  isSuccessResponse,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
+
+GoogleSignin.configure({
+  iosClientId: process.env.GOOGLE_IOS_CLIENT_ID,
+  webClientId: process.env.GOOGLE_WEB_CLIENT_ID,
+  scopes: ["https://www.googleapis.com/auth/drive.readonly"],
+  offlineAccess: true,
+});
+
 
 export default function SignupScreen() {
   const router = useRouter();
-  const { formData, errors, updateField, validateForm } = useSignupForm();
-  const { register, googleLogin, appleLogin, isLoading, error, requiresOtp } = useAuth();
+  const { signupFormData, errors, updateField, validateForm } = useSignupForm();
+  const { register, googleLogin, appleLogin, isLoading, error, requiresOtp } =
+    useAuth();
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: "321354387399-pni8pf1pm86riopsg3ng2nlqoq4hmfjg.apps.googleusercontent.com", // Add your Google client ID here
-  });
-
-  useEffect(() => {
-    if (response?.type === "success") {
-      const token = response.authentication?.accessToken || "";
-      handleGoogleAuth(token);
-    }
-  }, [response]);
-
-  const handleGoogleAuth = async (accessToken: string) => {
+  const handleGoogleSignup = async () => {
     try {
-      await googleLogin({ idToken: accessToken, role: formData.role });
-      Toast.show({
-        text1: 'Signed in with Google',
-        type: 'customSuccess' as ToastType,
-        text2: 'Signed in with Google successfully!',
-      });
-    } catch (err) {
-      console.error("Google signup error:", err);
-      Toast.show({
-        text1: 'Google Sign-in Failed',
-        type: 'customError' as ToastType,
-        text2: 'Google Sign-in Failed! Please try again.',
-      });
-    }
-  };
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
 
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const token = response.authentication?.accessToken || '';
-      handleGoogleAuth(token);
-    }
-  }, [response, handleGoogleAuth]);
+      if (isSuccessResponse(response)) {
+        let idToken = response.data?.idToken;
 
-  // Navigate to OTP screen when signup is successful
-  useEffect(() => {
-    console.log('Signup useEffect - requiresOtp:', requiresOtp);
-    if (requiresOtp) {
-      console.log('Navigating to OTP screen...');
-      router.push('/(auth)/otp');
-    }
-  }, [requiresOtp, router]);
+        // Sometimes idToken isn’t directly included
+        if (!idToken) {
+          const tokens = await GoogleSignin.getTokens();
+          idToken = tokens.idToken;
+        }
 
-  const handleAppleAuth = async () => {
-    try {
-      const credential = await AppleAuthentication.signInAsync({
-        requestedScopes: [
-          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-          AppleAuthentication.AppleAuthenticationScope.EMAIL,
-        ],
-      });
+        if (!idToken) {
+          throw new Error("Google returned null idToken");
+        }
 
-      if (credential.identityToken) {
-        await appleLogin({
-          idToken: credential.identityToken,
-          role: formData.role,
+        console.log("====== GOOGLE LOGIN SUCCESS ======");
+        console.log("ID Token:", idToken);
+        console.log("User Info:", response.data?.user);
+
+        // Call the store action (handles backend + state)
+        await googleLogin({
+          idToken,
+          role: signupFormData?.role, // Only used if signing up
         });
+
         Toast.show({
-          text1: 'Signed in with Apple',
-          type: 'customSuccess' as ToastType,
-          text2: 'Signed in with Apple successfully!',
+          text1: "Google Sign-In Success",
+          type: "customSuccess" as ToastType,
+          text2: "Welcome back!",
+        });
+
+        router.replace("/(tabs)/home");
+      } else {
+        console.log("Google auth was rejected by user");
+        Toast.show({
+          text1: "Sign-in cancelled",
+          type: "customError" as ToastType,
+          text2: "You cancelled the Google sign-in process.",
         });
       }
-    } catch (err: any) {
-      if (err?.code === "ERR_CANCELED") return;
-      console.error("Apple signup error:", err);
-      Toast.show({
-        text1: 'Apple Sign-in Failed',
-        type: 'customError' as ToastType,
-        text2: 'Apple Sign-in Failed! Please try again.',
-      });
+    } catch (error) {
+      if (isErrorWithCode(error)) {
+        switch (error.code) {
+          case statusCodes.IN_PROGRESS:
+            Toast.show({
+              text1: "Google Sign-in in progress",
+              type: "customWarning" as ToastType,
+              text2: "Please wait while sign-in completes.",
+            });
+            break;
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            Toast.show({
+              text1: "Play Services not available",
+              type: "customError" as ToastType,
+              text2: "Your Google Play Services may be outdated.",
+            });
+            break;
+          default:
+            console.log("Google Sign-In error:", error);
+            Toast.show({
+              text1: "Google Sign-in failed",
+              type: "customError" as ToastType,
+              text2: "An unexpected error occurred.",
+            });
+        }
+      } else {
+        console.log("Unknown Google Sign-In error:", error);
+        Toast.show({
+          text1: "Sign-in failed",
+          type: "customError" as ToastType,
+          text2: "Unknown error occurred during Google login",
+        });
+      }
     }
   };
 
-  const handleSignup = async () => {
+const handleSignup = async () => {
     if (!validateForm()) return; // stop if form is invalid
     try {
-      await register(formData); // attempt registration
+      await register(signupFormData); // attempt registration
       router.push("/(auth)/otp"); // replace with your actual OTP route
-
     } catch (err) {
       console.error("Signup error:", err);
       Toast.show({
@@ -129,7 +141,6 @@ export default function SignupScreen() {
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        {/* Entire page scrollable */}
         <ScrollView
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
@@ -139,7 +150,7 @@ export default function SignupScreen() {
 
           <InputField
             label="Email"
-            value={formData.email}
+            value={signupFormData.email}
             onChangeText={(text) => updateField("email", text)}
             placeholder="Enter your email"
             keyboardType="email-address"
@@ -150,7 +161,7 @@ export default function SignupScreen() {
 
           <InputField
             label="Password"
-            value={formData.password}
+            value={signupFormData.password}
             onChangeText={(text) => updateField("password", text)}
             placeholder="Enter your password"
             secureTextEntry
@@ -161,7 +172,7 @@ export default function SignupScreen() {
 
           <InputField
             label="Confirm Password"
-            value={formData.passwordConfirmation}
+            value={signupFormData.passwordConfirmation}
             onChangeText={(text) => updateField("passwordConfirmation", text)}
             placeholder="Confirm your password"
             secureTextEntry
@@ -170,17 +181,15 @@ export default function SignupScreen() {
             errorMessage={errors.passwordConfirmation}
           />
 
-
-          {formData.referralCode && (
+          {signupFormData.referralCode && (
             <InputField
               label="Referral Code"
-              value={formData.referralCode}
-              onChangeText={(text) => updateField('referralCode', text)}
+              value={signupFormData.referralCode}
+              onChangeText={(text) => updateField("referralCode", text)}
               placeholder="Enter referral code"
             />
           )}
 
-          {error && <Text style={styles.errorText}>{error}</Text>}
 
           <PrimaryButton
             title="Sign up"
@@ -189,28 +198,12 @@ export default function SignupScreen() {
           />
 
           <OrDivider />
-          {Platform.OS == "ios" ? (
-            <YStack>
-              <SocialButton
-                title="Sign in with Apple"
-                icon={require("../../assets/images/apple.png")}
-                onPress={handleAppleAuth}
-              />
-              <SocialButton
-                title="Sign in with Google"
-                icon={require("../../assets/images/google.png")}
-                onPress={() => promptAsync()}
-                disabled={!request}
-              />
-            </YStack>
-          ) : (
-            <SocialButton
-              title="Sign in with Google"
-              icon={require("../../assets/images/google.png")}
-              onPress={() => promptAsync()}
-              disabled={!request}
-            />
-          )}
+
+          <SocialButton
+            title="Continue with Google"
+            icon={require("../../assets/images/google.png")}
+            onPress={handleGoogleSignup}
+          />
 
           <TouchableOpacity
             style={styles.loginLink}
@@ -220,16 +213,6 @@ export default function SignupScreen() {
               Already have an account? Log in
             </Text>
           </TouchableOpacity>
-
-          {/* Debug: Manual OTP navigation button */}
-          <TouchableOpacity
-            style={[styles.loginLink, { marginTop: 10 }]}
-            onPress={() => router.push('/(auth)/otp')}
-          >
-            <Text style={[styles.loginLinkText, { color: '#666' }]}>
-              Debug: Go to OTP Screen
-            </Text>
-          </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -237,34 +220,14 @@ export default function SignupScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#F7F7F7",
-  },
-  container: {
-    flexGrow: 1,
-    padding: 24,
-    paddingTop: 50,
-  },
+  safeArea: { flex: 1, backgroundColor: "#F7F7F7" },
+  container: { flexGrow: 1, padding: 24, paddingTop: 50 },
   errorText: {
     color: "red",
     marginTop: -10,
     marginBottom: 15,
     textAlign: "center",
   },
-  roleDisplay: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#0E0E55",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  loginLink: {
-    marginTop: 20,
-    alignSelf: "center",
-  },
-  loginLinkText: {
-    color: "#0E0E55",
-    fontWeight: "bold",
-  },
+  loginLink: { marginTop: 20, alignSelf: "center" },
+  loginLinkText: { color: "#0E0E55", fontWeight: "bold" },
 });

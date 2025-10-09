@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 export const useSignupForm = () => {
     const { user, referralCode } = useAuth();
-    const [formData, setFormData] = useState<RegisterCredentials>({
+    const [signupFormData, setFormData] = useState<RegisterCredentials>({
         email: '',
         password: '',
         passwordConfirmation: '',
@@ -24,25 +24,25 @@ export const useSignupForm = () => {
     const validateForm = (): boolean => {
         const newErrors: Partial<RegisterCredentials> = {};
 
-        if (!formData.email.trim()) {
+        if (!signupFormData.email.trim()) {
             newErrors.email = 'Email is required';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+        } else if (!/\S+@\S+\.\S+/.test(signupFormData.email)) {
             newErrors.email = 'Please enter a valid email address';
         }
 
-        if (!formData.password.trim()) {
+        if (!signupFormData.password.trim()) {
             newErrors.password = 'Password is required';
-        } else if (formData.password.length < 8) {
+        } else if (signupFormData.password.length < 8) {
             newErrors.password = 'Password must be at least 8 characters';
         }
 
-        if (!formData.passwordConfirmation.trim()) {
+        if (!signupFormData.passwordConfirmation.trim()) {
             newErrors.passwordConfirmation = 'Password confirmation is required';
-        } else if (formData.password !== formData.passwordConfirmation) {
+        } else if (signupFormData.password !== signupFormData.passwordConfirmation) {
             newErrors.passwordConfirmation = 'Passwords do not match';
         }
 
-        if (!formData.role.trim()) {
+        if (!signupFormData.role.trim()) {
             newErrors.role = 'Role is required';
         }
 
@@ -62,7 +62,7 @@ export const useSignupForm = () => {
     };
 
     return {
-        formData,
+        signupFormData,
         errors,
         updateField,
         validateForm,

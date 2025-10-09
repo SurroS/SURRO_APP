@@ -17,6 +17,7 @@ export default function Index() {
 
   type RoleKey = keyof typeof roleMapping;
 
+
   useEffect(() => {
     if (!isLoading) {
       if (isAuthenticated && user?.role) {
@@ -28,7 +29,7 @@ export default function Index() {
         }
       } else {
         // User is not authenticated, start with onboarding
-        router.replace("/onboarding/role-selection");
+        router.replace("/onboarding/screen1");
 
       }
     }

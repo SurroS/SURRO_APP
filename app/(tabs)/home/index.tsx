@@ -9,7 +9,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, YStack, Button, Spinner } from "tamagui";
 
 export default function HomeIndex() {
-  const Role = useAuth().user?.role?.trim();
+  const Role = useAuth().user?.role?.trim(); // trim in case of trailing spaces
   const router = useRouter();
 
   return (
