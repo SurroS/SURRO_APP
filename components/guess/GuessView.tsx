@@ -12,12 +12,6 @@ import ContactSection from "@/components/guess/ContactSection";
 import SocialsSection from "@/components/guess/SocialsSection";
 import GallerySection from "@/components/guess/GallerySection";
 
-/**
- * Reusable Guess View component
- * -------------------------------------------------
- * - Can be called inside any screen under (tabs)
- * - Does not create a standalone route
- */
 const GuessView = () => {
   const router = useRouter();
 

@@ -25,7 +25,7 @@ const HeaderBar = () => {
 
       {/* Right side "Pressable" bell */}
       <YStack
-        onPress={() => console.log("Bell pressed")} // or router.push("/notifications")
+        onPress={() => router.push("/notifications")} // or router.push("/notifications")
         width={36}
         height={36}
         alignItems="center"
