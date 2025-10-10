@@ -17,9 +17,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.surrosantara.mobile",
       "usesAppleSignIn": true,
-      "associatedDomains": [
-        "applinks:surro.app"
-      ],
+      "associatedDomains": ["applinks:surro.app"],
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSExceptionDomains": {
@@ -43,31 +41,25 @@
       ]
     },
     "plugins": [
-      "expo-router",
-      "expo-font",
-      [
-         "@react-native-google-signin/google-signin",
-        {
-          "iosUrlScheme": "com.googleusercontent.apps.321354387399-u4qsn500nvnj8738hnr3imnpp7rkg7t4"
-        }
-      ],
       [
         "expo-build-properties",
         {
-          "ios": {
-            "newArchEnabled": true
-          },
-          "android": {
-            "newArchEnabled": true
-          }
+          "ios": { "newArchEnabled": true },
+          "android": { "newArchEnabled": true }
+        }
+      ],
+      "expo-router",
+      "expo-font",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.321354387399-u4qsn500nvnj8738hnr3imnpp7rkg7t4"
         }
       ],
       "expo-secure-store",
       [
         "expo-local-authentication",
-        {
-          "faceIDPermission": "Allow Surro to use Face ID."
-        }
+        { "faceIDPermission": "Allow Surro to use Face ID." }
       ],
       [
         "expo-image-picker",
@@ -78,16 +70,9 @@
       ],
       [
         "expo-contacts",
-        {
-          "contactsPermission": "Allow Surro to access your contacts."
-        }
+        { "contactsPermission": "Allow Surro to access your contacts." }
       ],
-      [
-        "expo-document-picker",
-        {
-          "iCloudContainerEnvironment": "Production"
-        }
-      ]
+      ["expo-document-picker", { "iCloudContainerEnvironment": "Production" }]
     ],
     "extra": {
       "eas": {
