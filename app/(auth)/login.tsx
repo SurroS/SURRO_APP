@@ -28,13 +28,13 @@ GoogleSignin.configure({
   offlineAccess: true,
 });
 
+
 export default function LoginScreen() {
   const router = useRouter();
   const { formData, errors, updateField, validateForm } = useLoginForm();
   const { signupFormData } = useSignupForm();
   const { login, googleLogin, isLoading } = useAuth();
 
-  // Centralized Google Sign-In using the store action
   const handleGoogleSignin = async () => {
     try {
       await GoogleSignin.hasPlayServices();
@@ -43,7 +43,7 @@ export default function LoginScreen() {
       if (isSuccessResponse(response)) {
         let idToken = response.data?.idToken;
 
-        // Sometimes idToken isn’t directly included
+        // Sometimes idToken isn’t directly included so we force fetch
         if (!idToken) {
           const tokens = await GoogleSignin.getTokens();
           idToken = tokens.idToken;
@@ -57,10 +57,10 @@ export default function LoginScreen() {
         console.log("ID Token:", idToken);
         console.log("User Info:", response.data?.user);
 
-        // Call the store action (handles backend + state)
+        // Calling the store action (handles backend + state)
         await googleLogin({
           idToken,
-          role: signupFormData?.role, // Only used if signing up
+          role: signupFormData?.role, // Only will be used if account dont exist 
         });
 
         Toast.show({
@@ -114,6 +114,7 @@ export default function LoginScreen() {
     }
   };
 
+  
   // Regular email/password login
   const handleLogin = async () => {
     if (!validateForm()) return;

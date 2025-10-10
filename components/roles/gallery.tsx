@@ -1,4 +1,5 @@
 import { ChevronRight, Images } from "@tamagui/lucide-icons";
+import { router } from "expo-router";
 import { Image as RNImage, StyleSheet } from "react-native";
 import { Button, Card, Text, XStack, YStack } from "tamagui";
 
@@ -7,6 +8,15 @@ const Gallery = ({ galleryImages = [], style }: { galleryImages?: string[]; styl
     galleryImages && galleryImages.length > 0
       ? galleryImages.slice(0, 3)
       : [require("../../assets/images/emptyGallery.png")];
+
+  const handleNavigate = () => {
+    router.push({
+      pathname: "/(tabs)/home/galleryAction",
+      params: {
+        images: JSON.stringify(galleryImages), // pass as string for URL safety
+      },
+    });
+  };
 
   return (
     <Card
@@ -69,6 +79,7 @@ const Gallery = ({ galleryImages = [], style }: { galleryImages?: string[]; styl
           borderColor="#0E0E55"
           borderRadius="$5"
           color="#0E0E55"
+          onPress={handleNavigate}
         >
           <Text color="#0E0E55">{galleryImages?.length || 0}</Text>
         </Button>
@@ -80,9 +91,12 @@ const Gallery = ({ galleryImages = [], style }: { galleryImages?: string[]; styl
 export default Gallery;
 
 const styles = StyleSheet.create({
- card:{ overflow: "hidden" ,   shadowColor: "#000",
+  card: {
+    overflow: "hidden",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-     elevation: 3,
+    elevation: 3,
     shadowOpacity: 0.15,
-    shadowRadius: 3, }
+    shadowRadius: 3,
+  },
 });

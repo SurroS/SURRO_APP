@@ -1,6 +1,6 @@
-import { Card, Text, YStack } from "tamagui";
-import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { StyleSheet, ViewStyle } from "react-native";
+import { AnimatedCircularProgress } from "react-native-circular-progress";
+import { Card, Text, YStack } from "tamagui";
 
 interface ProgressMeterProps {
   progress?: number;
@@ -9,8 +9,8 @@ interface ProgressMeterProps {
 }
 
 const ProgressMeter = ({
-  progress = 70,
-  label = "Profile Completion",
+  progress = 100,
+  label = "Please complete your profile",
   style,
 }: ProgressMeterProps) => {
   return (
@@ -23,12 +23,21 @@ const ProgressMeter = ({
       justifyContent="center"
       style={[styles.card, style]} // 👈 merge internal + external styles
     >
+      <Text
+        fontSize="$3"
+        color={progress < 70 ? "#ce9505ff" : "#0E0E55"}
+        textAlign="center"
+        fontWeight="600"
+        marginBottom="$2"
+      >
+        Profile completion
+      </Text>
       <YStack alignItems="center" justifyContent="center" gap="$2">
         <AnimatedCircularProgress
           size={80}
           width={6}
           fill={progress}
-          tintColor="#0E0E55"
+          tintColor={progress < 100 ? "#ce9505ff" : "#0E0E55"}
           backgroundColor="#E5E5F9"
           rotation={0}
           style={styles.circle}
@@ -37,7 +46,7 @@ const ProgressMeter = ({
             <Text
               fontSize="$5"
               fontWeight="700"
-              color="#0E0E55"
+              color={progress < 100 ? "#ce9505ff" : "#0E0E55"}
               textAlign="center"
             >
               {progress}%
@@ -47,7 +56,7 @@ const ProgressMeter = ({
 
         <Text
           fontSize="$3"
-          color="#8080FF"
+          color={progress < 100 ? "#ce9505ff" : "#0E0E55"}
           textAlign="center"
           fontWeight="600"
           marginTop="$2"
@@ -67,11 +76,9 @@ const styles = StyleSheet.create({
     height: 160,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-     elevation: 3,
+    elevation: 3,
     shadowOpacity: 0.15,
     shadowRadius: 3,
-   
-
   },
   circle: {
     justifyContent: "center",

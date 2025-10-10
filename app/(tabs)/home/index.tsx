@@ -46,7 +46,7 @@ export default function HomeIndex() {
         <YStack marginTop="$4" alignItems="center">
           <Button
             size="$4"
-            onPress={() => router.replace("/(tabs)/home/guessview")}
+            onPress={() => router.replace("/(tabs)/home/surrogateGuestView")}
           >
             Go to Guess View
           </Button>

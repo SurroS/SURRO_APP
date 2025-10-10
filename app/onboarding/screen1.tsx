@@ -178,7 +178,7 @@ export default function Screen2() {
               key={index}
               width={index === activeIndex ? 20 : 8}
               height={8}
-              borderRadius={12}
+              borderRadius={20}
               backgroundColor={index === activeIndex ? "$primary" : "$secondary"}
             />
           ))}

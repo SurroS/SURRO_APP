@@ -1,5 +1,5 @@
 // app/home/_layout.tsx
-import { Stack } from 'expo-router'
+import { Stack } from "expo-router";
 
 export default function HomeLayout() {
   return (
@@ -10,16 +10,9 @@ export default function HomeLayout() {
     >
       {/* Redirect entry (index) */}
       <Stack.Screen name="index" />
-
-      {/* Main page with images */}
-      <Stack.Screen name="HomeGallery" />
-
-      {/* Placeholder for future pages */}
-       <Stack.Screen name="GalleryScreen" />
-        <Stack.Screen name="InviteScreen" />
-
-       
-
+      <Stack.Screen name="galleryAction" />
+      <Stack.Screen name="inviteScreen" />
+      <Stack.Screen name="surrogateGuestView" />
     </Stack>
-  )
+  );
 }

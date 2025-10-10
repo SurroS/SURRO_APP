@@ -245,44 +245,6 @@ export default function InviteScreen() {
           </Text>
         </Button>
       </YStack>
-
-      {/* Bottom nav (visual only) */}
-      <XStack
-        justifyContent="space-around"
-        alignItems="center"
-        paddingVertical={12}
-        borderTopWidth={1}
-        borderTopColor="#EFEFEF"
-        backgroundColor="#fff"
-      >
-        <XStack alignItems="center">
-          <Ionicons name="home" size={20} color="#0E0E55" />
-          <Text marginLeft={6} color="#0E0E55">
-            Home
-          </Text>
-        </XStack>
-
-        <XStack alignItems="center">
-          <Ionicons name="chatbubble" size={20} color="#9AA0B0" />
-          <Text marginLeft={6} color="#9AA0B0">
-            Chat
-          </Text>
-        </XStack>
-
-        <XStack alignItems="center">
-          <Ionicons name="albums" size={20} color="#9AA0B0" />
-          <Text marginLeft={6} color="#9AA0B0">
-            Resources
-          </Text>
-        </XStack>
-
-        <XStack alignItems="center">
-          <Ionicons name="settings" size={20} color="#9AA0B0" />
-          <Text marginLeft={6} color="#9AA0B0">
-            Settings
-          </Text>
-        </XStack>
-      </XStack>
     </ScrollView>
   )
 }
