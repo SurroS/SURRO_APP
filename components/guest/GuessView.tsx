@@ -5,12 +5,12 @@ import { YStack, Text, Separator } from "tamagui";
 import { useRouter } from "expo-router";
 
 // Components
-import HeaderBar from "@/components/guess/HeaderBar";
-import ProfileCard from "@/components/guess/ProfileCard";
-import AboutSection from "@/components/guess/AboutSection";
-import ContactSection from "@/components/guess/ContactSection";
-import SocialsSection from "@/components/guess/SocialsSection";
-import GallerySection from "@/components/guess/GallerySection";
+import HeaderBar from "@/components/guest/HeaderBar";
+import ProfileCard from "@/components/guest/ProfileCard";
+import AboutSection from "@/components/guest/AboutSection";
+import ContactSection from "@/components/guest/ContactSection";
+import SocialsSection from "@/components/guest/SocialsSection";
+import GallerySection from "@/components/guest/GallerySection";
 
 const GuessView = () => {
   const router = useRouter();
