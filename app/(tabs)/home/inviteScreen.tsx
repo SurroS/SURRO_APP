@@ -1,55 +1,68 @@
-import { Ionicons } from '@expo/vector-icons'
-import { useRouter } from 'expo-router'
-import { useState } from 'react'
-import { Alert, Image, Linking, ScrollView } from 'react-native'
-import * as Clipboard from 'expo-clipboard'
-import { Button, Text, XStack, YStack } from 'tamagui'
+import { Ionicons } from "@expo/vector-icons";
+import * as Clipboard from "expo-clipboard";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import {
+  Alert,
+  Image,
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
+import { Button, Text, XStack, YStack } from "tamagui";
 
 export default function InviteScreen() {
-  const router = useRouter()
-  const [inviteLink] = useState('https://surrosantara.com/invite/12345')
-  const [copied, setCopied] = useState(false)
+  const router = useRouter();
+  const [inviteLink] = useState("https://surrosantara.com/invite/12345");
+  const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
     try {
-      await Clipboard.setStringAsync(inviteLink)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1800)
-      Alert.alert('Copied', 'Invite link copied to clipboard')
+      await Clipboard.setStringAsync(inviteLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+      Alert.alert("Copied", "Invite link copied to clipboard");
     } catch (e) {
-      console.error(e)
-      Alert.alert('Error', 'Failed to copy link')
+      console.error(e);
+      Alert.alert("Error", "Failed to copy link");
     }
-  }
+  };
 
-  const handleShare = (mode: 'whatsapp' | 'facebook' | 'mail' | 'x') => {
-    const encoded = encodeURIComponent(inviteLink)
+  const handleShare = (mode: "whatsapp" | "facebook" | "mail" | "x") => {
+    const encoded = encodeURIComponent(inviteLink);
     switch (mode) {
-      case 'whatsapp':
+      case "whatsapp":
         Linking.openURL(`whatsapp://send?text=${encoded}`).catch(() =>
-          Alert.alert('Unable', 'WhatsApp not available')
-        )
-        break
-      case 'facebook':
-        Linking.openURL(`https://www.facebook.com/sharer/sharer.php?u=${encoded}`)
-        break
-      case 'mail':
-        Linking.openURL(`mailto:?subject=Join%20me&body=${encoded}`)
-        break
-      case 'x':
-        Linking.openURL(`https://twitter.com/intent/tweet?text=${encoded}`)
-        break
+          Alert.alert("Unable", "WhatsApp not available")
+        );
+        break;
+      case "facebook":
+        Linking.openURL(
+          `https://www.facebook.com/sharer/sharer.php?u=${encoded}`
+        );
+        break;
+      case "mail":
+        Linking.openURL(`mailto:?subject=Join%20me&body=${encoded}`);
+        break;
+      case "x":
+        Linking.openURL(`https://twitter.com/intent/tweet?text=${encoded}`);
+        break;
     }
-  }
+  };
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: '#FFFFFF' }}
-      contentContainerStyle={{ padding: 16, alignItems: 'stretch' }}
+      style={{ flex: 1, backgroundColor: "#FFFFFF" }}
+      contentContainerStyle={{ padding: 16, alignItems: "stretch" }}
       showsVerticalScrollIndicator={false}
     >
       {/* Header */}
-      <XStack alignItems="center" justifyContent="space-between" marginBottom={18}>
+      <XStack
+        alignItems="center"
+        justifyContent="space-between"
+        marginBottom={18}
+      >
         <Button
           size="$3"
           backgroundColor="transparent"
@@ -75,7 +88,7 @@ export default function InviteScreen() {
           overflow="hidden"
           justifyContent="center"
           alignItems="center"
-          style={{ transform: [{ rotate: '-3deg' }] }}
+          style={{ transform: [{ rotate: "-3deg" }] }}
           backgroundColor="#FFF"
           shadowColor="#000"
           shadowOpacity={0.1}
@@ -83,14 +96,14 @@ export default function InviteScreen() {
           elevation={3}
         >
           <Image
-            source={require('@/assets/images/gift.png')}
-            style={{ width: 100, height: 100, resizeMode: 'contain' }}
+            source={require("@/assets/images/gift.png")}
+            style={{ width: 100, height: 100, resizeMode: "contain" }}
           />
         </YStack>
 
         <YStack flex={1} justifyContent="center" gap={8}>
           <Text fontSize={20} fontWeight="800" color="#0E0E55">
-            INVITE AND{'\n'}GET $5
+            INVITE AND{"\n"}GET $5
           </Text>
 
           <Button
@@ -98,7 +111,7 @@ export default function InviteScreen() {
             backgroundColor="#EBF4FE"
             borderRadius={12}
             alignSelf="flex-start"
-            onPress={() => Alert.alert('Redeem', 'Redeem flow placeholder')}
+            onPress={() => Alert.alert("Redeem", "Redeem flow placeholder")}
           >
             <Text color="#0E0E55" fontWeight="600">
               Redeem prize
@@ -127,70 +140,75 @@ export default function InviteScreen() {
             onPress={handleCopy}
           >
             <Text color="white" fontWeight="600">
-              {copied ? 'Copied' : 'Copy'}
+              {copied ? "Copied" : "Copy"}
             </Text>
           </Button>
         </XStack>
       </YStack>
 
       {/* Share buttons */}
-      <YStack marginBottom={20}>
+      <YStack marginBottom={35}>
         <Text fontSize={14} fontWeight="600" color="#0E0E55" marginBottom={8}>
           Share to
         </Text>
 
-        <XStack gap={12}>
-          <Button
-            backgroundColor="#FFFFFF"
-            borderRadius={12}
-            size="$3"
-            onPress={() => handleShare('whatsapp')}
-            style={{ paddingHorizontal: 12 }}
+        <XStack 
+          justifyContent="space-around"
+          alignItems={"center"}
+          height={40}
+        >
+          <Pressable
+            style={styles.pressable}
+            onPress={() => handleShare("whatsapp")}
           >
             <Image
-              source={require('@/assets/images/whatsapp.png')}
-              style={{ width: 22, height: 22 }}
+              source={require("@/assets/images/whatsapp1.png")}
+              style={styles.socialIcon}
             />
-          </Button>
+            <Text color="$text" fontSize={14}>
+              WhatsApp
+            </Text>
+          </Pressable>
 
-          <Button
-            backgroundColor="#FFFFFF"
-            borderRadius={12}
-            size="$3"
-            onPress={() => handleShare('x')}
-            style={{ paddingHorizontal: 12 }}
+          <Pressable
+          style={styles.pressable}
+            onPress={() => handleShare("x")} 
           >
-            <Image
-              source={require('@/assets/images/x-icon.png')}
-              style={{ width: 22, height: 22 }}
+            <Image source={require("@/assets/images/x_icon1.png")} 
+            style={styles.socialIcon}
             />
-          </Button>
+            
+            <Text color="$text" fontSize={14}>
+              X
+            </Text>
+          </Pressable>
 
-          <Button
-            backgroundColor="#FFFFFF"
-            borderRadius={12}
-            size="$3"
-            onPress={() => handleShare('facebook')}
-            style={{ paddingHorizontal: 12 }}
+          <Pressable
+            onPress={() => handleShare("facebook")} 
+            style={styles.pressable}
           >
             <Image
-              source={require('@/assets/images/facebook.png')}
-              style={{ width: 22, height: 22 }}
-            />
-          </Button>
+              source={require("@/assets/images/facebook1.png")}
+              style={styles.socialIcon}
 
-          <Button
-            backgroundColor="#FFFFFF"
-            borderRadius={12}
-            size="$3"
-            onPress={() => handleShare('mail')}
-            style={{ paddingHorizontal: 12 }}
+            />
+            <Text color="$text" fontSize={14}>
+              Facebook
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => handleShare("mail")}
+            style={styles.pressable}
           >
             <Image
-              source={require('@/assets/images/mail_icon.png')}
-              style={{ width: 22, height: 22 }}
+              source={require("@/assets/images/mail.png")}
+              style={styles.socialIcon}
             />
-          </Button>
+            <Text color="$text" fontSize={14}>
+              Mail
+            </Text>
+          </Pressable>
         </XStack>
       </YStack>
 
@@ -201,10 +219,26 @@ export default function InviteScreen() {
         </Text>
 
         {[
-          { step: 1, title: 'Invite a Friend', desc: 'Share your referral link above with a friend.' },
-          { step: 2, title: 'They Join', desc: 'Your friend registers and verifies their account.' },
-          { step: 3, title: 'They Take Action', desc: 'They complete a qualifying action to unlock your reward.' },
-          { step: 4, title: 'You Earn', desc: 'Your reward becomes available once all steps are done.' },
+          {
+            step: 1,
+            title: "Invite a Friend",
+            desc: "Share your referral link above with a friend.",
+          },
+          {
+            step: 2,
+            title: "They Join",
+            desc: "Your friend registers and verifies their account.",
+          },
+          {
+            step: 3,
+            title: "They Take Action",
+            desc: "They complete any of the following qualifying action to unlock your reward. \n* Subscribe to a package. \n*  Boost their profile \n*  Makes a purchase on the platform.",
+          },
+          {
+            step: 4,
+            title: "You Earn",
+            desc: "Your reward becomes available once all steps are done.",
+          },
         ].map(({ step, title, desc }) => (
           <XStack key={step} gap={10} alignItems="flex-start">
             <YStack
@@ -231,20 +265,11 @@ export default function InviteScreen() {
         ))}
       </YStack>
 
-      {/* Footer button */}
-      <YStack marginBottom={36} alignItems="center">
-        <Button
-          size="$4"
-          backgroundColor="#0E0E55"
-          borderRadius={12}
-          onPress={() => Alert.alert('Share', 'Open share sheet placeholder')}
-          style={{ width: 160 }}
-        >
-          <Text color="white" fontWeight="700">
-            Redeem all
-          </Text>
-        </Button>
-      </YStack>
     </ScrollView>
-  )
+  );
 }
+
+const styles = StyleSheet.create({
+  socialIcon: { width: 30, height: 30, margin: "auto" },
+  pressable:{ justifyContent: "center", alignItems:"center", margin:"auto" }
+});

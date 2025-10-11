@@ -173,7 +173,7 @@ export default function GalleryScreen() {
             <Ionicons
               name={isSelected ? "checkmark-circle" : "ellipse-outline"}
               size={26}
-              color={isSelected ? "#5555d4ff" : "$primary"}
+              color={isSelected ? "#09d814ff" : "#fff"}
             />
           </View>
         )}

@@ -54,7 +54,7 @@ const ProfileData = () => {
           onPress={handleStatusPress}
           style={[styles.statusButton,{backgroundColor: available? "#80cdb1ff":"#b4b4b3ff"}]}
         >
-          <Text color="black" fontSize="$3" fontWeight={'bold'} margin={"auto"} >
+          <Text color="black" fontSize="$3" fontWeight={'bold'} >
             {available? "Available" : "Not Available"}
           </Text>
         </TouchableOpacity>
@@ -68,6 +68,9 @@ export default ProfileData;
 const styles = StyleSheet.create({
   statusButton: { 
     borderRadius: 30,
-    height:"24%"
+    height:"24%",
+    flexGrow:0.5,
+    justifyContent:"center",
+    alignItems:"center"
   },
 });

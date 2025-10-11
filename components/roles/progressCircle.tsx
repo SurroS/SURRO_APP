@@ -5,7 +5,7 @@ import { Card, Text, YStack } from "tamagui";
 interface ProgressMeterProps {
   progress?: number;
   label?: string;
-  style?: ViewStyle; // 👈 allow styles from parent
+  style?: ViewStyle; // allow styles from parent
 }
 
 const ProgressMeter = ({
@@ -16,12 +16,12 @@ const ProgressMeter = ({
   return (
     <Card
       bordered
-      borderColor={"#a5a5a6ff"}
+      borderColor={"#E5E5E5"}
       padding="$2"
       borderRadius="$4"
       alignItems="center"
       justifyContent="center"
-      style={[styles.card, style]} // 👈 merge internal + external styles
+      style={[styles.card, style]} //  merge internal + external styles
     >
       <Text
         fontSize="$3"
