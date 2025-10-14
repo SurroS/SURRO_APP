@@ -63,7 +63,7 @@ export default function SurrogateScreen() {
           <YStack width={"48%"} gap={10}>
             <WalletCard style={{ width: "100%", height: 100 }} />
             <ProgressMeter
-              progress={0}
+              progress={90}
               style={{ width: "100%", height: 210 }}
             />
           </YStack>
