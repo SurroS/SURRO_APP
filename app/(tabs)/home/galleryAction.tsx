@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  Modal,
   BackHandler,
   ScrollView,
   Platform,
@@ -16,15 +15,35 @@ import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import BottomModal from "@/components/BottomModal";
+import { useGallery } from "@/hooks/useGallery";
 
 
 export default function GalleryScreen() {
   const router = useRouter();
-  const [images, setImages] = useState<string[]>([]);
+  const {
+    images: galleryImages,
+    isLoading,
+    isUploading,
+    error,
+    uploadImage,
+    fetchImages,
+    deleteImage
+  } = useGallery();
+
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  // Fetch images on component mount
+  useEffect(() => {
+    fetchImages(true); // Use cache by default
+  }, [fetchImages]);
+
+  const exitSelectionMode = useCallback(() => {
+    setSelectionMode(false);
+    setSelectedIndices([]);
+  }, []);
 
   // Request permission on first mount
   useEffect(() => {
@@ -55,12 +74,12 @@ export default function GalleryScreen() {
     };
     const sub = BackHandler.addEventListener("hardwareBackPress", onBack);
     return () => sub.remove();
-  }, [selectionMode, selectedIndices]);
+  }, [selectionMode, selectedIndices, exitSelectionMode]);
 
   // pickImage: always re-check permission first
   const pickImage = async () => {
     // Prevent adding beyond limit
-    if (images.length >= 4) return;
+    if (galleryImages.length >= 4) return;
 
     const perms = await ImagePicker.getMediaLibraryPermissionsAsync();
     if (!perms.granted) {
@@ -82,10 +101,25 @@ export default function GalleryScreen() {
     });
 
     if (!res.canceled && res.assets?.length) {
-      setImages((prev) => {
-        const next = [...prev, res.assets[0].uri];
-        return next.slice(0, 4);
-      });
+      try {
+        // Create FormData for upload
+        const formData = new FormData();
+        formData.append('image', {
+          uri: res.assets[0].uri,
+          type: 'image/jpeg',
+          name: 'image.jpg',
+        } as any);
+
+        // Upload image via API
+        await uploadImage(formData);
+
+        // Show success message
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 1400);
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        Alert.alert('Error', 'Failed to upload image. Please try again.');
+      }
     }
   };
 
@@ -111,24 +145,33 @@ export default function GalleryScreen() {
   };
 
   // Delete selected images
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (selectedIndices.length === 0) {
       setShowDeleteConfirm(false);
       return;
     }
-    // Remove by index; keep order of remaining
-    setImages((prev) => prev.filter((_, i) => !selectedIndices.includes(i)));
-    setSelectedIndices([]);
-    setSelectionMode(false);
-    setShowDeleteConfirm(false);
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 1400);
-  };
 
-  const exitSelectionMode = useCallback(() => {
-    setSelectionMode(false);
-    setSelectedIndices([]);
-  }, []);
+    try {
+      // Delete images by their IDs
+      const selectedImages = selectedIndices.map(index => galleryImages[index]);
+
+      // Delete each selected image
+      for (const image of selectedImages) {
+        await deleteImage(image.id);
+      }
+
+      // Clear selection and exit selection mode
+      setSelectedIndices([]);
+      setSelectionMode(false);
+      setShowDeleteConfirm(false);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 1400);
+    } catch (error) {
+      console.error('Error deleting images:', error);
+      Alert.alert('Error', 'Failed to delete images. Please try again.');
+      setShowDeleteConfirm(false);
+    }
+  };
 
   // Header back button handler
   const onHeaderBack = () => {
@@ -140,17 +183,20 @@ export default function GalleryScreen() {
   };
 
   // Render a single card (image or add)
-  const renderCard = (uriOrAdd: string | "add", idx: number) => {
-    if (uriOrAdd === "add") {
+  const renderCard = (imageOrAdd: any | "add", idx: number) => {
+    if (imageOrAdd === "add") {
       return (
         <TouchableOpacity
           key={"add"}
           style={[styles.card, styles.addCard]}
           activeOpacity={0.8}
           onPress={pickImage}
+          disabled={isUploading}
         >
           <Ionicons name="add-circle" size={44} color="#0E0E55" />
-          <RNText style={styles.addText}>Add image</RNText>
+          <RNText style={styles.addText}>
+            {isUploading ? "Uploading..." : "Add image"}
+          </RNText>
         </TouchableOpacity>
       );
     }
@@ -159,7 +205,7 @@ export default function GalleryScreen() {
 
     return (
       <TouchableOpacity
-        key={uriOrAdd}
+        key={imageOrAdd.id}
         activeOpacity={0.9}
         onLongPress={() => handleLongPress(idx)}
         onPress={() => {
@@ -167,7 +213,7 @@ export default function GalleryScreen() {
         }}
         style={styles.card}
       >
-        <Image source={{ uri: uriOrAdd }} style={styles.image} />
+        <Image source={{ uri: imageOrAdd.url }} style={styles.image} />
         {selectionMode && (
           <View style={styles.checkboxWrap} pointerEvents="none">
             <Ionicons
@@ -183,8 +229,8 @@ export default function GalleryScreen() {
 
   // prepare items to display: images + add (if < 4 && not in selection mode)
   const itemsToShow = [
-    ...images,
-    ...(images.length < 4 && !selectionMode ? (["add"] as const) : []),
+    ...galleryImages,
+    ...(galleryImages.length < 4 && !selectionMode ? (["add"] as const) : []),
   ];
 
   return (
@@ -202,11 +248,27 @@ export default function GalleryScreen() {
 
       {/* Grid area */}
       <ScrollView contentContainerStyle={styles.gridWrap}>
-        <View style={styles.grid}>
-          {itemsToShow.map((it, i) =>
-            it === "add" ? renderCard("add", i) : renderCard(it as string, i)
-          )}
-        </View>
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <RNText style={styles.loadingText}>Loading gallery...</RNText>
+          </View>
+        ) : error ? (
+          <View style={styles.errorContainer}>
+            <RNText style={styles.errorText}>Error: {error}</RNText>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={() => fetchImages(false)}
+            >
+              <RNText style={styles.retryText}>Retry</RNText>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.grid}>
+            {itemsToShow.map((item, i) =>
+              item === "add" ? renderCard("add", i) : renderCard(item, i)
+            )}
+          </View>
+        )}
       </ScrollView>
 
       {/* Action buttons */}
@@ -231,35 +293,35 @@ export default function GalleryScreen() {
       ) : null}
 
       <BottomModal
-  visible={showDeleteConfirm}
-  icon="trash"
-  iconColor="#BB2D21"
-  title="Delete images"
-  message="Confirm that you want to delete the selected image(s)"
-  buttons={[
-    {
-      label: "Dismiss",
-      color: "#E6E6E6",
-      textColor: "#0E0E55",
-      onPress: () => setShowDeleteConfirm(false),
-    },
-    {
-      label: "Delete",
-      color: "#BB2D21",
-      onPress: confirmDelete,
-    },
-  ]}
-  onClose={() => setShowDeleteConfirm(false)}
-/>
+        visible={showDeleteConfirm}
+        icon="trash"
+        iconColor="#BB2D21"
+        title="Delete images"
+        message="Confirm that you want to delete the selected image(s)"
+        buttons={[
+          {
+            label: "Dismiss",
+            color: "#E6E6E6",
+            textColor: "#0E0E55",
+            onPress: () => setShowDeleteConfirm(false),
+          },
+          {
+            label: "Delete",
+            color: "#BB2D21",
+            onPress: confirmDelete,
+          },
+        ]}
+        onClose={() => setShowDeleteConfirm(false)}
+      />
 
-{/* Success modal */}
-<BottomModal
-  visible={showSuccess}
-  success
-  title="Deleted"
-  message="Image(s) removed successfully."
-  onClose={() => setShowSuccess(false)}
-/>
+      {/* Success modal */}
+      <BottomModal
+        visible={showSuccess}
+        success
+        title="Deleted"
+        message="Image(s) removed successfully."
+        onClose={() => setShowSuccess(false)}
+      />
     </View>
   );
 }
@@ -364,4 +426,41 @@ const styles = StyleSheet.create({
   },
   modalBtnLight: { backgroundColor: "#F1F1F1" },
   modalBtnDanger: { backgroundColor: "#BB2D21" },
+
+  // Loading and error states
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 60,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: "#666",
+    fontWeight: "500",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 60,
+    paddingHorizontal: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    color: "#BB2D21",
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  retryButton: {
+    backgroundColor: "#0E0E55",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
 });
