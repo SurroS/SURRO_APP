@@ -1,3 +1,4 @@
+// components/guest/SocialsSection.tsx
 import React from 'react'
 import { YStack, XStack, Text, Image } from 'tamagui'
 import InstagramIcon from '../../assets/images/instagramsvg (1).svg'
@@ -12,7 +13,7 @@ const SocialsSection = () => {
     <YStack
       width="100%"
       borderBottomWidth={1}
-      borderColor="$secondray"
+      borderColor="$secondary" // subtle border color
       paddingBottom={20}
       gap="$3"
     >

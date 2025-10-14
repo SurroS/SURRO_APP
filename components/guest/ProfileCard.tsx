@@ -1,7 +1,9 @@
 import React from "react";
 import { YStack, XStack, Text, Image } from "tamagui";
+import { MapPin, Calendar } from "@tamagui/lucide-icons";
 
 const PROFILE_IMAGE = require("../../assets/images/profile-icon.png");
+const VERIFY_ICON = require("../../assets/images/verify-icon.png");
 
 const ProfileCard = () => {
   return (
@@ -21,7 +23,7 @@ const ProfileCard = () => {
           width={120}
           height={120}
           borderRadius={12}
-          resizeMode="cover" // or "cover" if you want it to fill
+          resizeMode="cover"
         />
       </YStack>
 
@@ -31,42 +33,43 @@ const ProfileCard = () => {
           <Text fontSize={18} fontWeight="700" color="$text">
             Michelle John
           </Text>
-          <YStack
-            backgroundColor="$success"
-            borderRadius={6}
-            padding={4}
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Text color="$white" fontSize={12}>
-              ✓
-            </Text>
-          </YStack>
+          {/* Verify Badge */}
+          <Image
+            source={VERIFY_ICON}
+            width={27.71}   // Figma width
+            height={32}     // Figma height
+            resizeMode="contain"
+          />
         </XStack>
 
         <Text color="$text">@Micah</Text>
 
+        {/* Location */}
         <XStack alignItems="center" gap={8}>
-          <Text>📍</Text>
+          <MapPin size={16} color="$text" />
           <Text color="$text">California</Text>
         </XStack>
 
+        {/* Age */}
         <XStack alignItems="center" gap={8}>
-          <Text>📅</Text>
+          <Calendar size={16} color="$text" />
           <Text color="$text">29 Years</Text>
         </XStack>
 
-        <YStack
-          backgroundColor="$success"
-          borderRadius={20}
-          paddingHorizontal={12}
+        {/* Available Badge */}
+        <XStack
+          width={107}
+          borderRadius={12}
           paddingVertical={4}
-          alignSelf="flex-start"
+          paddingHorizontal={14}
+          backgroundColor="#A6F4D8"
+          justifyContent="center"
+          alignItems="center"
         >
-          <Text color="$white" fontSize={12}>
+          <Text color="$text" fontSize={12}>
             Available
           </Text>
-        </YStack>
+        </XStack>
       </YStack>
     </XStack>
   );
