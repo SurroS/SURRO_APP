@@ -43,7 +43,7 @@ export const GalleryExample = () => {
 
                 // Create FormData for upload
                 const formData = new FormData();
-                formData.append('image', {
+                formData.append('files', {
                     uri: asset.uri,
                     type: 'image/jpeg',
                     name: 'image.jpg',

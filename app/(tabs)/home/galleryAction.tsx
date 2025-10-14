@@ -102,9 +102,9 @@ export default function GalleryScreen() {
 
     if (!res.canceled && res.assets?.length) {
       try {
-        // Create FormData for upload
+        // Create FormData for upload - backend expects 'files' array
         const formData = new FormData();
-        formData.append('image', {
+        formData.append('files', {
           uri: res.assets[0].uri,
           type: 'image/jpeg',
           name: 'image.jpg',

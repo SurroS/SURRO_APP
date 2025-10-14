@@ -35,6 +35,13 @@ The following endpoints are supported:
 - `GET /api/v1/gallery` - Get all gallery images
 - `DELETE /api/v1/gallery/{id}` - Delete specific image
 
+### Backend Data Format
+
+The backend expects image uploads in the following format:
+- **Field Name**: `files` (array of strings)
+- **Content Type**: `multipart/form-data`
+- **Structure**: `files[]` for multiple images or `files` for single image
+
 ## Caching Strategy
 
 The gallery API implements intelligent caching to minimize API calls:
@@ -74,7 +81,7 @@ const MyComponent = () => {
   // Upload an image
   const handleUploadImage = async (imageFile: File) => {
     const formData = new FormData();
-    formData.append('image', imageFile);
+    formData.append('files', imageFile); // Backend expects 'files' array
 
     try {
       await uploadImage(formData);
@@ -158,7 +165,7 @@ const ImageUploadComponent = () => {
         
         // Create FormData for upload
         const formData = new FormData();
-        formData.append('image', {
+        formData.append('files', {
           uri: asset.uri,
           type: 'image/jpeg',
           name: 'image.jpg',
