@@ -28,7 +28,7 @@ const SCREENS = {
     ADD_PAYMENT: 'AddPayment',
     ENTER_CARD_DETAILS: 'EnterCardDetails',
     PAYMENT_STATUS: 'PaymentStatus',
-    RECENT_ACTIVITIES: 'RecentActivities', // NEW SCREEN
+    RECENT_ACTIVITIES: 'RecentActivities', 
 };
 
 const COLORS = {
@@ -56,47 +56,38 @@ const COLORS = {
 const TransactionItem = ({ title, date, amount, type }) => {
     const isDebit = type === 'debit';
     const amountColor = isDebit ? COLORS.DEBIT_RED : COLORS.CREDIT_GREEN;
-    const iconBackgroundColor = isDebit ? COLORS.DEBIT_RED : COLORS.CREDIT_GREEN;
+    
+    let displayedIcon;
+    let iconBackgroundColor;
+
+    // --- ICON LOGIC (UPDATED) ---
+    if (title.includes('Account Top-up')) {
+        // Green circle with checkmark
+        displayedIcon = <Ionicons name="checkmark" size={24} color={COLORS.white} />;
+        iconBackgroundColor = COLORS.CREDIT_GREEN;
+    } else if (title.includes('Subscription renewal')) {
+        // Red circle for debit transactions
+        iconBackgroundColor = COLORS.DEBIT_RED;
+        
+        // Differentiate between the two red icons based on amount (as per screenshot)
+        if (amount === -100) {
+            // Document/list icon for the -100 transaction
+            displayedIcon = <Ionicons name="document-text-outline" size={20} color={COLORS.white} />;
+        } else {
+            // Arrow up-right icon for other debit renewals (-30, -360)
+            displayedIcon = <Ionicons name="arrow-up-right" size={20} color={COLORS.white} />;
+        }
+    } else {
+        // Default fallback
+        displayedIcon = <Ionicons name={isDebit ? 'arrow-up-outline' : 'arrow-down-outline'} size={20} color={COLORS.white} />;
+        iconBackgroundColor = isDebit ? COLORS.DEBIT_RED : COLORS.CREDIT_GREEN;
+    }
+    // ----------------------------
 
     const formattedAmount = Math.abs(amount).toLocaleString('en-US', {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
     });
-
-    let displayedIcon;
-    if (title.includes('Subscription renewal') && amount === -100) {
-        displayedIcon = (
-            <Ionicons
-                name="document-text-outline"
-                size={20}
-                color={COLORS.white}
-            />
-        );
-    } else if (title.includes('Subscription renewal')) {
-        displayedIcon = (
-            <Ionicons
-                name="arrow-up-right"
-                size={20}
-                color={COLORS.white}
-            />
-        );
-    } else if (title.includes('Top-up')) {
-        displayedIcon = (
-            <Ionicons
-                name="checkmark"
-                size={24}
-                color={COLORS.white}
-            />
-        );
-    } else {
-        displayedIcon = (
-            <Ionicons
-                name={isDebit ? 'arrow-up-outline' : 'arrow-down-outline'}
-                size={20}
-                color={COLORS.white}
-            />
-        );
-    }
 
 
     return (
@@ -598,8 +589,7 @@ const allMockTransactions = [
         title: 'Subscription renewal',
         date: '28-09-2025', // Grouping key
         dateDetails: 'Today', // Displayed subtext for summary
-        amount: -100,
-        iconName: 'document-text-outline',
+        amount: -100, // Specific amount to trigger the document icon
     },
     {
         id: 2,
@@ -608,7 +598,6 @@ const allMockTransactions = [
         date: '28-09-2025',
         dateDetails: 'Today',
         amount: 120,
-        iconName: 'checkmark',
     },
     {
         id: 3,
@@ -616,8 +605,7 @@ const allMockTransactions = [
         title: 'Subscription renewal',
         date: '28-09-2025',
         dateDetails: 'Today',
-        amount: -30,
-        iconName: 'arrow-up-right',
+        amount: -30, // Triggers the arrow icon
     },
     {
         id: 4,
@@ -626,7 +614,6 @@ const allMockTransactions = [
         date: '28-09-2025',
         dateDetails: 'Today',
         amount: 300,
-        iconName: 'checkmark',
     },
     {
         id: 5,
@@ -635,7 +622,6 @@ const allMockTransactions = [
         date: '28-09-2025',
         dateDetails: 'Today',
         amount: 125,
-        iconName: 'checkmark',
     },
     {
         id: 6,
@@ -643,8 +629,7 @@ const allMockTransactions = [
         title: 'Subscription renewal',
         date: '27-09-2025',
         dateDetails: 'Yesterday',
-        amount: -360,
-        iconName: 'arrow-up-right',
+        amount: -360, // Triggers the arrow icon
     },
     {
         id: 7,
@@ -653,25 +638,22 @@ const allMockTransactions = [
         date: '27-09-2025',
         dateDetails: 'Yesterday',
         amount: 15,
-        iconName: 'checkmark',
     },
     {
         id: 8,
         type: 'debit',
         title: 'Subscription renewal',
-        date: '26-09-2025', // Changed to match date format and sorting
-        dateDetails: '26 Sept 2025',
-        amount: -30,
-        iconName: 'arrow-up-right',
+        date: '26-10-2025', // Using a different month to demonstrate sorting
+        dateDetails: '26 Oct 2025',
+        amount: -30, // Triggers the arrow icon
     },
     {
         id: 9,
         type: 'credit',
         title: 'Account Top-up',
-        date: '26-09-2025',
-        dateDetails: '26 Sept 2025',
+        date: '26-10-2025',
+        dateDetails: '26 Oct 2025',
         amount: 12,
-        iconName: 'checkmark',
     },
 ];
 
@@ -842,7 +824,6 @@ export default function WalletFlowScreen() {
                                 date={tx.dateDetails}
                                 amount={tx.amount}
                                 type={tx.type}
-                                iconName={tx.iconName}
                             />
                         ))}
                     </YStack>
