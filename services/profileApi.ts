@@ -50,7 +50,7 @@ export const createSurrogateProfile = async (
     return makeAuthenticatedProfileRequest(
         // token,
         'POST',
-        'surrogates/profile',
+        '/surrogates/profile',
         profileData
     );
 };
@@ -62,7 +62,7 @@ export const updateSurrogateProfile = async (
     return makeAuthenticatedProfileRequest(
         // token,
         'PATCH',
-        'surrogates/profile',
+        '/surrogates/profile',
         profileData
     );
 };
@@ -71,7 +71,7 @@ export const getSurrogateProfile = async () => {
     return makeAuthenticatedProfileRequest(
         // token,
         'GET',
-        'surrogates/profile/me'
+        '/surrogates/profile/me'
     );
 };
 
@@ -82,7 +82,7 @@ export const updateMedicalProfile = async (
     return makeAuthenticatedProfileRequest(
         // token,
         'PATCH',
-        'surrogates/profile/medical',
+        '/surrogates/profile/medical',
         medicalData
     );
 };
@@ -93,7 +93,7 @@ export const uploadEndometriumImage = async (
 ) => {
     const token = await secureGet('auth_token')
     return profileApi.patch(
-        'surrogates/profile/medical/upload-endometrium',
+        '/surrogates/profile/medical/upload-endometrium',
         imageData,
         {
             headers: {
