@@ -46,11 +46,9 @@ The following endpoints are supported:
 
 ```typescript
 import { useProfile } from '@/hooks/useProfile';
-import { useAuth } from '@/hooks/useAuth';
 import { SurrogateProfile, SurrogateProfileUpdate } from '@/types/profile';
 
 const MyComponent = () => {
-  const { token } = useAuth();
   const { 
     surrogateProfile, 
     isLoading, 
@@ -91,7 +89,7 @@ const MyComponent = () => {
     };
 
     try {
-      await createProfile(token, profileData);
+      await createProfile(profileData);
       console.log('Profile created successfully');
     } catch (error) {
       console.error('Failed to create profile:', error);
@@ -107,7 +105,7 @@ const MyComponent = () => {
     };
 
     try {
-      await updateProfile(token, updateData);
+      await updateProfile(updateData);
       console.log('Profile updated successfully');
     } catch (error) {
       console.error('Failed to update profile:', error);
@@ -117,7 +115,7 @@ const MyComponent = () => {
   // Fetch current profile
   const handleFetchProfile = async () => {
     try {
-      await fetchProfile(token);
+      await fetchProfile();
       console.log('Profile fetched:', surrogateProfile);
     } catch (error) {
       console.error('Failed to fetch profile:', error);
@@ -152,7 +150,6 @@ const MyComponent = () => {
 import { useProfile } from '@/hooks/useProfile';
 
 const MedicalProfileComponent = () => {
-  const { token } = useAuth();
   const { 
     medicalProfile, 
     updateMedicalProfile, 
@@ -173,7 +170,7 @@ const MedicalProfileComponent = () => {
     };
 
     try {
-      await updateMedicalProfile(token, medicalData);
+      await updateMedicalProfile(medicalData);
       console.log('Medical profile updated successfully');
     } catch (error) {
       console.error('Failed to update medical profile:', error);
@@ -186,7 +183,7 @@ const MedicalProfileComponent = () => {
     formData.append('endometriumImage', imageFile);
 
     try {
-      await uploadEndometriumImage(token, formData);
+      await uploadEndometriumImage(formData);
       console.log('Endometrium image uploaded successfully');
     } catch (error) {
       console.error('Failed to upload image:', error);
@@ -275,6 +272,23 @@ The profile store uses Zustand with persistence, following the same pattern as t
 3. **Loading States**: Use the `isLoading` state to show loading indicators
 4. **Data Validation**: Validate form data before sending to the API
 5. **File Uploads**: Use FormData for image uploads, not JSON
+
+## Quick Usage Reference
+
+```typescript
+import { useProfile } from '@/hooks/useProfile';
+
+const { createProfile, updateProfile, fetchProfile, surrogateProfile } = useProfile();
+
+// Create profile
+await createProfile(profileData);
+
+// Update profile  
+await updateProfile({ firstName: 'New Name' });
+
+// Fetch profile
+await fetchProfile();
+```
 
 ## Testing
 

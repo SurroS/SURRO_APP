@@ -1,10 +1,7 @@
 import { ChevronDown } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
 import { Pressable, ScrollView, StyleSheet } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  withTiming,
-} from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { Accordion, Text, XStack, YStack } from "tamagui";
 import About from "../about";
 import Contact from "../contact";
@@ -74,7 +71,6 @@ export default function SurrogateScreen() {
           <YStack width={"48%"} gap={10}>
             <WalletCard style={{ width: "100%", height: 100 }} />
             <ProgressMeter
-              progress={90}
               style={{ width: "100%", height: 210 }}
             />
           </YStack>
@@ -101,12 +97,6 @@ function AccordionTriggerWithChevron({ title }: { title: string }) {
       height={48}
     >
       {({ open }: { open: boolean }) => {
-        const animatedStyle = useAnimatedStyle(() => ({
-          transform: [
-            { rotate: withTiming(open ? "180deg" : "0deg", { duration: 200 }) },
-          ],
-        }));
-
         return (
           <XStack
             alignItems="center"
@@ -117,7 +107,9 @@ function AccordionTriggerWithChevron({ title }: { title: string }) {
               <Text color="white" fontWeight="700" fontSize="$5">
                 {title}
               </Text>
-              <Animated.View style={animatedStyle}>
+              <Animated.View style={{
+                transform: [{ rotate: open ? "180deg" : "0deg" }]
+              }}>
                 <ChevronDown color="white" size={18} />
               </Animated.View>
             </XStack>

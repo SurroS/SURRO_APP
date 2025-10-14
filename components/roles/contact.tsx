@@ -1,5 +1,5 @@
-import { Feather, Ionicons } from "@expo/vector-icons";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { StyleSheet } from "react-native";
 import { Image, Text, XStack, YStack } from "tamagui";
 import InstagramIcon from "../../assets/images/instagramsvg (1).svg";
 import { useProfile } from "@/hooks/useProfile";
@@ -10,7 +10,6 @@ const body = "$3.2";
 const smallGap = "$2";
 const bigGap = "$3";
 const iconSize = 18;
-const addIcon = 25;
 
 const Contact = () => {
   const { surrogateProfile } = useProfile()
