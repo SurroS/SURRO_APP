@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { createProfileSlice } from './actions';
-import { ProfileState } from './actions';
+import { createProfileSlice, ProfileState } from './actions';
 import { ProfileStore } from './types';
 import { secureStorage } from '../middleware/persist';
 

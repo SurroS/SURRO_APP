@@ -22,13 +22,13 @@ export interface ProfileState {
 
 export interface ProfileActions {
     // Surrogate Profile Actions
-    createProfile: (token: string, profileData: SurrogateProfile) => Promise<void>;
-    updateProfile: (token: string, profileData: SurrogateProfileUpdate) => Promise<void>;
-    fetchProfile: (token: string) => Promise<void>;
+    createProfile: (profileData: SurrogateProfile) => Promise<void>;
+    updateProfile: (profileData: SurrogateProfileUpdate) => Promise<void>;
+    fetchProfile: () => Promise<void>;
 
     // Medical Profile Actions
-    updateMedicalProfile: (token: string, medicalData: MedicalProfileUpdate) => Promise<void>;
-    uploadEndometriumImage: (token: string, imageData: FormData) => Promise<void>;
+    updateMedicalProfile: (medicalData: MedicalProfileUpdate) => Promise<void>;
+    uploadEndometriumImage: (imageData: FormData) => Promise<void>;
 
     // Utility Actions
     clearError: () => void;
@@ -44,11 +44,11 @@ export const createProfileSlice: StateCreator<ProfileStore> = (set, get) => ({
     isLoading: false,
     error: null,
 
-    createProfile: async (token: string, profileData: SurrogateProfile) => {
+    createProfile: async (profileData: SurrogateProfile) => {
         try {
             set({ isLoading: true, error: null });
 
-            const response = await createSurrogateProfile(token, profileData);
+            const response = await createSurrogateProfile(profileData);
             const { profile } = response.data;
 
             set({
@@ -65,11 +65,11 @@ export const createProfileSlice: StateCreator<ProfileStore> = (set, get) => ({
         }
     },
 
-    updateProfile: async (token: string, profileData: SurrogateProfileUpdate) => {
+    updateProfile: async (profileData: SurrogateProfileUpdate) => {
         try {
             set({ isLoading: true, error: null });
 
-            const response = await updateSurrogateProfile(token, profileData);
+            const response = await updateSurrogateProfile(profileData);
             const { profile } = response.data;
 
             set({
@@ -86,11 +86,11 @@ export const createProfileSlice: StateCreator<ProfileStore> = (set, get) => ({
         }
     },
 
-    fetchProfile: async (token: string) => {
+    fetchProfile: async () => {
         try {
             set({ isLoading: true, error: null });
 
-            const response = await getSurrogateProfile(token);
+            const response = await getSurrogateProfile();
             const { profile, medicalProfile } = response.data;
 
             set({
@@ -108,11 +108,11 @@ export const createProfileSlice: StateCreator<ProfileStore> = (set, get) => ({
         }
     },
 
-    updateMedicalProfile: async (token: string, medicalData: MedicalProfileUpdate) => {
+    updateMedicalProfile: async (medicalData: MedicalProfileUpdate) => {
         try {
             set({ isLoading: true, error: null });
 
-            const response = await updateMedicalProfile(token, medicalData);
+            const response = await updateMedicalProfile(medicalData);
             const { medicalProfile } = response.data;
 
             set({
@@ -129,11 +129,11 @@ export const createProfileSlice: StateCreator<ProfileStore> = (set, get) => ({
         }
     },
 
-    uploadEndometriumImage: async (token: string, imageData: FormData) => {
+    uploadEndometriumImage: async (imageData: FormData) => {
         try {
             set({ isLoading: true, error: null });
 
-            const response = await uploadEndometriumImage(token, imageData);
+            const response = await uploadEndometriumImage(imageData);
             const { medicalProfile } = response.data;
 
             set({

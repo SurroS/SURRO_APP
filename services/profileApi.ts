@@ -1,3 +1,4 @@
+import { secureGet } from '@/utils/storage';
 import axios from 'axios';
 
 const API_BASE_URL =
@@ -12,11 +13,13 @@ const profileApi = axios.create({
 
 // Helper function for authenticated requests
 export const makeAuthenticatedProfileRequest = async (
-    token: string,
+    // token: string,
     method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE',
     endpoint: string,
     data?: any
 ) => {
+    const token = await secureGet('auth_token')
+
     const config = {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -41,55 +44,56 @@ export const makeAuthenticatedProfileRequest = async (
 
 // Profile API functions
 export const createSurrogateProfile = async (
-    token: string,
+    // token: string,
     profileData: any
 ) => {
     return makeAuthenticatedProfileRequest(
-        token,
+        // token,
         'POST',
-        '/api/v1/surrogates/profile',
+        'surrogates/profile',
         profileData
     );
 };
 
 export const updateSurrogateProfile = async (
-    token: string,
+    // token: string,
     profileData: any
 ) => {
     return makeAuthenticatedProfileRequest(
-        token,
+        // token,
         'PATCH',
-        '/api/v1/surrogates/profile',
+        'surrogates/profile',
         profileData
     );
 };
 
-export const getSurrogateProfile = async (token: string) => {
+export const getSurrogateProfile = async () => {
     return makeAuthenticatedProfileRequest(
-        token,
+        // token,
         'GET',
-        '/api/v1/surrogates/profile/me'
+        'surrogates/profile/me'
     );
 };
 
 export const updateMedicalProfile = async (
-    token: string,
+    // token: string,
     medicalData: any
 ) => {
     return makeAuthenticatedProfileRequest(
-        token,
+        // token,
         'PATCH',
-        '/api/v1/surrogates/profile/medical',
+        'surrogates/profile/medical',
         medicalData
     );
 };
 
 export const uploadEndometriumImage = async (
-    token: string,
+    // token: string,
     imageData: FormData
 ) => {
+    const token = await secureGet('auth_token')
     return profileApi.patch(
-        '/api/v1/surrogates/profile/medical/upload-endometrium',
+        'surrogates/profile/medical/upload-endometrium',
         imageData,
         {
             headers: {
