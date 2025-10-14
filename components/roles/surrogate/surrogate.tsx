@@ -13,8 +13,19 @@ import ProfileData from "../profile-data";
 import ProgressMeter from "../progressCircle";
 import Referral from "../referral";
 import WalletCard from "../wallet";
+import { useProfile } from "@/hooks/useProfile";
+import { useEffect } from "react";
 
 export default function SurrogateScreen() {
+  const {
+    fetchProfile,
+  } = useProfile();
+
+  // Fetch profile on component mount
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <YStack flex={1} gap="$3">

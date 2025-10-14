@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Input, Text, YStack, XStack } from 'tamagui';
 import { useProfile } from '@/hooks/useProfile';
-import { useAuth } from '@/hooks/useAuth';
 import { SurrogateProfile, SurrogateProfileUpdate } from '@/types/profile';
 
 // Example component showing how to use the profile APIs
 export const ProfileExample = () => {
-    const { token } = useAuth();
     const {
         surrogateProfile,
         medicalProfile,
@@ -49,10 +47,8 @@ export const ProfileExample = () => {
 
     // Fetch profile on component mount
     useEffect(() => {
-        if (token) {
-            fetchProfile(token);
-        }
-    }, [token, fetchProfile]);
+        fetchProfile();
+    }, [fetchProfile]);
 
     // Update form data when profile is loaded
     useEffect(() => {
@@ -62,10 +58,9 @@ export const ProfileExample = () => {
     }, [surrogateProfile]);
 
     const handleCreateProfile = async () => {
-        if (!token) return;
 
         try {
-            await createProfile(token, formData as SurrogateProfile);
+            await createProfile(formData as SurrogateProfile);
             console.log('Profile created successfully');
         } catch (error) {
             console.error('Failed to create profile:', error);
@@ -73,7 +68,6 @@ export const ProfileExample = () => {
     };
 
     const handleUpdateProfile = async () => {
-        if (!token) return;
 
         try {
             const updateData: SurrogateProfileUpdate = {
@@ -83,7 +77,7 @@ export const ProfileExample = () => {
                 // Add other fields as needed
             };
 
-            await updateProfile(token, updateData);
+            await updateProfile(updateData);
             console.log('Profile updated successfully');
         } catch (error) {
             console.error('Failed to update profile:', error);
@@ -91,8 +85,6 @@ export const ProfileExample = () => {
     };
 
     const handleUpdateMedicalProfile = async () => {
-        if (!token) return;
-
         try {
             const medicalData = {
                 genotype: 'AA',
@@ -105,7 +97,7 @@ export const ProfileExample = () => {
                 endometriumUploadUrl: 'https://example.com/endometrium.pdf'
             };
 
-            await updateMedicalProfile(token, medicalData);
+            await updateMedicalProfile(medicalData);
             console.log('Medical profile updated successfully');
         } catch (error) {
             console.error('Failed to update medical profile:', error);
