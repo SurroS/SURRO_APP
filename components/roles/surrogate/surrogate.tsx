@@ -1,10 +1,7 @@
 import { ChevronDown } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
 import { Pressable, ScrollView, StyleSheet } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  withTiming,
-} from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { Accordion, Text, XStack, YStack } from "tamagui";
 import About from "../about";
 import Contact from "../contact";
@@ -13,8 +10,19 @@ import ProfileData from "../profile-data";
 import ProgressMeter from "../progressCircle";
 import Referral from "../referral";
 import WalletCard from "../wallet";
+import { useProfile } from "@/hooks/useProfile";
+import { useEffect } from "react";
 
 export default function SurrogateScreen() {
+  const {
+    fetchProfile,
+  } = useProfile();
+
+  // Fetch profile on component mount
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <YStack flex={1} gap="$3">
@@ -63,7 +71,6 @@ export default function SurrogateScreen() {
           <YStack width={"48%"} gap={10}>
             <WalletCard style={{ width: "100%", height: 100 }} />
             <ProgressMeter
-              progress={0}
               style={{ width: "100%", height: 210 }}
             />
           </YStack>
@@ -90,12 +97,6 @@ function AccordionTriggerWithChevron({ title }: { title: string }) {
       height={48}
     >
       {({ open }: { open: boolean }) => {
-        const animatedStyle = useAnimatedStyle(() => ({
-          transform: [
-            { rotate: withTiming(open ? "180deg" : "0deg", { duration: 200 }) },
-          ],
-        }));
-
         return (
           <XStack
             alignItems="center"
@@ -106,7 +107,9 @@ function AccordionTriggerWithChevron({ title }: { title: string }) {
               <Text color="white" fontWeight="700" fontSize="$5">
                 {title}
               </Text>
-              <Animated.View style={animatedStyle}>
+              <Animated.View style={{
+                transform: [{ rotate: open ? "180deg" : "0deg" }]
+              }}>
                 <ChevronDown color="white" size={18} />
               </Animated.View>
             </XStack>

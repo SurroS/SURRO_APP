@@ -1,23 +1,27 @@
-import { Feather, Ionicons } from "@expo/vector-icons";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { StyleSheet } from "react-native";
 import { Image, Text, XStack, YStack } from "tamagui";
 import InstagramIcon from "../../assets/images/instagramsvg (1).svg";
+import { useProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/hooks/useAuth";
 
 const texthead = "$4";
 const body = "$3.2";
 const smallGap = "$2";
 const bigGap = "$3";
 const iconSize = 18;
-const addIcon = 25;
 
 const Contact = () => {
+  const { surrogateProfile } = useProfile()
+  const { user } = useAuth();
+
   const socials = [
     {
       icon: require("../../assets/images/fb-icon.png"),
-      label: "@mich123",
+      label: "@" + surrogateProfile?.facebookProfile,
       type: "png",
     },
-    { icon: InstagramIcon, label: "@mich123", type: "svg" },
+    { icon: InstagramIcon, label: "@" + surrogateProfile?.instagramProfile, type: "svg" },
   ];
   return (
     <YStack gap={smallGap} flex={1}>
@@ -30,13 +34,13 @@ const Contact = () => {
             <XStack alignItems="center" gap={smallGap}>
               <Feather name="phone" size={iconSize} color="#000" />
               <Text fontSize={body} color="black">
-                237650810984
+                {surrogateProfile ? surrogateProfile.phone1 : '237650810984'}
               </Text>
             </XStack>
             <XStack alignItems="center" gap={smallGap}>
               <Feather name="mail" size={iconSize} color="#000" />
               <Text fontSize={body} color="black">
-                surrogate@gmail.com
+                {user ? user?.email : 'surrogate@gmail.com'}
               </Text>
             </XStack>
           </XStack>
