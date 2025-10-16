@@ -2,8 +2,11 @@ import { Gift } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
 import { StyleSheet } from "react-native";
 import { Button, Card, Text, XStack, YStack } from "tamagui";
+import { useAuth } from "@/hooks/useAuth";
 
 const Referral = ({ style }: { style?: any }) => {
+  const { user } = useAuth();
+
   const handleInvite = () => {
     // 👇 Navigate to your invite screen
     router.push("/home/inviteScreen");
@@ -30,6 +33,17 @@ const Referral = ({ style }: { style?: any }) => {
         <Text color="#333" fontSize="$3.5" lineHeight={18}>
           and get rewarded
         </Text>
+
+        {user?.referralCode && (
+          <YStack gap="$1">
+            <Text color="#666" fontSize="$2.5">
+              Your referral code:
+            </Text>
+            <Text color="#0E0E55" fontSize="$3" fontWeight="600">
+              {user.referralCode}
+            </Text>
+          </YStack>
+        )}
 
         <Button
           backgroundColor="#0E0E55"

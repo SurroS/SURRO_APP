@@ -2,18 +2,26 @@ import { ChevronRight, Images } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
 import { Image as RNImage, StyleSheet } from "react-native";
 import { Button, Card, Text, XStack, YStack } from "tamagui";
+import { useGallery } from "@/hooks/useGallery";
+import { useEffect } from "react";
 
-const Gallery = ({ galleryImages = [], style }: { galleryImages?: string[]; style?: any }) => {
-  const displayImages =
-    galleryImages && galleryImages.length > 0
-      ? galleryImages.slice(0, 3)
-      : [require("../../assets/images/emptyGallery.png")];
+const Gallery = ({ style }: { style?: any }) => {
+  const { images, isLoading, fetchImages } = useGallery();
+
+  // Fetch images on component mount
+  useEffect(() => {
+    fetchImages(true); // Use cache by default
+  }, [fetchImages]);
+
+  const displayImages = images && images.length > 0
+    ? images.slice(0, 3).map(img => img.url)
+    : [require("../../assets/images/emptyGallery.png")];
 
   const handleNavigate = () => {
     router.push({
       pathname: "/(tabs)/home/galleryAction",
       params: {
-        images: JSON.stringify(galleryImages), // pass as string for URL safety
+        images: JSON.stringify(images.map(img => img.url)), // pass as string for URL safety
       },
     });
   };
@@ -80,8 +88,9 @@ const Gallery = ({ galleryImages = [], style }: { galleryImages?: string[]; styl
           borderRadius="$5"
           color="#0E0E55"
           onPress={handleNavigate}
+          disabled={isLoading}
         >
-          <Text color="#0E0E55">{galleryImages?.length || 0}</Text>
+          <Text color="#0E0E55">{images?.length || 0}</Text>
         </Button>
       </YStack>
     </Card>
