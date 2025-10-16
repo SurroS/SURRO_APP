@@ -14,7 +14,14 @@ import ProgressMeter from "../progressCircle";
 import Referral from "../referral";
 import WalletCard from "../wallet";
 
+
+
 export default function SurrogateScreen() {
+  const galleryImages = [
+    require("@/assets/images/couple-image.png"),
+    require("@/assets/images/couple-image.png"),
+    require("@/assets/images/couple-image.png"),
+  ]
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <YStack flex={1} gap="$3">
@@ -69,7 +76,7 @@ export default function SurrogateScreen() {
           </YStack>
 
           <YStack width={"48%"} gap={10}>
-            <Gallery style={{ width: "100%", height: 210 }} />
+            <Gallery galleryImages={galleryImages} style={{ width: "100%", height: 210 }} />
             <Referral style={{ width: "100%", height: 160 }} />
           </YStack>
         </XStack>

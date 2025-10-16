@@ -48,7 +48,7 @@ export default function ForgotPasswordScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
-        <ScreenHeader title="Forgot Password" onBackPress={() => router.back()} />
+        <ScreenHeader title="Forgot Password" style={{size:'$4'}} onBackPress={() => router.back()} />
 
         <Text style={styles.infoText}>
           Enter your email address and we&apos;ll send you a code to reset your password.

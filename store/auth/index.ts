@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { appStorage } from '@/utils/storage';
 import { createAuthSlice } from './actions';
 import { AuthState } from '@/types/auth';
 import { AuthStore } from './types';
-import { secureStorage } from '../middleware/persist';
 
 const initialState: AuthState = {
   user: null,
@@ -25,7 +25,7 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'auth-storage',
-      storage: createJSONStorage(() => secureStorage),
+      storage: createJSONStorage(() => appStorage),
       partialize: (state) => ({
         token: state.token,
         user: state.user,

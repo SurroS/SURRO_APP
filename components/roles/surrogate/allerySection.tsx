@@ -2,12 +2,12 @@ import { FlatList } from "react-native";
 import { Image, YStack } from "tamagui";
 
 // Local images (replace or load dynamically later)
-import gallery1 from "@/assets/images/gallery1.png";
 import {
+  default as gallery1,
   default as gallery2,
   default as gallery3,
   default as gallery4,
-} from "@/assets/images/gallery2.png";
+} from "@/assets/images/emptyGallery.png";
 
 // Sample array – replace with fetched URLs later
 const galleryImages = [gallery1, gallery2, gallery3, gallery4];

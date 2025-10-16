@@ -36,14 +36,14 @@ export default function LoginScreen() {
   const { login, googleLogin, isLoading } = useAuth();
 
   const handleGoogleSignin = async () => {
-    try {
+  try {
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
 
       if (isSuccessResponse(response)) {
         let idToken = response.data?.idToken;
 
-        // Sometimes idToken isn’t directly included so we force fetch
+        // Sometimes idToken isn’t directly included
         if (!idToken) {
           const tokens = await GoogleSignin.getTokens();
           idToken = tokens.idToken;
@@ -57,10 +57,10 @@ export default function LoginScreen() {
         console.log("ID Token:", idToken);
         console.log("User Info:", response.data?.user);
 
-        // Calling the store action (handles backend + state)
+        // Call the store action (handles backend + state)
         await googleLogin({
           idToken,
-          role: signupFormData?.role, // Only will be used if account dont exist 
+          role: signupFormData?.role, // Only used if signing up
         });
 
         Toast.show({
