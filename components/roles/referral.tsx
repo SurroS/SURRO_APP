@@ -23,14 +23,14 @@ const Referral = ({ style }: { style?: any }) => {
       {/* Header */}
       <XStack alignItems="center" gap="$2" marginBottom="$2">
         <Gift color="#0E0E55" size={18} />
-        <Text fontSize="$3.5" fontWeight="600" color="#0E0E55" padding={2}>
+        <Text fontSize="$3.2" fontWeight="600" color="#0E0E55" padding={2} textWrap="wrap">
           Invite your friends
         </Text>
       </XStack>
 
       {/* Content */}
       <YStack flex={1} justifyContent="center" alignItems="flex-start" gap="$3">
-        <Text color="#333" fontSize="$3.5" lineHeight={18}>
+        <Text color="#333" fontSize="$3.2" lineHeight={18}>
           and get rewarded
         </Text>
 
@@ -51,6 +51,7 @@ const Referral = ({ style }: { style?: any }) => {
           borderRadius="$5"
           fontWeight="600"
           paddingHorizontal="$4"
+          marginBottom={5}
           paddingVertical="$2"
           alignSelf="flex-start"
           onPress={handleInvite}

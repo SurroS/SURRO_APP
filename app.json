@@ -17,7 +17,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.surrosantara.mobile",
       "usesAppleSignIn": true,
-      "associatedDomains": ["applinks:surro.app"],
+      "associatedDomains": [
+        "applinks:surro.app"
+      ],
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSExceptionDomains": {
@@ -37,15 +39,22 @@
       "permissions": [
         "android.permission.USE_BIOMETRIC",
         "android.permission.USE_FINGERPRINT",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.INTERNET",
+        "android.permission.READ_CONTACTS",
+        "android.permission.WRITE_CONTACTS"
       ]
     },
     "plugins": [
       [
         "expo-build-properties",
         {
-          "ios": { "newArchEnabled": true },
-          "android": { "newArchEnabled": true }
+          "ios": {
+            "newArchEnabled": true
+          },
+          "android": {
+            "newArchEnabled": true
+          }
         }
       ],
       "expo-router",
@@ -59,7 +68,9 @@
       "expo-secure-store",
       [
         "expo-local-authentication",
-        { "faceIDPermission": "Allow Surro to use Face ID." }
+        {
+          "faceIDPermission": "Allow Surro to use Face ID."
+        }
       ],
       [
         "expo-image-picker",
@@ -70,14 +81,30 @@
       ],
       [
         "expo-contacts",
-        { "contactsPermission": "Allow Surro to access your contacts." }
+        {
+          "contactsPermission": "Allow Surro to access your contacts."
+        }
       ],
-      ["expo-document-picker", { "iCloudContainerEnvironment": "Production" }]
+      [
+        "expo-document-picker",
+        {
+          "iCloudContainerEnvironment": "Production"
+        }
+      ],
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.surrosantara.mobile",
+          "enableGooglePay": true,
+          "enableApplePay": true
+        }
+      ]
     ],
     "extra": {
       "eas": {
-        "projectId": "50b5b0d5-9fbd-46ea-8769-ca33f946ef88"
-      }
+        "projectId": "14e7d0ff-8bf2-46de-88f0-fd3bf12debda"
+      },
+      "router": {}
     }
   }
 }

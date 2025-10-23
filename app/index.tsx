@@ -30,6 +30,7 @@ export default function Index() {
       } else {
         // User is not authenticated, start with onboarding
         router.replace("/onboarding/screen1");
+        //  router.replace(`/(tabs)/home`);
 
       }
     }

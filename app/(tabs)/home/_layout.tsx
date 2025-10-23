@@ -13,7 +13,7 @@ export default function HomeLayout() {
       <Stack.Screen name="galleryAction" />
       <Stack.Screen name="inviteScreen" />
       <Stack.Screen name="surrogateGuestView" />
-      <Stack.Screen name="walletflow" />
+      <Stack.Screen name="walletFlow" />
     </Stack>
   );
 }

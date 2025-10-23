@@ -1,9 +1,9 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import { appStorage } from '@/utils/storage';
-import { createAuthSlice } from './actions';
-import { AuthState } from '@/types/auth';
-import { AuthStore } from './types';
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import Storage from "@/store/middleware/persist";
+import { createAuthSlice } from "./actions";
+import { AuthState } from "@/types/auth";
+import { AuthStore } from "./types";
 
 const initialState: AuthState = {
   user: null,
@@ -16,17 +16,17 @@ const initialState: AuthState = {
   referralSource: null,
   referralCode: null,
 };
-
+ 
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (...a) => ({
+    (set:any, get:any, api:any) => ({
       ...initialState,
-      ...createAuthSlice(...a),
+      ...createAuthSlice(set, get, api),
     }),
     {
-      name: 'auth-storage',
-      storage: createJSONStorage(() => appStorage),
-      partialize: (state) => ({
+      name: "auth-storage",
+      storage: createJSONStorage(() => Storage),
+      partialize: (state:any) => ({
         token: state.token,
         user: state.user,
         isAuthenticated: state.isAuthenticated,

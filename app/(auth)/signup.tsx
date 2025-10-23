@@ -18,6 +18,7 @@ import { PrimaryButton } from "../../components/auth/PrimaryButton";
 import { ScreenHeader } from "../../components/auth/ScreenHeader";
 import { SocialButton } from "../../components/auth/SocialButton";
 import { useSignupForm } from "../../hooks/auth/useSignupForm";
+import { SecureStore } from "expo-secure-store";
 
 
 import {
@@ -62,7 +63,7 @@ export default function SignupScreen() {
         console.log("====== GOOGLE LOGIN SUCCESS ======");
         console.log("ID Token:", idToken);
         console.log("User Info:", response.data?.user);
-
+ 
         // Call the store action (handles backend + state)
         await googleLogin({
           idToken,

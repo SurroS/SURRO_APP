@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useAuthStore } from '@/store/auth';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://localhost:8081';
 
@@ -8,5 +9,4 @@ const api = axios.create({
         'Content-Type': 'application/json',
     },
 });
-
 export default api;

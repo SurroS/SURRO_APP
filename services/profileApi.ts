@@ -13,33 +13,37 @@ const profileApi = axios.create({
 
 // Helper function for authenticated requests
 export const makeAuthenticatedProfileRequest = async (
-    // token: string,
-    method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE',
-    endpoint: string,
-    data?: any
+  method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE',
+  endpoint: string,
+  data?: any
 ) => {
-    const token = await secureGet('auth_token')
+  const token = await secureGet('auth_token');
 
-    const config = {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    };
+  if (!token) {
+    console.warn('No token found in SecureStore — user might be logged out.');
+    throw new Error('Authentication token missing.');
+  }
 
-    switch (method) {
-        case 'GET':
-            return profileApi.get(endpoint, config);
-        case 'POST':
-            return profileApi.post(endpoint, data, config);
-        case 'PATCH':
-            return profileApi.patch(endpoint, data, config);
-        case 'PUT':
-            return profileApi.put(endpoint, data, config);
-        case 'DELETE':
-            return profileApi.delete(endpoint, config);
-        default:
-            throw new Error(`Unsupported HTTP method: ${method}`);
-    }
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+
+  switch (method) {
+    case 'GET':
+      return profileApi.get(endpoint, config);
+    case 'POST':
+      return profileApi.post(endpoint, data, config);
+    case 'PATCH':
+      return profileApi.patch(endpoint, data, config);
+    case 'PUT':
+      return profileApi.put(endpoint, data, config);
+    case 'DELETE':
+      return profileApi.delete(endpoint, config);
+    default:
+      throw new Error(`Unsupported HTTP method: ${method}`);
+  }
 };
 
 // Profile API functions

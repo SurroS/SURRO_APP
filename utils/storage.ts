@@ -25,66 +25,53 @@
 //     }
 // };
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Platform } from "react-native";
+import Constants from "expo-constants";
 
-const ENV = process.env.APP_ENV ?? "development";
+const APP_ENV =
+  Constants.expoConfig?.extra?.appEnv ||
+  process.env.EXPO_PUBLIC_APP_ENV ||
+  "development";
 
-const getStorageEngine = () => {
-  if (ENV === "production") {
-    return {
-      getItem: async (key: string) => {
-        try {
-          const value = await SecureStore.getItemAsync(key);
-          return value ? JSON.parse(value) : null;
-        } catch (error) {
-          console.error("[SecureStore:getItem]", error);
-          return null;
-        }
-      },
-      setItem: async (key: string, value: any) => {
-        try {
-          await SecureStore.setItemAsync(key, JSON.stringify(value));
-        } catch (error) {
-          console.error("[SecureStore:setItem]", error);
-        }
-      },
-      removeItem: async (key: string) => {
-        try {
-          await SecureStore.deleteItemAsync(key);
-        } catch (error) {
-          console.error("[SecureStore:removeItem]", error);
-        }
-      },
-    };
-  } else {
-    // Use AsyncStorage for dev / preview to persist data easily between builds
-    return {
-      getItem: async (key: string) => {
-        try {
-          const value = await AsyncStorage.getItem(key);
-          return value ? JSON.parse(value) : null;
-        } catch (error) {
-          console.error("[AsyncStorage:getItem]", error);
-          return null;
-        }
-      },
-      setItem: async (key: string, value: any) => {
-        try {
-          await AsyncStorage.setItem(key, JSON.stringify(value));
-        } catch (error) {
-          console.error("[AsyncStorage:setItem]", error);
-        }
-      },
-      removeItem: async (key: string) => {
-        try {
-          await AsyncStorage.removeItem(key);
-        } catch (error) {
-          console.error("[AsyncStorage:removeItem]", error);
-        }
-      },
-    };
+// Check if we're in dev mode (Expo Go or local)
+const isDev = __DEV__ || APP_ENV === "development";
+
+// Use AsyncStorage in dev for easier debugging
+
+export const secureSet = async (key: string, value: string) => {
+  try {
+    if (isDev) {
+      await AsyncStorage.setItem(key, value);
+    } else {
+      await SecureStore.setItemAsync(key, value);
+    }
+  } catch (error) {
+    console.error("Storage setItem error:", error);
+  }
+};
+export const secureGet = async (key: string): Promise<string | null> => {
+  try {
+    if (isDev) {
+      return await AsyncStorage.getItem(key);
+    } else {
+      return await SecureStore.getItemAsync(key);
+    }
+  } catch (error) {
+    console.error("Storage getItem error:", error);
+    return null;
   }
 };
 
-export const appStorage = getStorageEngine();
+export const secureDelete = async (key: string) => {
+  try {
+    if (isDev) {
+      await AsyncStorage.removeItem(key);
+    } else {
+      await SecureStore.deleteItemAsync(key);
+    }
+  } catch (error) {
+    console.error("Storage removeItem error:", error);
+  }
+};

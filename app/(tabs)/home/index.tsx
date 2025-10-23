@@ -19,7 +19,7 @@ export default function HomeIndex() {
         <YStack justifyContent="center" alignItems="flex-end">
           <MaterialCommunityIcons name="bell-outline" size={24} color="black" />
         </YStack>
-
+       <SurrogateScreen />
         {/* Role-based content */}
         {Role === 'SURROGATE' ? (
           <>

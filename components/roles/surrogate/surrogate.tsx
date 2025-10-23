@@ -82,9 +82,9 @@ export default function SurrogateScreen() {
             />
           </YStack>
 
-          <YStack width={"48%"} gap={10}>
+          <YStack width={"48%"} gap={10} flexGrow={1} >
             <Gallery  style={{ width: "100%", height: 210 }} />
-            <Referral style={{ width: "100%", height: 160 }} />
+            <Referral style={{ width: "100%", height: 160, padding:4}} />
           </YStack>
         </XStack>
       </YStack>

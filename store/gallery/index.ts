@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { createGallerySlice, GalleryState } from './actions';
 import { GalleryStore } from './types';
-import { secureStorage } from '../middleware/persist';
+import Storage  from '../middleware/persist';
 
 const initialState: GalleryState = {
     images: [],
@@ -20,7 +20,7 @@ export const useGalleryStore = create<GalleryStore>()(
         }),
         {
             name: 'gallery-storage',
-            storage: createJSONStorage(() => secureStorage),
+            storage: createJSONStorage(() => Storage),
             partialize: (state) => ({
                 images: state.images,
                 lastFetched: state.lastFetched,

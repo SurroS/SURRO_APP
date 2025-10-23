@@ -33,7 +33,6 @@ const Galleryview = () => {
           borderRadius={12}
           overflow="hidden"
           marginBottom="$3"
-          backgroundColor={'blue'}
         >
           <Image
             source={item}

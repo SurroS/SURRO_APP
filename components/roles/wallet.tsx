@@ -9,10 +9,10 @@ const WalletCard = ({ style }: any) => {
   return (
     // Set href to the simple router path: /walletflow
     <Link 
-      href="/home/walletflow" 
+      href="/home/walletFlow" 
       asChild // Pass press behavior down to the TouchableOpacity
     >
-      <TouchableOpacity activeOpacity={0.85} style={{ flex: 1 }}>
+      <TouchableOpacity activeOpacity={0.85} style={{ flex: 1, }}>
         <Card bordered overflow="hidden" borderRadius="$4" style={[style, styles.card]}>
           <ImageBackground
             source={require("../../assets/images/wallet_Bg.png")}
