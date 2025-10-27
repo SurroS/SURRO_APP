@@ -90,14 +90,6 @@
         {
           "iCloudContainerEnvironment": "Production"
         }
-      ],
-      [
-        "@stripe/stripe-react-native",
-        {
-          "merchantIdentifier": "merchant.com.surrosantara.mobile",
-          "enableGooglePay": true,
-          "enableApplePay": true
-        }
       ]
     ],
     "extra": {

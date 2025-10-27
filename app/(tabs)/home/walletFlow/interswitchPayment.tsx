@@ -11,7 +11,7 @@ export default function InterswitchPaymentScreen() {
     <View style={{ flex: 1 }}>
       <WebView
         source={{ uri: paymentUrl }}
-        onNavigationStateChange={(navState) => {
+        onNavigationStateChange={(navState:any) => {
           if (navState.url.includes("payment/success")) {
             router.back();
           }

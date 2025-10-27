@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text } from "react-native";
-import { PaystackWebView } from "react-native-paystack-webview";
+// import { PaystackWebView } from "react-native-paystack-webview";
 import { useRouter } from "expo-router";
 
 export default function PaystackPaymentScreen() {
@@ -12,7 +12,7 @@ export default function PaystackPaymentScreen() {
         Paystack Payment
       </Text>
 
-      <PaystackWebView
+      {/* <PaystackWebView
         showPayButton={true}
         paystackKey="pk_test_your_public_key"
         amount={5000} // NGN 5000
@@ -29,7 +29,7 @@ export default function PaystackPaymentScreen() {
           router.back();
         }}
         autoStart={false} // Set true if you want it to start immediately
-      />
+      /> */}
     </View>
   );
 }
