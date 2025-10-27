@@ -80,7 +80,7 @@ export default function HowDidYouHear() {
         setReferralInfo(selectedSource);
       }
     }
-    router.replace("/(auth)/signup");
+    router.push("/(auth)/signup");
   };
 
   return (
@@ -160,7 +160,7 @@ export default function HowDidYouHear() {
             height={55}
             borderRadius={8}
             backgroundColor="$secondary"
-            onPress={() => router.push("/(tabs)/home/guessview")}
+            onPress={() => router.push("/(auth)/signup")}
           >
             <Text color="$color12" fontWeight="600">
               Skip

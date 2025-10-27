@@ -1,27 +1,50 @@
+import { useProfile } from "@/hooks/useProfile";
 import { StyleSheet, ViewStyle } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { Card, Text, YStack } from "tamagui";
 
 interface ProgressMeterProps {
-  progress?: number;
-  label?: string;
-  style?: ViewStyle; // 👈 allow styles from parent
+  style?: ViewStyle; // allow styles from parent
 }
 
-const ProgressMeter = ({
-  progress = 100,
-  label = "Please complete your profile",
-  style,
-}: ProgressMeterProps) => {
+const ProgressMeter = ({ style }: ProgressMeterProps) => {
+  const { surrogateProfile } = useProfile();
+
+  // Calculate profile completion percentage
+  const calculateProgress = () => {
+    if (!surrogateProfile) return 0;
+
+    const fields = [
+      'firstName', 'lastName', 'userName', 'countryOfOrigin', 'aboutMe',
+      'dateOfBirth', 'maritalStatus', 'height', 'weight', 'profilePicture',
+      'numberOfChildren', 'countryOfResidence', 'stateOfOrigin', 'address',
+      'zipCode', 'phone1', 'phone2', 'emergencyContactPhone',
+      'emergencyContactRelation', 'facebookProfile', 'instagramProfile',
+      'twitterProfile', 'threadsProfile'
+    ];
+
+    const completedFields = fields.filter(field => {
+      const value = surrogateProfile[field as keyof typeof surrogateProfile];
+      return value !== null && value !== undefined && value !== '';
+    });
+
+    return Math.round((completedFields.length / fields.length) * 100);
+  };
+
+  const progress = calculateProgress();
+  const label = progress < 100
+    ? "Please complete your profile"
+    : "Profile completed!";
+
   return (
     <Card
       bordered
-      borderColor={"#a5a5a6ff"}
+      borderColor={"#E5E5E5"}
       padding="$2"
       borderRadius="$4"
       alignItems="center"
       justifyContent="center"
-      style={[styles.card, style]} // 👈 merge internal + external styles
+      style={[styles.card, style]} //  merge internal + external styles
     >
       <Text
         fontSize="$3"

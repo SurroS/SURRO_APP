@@ -1,24 +1,28 @@
-import { useAuth } from "@/hooks/useAuth";
-import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useProfile } from "@/hooks/useProfile";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { Image, Text, XStack, YStack } from "tamagui";
 
 const ProfileData = () => {
-  const { user } = useAuth();
+  const { surrogateProfile, updateProfile } = useProfile();
 
-  const [available, setAvailable] = useState<boolean>(true);
-  const handleStatusPress = () => {
-    setAvailable(!available);
-    console.log("Status pressed:", available);
+  const handleStatusPress = async () => {
+    if (surrogateProfile) {
+      try {
+        await updateProfile({ isAvailable: !surrogateProfile.isAvailable });
+        console.log("Status updated:", !surrogateProfile.isAvailable);
+      } catch (error) {
+        console.error("Failed to update status:", error);
+      }
+    }
   };
 
   return (
     <XStack margin={2} gap="$4" alignItems="flex-start" height={150} flex={1}>
       <Image
         source={
-          user?.profilePictureUrl
-            ? { uri: user.profilePictureUrl }
+          surrogateProfile?.profilePicture
+            ? { uri: surrogateProfile.profilePicture }
             : require("@/assets/images/avatar.jpg")
         }
         width={"45%"}
@@ -29,33 +33,31 @@ const ProfileData = () => {
       <YStack gap="$3">
         <XStack alignItems="center" gap="$2">
           <Text color="black" fontSize="$4" fontWeight={"bold"} textWrap="wrap">
-            {user?.username || user?.name || "User Name"}
+            {surrogateProfile ? `${surrogateProfile.firstName} ${surrogateProfile.lastName}` : "User Name"}
           </Text>
-          {user?.isVerified && (
-            <MaterialIcons name="verified" size={19} color="#0E0E55" />
-          )}
+          {/* Add verification status if available */}
         </XStack>
 
         <XStack alignItems="center" gap="$2">
           <Ionicons name="location-outline" size={19} color="#666" />
           <Text color="black" fontSize="$3">
-            {user?.location || "Location not set"}
+            {surrogateProfile?.countryOfResidence || "Location not set"}
           </Text>
         </XStack>
 
         <XStack alignItems="center" gap="$2">
           <Feather name="calendar" size={19} color="#666" />
           <Text color="black" fontSize="$3">
-            {user?.dob || "DOB not set"}
+            {surrogateProfile?.dateOfBirth || "DOB not set"}
           </Text>
         </XStack>
 
         <TouchableOpacity
           onPress={handleStatusPress}
-          style={[styles.statusButton,{backgroundColor: available? "#80cdb1ff":"#b4b4b3ff"}]}
+          style={[styles.statusButton, { backgroundColor: surrogateProfile?.isAvailable ? "#80cdb1ff" : "#b4b4b3ff" }]}
         >
-          <Text color="black" fontSize="$3" fontWeight={'bold'} margin={"auto"} >
-            {available? "Available" : "Not Available"}
+          <Text color="black" fontSize="$3" fontWeight={'bold'} >
+            {surrogateProfile?.isAvailable ? "Available" : "Not Available"}
           </Text>
         </TouchableOpacity>
       </YStack>
@@ -66,8 +68,11 @@ const ProfileData = () => {
 export default ProfileData;
 
 const styles = StyleSheet.create({
-  statusButton: { 
+  statusButton: {
     borderRadius: 30,
-    height:"24%"
+    height: "24%",
+    flexGrow: 0.5,
+    justifyContent: "center",
+    alignItems: "center"
   },
 });

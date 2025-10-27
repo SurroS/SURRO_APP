@@ -1,49 +1,124 @@
-import { useAuth } from '@/hooks/useAuth';
-import { Button, Text, YStack } from 'tamagui';
+import { ChevronDown } from "@tamagui/lucide-icons";
+import { router } from "expo-router";
+import { Pressable, ScrollView, StyleSheet } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
+import { Accordion, Text, XStack, YStack } from "tamagui";
+import About from "../about";
+import Contact from "../contact";
+import Gallery from "../gallery";
+import ProfileData from "../profile-data";
+import ProgressMeter from "../progressCircle";
+import Referral from "../referral";
+import WalletCard from "../wallet";
 
 export default function AgentScreen() {
-  const { user, logout } = useAuth();
-
   return (
-    <YStack justifyContent="center" alignItems="center" padding="$4">
-      <Text
-        fontSize="$6"
-        fontWeight="bold"
-        marginBottom="$4"
-        color="$primary"
-      >
-        Agent Dashboard
-      </Text>
+    <ScrollView contentContainerStyle={styles.container}>
+      <YStack flex={1} gap="$3">
+        <ProfileData />
 
-      {user && (
-        <YStack alignItems="center" marginBottom="$4">
-          <Text color={"balck"} fontSize="$4" marginBottom="$2">
-            Welcome, {user.name}!
-          </Text>
-          <Text color={"balck"} fontSize="$3" >
-            Email: {user.email}
-          </Text>
-          <Text color={"balck"} fontSize="$3">
-            Role: {user.role}
-          </Text>
-          <Text color={"balck"} fontSize="$3" >
-            Verified: {user.isVerified ? 'Yes' : 'No'}
-          </Text>
-        </YStack>
-      )}
+        {/* Accordion for About + Contact */}
+        <Accordion
+          type="single"
+          collapsible
+          defaultValue={undefined} // keeps closed initially
+          borderTopStartRadius={10}
+          borderTopEndRadius={10}
+          overflow="hidden"
+        >
+          <Accordion.Item value="profile-info">
+            <AccordionTriggerWithChevron title="Profile Information" />
+            <Accordion.Content backgroundColor="white" padding="$3">
+              <YStack gap="$3">
+                <About />
+                <Contact />
+              </YStack>
+            </Accordion.Content>
+          </Accordion.Item>
+        </Accordion>
 
-      <Text marginBottom="$4" textAlign="center" color={'black'}>
-        This is the Agents dashboard screen. Here you can manage your Agent&apos;s journey.
-      </Text>
+        <Pressable
+          onPress={() => router.push("/(tabs)/home/surrogateGuestView")}
+        >
+          <Text
+            color="black"
+            fontWeight="bold"
+            textDecorationLine="underline"
+            textDecorationColor="#0E0E55"
+            marginBottom={8}
+          >
+            View profile as guest
+          </Text>
+        </Pressable>
+        {/* Floating Card Section */}
+        <XStack
+          flexWrap="wrap"
+          justifyContent="flex-end"
+          alignContent="flex-start"
+          gap={10}
+        >
+          <YStack width={"48%"} gap={10}>
+            <WalletCard style={{ width: "100%", height: 100 }} />
+            <ProgressMeter
+              progress={0}
+              style={{ width: "100%", height: 210 }}
+            />
+          </YStack>
 
-      <Button
-        onPress={logout}
-        backgroundColor="$red10"
-        color="white"
-        marginTop="$4"
-      >
-        Logout
-      </Button>
-    </YStack>
+          <YStack width={"48%"} gap={10}>
+            <Gallery style={{ width: "100%", height: 210 }} />
+            <Referral style={{ width: "100%", height: 160 }} />
+          </YStack>
+        </XStack>
+      </YStack>
+    </ScrollView>
   );
 }
+
+/** Custom trigger with animated Chevron */
+function AccordionTriggerWithChevron({ title }: { title: string }) {
+  return (
+    <Accordion.Trigger
+      backgroundColor="#0E0E55"
+      paddingVertical="$2"
+      paddingHorizontal="$4"
+      alignItems="center"
+      justifyContent="space-between"
+      height={48}
+    >
+      {({ open }: { open: boolean }) => {
+        const animatedStyle = useAnimatedStyle(() => ({
+          transform: [
+            { rotate: withTiming(open ? "180deg" : "0deg", { duration: 200 }) },
+          ],
+        }));
+
+        return (
+          <XStack
+            alignItems="center"
+            justifyContent="space-between"
+            width="100%"
+          >
+            <XStack alignItems="center" justifyContent="space-between">
+              <Text color="white" fontWeight="700" fontSize="$5">
+                {title}
+              </Text>
+              <Animated.View style={animatedStyle}>
+                <ChevronDown color="white" size={18} />
+              </Animated.View>
+            </XStack>
+          </XStack>
+        );
+      }}
+    </Accordion.Trigger>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    paddingBottom: 40,
+  },
+});
