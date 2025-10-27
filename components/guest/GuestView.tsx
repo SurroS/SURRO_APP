@@ -1,46 +1,63 @@
-// components/guess/GuessView.tsx
-import { useRouter } from "expo-router";
-import { ScrollView, Pressable } from "react-native";
-import { Text, YStack } from "tamagui";
+// components/guest/surrogateGuestView.tsx
+import React from "react"
+import { SafeAreaView } from "react-native-safe-area-context"
+import { ScrollView } from "react-native"
+import { YStack, Text, Separator } from "tamagui"
 
 // Components
-import AboutSection from "@/components/guest/AboutSection";
-import Contact from "@/components/roles/contact";
-import ProfileData from "@/components/roles/profile-data";
-import GallerySection from "../roles/surrogate/allerySection";
+import HeaderBar from "@/components/guest/HeaderBar"
+import ProfileCard from "@/components/guest/ProfileCard"
+import AboutSection from "@/components/guest/AboutSection"
+import ContactSection from "@/components/guest/ContactSection"
+import SocialsSection from "@/components/guest/SocialsSection"
+import GallerySection from "@/components/guest/GallerySection"
 
-const GuessView = () => {
-  const router = useRouter();
+// Constants
+import { Colors } from "@/constants/Colors"
 
+export default function SurrogateGuestView() {
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ flexGrow: 1 }}
-    >
-      <YStack
-        flex={1}
-        backgroundColor="$background"
-        paddingHorizontal={20}
-        paddingTop={12}
-        gap="$4"
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.light.background }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ flexGrow: 1 }}
       >
-        {/* Profile Sections */}
-        <ProfileData />
-        <AboutSection />
-        <Contact />
+        <YStack
+          flex={1}
+          backgroundColor={Colors.light.background}
+          paddingHorizontal="$4"
+          paddingTop="$3"
+          gap="$4"
+        >
+          {/* Header */}
+          <HeaderBar />
 
-        {/* Gallery Section */}
-        <YStack gap="$3" paddingVertical="$2">
-          <Pressable onPress={()=>router.back()}>
-          <Text color="$text" fontWeight="600" textDecorationLine="underline">
-            Back to default view
-          </Text>
-          </Pressable>
-          <GallerySection />
+          {/* Profile Info */}
+          <ProfileCard />
+
+          {/* About Section */}
+          <AboutSection />
+
+          {/* Separator (subtle) */}
+          <Separator
+            width="100%"
+            borderColor="$secondary"  // same subtle color used in other sections
+            opacity={0.9}            // makes it almost invisible
+          />
+
+          {/* Contact & Socials */}
+          <ContactSection />
+          <SocialsSection />
+
+          {/* Gallery Section */}
+          <YStack gap="$3" paddingVertical="$3">
+            <Text color="$color" fontWeight="600">
+              Back to default view
+            </Text>
+            <GallerySection />
+          </YStack>
         </YStack>
-      </YStack>
-    </ScrollView>
-  );
-};
-
-export default GuessView;
+      </ScrollView>
+    </SafeAreaView>
+  )
+}
