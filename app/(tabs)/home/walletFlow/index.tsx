@@ -30,7 +30,7 @@ const WalletScreen = () => {
     const recentTransactions = allMockTransactions.slice(0, 5);
 
 
-    // --- SCREEN NAVIGATION LOGIC ---
+    // --- SCREEN NAVIGATION LOGIC ---g it 
 
     // 1. Recent Activities Screen
     if (currentScreen === SCREENS.RECENT_ACTIVITIES)

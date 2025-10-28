@@ -1,12 +1,13 @@
-import React from 'react'
-import { YStack, XStack, Text } from 'tamagui'
+import React from 'react';
+import { YStack, XStack, Text } from 'tamagui';
+import { Mail, Phone } from '@tamagui/lucide-icons';
 
 const ContactSection = () => {
   return (
     <YStack
       width="100%"
       borderBottomWidth={1}
-      borderColor="$secondray"
+      borderColor="$secondary"
       paddingBottom={20}
       gap="$3"
     >
@@ -14,20 +15,15 @@ const ContactSection = () => {
         Contact
       </Text>
 
-      {/* Email and Phone on the same line */}
-      <XStack alignItems="center" gap="$4">
-        <XStack alignItems="center" gap="$2">
-          <Text>✉️</Text>
-          <Text color="$text">michelle@gmail.com</Text>
-        </XStack>
-
-        <XStack alignItems="center" gap="$2">
-          <Text>📞</Text>
-          <Text color="$text">2363487892</Text>
-        </XStack>
+      {/* Contact Info (Phone + Mail on the same row) */}
+      <XStack alignItems="center" gap={16}>
+        <Mail size={16} color="$text" />
+        <Text color="$text">michelle@example.com</Text>
+        <Phone size={16} color="$text" />
+        <Text color="$text">+234 903 5567 890</Text>
       </XStack>
     </YStack>
-  )
-}
+  );
+};
 
-export default ContactSection
+export default ContactSection;

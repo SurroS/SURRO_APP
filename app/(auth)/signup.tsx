@@ -17,8 +17,7 @@ import { OrDivider } from "../../components/auth/OrDivider";
 import { PrimaryButton } from "../../components/auth/PrimaryButton";
 import { ScreenHeader } from "../../components/auth/ScreenHeader";
 import { SocialButton } from "../../components/auth/SocialButton";
-import { useSignupForm } from "../../hooks/auth/useSignupForm";
-import { SecureStore } from "expo-secure-store";
+import { useSignupForm } from "../../hooks/auth/useSignupForm"; 
 
 
 import {

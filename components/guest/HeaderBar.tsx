@@ -1,43 +1,31 @@
 // components/guess/HeaderBar.tsx
 import React from "react";
-import { XStack, YStack, Text } from "tamagui";
+import { XStack, YStack } from "tamagui";
 import { useRouter } from "expo-router";
+import { Bell } from "@tamagui/lucide-icons";
 
-const HeaderBar = () => {
+const ICON_SIZE = 24;
+
+const HeaderBar: React.FC = () => {
   const router = useRouter();
 
   return (
-    <XStack justifyContent="space-between" alignItems="center" paddingTop={8}>
-      {/* Left side avatar circle */}
-      <YStack
-        width={36}
-        height={36}
-        borderRadius={18}
-        alignItems="center"
-        justifyContent="center"
-        backgroundColor="$white"
-        elevation={2}
-      >
-        {/* <Text color="$primary" fontWeight="700">
-          B
-        </Text> */}
-      </YStack>
+    <XStack
+      justifyContent="space-between"
+      alignItems="center"
+      paddingTop="$md"
+      paddingHorizontal="$md"
+    >
 
-      {/* Right side "Pressable" bell */}
-      <YStack
-        onPress={() => console.log("Bell pressed")} // or router.push("/notifications")
-        width={36}
-        height={36}
-        alignItems="center"
-        justifyContent="center"
-        backgroundColor="$white"
-        borderRadius={18}
-        pressStyle={{ scale: 0.9, opacity: 0.8 }}
-        hoverStyle={{ opacity: 0.85 }}
-        elevation={2}
-      >
-        <Text fontSize={20}>🔔</Text>
-      </YStack>
+      <YStack />
+
+      {/* Right side: bell icon */}
+      
+      <Bell
+        size={ICON_SIZE}
+        color="#000"
+        onPress={() => router.push("/notifications")}
+      />
     </XStack>
   );
 };

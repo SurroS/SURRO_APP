@@ -188,33 +188,37 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
     }
   },
 
-  changePassword: async (request: ChangePasswordRequest) => {
-    try {
-      set({ isLoading: true, error: null });
+ changePassword: async (request: ChangePasswordRequest) => {
+  try {
+    set({ isLoading: true, error: null });
 
-      const { token } = get();
-      if (!token) {
-        throw new Error("No authentication token available");
-      }
-
-      await makeAuthenticatedAuthRequest(
-        token,
-        "/auth/change-password",
-        request
-      );
-
-      set({
-        isLoading: false,
-        error: null,
-      });
-    } catch (error: any) {
-      set({
-        isLoading: false,
-        error: error.response?.data?.message || "Password change failed",
-      });
-      throw error;
+    const { token } = get();
+    if (!token) {
+      throw new Error("No authentication token available");
     }
-  },
+
+    //  Exclude frontend-only field
+    const { newPasswordConfirmation, ...apiRequest } = request;
+
+    await makeAuthenticatedAuthRequest(
+      token,
+      "/auth/change-password",
+      apiRequest // send only the required fields
+    );
+
+    set({
+      isLoading: false,
+      error: null,
+    });
+  } catch (error: any) {
+    set({
+      isLoading: false,
+      error: error.response?.data?.message || "Password change failed",
+    });
+    throw error;
+  }
+},
+
 
  googleLogin: async (googleAuth: { idToken: string; role?: string }) => {
   try {
