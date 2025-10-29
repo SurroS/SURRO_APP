@@ -6,6 +6,8 @@ import { useRouter } from "expo-router";
 import ChatInput from "@/components/chat/chatInput";
 import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 import colors from "@/hooks/colors";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { ScreenHeader } from "@/components/auth";
 
 interface SupportMessage {
   id: string;
@@ -45,7 +47,8 @@ export default function SupportChatScreen() {
     setIsTyping(true);
     setTimeout(() => {
       const lower = text.toLowerCase();
-      let reply = "I’m not sure I understand, but I’ll connect you with an agent.";
+      let reply =
+        "I’m not sure I understand, but I’ll connect you with an agent.";
 
       if (lower.includes("payment")) {
         reply = "💳 For payment issues, please confirm your transaction ID.";
@@ -92,48 +95,42 @@ export default function SupportChatScreen() {
 
   return (
     <KeyboardAvoidingWrapper>
-      <YStack flex={1} backgroundColor="#fff">
+      <SafeAreaView style={{ flex: 1 }}>
         <YStack
-          flexDirection="row"
-          alignItems="center"
-          padding={15}
-          borderBottomWidth={1}
-          borderColor="#eee"
-          backgroundColor="#f8f8f8"
+          flex={1}
+          backgroundColor="#fff"
+          style={{ justifyContent: "center", marginTop: 10 }}
         >
-          <Ionicons
-            name="arrow-back"
-            size={24}
-            color={colors.primary}
-            onPress={() => router.back()}
-          />
-          <Text fontSize={18} fontWeight="700" marginLeft={12}>
-            Support Chat
-          </Text>
-        </YStack>
-
-        <FlatList
-          ref={flatListRef}
-          data={messages}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={styles.chatContainer}
-          onContentSizeChange={() =>
-            flatListRef.current?.scrollToEnd({ animated: true })
-          }
-        />
-
-        {isTyping && (
-          <View style={styles.typingIndicator}>
-            <ActivityIndicator size="small" color={colors.primary} />
-            <Text marginLeft={6} color={colors.secondaryGray}>
-              Suri is typing...
-            </Text>
+          <View style={{ marginLeft: 15 }}>
+            <ScreenHeader
+              title="Customer Care"
+              onBackPress={() => router.back()}
+            />
           </View>
-        )}
 
-        <ChatInput onSend={handleSend} disabled={false} />
-      </YStack>
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            contentContainerStyle={styles.chatContainer}
+            onContentSizeChange={() =>
+              flatListRef.current?.scrollToEnd({ animated: true })
+            }
+          />
+
+          {isTyping && (
+            <View style={styles.typingIndicator}>
+              <ActivityIndicator size="small" color={colors.primary} />
+              <Text marginLeft={6} color={colors.secondaryGray}>
+                Suri is typing...
+              </Text>
+            </View>
+          )}
+
+          <ChatInput onSend={handleSend} disabled={false} />
+        </YStack>
+      </SafeAreaView>
     </KeyboardAvoidingWrapper>
   );
 }
