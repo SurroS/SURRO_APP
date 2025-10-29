@@ -2,7 +2,7 @@
 import { ChangePasswordRequest } from "@/types/auth";
 import { useState } from "react";
 
-  const usechangePasswordForm = () => {
+const useChangePasswordForm = () => {
   const [formData, setFormData] = useState<ChangePasswordRequest>({
     currentPassword:"",
     newPassword: "", 
@@ -60,4 +60,4 @@ import { useState } from "react";
   };
 };
 
-export default usechangePasswordForm 
+export default useChangePasswordForm; 

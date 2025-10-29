@@ -1,5 +1,4 @@
-import React from "react";
-import { StyleSheet, TextInput, Button, Alert } from "react-native";
+import { StyleSheet, TextInput, Alert } from "react-native";
 import { YStack, Text } from "tamagui";
 import usechangePasswordForm from "@/hooks/auth/useChangePasswordForm";
 import { PrimaryButton } from "@/components/auth";
@@ -10,8 +9,7 @@ import { ScreenHeader } from "@/components/auth/ScreenHeader";
 import { router } from "expo-router";
 
 export default function ChangePasswordScreen() {
-  const { formData, errors, updateField, validateForm, resetForm } =
-    usechangePasswordForm();
+  const { formData, errors, updateField, validateForm, resetForm } = usechangePasswordForm();
   const { isLoading } = useAuth();
 
   const handleSubmit = () => {
