@@ -94,7 +94,7 @@ export default function ChatListScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
-      <YStack flex={1} paddingHorizontal={20} paddingTop={20}>
+      <YStack flex={1} paddingHorizontal={20} paddingTop={20} justifyContent="center">
         <Text
           fontSize={20}
           fontWeight="700"

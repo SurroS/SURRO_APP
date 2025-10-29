@@ -6,11 +6,12 @@ import { YStack, ScrollView } from "tamagui";
 import RectangleCard from "./rectangleCard";
 import ProfileImageCard from "./profileImageCard";
 import InfoRowCard from "./infoRowCard";
-import EditBioModal from "./EditBioModal";
-import { Images } from "../../constants/Images";
+// // import EditBioModal from "@/EditBioModal";
+// import { Images } from "@/components/Images";
+import { User, Contact,History } from "@tamagui/lucide-icons";
 
 export default function EditBioView() {
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false); 
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -34,19 +35,19 @@ export default function EditBioView() {
             <InfoRowCard
               title="Personal details"
               subtitle="Name, country of origin, height, Date of Birth"
-              icon={Images.userIcon}
+              icon={User}
               onPress={() => {}}
             />
             <InfoRowCard
               title="Contact information"
               subtitle="Country, state, street, zip code"
-              icon={Images.contactInfoIcon}
+              icon={Contact}
               onPress={() => {}}
             />
             <InfoRowCard
               title="Medical history"
               subtitle="Allergies, conditions"
-              icon={Images.medHistoryIcon}
+              icon={ History }
               onPress={() => {}}
             />
           </YStack>
@@ -54,10 +55,10 @@ export default function EditBioView() {
       </ScrollView>
 
       {/* Edit Bio Modal */}
-      <EditBioModal
+      {/* <EditBioModal
         visible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
-      />
+      /> */}
     </SafeAreaView>
   );
 }

@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, TextInput, Button, Alert } from "react-native";
 import { YStack, Text } from "tamagui";
-import usechangePasswordForm from "@/hooks/auth/useChangePasswordform";
+import usechangePasswordForm from "@/hooks/auth/useChangePasswordForm";
 import { PrimaryButton } from "@/components/auth";
 import { useAuth } from "@/hooks/useAuth";
 import colors from "@/hooks/colors";

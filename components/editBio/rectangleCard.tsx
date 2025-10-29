@@ -1,7 +1,7 @@
 import React from 'react';
 import { YStack, XStack, Text, Image, Button } from 'tamagui';
 import { useRouter } from 'expo-router';
-import { Images } from '../../constants/Images';
+import  Images  from '@/assets/images/avatar.jpg';
 
 const WIDTH = 393;
 const HEIGHT = 179.5;
@@ -18,7 +18,7 @@ export default function RectangleCard({ title = 'Profile information' }: Props) 
     <YStack width={WIDTH} height={HEIGHT} overflow="hidden" alignItems="center">
       {/* Background rectangle */}
       <Image
-        source={Images.rectangleCard}
+        source={Images}
         resizeMode="cover"
         width={WIDTH}
         height={HEIGHT}
