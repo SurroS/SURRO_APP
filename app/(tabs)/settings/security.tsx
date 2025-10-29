@@ -4,6 +4,10 @@ import { YStack, Text } from "tamagui";
 import usechangePasswordForm from "@/hooks/auth/useChangePasswordform";
 import { PrimaryButton } from "@/components/auth";
 import { useAuth } from "@/hooks/useAuth";
+import colors from "@/hooks/colors";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { ScreenHeader } from "@/components/auth/ScreenHeader";
+import { router } from "expo-router";
 
 export default function ChangePasswordScreen() {
   const { formData, errors, updateField, validateForm, resetForm } =
@@ -20,7 +24,9 @@ export default function ChangePasswordScreen() {
   };
 
   return (
-    <YStack style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <ScreenHeader title="Privacy and security" onBackPress={() => router.back()} />
+    <YStack >
       <Text style={styles.label}>Current Password</Text>
       <TextInput
         secureTextEntry
@@ -60,24 +66,27 @@ export default function ChangePasswordScreen() {
         loading={isLoading}
       />
     </YStack>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 20, 
   },
   label: {
     fontWeight: "600",
     marginBottom: 6,
+    color:colors.text
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor:colors.gray,
     borderRadius: 8,
     padding: 10,
     marginBottom: 10,
+    color:colors.text
   },
   error: {
     color: "red",

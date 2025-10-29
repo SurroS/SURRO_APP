@@ -18,26 +18,20 @@ export default function HomeIndex() {
       <SafeAreaView>
         {/* Header */}
         
-        <Pressable style={{justifyContent:"center", alignItems:"flex-end"}} >
+        <Pressable onPress={()=>router.push('/notifications')} style={{justifyContent:"center", alignItems:"flex-end"}} >
           <MaterialCommunityIcons name="bell-outline" size={24} color="black" />
-        </Pressable>
-       <SurrogateScreen /> 
+        </Pressable> 
         {/* Role-based content */}
         {Role === 'SURROGATE' ? (
-          <>
-            <Text>Surrogate</Text>
+          
             <SurrogateScreen />
-          </>
+  
         ) : Role === 'INTENDED_PARENT' ? (
-          <>
-            <Text>Intended Parent</Text>
-            <ParentScreen />
-          </>
+        
+            <ParentScreen /> 
         ) : Role === 'AGENT' ? (
-          <>
-            <Text>Agent</Text>
-            <AgentScreen />
-          </>
+      
+            <AgentScreen /> 
         ) : (
           <YStack flex={1} justifyContent="center" alignItems="center">
             <Spinner size="large" />
