@@ -4,13 +4,21 @@ import { Image as RNImage, StyleSheet } from "react-native";
 import { Button, Card, Text, XStack, YStack } from "tamagui";
 import { useGallery } from "@/hooks/useGallery";
 import { useEffect } from "react";
+import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 
 const Gallery = ({ style }: { style?: any }) => {
   const { images, isLoading, fetchImages } = useGallery();
 
   // Fetch images on component mount
   useEffect(() => {
-    fetchImages(true);
+    fetchImages(true).catch((err: any) => {
+      Toast.show({
+        text1: "Failed to load gallery",
+        type: "customError" as ToastType,
+        text2: err?.response?.data?.message || "Please try again.",
+      });
+    });
   }, [fetchImages]);
 
   const validImages =
@@ -24,10 +32,19 @@ const Gallery = ({ style }: { style?: any }) => {
       : [require("../../assets/images/emptyGallery.png")];
 
   const handleNavigate = () => {
+    if (validImages.length === 0) {
+      Toast.show({
+        text1: "No images yet",
+        type: "customError" as ToastType,
+        text2: "Add an image to view your gallery.",
+      });
+      return;
+    }
+
     router.push({
       pathname: "/(tabs)/home/galleryAction",
       params: {
-        images: JSON.stringify(validImages.map((img) => img.url)), // ✅ use filtered list
+        images: JSON.stringify(validImages.map((img) => img.url)),
       },
     });
   };

@@ -9,12 +9,6 @@ import {
 } from '@/services/galleryApi';
 import { Toast } from 'toastify-react-native';
 import { ToastType } from 'toastify-react-native/utils/interfaces';
-  uploadGalleryImage,
-  getGalleryImages,
-  deleteGalleryImage,
-  refreshGalleryCache,
-  getCachedGalleryImages,
-} from "@/services/galleryApi";
 
 export interface GalleryState {
   images: GalleryImage[];
@@ -62,6 +56,11 @@ uploadImage: async (imageData: FormData) => {
     if (!image || !image.url) {
       await get().fetchImages(false);
       set({ isUploading: false });
+      Toast.show({
+        text1: 'Image uploaded successfully',
+        type: 'customSuccess' as ToastType,
+        text2: 'Your image has been added to the gallery',
+      });
       return;
     }
 
@@ -72,10 +71,20 @@ uploadImage: async (imageData: FormData) => {
       error: null,
       lastFetched: new Date().toISOString(),
     }));
+    Toast.show({
+      text1: 'Image uploaded successfully',
+      type: 'customSuccess' as ToastType,
+      text2: 'Your image has been added to the gallery',
+    });
   } catch (error: any) {
     set({
       isUploading: false,
       error: error.response?.data?.message || "Failed to upload image",
+    });
+    Toast.show({
+      text1: 'Upload failed',
+      type: 'customError' as ToastType,
+      text2: error.response?.data?.message || 'Failed to upload image',
     });
     throw error;
   }
@@ -101,11 +110,23 @@ fetchImages: async (useCache: boolean = true) => {
       error: null,
       lastFetched: new Date().toISOString(),
     });
+  if (!shouldUseCache) {
+    Toast.show({
+      text1: 'Gallery loaded',
+      type: 'customSuccess' as ToastType,
+      text2: `Loaded ${images?.length || 0} image${(images?.length || 0) === 1 ? '' : 's'}`,
+    });
+  }
   } catch (error: any) {
     set({
       isLoading: false,
       error: error.response?.data?.message || "Failed to fetch images",
     });
+  Toast.show({
+    text1: 'Failed to load gallery',
+    type: 'customError' as ToastType,
+    text2: error.response?.data?.message || 'Please try again.',
+  });
     throw error;
   }
 },
@@ -124,10 +145,20 @@ fetchImages: async (useCache: boolean = true) => {
         error: null,
         lastFetched: new Date().toISOString(),
       }));
+      Toast.show({
+        text1: 'Image deleted',
+        type: 'customSuccess' as ToastType,
+        text2: 'The image has been removed from your gallery',
+      });
     } catch (error: any) {
       set({
         isLoading: false,
         error: error.response?.data?.message || "Failed to delete image",
+      });
+      Toast.show({
+        text1: 'Delete failed',
+        type: 'customError' as ToastType,
+        text2: error.response?.data?.message || 'Failed to delete image',
       });
       throw error;
     }
@@ -145,11 +176,21 @@ fetchImages: async (useCache: boolean = true) => {
         error: null,
         lastFetched: new Date().toISOString(),
       });
+  Toast.show({
+    text1: 'Gallery refreshed',
+    type: 'customSuccess' as ToastType,
+    text2: `Loaded ${images.length} image${images.length === 1 ? '' : 's'}`,
+  });
     } catch (error: any) {
       set({
         isLoading: false,
         error: error.response?.data?.message || "Failed to refresh cache",
       });
+  Toast.show({
+    text1: 'Refresh failed',
+    type: 'customError' as ToastType,
+    text2: error.response?.data?.message || 'Failed to refresh cache',
+  });
       throw error;
     }
   },
