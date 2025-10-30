@@ -2,7 +2,7 @@
 import { YStack, XStack, Text, Avatar } from "tamagui";
 import { StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
-import { User, MapPin, Heart, LogOut, Skull } from "@tamagui/lucide-icons";
+import { User, MapPin, Heart, LogOut, Camera } from "@tamagui/lucide-icons";
 import colors from "@/hooks/colors";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -60,13 +60,14 @@ export default function ProfileInformationScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <YStack gap="$4" alignItems="center" paddingTop="$6">
-        <Avatar circular size="$6">
+        <Avatar size="$10">
           <Avatar.Image src={require("@/assets/images/avatar.jpg")} />
           <Avatar.Fallback backgroundColor="#ccc" />
         </Avatar>
 
-        <TouchableOpacity>
-          <Text style={styles.changePhoto}>Change profile picture</Text>
+        <TouchableOpacity style={{flexDirection:"row"}}>
+          <Text style={styles.changePhoto}>Change profile picture </Text>
+          <Camera color={colors.primary} size={16}/> 
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.editButton}>
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
   },
   changePhoto: {
     fontSize: 14,
-    color: "#5A5AED",
+    color: colors.primary,
     marginTop: 8,
     fontWeight: "500",
   },

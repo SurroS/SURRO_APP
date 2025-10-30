@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
@@ -18,7 +17,6 @@ import { useGallery } from "@/hooks/useGallery";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 
-
 export default function GalleryScreen() {
   const router = useRouter();
   const {
@@ -28,17 +26,24 @@ export default function GalleryScreen() {
     error,
     uploadImage,
     fetchImages,
-    deleteImage
+    deleteImage,
   } = useGallery();
 
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
 
-  // Fetch images on component mount
+  // separate success states
+  const [showUploadSuccess, setShowUploadSuccess] = useState(false);
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+
+  // Filter null/invalid images
+  const safeGalleryImages = Array.isArray(galleryImages)
+    ? galleryImages.filter((img) => img && img.url)
+    : [];
+
   useEffect(() => {
-    fetchImages(true); // Use cache by default
+    fetchImages(true);
   }, [fetchImages]);
 
   const exitSelectionMode = useCallback(() => {
@@ -46,11 +51,11 @@ export default function GalleryScreen() {
     setSelectedIndices([]);
   }, []);
 
-  // Request permission on first mount
   useEffect(() => {
     (async () => {
       try {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        const { status } =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== "granted") {
           Toast.show({
             text1: "Permission required",
@@ -59,29 +64,25 @@ export default function GalleryScreen() {
           });
         }
       } catch (err) {
-        // fallback
         console.warn("permission request failed", err);
       }
     })();
   }, []);
 
-  // Back handler: exit selection mode when active
   useEffect(() => {
     const onBack = () => {
       if (selectionMode) {
         exitSelectionMode();
-        return true; // handled
+        return true;
       }
-      return false; // let default behavior run
+      return false;
     };
     const sub = BackHandler.addEventListener("hardwareBackPress", onBack);
     return () => sub.remove();
-  }, [selectionMode, selectedIndices, exitSelectionMode]);
+  }, [selectionMode, exitSelectionMode]);
 
-  // pickImage: always re-check permission first
   const pickImage = async () => {
-    // Prevent adding beyond limit
-    if (galleryImages.length >= 4) return;
+    if (safeGalleryImages.length >= 4) return;
 
     const perms = await ImagePicker.getMediaLibraryPermissionsAsync();
     if (!perms.granted) {
@@ -96,29 +97,26 @@ export default function GalleryScreen() {
       }
     }
 
-    // open picker
     const res = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"], // avoid deprecated enum; string works
+      mediaTypes: ["images"],
       allowsEditing: true,
       quality: 1,
     });
 
     if (!res.canceled && res.assets?.length) {
       try {
-        // Create FormData for upload - backend expects 'files' array
         const formData = new FormData();
-        formData.append('files', {
+        formData.append("files", {
           uri: res.assets[0].uri,
-          type: 'image/jpeg',
-          name: 'image.jpg',
+          type: "image/jpeg",
+          name: "image.jpg",
         } as any);
 
-        // Upload image via API
         await uploadImage(formData);
 
-        // Show success message
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 1400);
+        // show upload success modal
+        setShowUploadSuccess(true);
+        setTimeout(() => setShowUploadSuccess(false), 1500);
       } catch (error) {
         console.error('Error uploading image:', error);
         Toast.show({
@@ -130,28 +128,23 @@ export default function GalleryScreen() {
     }
   };
 
-  // enter or toggle selection on long press
   const handleLongPress = (index: number) => {
     if (!selectionMode) {
       setSelectionMode(true);
       setSelectedIndices([index]);
     } else {
-      // toggle if already in selectionMode
       toggleSelect(index);
     }
   };
 
-  // toggle single index selection
   const toggleSelect = (index: number) => {
-    setSelectedIndices((prev) => {
-      if (prev.includes(index)) {
-        return prev.filter((i) => i !== index);
-      }
-      return [...prev, index];
-    });
+    setSelectedIndices((prev) =>
+      prev.includes(index)
+        ? prev.filter((i) => i !== index)
+        : [...prev, index]
+    );
   };
 
-  // Delete selected images
   const confirmDelete = async () => {
     if (selectedIndices.length === 0) {
       setShowDeleteConfirm(false);
@@ -159,20 +152,21 @@ export default function GalleryScreen() {
     }
 
     try {
-      // Delete images by their IDs
-      const selectedImages = selectedIndices.map(index => galleryImages[index]);
+      const selectedImages = selectedIndices
+        .map((index) => safeGalleryImages[index])
+        .filter((img) => img && img.id);
 
-      // Delete each selected image
       for (const image of selectedImages) {
         await deleteImage(image.id);
       }
 
-      // Clear selection and exit selection mode
       setSelectedIndices([]);
       setSelectionMode(false);
       setShowDeleteConfirm(false);
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 1400);
+
+      //show delete success modal
+      setShowDeleteSuccess(true);
+      setTimeout(() => setShowDeleteSuccess(false), 1500);
     } catch (error) {
       console.error('Error deleting images:', error);
       Toast.show({
@@ -184,7 +178,6 @@ export default function GalleryScreen() {
     }
   };
 
-  // Header back button handler
   const onHeaderBack = () => {
     if (selectionMode) {
       exitSelectionMode();
@@ -193,7 +186,6 @@ export default function GalleryScreen() {
     }
   };
 
-  // Render a single card (image or add)
   const renderCard = (imageOrAdd: any | "add", idx: number) => {
     if (imageOrAdd === "add") {
       return (
@@ -212,11 +204,13 @@ export default function GalleryScreen() {
       );
     }
 
+    if (!imageOrAdd || !imageOrAdd.url) return null;
+
     const isSelected = selectedIndices.includes(idx);
 
     return (
       <TouchableOpacity
-        key={imageOrAdd.id}
+        key={imageOrAdd.id || idx}
         activeOpacity={0.9}
         onLongPress={() => handleLongPress(idx)}
         onPress={() => {
@@ -238,10 +232,9 @@ export default function GalleryScreen() {
     );
   };
 
-  // prepare items to display: images + add (if < 4 && not in selection mode)
   const itemsToShow = [
-    ...galleryImages,
-    ...(galleryImages.length < 4 && !selectionMode ? (["add"] as const) : []),
+    ...safeGalleryImages,
+    ...(safeGalleryImages.length < 4 && !selectionMode ? (["add"] as const) : []),
   ];
 
   return (
@@ -257,7 +250,7 @@ export default function GalleryScreen() {
         <View style={{ width: 40 }} />
       </View>
 
-      {/* Grid area */}
+      {/* Grid */}
       <ScrollView contentContainerStyle={styles.gridWrap}>
         {isLoading ? (
           <View style={styles.loadingContainer}>
@@ -282,8 +275,8 @@ export default function GalleryScreen() {
         )}
       </ScrollView>
 
-      {/* Action buttons */}
-      {selectionMode ? (
+      {/* Selection bar */}
+      {selectionMode && (
         <View style={styles.selectionBar}>
           <TouchableOpacity
             style={[styles.actionBtn, { backgroundColor: "#BB2D21" }]}
@@ -301,8 +294,9 @@ export default function GalleryScreen() {
             <RNText style={{ color: "#0E0E55" }}>Cancel</RNText>
           </TouchableOpacity>
         </View>
-      ) : null}
+      )}
 
+      {/* Delete confirmation modal */}
       <BottomModal
         visible={showDeleteConfirm}
         icon="trash"
@@ -325,13 +319,22 @@ export default function GalleryScreen() {
         onClose={() => setShowDeleteConfirm(false)}
       />
 
-      {/* Success modal */}
+      {/* Upload success modal */}
       <BottomModal
-        visible={showSuccess}
+        visible={showUploadSuccess}
+        success
+        title="Uploaded"
+        message="Image uploaded successfully."
+        onClose={() => setShowUploadSuccess(false)}
+      />
+
+      {/*Delete success modal */}
+      <BottomModal
+        visible={showDeleteSuccess}
         success
         title="Deleted"
         message="Image(s) removed successfully."
-        onClose={() => setShowSuccess(false)}
+        onClose={() => setShowDeleteSuccess(false)}
       />
     </View>
   );
@@ -347,11 +350,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#fff",
   },
   backBtn: { width: 40, height: 36, justifyContent: "center" },
   headerTitle: { fontSize: 18, fontWeight: "700", color: "#0E0E55" },
-
   gridWrap: { paddingHorizontal: 8, paddingBottom: 120 },
   grid: {
     flexDirection: "row",
@@ -375,16 +376,13 @@ const styles = StyleSheet.create({
     borderColor: "#e6e6e6",
   },
   addText: { marginTop: 6, color: "#333" },
-
   image: { width: "100%", height: "100%", borderRadius: 10 },
-
   checkboxWrap: {
     position: "absolute",
     top: 8,
     right: 8,
     backgroundColor: "transparent",
   },
-
   selectionBar: {
     position: "absolute",
     bottom: 18,
@@ -403,53 +401,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   actionText: { color: "#fff", marginLeft: 8, fontWeight: "600" },
-
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.45)",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 24,
-  },
-  modalCard: {
-    width: "100%",
-    maxWidth: 420,
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 20,
-    alignItems: "center",
-  },
-  modalTitle: { fontWeight: "700", fontSize: 18, color: "#111", marginBottom: 8 },
-  modalBody: { color: "#444", textAlign: "center", marginBottom: 12 },
-
-  modalActions: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 8,
-  },
-  modalBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignItems: "center",
-    marginHorizontal: 6,
-  },
-  modalBtnLight: { backgroundColor: "#F1F1F1" },
-  modalBtnDanger: { backgroundColor: "#BB2D21" },
-
-  // Loading and error states
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingVertical: 60,
   },
-  loadingText: {
-    fontSize: 16,
-    color: "#666",
-    fontWeight: "500",
-  },
+  loadingText: { fontSize: 16, color: "#666", fontWeight: "500" },
   errorContainer: {
     flex: 1,
     justifyContent: "center",
@@ -469,9 +427,5 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 8,
   },
-  retryText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
-  },
+  retryText: { color: "#fff", fontSize: 14, fontWeight: "600" },
 });

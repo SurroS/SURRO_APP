@@ -3,9 +3,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState, useRef } from "react";
 import { Platform, TextInput, Pressable } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Card, Input, Text, XStack, YStack } from "tamagui";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-
 
 const SourceOption = ({ item, isSelected, onPress }: any) => (
   <Pressable
@@ -84,91 +84,71 @@ export default function HowDidYouHear() {
   };
 
   return (
-    <KeyboardAwareScrollView
-      style={{ flex: 1, backgroundColor: "$white" }}
-      contentContainerStyle={{ flexGrow: 1, paddingBottom: 40, paddingHorizontal: 16 }}
-      enableOnAndroid
-      extraScrollHeight={Platform.OS === "ios" ? 80 : 60}
-      keyboardShouldPersistTaps="handled"
-    >
-      <YStack flex={1}>
-        <Text
-          fontSize={23}
-          lineHeight={32}
-          fontWeight="600"
-          textAlign="center"
-          marginBottom="$4"
-        >
-          How did you hear about us?
-        </Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "$white" }}>
+      <KeyboardAwareScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 40, paddingHorizontal: 16 }}
+        enableOnAndroid
+        extraScrollHeight={Platform.OS === "ios" ? 80 : 60}
+        keyboardShouldPersistTaps="handled"
+      >
+        <YStack flex={1}>
+          <Text
+            fontSize={23}
+            lineHeight={32}
+            fontWeight="600"
+            textAlign="center"
+            marginBottom="$4"
+            color="$text"
+          >
+            How did you hear about us?
+          </Text>
 
-        <Card width="100%" maxWidth={500} alignSelf="center" padding="$3" borderRadius={12}>
-          {/* Source options */}
-          {[
-            { key: "Friend", label: "From a friend/family", bg: "#0E0E55", fg: "#F2F2F2", icon: "person" },
-            { key: "X", label: "X", bg: "#000000", fg: "#ffffff", icon: "logo-xbox" },
-            { key: "Facebook", label: "Facebook", bg: "#1877F2", fg: "#ffffff", icon: "logo-facebook" },
-            { key: "Instagram", label: "Instagram", bg: "#E1306C", fg: "#ffffff", icon: "logo-instagram" },
-            { key: "TikTok", label: "TikTok", bg: "#000000", fg: "#ffffff", icon: "logo-tiktok" },
-            { key: "YouTube", label: "YouTube", bg: "#FF0000", fg: "#ffffff", icon: "logo-youtube" },
-            { key: "Referral", label: "Referral", bg: "#0E0E55", fg: "#EAEAF6", icon: null },
-          ].map((item) => (
-            <SourceOption
-              key={item.key}
-              item={item}
-              isSelected={selectedSource === item.key}
-              onPress={() => setSelectedSource(item.key)}
-            />
-          ))}
-
-          {/* Referral input */}
-          {selectedSource === "Referral" && (
-            <YStack gap="$2" marginTop="$3">
-              <Text fontSize={16} fontWeight="500" color="$gray11">
-                Referral Code
-              </Text>
-              <Input
-                ref={referralInputRef}
-                placeholder="Enter your code"
-                value={referralCode}
-                onChangeText={setReferralCode}
-                height={48}
-                paddingHorizontal={12}
-                fontSize={16}
-                borderRadius={8}
-                borderWidth={1}
-                borderColor="#CFCFCF"
+          <Card width="100%" maxWidth={500} alignSelf="center" padding="$3" borderRadius={12}>
+            {[  /* Source options */  
+              { key: "Friend", label: "From a friend/family", bg: "#0E0E55", fg: "#F2F2F2", icon: "person" },
+              { key: "X", label: "X", bg: "#000000", fg: "#ffffff", icon: "logo-xbox" },
+              { key: "Facebook", label: "Facebook", bg: "#1877F2", fg: "#ffffff", icon: "logo-facebook" },
+              { key: "Instagram", label: "Instagram", bg: "#E1306C", fg: "#ffffff", icon: "logo-instagram" },
+              { key: "TikTok", label: "TikTok", bg: "#000000", fg: "#ffffff", icon: "logo-tiktok" },
+              { key: "YouTube", label: "YouTube", bg: "#FF0000", fg: "#ffffff", icon: "logo-youtube" },
+              { key: "Referral", label: "Referral", bg: "#0E0E55", fg: "#EAEAF6", icon: null },
+            ].map((item) => (
+              <SourceOption
+                key={item.key}
+                item={item}
+                isSelected={selectedSource === item.key}
+                onPress={() => setSelectedSource(item.key)}
               />
-            </YStack>
-          )}
-        </Card>
+            ))}
 
-        <YStack gap="$3" width="100%" maxWidth={355} alignSelf="center" marginTop="$4">
-          <Button
-            height={55}
-            borderRadius={8}
-            backgroundColor="$primary"
-            onPress={completeOnboarding}
-            disabled={!selectedSource}
-            opacity={selectedSource ? 1 : 0.6}
-          >
-            <Text color="white" fontWeight="600">
-              Next
-            </Text>
-          </Button>
-          <Button
-            height={55}
-            borderRadius={8}
-            backgroundColor="$secondary"
-            onPress={() => router.push("/(auth)/signup")}
-          >
-            <Text color="$color12" fontWeight="600">
-              Skip
-            </Text>
-          </Button>
+            <YStack gap="$3" width="100%" maxWidth={355} alignSelf="center" marginTop="$4">
+              <Button
+                height={55}
+                borderRadius={8}
+                backgroundColor="$primary"
+                onPress={completeOnboarding}
+                disabled={!selectedSource}
+                opacity={selectedSource ? 1 : 0.6}
+              >
+                <Text color="white" fontWeight="600">
+                  Next
+                </Text>
+              </Button>
+              <Button
+                height={55}
+                borderRadius={8}
+                backgroundColor="$secondary"
+                onPress={() => router.push("/(auth)/signup")}
+              >
+                <Text color="$color12" fontWeight="600">
+                  Skip
+                </Text>
+              </Button>
+            </YStack>
+          </Card>
         </YStack>
-      </YStack>
-    </KeyboardAwareScrollView>
+      </KeyboardAwareScrollView>
+    </SafeAreaView>
   );
 }
-

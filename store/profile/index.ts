@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { createProfileSlice, ProfileState } from './actions';
 import { ProfileStore } from './types';
-import { secureStorage } from '../middleware/persist';
+import  Storage  from '../middleware/persist';
 
 const initialState: ProfileState = {
     surrogateProfile: null,
@@ -19,7 +19,7 @@ export const useProfileStore = create<ProfileStore>()(
         }),
         {
             name: 'profile-storage',
-            storage: createJSONStorage(() => secureStorage),
+            storage: createJSONStorage(() => Storage),
             partialize: (state) => ({
                 surrogateProfile: state.surrogateProfile,
                 medicalProfile: state.medicalProfile,

@@ -1,10 +1,10 @@
 {
   "extends": "expo/tsconfig.base.json",
   "compilerOptions": {
-    "jsx": "react-jsx",                 
-    "strict": true,                     
-    "esModuleInterop": true,            
-    "skipLibCheck": true,               
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
 
     // Base URL for imports
@@ -15,11 +15,19 @@
       "@/*": ["./*"]
     },
 
-    // (Optional but recommended)
-    "resolveJsonModule": true,          // allows importing .json files
-    "allowSyntheticDefaultImports": true // smooth interop with default exports
+    // Optional but recommended
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": [
+    "app",
+    "components",
+    "constants",
+    "store",
+    "types",
+    "hooks",
+    "services",
+    "utils",
     "**/*.ts",
     "**/*.tsx",
     "**/*.d.ts"
