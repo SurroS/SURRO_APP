@@ -32,7 +32,7 @@ export default function GalleryScreen() {
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // ✅ separate success states
+  // separate success states
   const [showUploadSuccess, setShowUploadSuccess] = useState(false);
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
 
@@ -111,7 +111,7 @@ export default function GalleryScreen() {
 
         await uploadImage(formData);
 
-        // ✅ show upload success modal
+        // show upload success modal
         setShowUploadSuccess(true);
         setTimeout(() => setShowUploadSuccess(false), 1500);
       } catch (error) {
@@ -157,7 +157,7 @@ export default function GalleryScreen() {
       setSelectionMode(false);
       setShowDeleteConfirm(false);
 
-      // ✅ show delete success modal
+      //show delete success modal
       setShowDeleteSuccess(true);
       setTimeout(() => setShowDeleteSuccess(false), 1500);
     } catch (error) {
@@ -308,7 +308,7 @@ export default function GalleryScreen() {
         onClose={() => setShowDeleteConfirm(false)}
       />
 
-      {/* ✅ Upload success modal */}
+      {/* Upload success modal */}
       <BottomModal
         visible={showUploadSuccess}
         success
@@ -317,7 +317,7 @@ export default function GalleryScreen() {
         onClose={() => setShowUploadSuccess(false)}
       />
 
-      {/* ✅ Delete success modal */}
+      {/*Delete success modal */}
       <BottomModal
         visible={showDeleteSuccess}
         success

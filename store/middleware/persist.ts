@@ -10,7 +10,7 @@ const APP_ENV =
 
 const isDev = __DEV__ || APP_ENV === "development";
 
-// ✅ Unified async storage layer compatible with Zustand persist
+// Unified async storage layer compatible with Zustand persist
 const Storage = {
   async setItem(key: string, value: string) {
     try {
@@ -51,7 +51,7 @@ const Storage = {
   },
 };
 
-// ✅ Ensure all 3 methods exist for Zustand
+// Ensure all 3 methods exist for Zustand
 export default {
   setItem: Storage.setItem.bind(Storage),
   getItem: Storage.getItem.bind(Storage),

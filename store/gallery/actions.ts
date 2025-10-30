@@ -42,28 +42,6 @@ export const createGallerySlice: StateCreator<GalleryStore> = (set, get) => ({
   error: null,
   lastFetched: null,
 
-//   uploadImage: async (imageData: FormData) => {
-//     try {
-//       set({ isUploading: true, error: null });
-
-//       const response = await uploadGalleryImage(imageData);
-//       const { image } = response.data;
-
-//       // Add new image to current state
-//       set((state) => ({
-//         images: [image, ...state.images],
-//         isUploading: false,
-//         error: null,
-//         lastFetched: new Date().toISOString(),
-//       }));
-//     } catch (error: any) {
-//       set({
-//         isUploading: false,
-//         error: error.response?.data?.message || "Failed to upload image",
-//       });
-//       throw error;
-//     }
-//   }
 uploadImage: async (imageData: FormData) => {
   try {
     set({ isUploading: true, error: null });
@@ -94,29 +72,6 @@ uploadImage: async (imageData: FormData) => {
     throw error;
   }
 },
-
-
-//   fetchImages: async (useCache: boolean = true) => {
-//     try {
-//       set({ isLoading: true, error: null });
-
-//       const response = await getGalleryImages(useCache);
-//       const { images } = response.data;
-
-//       set({
-//         images: images || [],
-//         isLoading: false,
-//         error: null,
-//         lastFetched: new Date().toISOString(),
-//       });
-//     } catch (error: any) {
-//       set({
-//         isLoading: false,
-//         error: error.response?.data?.message || "Failed to fetch images",
-//       });
-//       throw error;
-//     }
-//   }
 
 fetchImages: async (useCache: boolean = true) => {
   try {
@@ -191,20 +146,7 @@ fetchImages: async (useCache: boolean = true) => {
     }
   },
 
-  // getCachedImages: async () => {
-  //     try {
-  //         const cachedImages = await getCachedGalleryImages();
-
-  //         if (cachedImages) {
-  //             set({
-  //                 images: cachedImages,
-  //                 lastFetched: new Date().toISOString(),
-  //             });
-  //         }
-  //     } catch (error: any) {
-  //         console.warn('Failed to get cached images:', error);
-  //     }
-  // }
+ 
   getCachedImages: async () => {
     try {
       const cachedImages = await getCachedGalleryImages();
