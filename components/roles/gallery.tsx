@@ -32,15 +32,6 @@ const Gallery = ({ style }: { style?: any }) => {
       : [require("../../assets/images/emptyGallery.png")];
 
   const handleNavigate = () => {
-    if (validImages.length === 0) {
-      Toast.show({
-        text1: "No images yet",
-        type: "customError" as ToastType,
-        text2: "Add an image to view your gallery.",
-      });
-      return;
-    }
-
     router.push({
       pathname: "/(tabs)/home/galleryAction",
       params: {
