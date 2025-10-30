@@ -6,7 +6,6 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   BackHandler,
   ScrollView,
   Platform,
@@ -16,6 +15,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import BottomModal from "@/components/BottomModal";
 import { useGallery } from "@/hooks/useGallery";
+import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 
 
 export default function GalleryScreen() {
@@ -51,10 +52,11 @@ export default function GalleryScreen() {
       try {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== "granted") {
-          Alert.alert(
-            "Permission required",
-            "Please allow access to your photos to upload images."
-          );
+          Toast.show({
+            text1: "Permission required",
+            type: "customError" as ToastType,
+            text2: "Please allow access to your photos to upload images.",
+          });
         }
       } catch (err) {
         // fallback
@@ -85,10 +87,11 @@ export default function GalleryScreen() {
     if (!perms.granted) {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert(
-          "Permission denied",
-          "Grant photo access in Settings to pick images."
-        );
+        Toast.show({
+          text1: "Permission denied",
+          type: "customError" as ToastType,
+          text2: "Grant photo access in Settings to pick images.",
+        });
         return;
       }
     }
@@ -118,7 +121,11 @@ export default function GalleryScreen() {
         setTimeout(() => setShowSuccess(false), 1400);
       } catch (error) {
         console.error('Error uploading image:', error);
-        Alert.alert('Error', 'Failed to upload image. Please try again.');
+        Toast.show({
+          text1: 'Upload failed',
+          type: 'customError' as ToastType,
+          text2: 'Failed to upload image. Please try again.',
+        });
       }
     }
   };
@@ -168,7 +175,11 @@ export default function GalleryScreen() {
       setTimeout(() => setShowSuccess(false), 1400);
     } catch (error) {
       console.error('Error deleting images:', error);
-      Alert.alert('Error', 'Failed to delete images. Please try again.');
+      Toast.show({
+        text1: 'Delete failed',
+        type: 'customError' as ToastType,
+        text2: 'Failed to delete images. Please try again.',
+      });
       setShowDeleteConfirm(false);
     }
   };

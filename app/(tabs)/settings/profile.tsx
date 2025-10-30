@@ -1,10 +1,11 @@
 // app/profile-information.tsx
 import { YStack, XStack, Text, Avatar } from "tamagui";
-import { StyleSheet, TouchableOpacity, ScrollView, Alert } from "react-native";
+import { StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { User, MapPin, Heart, LogOut, Skull } from "@tamagui/lucide-icons";
 import colors from "@/hooks/colors";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 type ProfileItemProps = {
   title: string;
@@ -16,7 +17,7 @@ type ProfileItemProps = {
 export default function ProfileInformationScreen() {
   const router = useRouter();
   const [isDanger, setIsDanger] = useState(false);
-
+  const { logout, isLoading } = useAuth();
   const handleDeleteAccount = () => {
     Alert.alert(
       "DANGER",
@@ -95,11 +96,15 @@ export default function ProfileInformationScreen() {
       </YStack>
 
       <YStack marginTop="$6" gap="$3">
-        <TouchableOpacity style={styles.logout}>
-          <XStack alignItems="center" gap="$2">
-            <LogOut size={16} color={colors.primary} />
-            <Text style={styles.logoutText}>Log out</Text>
-          </XStack>
+        <TouchableOpacity style={styles.logout} onPress={() => logout()}>
+          {isLoading ? (
+            <ActivityIndicator size="small" color={colors.primary} />
+          ) : (
+            <XStack alignItems="center" gap="$2">
+              <LogOut size={16} color={colors.primary} />
+              <Text style={styles.logoutText}>Log out</Text>
+            </XStack>
+          )}
         </TouchableOpacity>
         <TouchableOpacity style={[styles.itemContainer]}onPress={() => setIsDanger(!isDanger)}>
           <Text style={[styles.deactivate,{marginBottom:10}]}>Danger zone</Text>

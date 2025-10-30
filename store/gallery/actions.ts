@@ -7,6 +7,8 @@ import {
     refreshGalleryCache,
     getCachedGalleryImages,
 } from '@/services/galleryApi';
+import { Toast } from 'toastify-react-native';
+import { ToastType } from 'toastify-react-native/utils/interfaces';
 
 export interface GalleryState {
     images: GalleryImage[];
@@ -56,11 +58,25 @@ export const createGallerySlice: StateCreator<GalleryStore> = (set, get) => ({
                 error: null,
                 lastFetched: new Date().toISOString(),
             }));
+
+            Toast.show({
+                text1: 'Image uploaded successfully',
+                type: 'customSuccess' as ToastType,
+                text2: 'Your image has been added to the gallery',
+            });
         } catch (error: any) {
+            const errorMessage = error.response?.data?.message || 'Failed to upload image';
             set({
                 isUploading: false,
-                error: error.response?.data?.message || 'Failed to upload image',
+                error: errorMessage,
             });
+            
+            Toast.show({
+                text1: 'Upload failed',
+                type: 'customError' as ToastType,
+                text2: errorMessage,
+            });
+            
             throw error;
         }
     },
@@ -78,11 +94,28 @@ export const createGallerySlice: StateCreator<GalleryStore> = (set, get) => ({
                 error: null,
                 lastFetched: new Date().toISOString(),
             });
+
+            // Only show success toast if not using cache and images were fetched
+            if (!useCache && images && images.length > 0) {
+                Toast.show({
+                    text1: 'Gallery refreshed',
+                    type: 'customSuccess' as ToastType,
+                    text2: `Loaded ${images.length} image${images.length === 1 ? '' : 's'}`,
+                });
+            }
         } catch (error: any) {
+            const errorMessage = error.response?.data?.message || 'Failed to fetch images';
             set({
                 isLoading: false,
-                error: error.response?.data?.message || 'Failed to fetch images',
+                error: errorMessage,
             });
+            
+            Toast.show({
+                text1: 'Failed to load gallery',
+                type: 'customError' as ToastType,
+                text2: errorMessage,
+            });
+            
             throw error;
         }
     },
@@ -100,11 +133,25 @@ export const createGallerySlice: StateCreator<GalleryStore> = (set, get) => ({
                 error: null,
                 lastFetched: new Date().toISOString(),
             }));
+
+            Toast.show({
+                text1: 'Image deleted successfully',
+                type: 'customSuccess' as ToastType,
+                text2: 'The image has been removed from your gallery',
+            });
         } catch (error: any) {
+            const errorMessage = error.response?.data?.message || 'Failed to delete image';
             set({
                 isLoading: false,
-                error: error.response?.data?.message || 'Failed to delete image',
+                error: errorMessage,
             });
+            
+            Toast.show({
+                text1: 'Delete failed',
+                type: 'customError' as ToastType,
+                text2: errorMessage,
+            });
+            
             throw error;
         }
     },
@@ -121,11 +168,25 @@ export const createGallerySlice: StateCreator<GalleryStore> = (set, get) => ({
                 error: null,
                 lastFetched: new Date().toISOString(),
             });
+
+            Toast.show({
+                text1: 'Gallery refreshed',
+                type: 'customSuccess' as ToastType,
+                text2: `Loaded ${images.length} image${images.length === 1 ? '' : 's'}`,
+            });
         } catch (error: any) {
+            const errorMessage = error.response?.data?.message || 'Failed to refresh cache';
             set({
                 isLoading: false,
-                error: error.response?.data?.message || 'Failed to refresh cache',
+                error: errorMessage,
             });
+            
+            Toast.show({
+                text1: 'Refresh failed',
+                type: 'customError' as ToastType,
+                text2: errorMessage,
+            });
+            
             throw error;
         }
     },
