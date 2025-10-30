@@ -10,18 +10,24 @@ const Gallery = ({ style }: { style?: any }) => {
 
   // Fetch images on component mount
   useEffect(() => {
-    fetchImages(true); // Use cache by default
+    fetchImages(true);
   }, [fetchImages]);
 
-  const displayImages = images && images.length > 0
-    ? images.slice(0, 3).map(img => img.url)
-    : [require("../../assets/images/emptyGallery.png")];
+  const validImages =
+    Array.isArray(images) && images.length > 0
+      ? images.filter((img) => img && img.url)
+      : [];
+
+  const displayImages =
+    validImages.length > 0
+      ? validImages.slice(0, 3).map((img) => img.url)
+      : [require("../../assets/images/emptyGallery.png")];
 
   const handleNavigate = () => {
     router.push({
       pathname: "/(tabs)/home/galleryAction",
       params: {
-        images: JSON.stringify(images.map(img => img.url)), // pass as string for URL safety
+        images: JSON.stringify(validImages.map((img) => img.url)), // ✅ use filtered list
       },
     });
   };
@@ -42,7 +48,7 @@ const Gallery = ({ style }: { style?: any }) => {
         </Text>
       </XStack>
 
-      {/* Image stack */}
+      {/* Image Stack */}
       <YStack
         alignItems="center"
         justifyContent="center"
@@ -90,7 +96,7 @@ const Gallery = ({ style }: { style?: any }) => {
           onPress={handleNavigate}
           disabled={isLoading}
         >
-          <Text color="#0E0E55">{images?.length || 0}</Text>
+          <Text color="#0E0E55">{validImages.length}</Text>
         </Button>
       </YStack>
     </Card>
