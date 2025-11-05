@@ -1,18 +1,13 @@
-import { useRouter } from 'expo-router';
-import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { InputField } from '@/components/auth/InputField';
-import { PrimaryButton } from '@/components/auth/PrimaryButton';
-import { ScreenHeader } from '@/components/auth/ScreenHeader';
-import { useForgotPasswordForm } from '@/hooks/auth/useForgotPasswordForm';
-import { useAuth } from '@/hooks/useAuth';
-import { Toast } from 'toastify-react-native';
-import { ToastType } from 'toastify-react-native/utils/interfaces';
+import { useRouter } from "expo-router";
+import { Alert, ScrollView, StyleSheet, Text } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { InputField } from "@/components/auth/InputField";
+import { PrimaryButton } from "@/components/auth/PrimaryButton";
+import { ScreenHeader } from "@/components/navigation/ScreenHeader";
+import { useForgotPasswordForm } from "@/hooks/auth/useForgotPasswordForm";
+import { useAuth } from "@/hooks/useAuth";
+import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
@@ -26,21 +21,22 @@ export default function ForgotPasswordScreen() {
 
     try {
       await forgotPassword({ email });
-      Alert.alert('Success', 'Password reset instructions sent to your email.');
-      console.log(updateEmail)
-      console.log(validateForm)
-      console.log(email)
+      Alert.alert("Success", "Password reset instructions sent to your email.");
+      console.log(updateEmail);
+      console.log(validateForm);
+      console.log(email);
       // Navigation will be handled by the auth store state changes
     } catch (err) {
       Toast.show({
-        text1: 'Password reset instructions sent to your email.',
-        type: 'customError' as ToastType,
-        text2: 'Password reset instructions sent to your email! Please try again.',
+        text1: "Password reset instructions sent to your email.",
+        type: "customError" as ToastType,
+        text2:
+          "Password reset instructions sent to your email! Please try again.",
       });
-      console.error('Forgot password error:', err);
-      console.log(updateEmail)
-      console.log(validateForm)
-      console.log(email)
+      console.error("Forgot password error:", err);
+      console.log(updateEmail);
+      console.log(validateForm);
+      console.log(email);
       // Error is already handled by the auth store
     }
   };
@@ -48,10 +44,15 @@ export default function ForgotPasswordScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
-        <ScreenHeader title="Forgot Password" style={{size:'$4'}} onBackPress={() => router.back()} />
+        <ScreenHeader
+          title="Forgot Password"
+          style={{ size: "$4" }}
+          onBackPress={() => router.back()}
+        />
 
         <Text style={styles.infoText}>
-          Enter your email address and we&apos;ll send you a code to reset your password.
+          Enter your email address and we&apos;ll send you a code to reset your
+          password.
         </Text>
 
         <InputField
@@ -78,7 +79,7 @@ export default function ForgotPasswordScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F7F7F7',
+    backgroundColor: "#F7F7F7",
   },
   container: {
     flexGrow: 1,
@@ -87,8 +88,8 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 15,
-    color: '#555',
-    textAlign: 'center',
+    color: "#555",
+    textAlign: "center",
     marginBottom: 30,
     lineHeight: 22,
   },

@@ -1,7 +1,6 @@
 // components/editBio/SocialRow.tsx
 import React from 'react';
-import { XStack, YStack, Text, Button, Input, Image } from 'tamagui';
-import { Images } from '@/constants/Images';
+import { XStack, YStack, Text, Button, Input, Image } from 'tamagui'; 
 
 type Props = {
   platform: string;
@@ -13,12 +12,12 @@ type Props = {
 export default function SocialRow({ platform, value, onChange, onRemove }: Props) {
   const icon =
     platform === 'Instagram'
-      ? Images.instagram
+      ? require("@/assets/images/x_icon.png")
       : platform === 'Facebook'
-      ? Images.facebook
+      ? require("@/assets/images/facebook.png")
       : platform === 'TikTok'
-      ? Images.tiktok
-      : Images.x;
+      ? require("@/assets/images/x_icon.png")
+      : require("@/assets/images/x_icon.png")
 
   return (
     <XStack alignItems="center" gap="$3">

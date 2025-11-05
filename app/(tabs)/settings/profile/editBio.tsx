@@ -57,12 +57,11 @@ export default function FieldInput({
           gap={8}
         >
           {prefix && <Text color="#0E0E55">{prefix}</Text>}
-          <Input
-            flex={1}
+          <Input 
             value={value}
             onChangeText={onChangeText}
             placeholder={placeholder}
-            borderWidth={0} // remove border inside Input because XStack handles it
+            borderWidth={0} 
             backgroundColor="transparent"
           />
         </XStack>

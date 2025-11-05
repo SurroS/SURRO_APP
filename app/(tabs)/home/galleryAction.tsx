@@ -15,6 +15,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import BottomModal from "@/components/BottomModal";
 import { useGallery } from "@/hooks/useGallery";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { ScreenHeader } from "@/components/auth";
 
 export default function GalleryScreen() {
   const router = useRouter();
@@ -84,7 +86,8 @@ export default function GalleryScreen() {
 
     const perms = await ImagePicker.getMediaLibraryPermissionsAsync();
     if (!perms.granted) {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
         Alert.alert(
           "Permission denied",
@@ -132,9 +135,7 @@ export default function GalleryScreen() {
 
   const toggleSelect = (index: number) => {
     setSelectedIndices((prev) =>
-      prev.includes(index)
-        ? prev.filter((i) => i !== index)
-        : [...prev, index]
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
     );
   };
 
@@ -223,109 +224,117 @@ export default function GalleryScreen() {
 
   const itemsToShow = [
     ...safeGalleryImages,
-    ...(safeGalleryImages.length < 4 && !selectionMode ? (["add"] as const) : []),
+    ...(safeGalleryImages.length < 4 && !selectionMode
+      ? (["add"] as const)
+      : []),
   ];
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={onHeaderBack} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={24} color="#0E0E55" />
-        </TouchableOpacity>
-        <RNText style={styles.headerTitle}>
-          {selectionMode ? `Select (${selectedIndices.length})` : "Gallery"}
-        </RNText>
-        <View style={{ width: 40 }} />
-      </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#ffff" }}>
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <RNText style={styles.headerTitle}>
+            {selectionMode ? (
+              `Select (${selectedIndices.length})`
+            ) : (
+              <ScreenHeader
+                title="Gallery"
+                onBackPress={() => router.back()}
+              />
+            )}
+          </RNText>
+          <View style={{ width: 40 }} />
+        </View>
 
-      {/* Grid */}
-      <ScrollView contentContainerStyle={styles.gridWrap}>
-        {isLoading ? (
-          <View style={styles.loadingContainer}>
-            <RNText style={styles.loadingText}>Loading gallery...</RNText>
-          </View>
-        ) : error ? (
-          <View style={styles.errorContainer}>
-            <RNText style={styles.errorText}>Error: {error}</RNText>
+        {/* Grid */}
+        <ScrollView contentContainerStyle={styles.gridWrap}>
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <RNText style={styles.loadingText}>Loading gallery...</RNText>
+            </View>
+          ) : error ? (
+            <View style={styles.errorContainer}>
+              <RNText style={styles.errorText}>Error: {error}</RNText>
+              <TouchableOpacity
+                style={styles.retryButton}
+                onPress={() => fetchImages(false)}
+              >
+                <RNText style={styles.retryText}>Retry</RNText>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.grid}>
+              {itemsToShow.map((item, i) =>
+                item === "add" ? renderCard("add", i) : renderCard(item, i)
+              )}
+            </View>
+          )}
+        </ScrollView>
+
+        {/* Selection bar */}
+        {selectionMode && (
+          <View style={styles.selectionBar}>
             <TouchableOpacity
-              style={styles.retryButton}
-              onPress={() => fetchImages(false)}
+              style={[styles.actionBtn, { backgroundColor: "#BB2D21" }]}
+              onPress={() => setShowDeleteConfirm(true)}
+              disabled={selectedIndices.length === 0}
             >
-              <RNText style={styles.retryText}>Retry</RNText>
+              <Ionicons name="trash" size={20} color="#fff" />
+              <RNText style={styles.actionText}>Delete</RNText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionBtn, { backgroundColor: "#E6E6E6" }]}
+              onPress={exitSelectionMode}
+            >
+              <RNText style={{ color: "#0E0E55" }}>Cancel</RNText>
             </TouchableOpacity>
           </View>
-        ) : (
-          <View style={styles.grid}>
-            {itemsToShow.map((item, i) =>
-              item === "add" ? renderCard("add", i) : renderCard(item, i)
-            )}
-          </View>
         )}
-      </ScrollView>
 
-      {/* Selection bar */}
-      {selectionMode && (
-        <View style={styles.selectionBar}>
-          <TouchableOpacity
-            style={[styles.actionBtn, { backgroundColor: "#BB2D21" }]}
-            onPress={() => setShowDeleteConfirm(true)}
-            disabled={selectedIndices.length === 0}
-          >
-            <Ionicons name="trash" size={20} color="#fff" />
-            <RNText style={styles.actionText}>Delete</RNText>
-          </TouchableOpacity>
+        {/* Delete confirmation modal */}
+        <BottomModal
+          visible={showDeleteConfirm}
+          icon="trash"
+          iconColor="#BB2D21"
+          title="Delete images"
+          message="Confirm that you want to delete the selected image(s)"
+          buttons={[
+            {
+              label: "Dismiss",
+              color: "#E6E6E6",
+              textColor: "#0E0E55",
+              onPress: () => setShowDeleteConfirm(false),
+            },
+            {
+              label: "Delete",
+              color: "#BB2D21",
+              onPress: confirmDelete,
+            },
+          ]}
+          onClose={() => setShowDeleteConfirm(false)}
+        />
 
-          <TouchableOpacity
-            style={[styles.actionBtn, { backgroundColor: "#E6E6E6" }]}
-            onPress={exitSelectionMode}
-          >
-            <RNText style={{ color: "#0E0E55" }}>Cancel</RNText>
-          </TouchableOpacity>
-        </View>
-      )}
+        {/* Upload success modal */}
+        <BottomModal
+          visible={showUploadSuccess}
+          success
+          title="Uploaded"
+          message="Image uploaded successfully."
+          onClose={() => setShowUploadSuccess(false)}
+        />
 
-      {/* Delete confirmation modal */}
-      <BottomModal
-        visible={showDeleteConfirm}
-        icon="trash"
-        iconColor="#BB2D21"
-        title="Delete images"
-        message="Confirm that you want to delete the selected image(s)"
-        buttons={[
-          {
-            label: "Dismiss",
-            color: "#E6E6E6",
-            textColor: "#0E0E55",
-            onPress: () => setShowDeleteConfirm(false),
-          },
-          {
-            label: "Delete",
-            color: "#BB2D21",
-            onPress: confirmDelete,
-          },
-        ]}
-        onClose={() => setShowDeleteConfirm(false)}
-      />
-
-      {/* Upload success modal */}
-      <BottomModal
-        visible={showUploadSuccess}
-        success
-        title="Uploaded"
-        message="Image uploaded successfully."
-        onClose={() => setShowUploadSuccess(false)}
-      />
-
-      {/*Delete success modal */}
-      <BottomModal
-        visible={showDeleteSuccess}
-        success
-        title="Deleted"
-        message="Image(s) removed successfully."
-        onClose={() => setShowDeleteSuccess(false)}
-      />
-    </View>
+        {/*Delete success modal */}
+        <BottomModal
+          visible={showDeleteSuccess}
+          success
+          title="Deleted"
+          message="Image(s) removed successfully."
+          onClose={() => setShowDeleteSuccess(false)}
+        />
+      </View>
+    </SafeAreaView>
   );
 }
 

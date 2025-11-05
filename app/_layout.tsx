@@ -18,7 +18,6 @@ export default function RootLayout() {
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
 
-  // ⛔ Don't block Slot with null — allow navigation tree to mount first
   if (!loaded) {
     return <StatusBar style="auto" />;
   }

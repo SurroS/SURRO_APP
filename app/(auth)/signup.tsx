@@ -15,10 +15,9 @@ import { ToastType } from "toastify-react-native/utils/interfaces";
 import { InputField } from "../../components/auth/InputField";
 import { OrDivider } from "../../components/auth/OrDivider";
 import { PrimaryButton } from "../../components/auth/PrimaryButton";
-import { ScreenHeader } from "../../components/auth/ScreenHeader";
+import { ScreenHeader } from "../../components/navigation/ScreenHeader";
 import { SocialButton } from "../../components/auth/SocialButton";
-import { useSignupForm } from "../../hooks/auth/useSignupForm"; 
-
+import { useSignupForm } from "../../hooks/auth/useSignupForm";
 
 import {
   GoogleSignin,
@@ -33,7 +32,6 @@ GoogleSignin.configure({
   scopes: ["https://www.googleapis.com/auth/drive.readonly"],
   offlineAccess: true,
 });
-
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -62,7 +60,7 @@ export default function SignupScreen() {
         console.log("====== GOOGLE LOGIN SUCCESS ======");
         console.log("ID Token:", idToken);
         console.log("User Info:", response.data?.user);
- 
+
         // Call the store action (handles backend + state)
         await googleLogin({
           idToken,
@@ -120,7 +118,7 @@ export default function SignupScreen() {
     }
   };
 
-const handleSignup = async () => {
+  const handleSignup = async () => {
     if (!validateForm()) return; // stop if form is invalid
     try {
       await register(signupFormData); // attempt registration
@@ -128,9 +126,9 @@ const handleSignup = async () => {
     } catch (err) {
       console.error("Signup error:", err);
       Toast.show({
-        text1: 'Signup Failed',
-        type: 'customError' as ToastType,
-        text2: 'Signup Failed! Please try again.',
+        text1: "Signup Failed",
+        type: "customError" as ToastType,
+        text2: "Signup Failed! Please try again.",
       });
     }
   };
@@ -189,7 +187,6 @@ const handleSignup = async () => {
               placeholder="Enter referral code"
             />
           )}
-
 
           <PrimaryButton
             title="Sign up"
