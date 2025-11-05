@@ -11,15 +11,7 @@ export default function SettingsLayout() {
           headerTitleStyle: { fontWeight: "bold" },
           headerShown: false,
         }}
-     />
-         <Stack.Screen
-        name="editBio"
-        options={{
-          headerTitle: "EditBio",
-          headerTitleStyle: { fontWeight: "bold" },
-          headerShown: false,
-        }}
-     />
+      />
     </Stack>
   );
 }

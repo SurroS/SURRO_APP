@@ -1,16 +1,15 @@
-// components/PlatformInputNative.tsx
 import React, { useState } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  Modal,
   FlatList,
   StyleSheet,
+  Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { YStack } from "tamagui";
 
 type Platform = {
   key: string;
@@ -36,24 +35,27 @@ const PLATFORMS: Platform[] = [
   { key: "TikTok", icon: "logo-tiktok", color: "#000000", label: "TikTok" },
 ];
 
+type PlatformInputProps = {
+  onAdd?: (platform: string, handle: string) => void;
+  initialPlatform?: string;
+};
+
 export default function PlatformInput({
   onAdd,
   initialPlatform = "Instagram",
-}: {
-  onAdd?: (platform: string, handle: string) => void;
-  initialPlatform?: string;
-}) {
+}: PlatformInputProps) {
   const [selected, setSelected] = useState<Platform>(
     PLATFORMS.find((p) => p.key === initialPlatform) || PLATFORMS[0]
   );
   const [text, setText] = useState("");
   const [list, setList] = useState<{ platform: string; handle: string }[]>([]);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+  const fadeAnim = new Animated.Value(0);
 
   const handleAdd = () => {
     if (!text.trim()) return;
     const entry = { platform: selected.key, handle: text.trim() };
-    setList((s) => [entry, ...s]); // newest first
+    setList((s) => [entry, ...s]);
     setText("");
     if (onAdd) onAdd(entry.platform, entry.handle);
   };
@@ -62,8 +64,26 @@ export default function PlatformInput({
     setList((s) => s.filter((_, i) => i !== index));
   };
 
+  const toggleDropdown = () => {
+    if (dropdownVisible) {
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: true,
+      }).start(() => setDropdownVisible(false));
+    } else {
+      setDropdownVisible(true);
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }).start();
+    }
+  };
+
   return (
-    <SafeAreaView style={{ width: "100%" }}>
+    <YStack>
+      {/* Added list preview */}
       {list.length > 0 && (
         <View style={styles.addedContainer}>
           {list.map((item, i) => (
@@ -93,25 +113,68 @@ export default function PlatformInput({
         </View>
       )}
 
-      {/* Row: select trigger, input, add button */}
+      {/* Row: dropdown, text input, add button */}
       <View style={styles.row}>
-        <TouchableOpacity
-          style={styles.selectTrigger}
-          onPress={() => setModalVisible(true)}
-          activeOpacity={0.75}
-        >
-          <Ionicons
-            name={selected.icon as any}
-            size={18}
-            color={selected.color}
-          />
-          <Ionicons
-            name="chevron-down"
-            size={16}
-            color="#333"
-            style={{ marginLeft: 6 }}
-          />
-        </TouchableOpacity>
+        <View style={{ position: "relative" }}>
+          <TouchableOpacity
+            style={styles.selectTrigger}
+            onPress={toggleDropdown}
+            activeOpacity={0.75}
+          >
+            <Ionicons
+              name={selected.icon as any}
+              size={18}
+              color={selected.color}
+            />
+            <Ionicons
+              name="chevron-down"
+              size={16}
+              color="#333"
+              style={{ marginLeft: 6 }}
+            />
+          </TouchableOpacity>
+
+          {dropdownVisible && (
+            <Animated.View
+              style={[
+                styles.inlineDropdownCard,
+                { opacity: fadeAnim, transform: [{ scale: fadeAnim }] },
+              ]}
+            >
+              <FlatList
+                data={PLATFORMS}
+                keyExtractor={(item) => item.key}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.platformRow}
+                    onPress={() => {
+                      setSelected(item);
+                      toggleDropdown();
+                    }}
+                  >
+                    <View
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      <Ionicons
+                        name={item.icon as any}
+                        size={20}
+                        color={item.color}
+                        style={{ marginRight: 12 }}
+                      />
+                      <Text style={styles.platformLabel}>
+                        {item.label ?? item.key}
+                      </Text>
+                    </View>
+                    {selected.key === item.key && (
+                      <Ionicons name="checkmark" size={16} color="#0E0E55" />
+                    )}
+                  </TouchableOpacity>
+                )}
+                ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+              />
+            </Animated.View>
+          )}
+        </View>
 
         <TextInput
           style={styles.input}
@@ -131,52 +194,7 @@ export default function PlatformInput({
           <Text style={styles.addButtonText}>Add</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Modal for platform selection */}
-      <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Choose platform</Text>
-            <FlatList
-              data={PLATFORMS}
-              keyExtractor={(item) => item.key}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.platformRow}
-                  onPress={() => {
-                    setSelected(item);
-                    setModalVisible(false);
-                  }}
-                >
-                  <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <Ionicons
-                      name={item.icon as any}
-                      size={22}
-                      color={item.color}
-                      style={{ marginRight: 12 }}
-                    />
-                    <Text style={styles.platformLabel}>
-                      {item.label ?? item.key}
-                    </Text>
-                  </View>
-                  {selected.key === item.key && (
-                    <Ionicons name="checkmark" size={18} color="#0E0E55" />
-                  )}
-                </TouchableOpacity>
-              )}
-              ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-            />
-
-            <TouchableOpacity
-              style={styles.modalClose}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.modalCloseText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-    </SafeAreaView>
+    </YStack>
   );
 }
 
@@ -196,11 +214,6 @@ const styles = StyleSheet.create({
     borderColor: "#E6E6E6",
     backgroundColor: "#F8F8FA",
     justifyContent: "center",
-  },
-  selectText: {
-    marginLeft: 8,
-    color: "#212121",
-    fontWeight: "600",
   },
   input: {
     flex: 1,
@@ -236,45 +249,41 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 8,
   },
-  addedLeft: { flexDirection: "row", alignItems: "center", flexWrap:"wrap", width:"70%" },
+  addedLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    width: "70%",
+  },
   addedText: { color: "#111" },
   removeBtn: {
     paddingHorizontal: 8,
     paddingVertical: 6,
   },
-  removeText: { color: "#E63946", fontWeight: "700", },
+  removeText: { color: "#E63946", fontWeight: "700" },
 
-  // modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.32)",
-    justifyContent: "flex-end",
-  },
-  modalCard: {
+  // dropdown
+  inlineDropdownCard: {
+    position: "absolute",
+    top: 48,
+    left: 0,
+    width: 150,
     backgroundColor: "#fff",
-    padding: 16,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    maxHeight: "60%",
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 12,
-    color: "#0E0E55",
+    borderRadius: 12,
+    padding: 10,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    zIndex: 100,
   },
   platformRow: {
-    paddingVertical: 12,
-    paddingHorizontal: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  platformLabel: { fontSize: 16, color: "#111" },
-  modalClose: {
-    marginTop: 12,
-    alignItems: "center",
-    paddingVertical: 12,
-  },
-  modalCloseText: { color: "#0E0E55", fontWeight: "700" },
+  platformLabel: { fontSize: 14, color: "#111" },
 });

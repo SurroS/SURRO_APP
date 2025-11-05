@@ -120,7 +120,7 @@ export default function EditBioView() {
       </ScrollView>
 
       <EditProfileModal
-      onSave={()=>{}}    
+      onSave={()=>{console.log("bio saved")}}    
       visible={isModalVisible}
       onClose={()=>setIsModalVisible(false)}
       />
