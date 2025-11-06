@@ -8,7 +8,7 @@ interface TransactionItemProps {
   date: string;
   amount: number;
   type: any;
-  gateway?: 'stripe' | 'paystack' | 'flutterwave' | 'interswitch'; 
+  gateway?: 'STRIPE' | 'PAYSTACK' | 'FLUTTERWAVE' | 'INTERSWITCH'; 
   iconName?: string; // optional manual icon override
 }
 
@@ -26,13 +26,13 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
     if (iconName) return iconName;
 
     switch (gateway) {
-      case 'stripe':
+      case 'STRIPE':
         return 'card-outline';
-      case 'paystack':
+      case 'PAYSTACK':
         return 'wallet-outline';
-      case 'flutterwave':
+      case 'FLUTTERWAVE':
         return 'cash-outline';
-      case 'interswitch':
+      case 'INTERSWITCH':
         return 'swap-horizontal-outline';
       default:
         return type === 'credit' ? 'arrow-down-circle' : 'arrow-up-circle';

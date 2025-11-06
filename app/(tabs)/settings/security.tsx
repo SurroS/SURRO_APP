@@ -5,11 +5,12 @@ import { PrimaryButton } from "@/components/auth";
 import { useAuth } from "@/hooks/useAuth";
 import colors from "@/hooks/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ScreenHeader } from "@/components/auth/ScreenHeader";
+import { ScreenHeader } from "@/components/navigation/ScreenHeader";
 import { router } from "expo-router";
 
 export default function ChangePasswordScreen() {
-  const { formData, errors, updateField, validateForm, resetForm } = usechangePasswordForm();
+  const { formData, errors, updateField, validateForm, resetForm } =
+    usechangePasswordForm();
   const { isLoading } = useAuth();
 
   const handleSubmit = () => {
@@ -23,47 +24,50 @@ export default function ChangePasswordScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScreenHeader title="Privacy and security" onBackPress={() => router.back()} />
-    <YStack >
-      <Text style={styles.label}>Current Password</Text>
-      <TextInput
-        secureTextEntry
-        style={styles.input}
-        value={formData.currentPassword}
-        onChangeText={(text) => updateField("currentPassword", text)}
+      <ScreenHeader
+        title="Privacy and security"
+        onBackPress={() => router.back()}
       />
-      {errors.currentPassword && (
-        <Text style={styles.error}>{errors.currentPassword}</Text>
-      )}
+      <YStack>
+        <Text style={styles.label}>Current Password</Text>
+        <TextInput
+          secureTextEntry
+          style={styles.input}
+          value={formData.currentPassword}
+          onChangeText={(text) => updateField("currentPassword", text)}
+        />
+        {errors.currentPassword && (
+          <Text style={styles.error}>{errors.currentPassword}</Text>
+        )}
 
-      <Text style={styles.label}>New Password</Text>
-      <TextInput
-        secureTextEntry
-        style={styles.input}
-        value={formData.newPassword}
-        onChangeText={(text) => updateField("newPassword", text)}
-      />
-      {errors.newPassword && (
-        <Text style={styles.error}>{errors.newPassword}</Text>
-      )}
+        <Text style={styles.label}>New Password</Text>
+        <TextInput
+          secureTextEntry
+          style={styles.input}
+          value={formData.newPassword}
+          onChangeText={(text) => updateField("newPassword", text)}
+        />
+        {errors.newPassword && (
+          <Text style={styles.error}>{errors.newPassword}</Text>
+        )}
 
-      <Text style={styles.label}>Confirm New Password</Text>
-      <TextInput
-        secureTextEntry
-        style={styles.input}
-        value={formData.newPasswordConfirmation}
-        onChangeText={(text) => updateField("newPasswordConfirmation", text)}
-      />
-      {errors.newPasswordConfirmation && (
-        <Text style={styles.error}>{errors.newPasswordConfirmation}</Text>
-      )}
+        <Text style={styles.label}>Confirm New Password</Text>
+        <TextInput
+          secureTextEntry
+          style={styles.input}
+          value={formData.newPasswordConfirmation}
+          onChangeText={(text) => updateField("newPasswordConfirmation", text)}
+        />
+        {errors.newPasswordConfirmation && (
+          <Text style={styles.error}>{errors.newPasswordConfirmation}</Text>
+        )}
 
-      <PrimaryButton
-        title="Change Password"
-        onPress={handleSubmit}
-        loading={isLoading}
-      />
-    </YStack>
+        <PrimaryButton
+          title="Change Password"
+          onPress={handleSubmit}
+          loading={isLoading}
+        />
+      </YStack>
     </SafeAreaView>
   );
 }
@@ -71,20 +75,20 @@ export default function ChangePasswordScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20, 
+    padding: 20,
   },
   label: {
     fontWeight: "600",
     marginBottom: 6,
-    color:colors.text
+    color: colors.text,
   },
   input: {
     borderWidth: 1,
-    borderColor:colors.gray,
+    borderColor: colors.gray,
     borderRadius: 8,
     padding: 10,
     marginBottom: 10,
-    color:colors.text
+    color: colors.text,
   },
   error: {
     color: "red",

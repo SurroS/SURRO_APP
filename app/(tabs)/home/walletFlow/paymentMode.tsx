@@ -10,8 +10,14 @@ import { useLocalSearchParams } from "expo-router";
 import { useTypedRouter } from "@/hooks/payment/useTypedRouter";
 import { PaymentGateway, PaymentMode } from "@/types/payment";
 
+// const modesByGateway: Record<PaymentGateway, PaymentMode[]> = {
+//   PAYSTACK: ["card", "bank_transfer", "ussd"],
+//   FLUTTERWAVE: ["card", "mobile"],
+//   STRIPE: ["card"],
+//   INTERSWITCH: ["card", "quickteller"],
+// };
 const modesByGateway: Record<PaymentGateway, PaymentMode[]> = {
-  paystack: ["card", "bank", "ussd"],
+  paystack: ["card", "bank_transfer", "ussd"],
   flutterwave: ["card", "mobile"],
   stripe: ["card"],
   interswitch: ["card", "quickteller"],

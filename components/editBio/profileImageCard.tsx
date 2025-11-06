@@ -1,6 +1,8 @@
-import React from 'react';
-import { YStack, Button, Image, Text } from 'tamagui';
-import { Images } from '../../constants/Images';
+import colors from "@/hooks/colors";
+import { Camera, Pen } from "@tamagui/lucide-icons";
+import React from "react";
+import { Pressable } from "react-native";
+import { YStack, Button, Image, Text } from "tamagui";
 
 const CARD_W = 197;
 const CARD_H = 156;
@@ -37,31 +39,36 @@ export default function ProfileImageCard({
         zIndex={10}
       >
         <Image
-          source={imageSrc || Images.profilePlaceholder}
+          source={imageSrc || require("@/assets/images/avatar.jpg")}
           width={120}
           height={120}
           borderRadius={12}
-          resizeMode="cover"
         />
       </YStack>
 
       {/* Change Profile Picture Button */}
-      <Button
-        width={CARD_W + 40}
+      <Pressable
+        style={{
+          flexDirection: "row",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
         onPress={onChangePicture}
-        iconAfter={<Image source={Images.camera} width={16} height={16} />}
-        color="$text"
       >
-        Change profile picture
-      </Button>
+        <Text color="$text" textDecorationLine="underline">
+          Change profile picture {""}
+          <Camera size={16} color={colors.text} />
+        </Text>
+      </Pressable>
 
       {/* Edit Bio Button */}
       <Button
         backgroundColor="#EBF4FE"
         onPress={onEditBio}
-        iconAfter={<Image source={Images.pencil} width={16} height={16} />}
+        iconAfter={<Pen width={16} color={colors.text} />}
         paddingHorizontal={12}
         paddingVertical={8}
+        elevate
       >
         <Text fontSize={14} fontWeight="500" color="$text">
           Edit bio
