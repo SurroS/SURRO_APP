@@ -6,9 +6,8 @@ import { router, useLocalSearchParams } from "expo-router";
 import colors from "@/hooks/colors";
 
 export default function KYCPicturePreview() {
-  const { idType } = useLocalSearchParams<{ idType?: string }>();
-  const [loading, setLoading] = useState(false);
-  const [imageUri, setImageUri] = useState(require("@/assets/images/id_sample.png")); // replace with actual captured URI
+ const { idType, imageUri } = useLocalSearchParams<{ idType?: string; imageUri?: string }>(); 
+  const [loading, setLoading] = useState(false); 
 
   const handleRetake = () => {
     router.back(); // return to camera/upload screen
@@ -37,7 +36,8 @@ export default function KYCPicturePreview() {
           Make sure your {idType || "ID"} is clearly visible and readable before submitting.
         </Text>
 
-        <Image source={imageUri} style={styles.previewImage} />
+       <Image source={{ uri: imageUri }} style={styles.previewImage} />
+
 
         <TouchableOpacity
           onPress={handleRetake}

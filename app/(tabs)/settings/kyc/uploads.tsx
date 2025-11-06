@@ -1,18 +1,49 @@
-import React from "react";
+import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, TouchableOpacity, Image } from "react-native";
+import { StyleSheet, TouchableOpacity, Image, Alert } from "react-native";
 import { YStack, XStack, Text } from "tamagui";
 import { router, useLocalSearchParams } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
 import { CheckCircle } from "@tamagui/lucide-icons";
 import colors from "@/hooks/colors";
 
 export default function KYCUploadScreen() {
   const { idType } = useLocalSearchParams<{ idType: string }>();
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
-  const handleTakePicture = () => {
-    // TODO: integrate with camera or document picker
-    console.log(`Taking picture for ID type: ${idType}`);
-    router.push("/settings/kyc/preview"); // or handle verification
+  const handleTakePicture = async () => {
+    try {
+      // ask permission first
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission required",
+          "Please allow camera access to take a picture of your ID."
+        );
+        return;
+      }
+
+      // launch camera
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 1,
+        allowsEditing: true,
+      });
+
+      if (!result.canceled && result.assets?.length) {
+        const uri = result.assets[0].uri;
+        setCapturedImage(uri);
+
+        // navigate to preview
+        router.push({
+          pathname: "/(tabs)/settings/kyc/preview",
+          params: { idType, imageUri: uri },
+        });
+      }
+    } catch (error) {
+      console.error("Camera error:", error);
+      Alert.alert("Error", "Failed to open camera. Please try again.");
+    }
   };
 
   const readableId =
@@ -25,13 +56,11 @@ export default function KYCUploadScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <YStack paddingHorizontal={20} paddingTop={20} flex={1}>
-        {/* Header */}
         <Text style={styles.title}>Take a picture of your ID</Text>
         <Text style={styles.subtitle}>
           Ensure your {readableId} is clear and all details are visible.
         </Text>
 
-        {/* Illustration */}
         <YStack
           backgroundColor="#F8F8FA"
           borderRadius={16}
@@ -41,19 +70,21 @@ export default function KYCUploadScreen() {
           paddingVertical={40}
         >
           <Image
-            source={require("@/assets/images/id_sample.png")}
+            source={
+              capturedImage
+                ? { uri: capturedImage }
+                : require("@/assets/images/id_sample.png")
+            }
             style={{ width: 180, height: 120, resizeMode: "contain" }}
           />
         </YStack>
 
-        {/* Checklist */}
         <YStack gap="$3" marginTop={30}>
           <ChecklistItem text="Your ID has not expired" />
           <ChecklistItem text="It is clear and easy to read" />
           <ChecklistItem text="All your details are in frame" />
         </YStack>
 
-        {/* Take picture button */}
         <TouchableOpacity
           style={styles.button}
           onPress={handleTakePicture}
@@ -74,10 +105,7 @@ const ChecklistItem = ({ text }: { text: string }) => (
 );
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
+  container: { flex: 1, backgroundColor: "#fff" },
   title: {
     fontSize: 20,
     fontWeight: "700",
@@ -97,13 +125,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 30,
   },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  checkText: {
-    fontSize: 14,
-    color: "#333",
-  },
+  buttonText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  checkText: { fontSize: 14, color: "#333" },
 });
