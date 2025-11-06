@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  FlatList,
   StyleSheet,
   Animated,
 } from "react-native";
@@ -19,18 +18,8 @@ type Platform = {
 };
 
 const PLATFORMS: Platform[] = [
-  {
-    key: "Instagram",
-    icon: "logo-instagram",
-    color: "#E1306C",
-    label: "Instagram",
-  },
-  {
-    key: "Facebook",
-    icon: "logo-facebook",
-    color: "#1877F2",
-    label: "Facebook",
-  },
+  { key: "Instagram", icon: "logo-instagram", color: "#E1306C", label: "Instagram" },
+  { key: "Facebook", icon: "logo-facebook", color: "#1877F2", label: "Facebook" },
   { key: "X", icon: "logo-twitter", color: "#000000", label: "X" },
   { key: "TikTok", icon: "logo-tiktok", color: "#000000", label: "TikTok" },
 ];
@@ -50,14 +39,15 @@ export default function PlatformInput({
   const [text, setText] = useState("");
   const [list, setList] = useState<{ platform: string; handle: string }[]>([]);
   const [dropdownVisible, setDropdownVisible] = useState(false);
-  const fadeAnim = new Animated.Value(0);
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const handleAdd = () => {
     if (!text.trim()) return;
     const entry = { platform: selected.key, handle: text.trim() };
     setList((s) => [entry, ...s]);
     setText("");
-    if (onAdd) onAdd(entry.platform, entry.handle);
+    onAdd?.(entry.platform, entry.handle);
   };
 
   const removeItem = (index: number) => {
@@ -141,37 +131,31 @@ export default function PlatformInput({
                 { opacity: fadeAnim, transform: [{ scale: fadeAnim }] },
               ]}
             >
-              <FlatList
-                data={PLATFORMS}
-                keyExtractor={(item) => item.key}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={styles.platformRow}
-                    onPress={() => {
-                      setSelected(item);
-                      toggleDropdown();
-                    }}
-                  >
-                    <View
-                      style={{ flexDirection: "row", alignItems: "center" }}
-                    >
-                      <Ionicons
-                        name={item.icon as any}
-                        size={20}
-                        color={item.color}
-                        style={{ marginRight: 12 }}
-                      />
-                      <Text style={styles.platformLabel}>
-                        {item.label ?? item.key}
-                      </Text>
-                    </View>
-                    {selected.key === item.key && (
-                      <Ionicons name="checkmark" size={16} color="#0E0E55" />
-                    )}
-                  </TouchableOpacity>
-                )}
-                ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-              />
+              {PLATFORMS.map((item) => (
+                <TouchableOpacity
+                  key={item.key}
+                  style={styles.platformRow}
+                  onPress={() => {
+                    setSelected(item);
+                    toggleDropdown();
+                  }}
+                >
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <Ionicons
+                      name={item.icon as any}
+                      size={20}
+                      color={item.color}
+                      style={{ marginRight: 12 }}
+                    />
+                    <Text style={styles.platformLabel}>
+                      {item.label ?? item.key}
+                    </Text>
+                  </View>
+                  {selected.key === item.key && (
+                    <Ionicons name="checkmark" size={16} color="#0E0E55" />
+                  )}
+                </TouchableOpacity>
+              ))}
             </Animated.View>
           )}
         </View>
@@ -183,7 +167,6 @@ export default function PlatformInput({
           onChangeText={setText}
           returnKeyType="done"
           onSubmitEditing={handleAdd}
-          editable
         />
 
         <TouchableOpacity
@@ -235,7 +218,6 @@ const styles = StyleSheet.create({
   },
   addButtonText: { color: "#fff", fontWeight: "700" },
 
-  // added list
   addedContainer: {
     marginBottom: 12,
     paddingHorizontal: 12,
@@ -256,16 +238,12 @@ const styles = StyleSheet.create({
     width: "70%",
   },
   addedText: { color: "#111" },
-  removeBtn: {
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-  },
+  removeBtn: { paddingHorizontal: 8, paddingVertical: 6 },
   removeText: { color: "#E63946", fontWeight: "700" },
 
-  // dropdown
   inlineDropdownCard: {
     position: "absolute",
-    top: 48,
+    top: -60,
     left: 0,
     width: 150,
     backgroundColor: "#fff",
@@ -276,7 +254,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    zIndex: 100,
+    zIndex: 1000, 
   },
   platformRow: {
     paddingVertical: 8,

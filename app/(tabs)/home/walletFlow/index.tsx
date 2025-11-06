@@ -123,6 +123,7 @@ const WalletScreen = () => {
                                     styles.actionButton,
                                     { backgroundColor: colors.ACTION_NAVY_BLUE },
                                 ]}
+                                onPress={()=>router.push("/home/walletFlow/withdrawal")}
                             >
                                 <Ionicons name="remove" size={24} color="#FFFFFF" />
                             </TouchableOpacity>
