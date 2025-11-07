@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet, TouchableOpacity, Image, Alert } from "react-native";
-import { YStack, XStack, Text } from "tamagui";
+import { YStack, XStack, Text, ScrollView } from "tamagui";
 import { router, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { CheckCircle } from "@tamagui/lucide-icons";
 import colors from "@/hooks/colors";
+import { ScreenHeader } from "@/components/auth";
 
 export default function KYCUploadScreen() {
   const { idType } = useLocalSearchParams<{ idType: string }>();
@@ -55,6 +56,8 @@ export default function KYCUploadScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+       <ScreenHeader title="KYC" onBackPress={() => router.back()} />
+        <ScrollView>
       <YStack paddingHorizontal={20} paddingTop={20} flex={1}>
         <Text style={styles.title}>Take a picture of your ID</Text>
         <Text style={styles.subtitle}>
@@ -93,6 +96,7 @@ export default function KYCUploadScreen() {
           <Text style={styles.buttonText}>Take picture</Text>
         </TouchableOpacity>
       </YStack>
+      </ScrollView>
     </SafeAreaView>
   );
 }

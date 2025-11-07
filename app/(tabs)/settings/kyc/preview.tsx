@@ -4,6 +4,7 @@ import { StyleSheet, Image, TouchableOpacity, ActivityIndicator } from "react-na
 import { YStack, Text } from "tamagui";
 import { router, useLocalSearchParams } from "expo-router";
 import colors from "@/hooks/colors";
+import { ScreenHeader } from "@/components/navigation/ScreenHeader";
 
 export default function KYCPicturePreview() {
  const { idType, imageUri } = useLocalSearchParams<{ idType?: string; imageUri?: string }>(); 
@@ -30,6 +31,7 @@ export default function KYCPicturePreview() {
 
   return (
     <SafeAreaView style={styles.container}>
+       <ScreenHeader title="KYC" onBackPress={() => router.back()} />
       <YStack flex={1} paddingHorizontal={20} paddingTop={20} alignItems="center">
         <Text style={styles.title}>Confirm your ID photo</Text>
         <Text style={styles.subtitle}>

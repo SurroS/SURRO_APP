@@ -35,13 +35,13 @@ const settingsData: SettingItem[] = [
     icon: <Ionicons name="settings" size={24} color="#FFD700" />,
     route: "/(tabs)/settings/personalization",
   },
-  {
-    id: "stats",
-    title: "My stats",
-    description: "View your record",
-    icon: <FontAwesome5 name="chart-bar" size={22} color="#DC143C" />,
-    route: "/(tabs)/settings/stats",
-  },
+  // {
+  //   id: "stats",
+  //   title: "My stats",
+  //   description: "View your record",
+  //   icon: <FontAwesome5 name="chart-bar" size={22} color="#DC143C" />,
+  //   route: "/(tabs)/settings/stats",
+  // },
   {
     id: "security",
     title: "Privacy and security",

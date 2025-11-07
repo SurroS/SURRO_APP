@@ -5,6 +5,7 @@ import { YStack, XStack, Text, Button } from "tamagui";
 import { router } from "expo-router";
 import { Lock } from "@tamagui/lucide-icons";
 import colors from "@/hooks/colors";
+import { ScreenHeader } from "@/components/auth";
 
 const idOptions = [
   { label: "National ID card", value: "national_id" },
@@ -25,8 +26,11 @@ export default function KYCSelectIDScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <ScreenHeader title="KYC" onBackPress={() => router.back()} />
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={styles.title}>Which type of ID would you like to provide?</Text>
+        <Text style={styles.title}>
+          Which type of ID would you like to provide?
+        </Text>
 
         <YStack gap="$3" marginTop="$4">
           {idOptions.map((item) => (
@@ -44,7 +48,9 @@ export default function KYCSelectIDScreen() {
                 width={22}
                 height={22}
                 borderWidth={2}
-                borderColor={selected === item.value ? colors.primary : "#C6C6C6"}
+                borderColor={
+                  selected === item.value ? colors.primary : "#C6C6C6"
+                }
                 borderRadius={20}
                 alignItems="center"
                 justifyContent="center"
@@ -68,7 +74,9 @@ export default function KYCSelectIDScreen() {
           backgroundColor={selected ? colors.primary : "#E6E6E6"}
           onPress={handleContinue}
         >
-          <Text style={[styles.buttonText, { color: selected ? "#fff" : "#999" }]}>
+          <Text
+            style={[styles.buttonText, { color: selected ? "#fff" : "#999" }]}
+          >
             Continue
           </Text>
         </Button>
@@ -80,7 +88,8 @@ export default function KYCSelectIDScreen() {
           gap="$2"
         >
           <Text style={styles.footerText}>
-            We priotise the safty of your informatoin, We will encrypt your info and store it securely, and only use it to verify your identity.
+            We priotise the safty of your informatoin, We will encrypt your info
+            and store it securely, and only use it to verify your identity.
           </Text>
         </XStack>
       </ScrollView>

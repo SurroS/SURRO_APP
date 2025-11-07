@@ -12,7 +12,8 @@ export default function HomeLayout() {
       <Stack.Screen name="preview" />
       <Stack.Screen name="select" />
       <Stack.Screen name="uploads" />
-      {/* <Stack.Screen name="" /> */}
+       <Stack.Screen name="face-scan" /> 
+        <Stack.Screen name="face-scan-rules" /> 
     </Stack>
   );
 }
