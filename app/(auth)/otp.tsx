@@ -15,7 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { PrimaryButton } from "../../components/auth/PrimaryButton";
-import { ScreenHeader } from "../../components/auth/ScreenHeader";
+import { ScreenHeader } from "../../components/navigation/ScreenHeader";
 import { useOtpForm } from "../../hooks/auth/useOtpForm";
 
 export default function OTPScreen() {
@@ -43,9 +43,9 @@ export default function OTPScreen() {
 
     if (!tempEmail) {
       Toast.show({
-        text1: 'No email found. Please restart the process.',
-        type: 'customError' as ToastType,
-        text2: 'No email found. Please restart the process!',
+        text1: "No email found. Please restart the process.",
+        type: "customError" as ToastType,
+        text2: "No email found. Please restart the process!",
       });
       return;
     }
@@ -53,7 +53,6 @@ export default function OTPScreen() {
     console.log("handleVerify =", getOtpCode());
     console.log("handleVerify =", tempEmail);
     try {
-
       await verifyOtp({
         email: tempEmail,
         code: getOtpCode(),
@@ -66,9 +65,9 @@ export default function OTPScreen() {
   const handleResendOtp = async () => {
     if (!tempEmail) {
       Toast.show({
-        text1: 'No email found. Please restart the process.',
-        type: 'customError' as ToastType,
-        text2: 'No email found. Please restart the process!',
+        text1: "No email found. Please restart the process.",
+        type: "customError" as ToastType,
+        text2: "No email found. Please restart the process!",
       });
       return;
     }
@@ -76,16 +75,16 @@ export default function OTPScreen() {
     try {
       await resendOtp(tempEmail);
       Toast.show({
-        text1: 'OTP code has been resent to your email.',
-        type: 'customSuccess' as ToastType,
-        text2: 'OTP code has been resent to your email!',
+        text1: "OTP code has been resent to your email.",
+        type: "customSuccess" as ToastType,
+        text2: "OTP code has been resent to your email!",
       });
     } catch (err) {
       console.error("Resend OTP error:", err);
       Toast.show({
-        text1: 'Failed to resend OTP. Please try again.',
-        type: 'customError' as ToastType,
-        text2: 'Failed to resend OTP. Please try again!',
+        text1: "Failed to resend OTP. Please try again.",
+        type: "customError" as ToastType,
+        text2: "Failed to resend OTP. Please try again!",
       });
     }
   };
@@ -101,7 +100,8 @@ export default function OTPScreen() {
         />
 
         <Text style={styles.infoText}>
-          We&apos;ve sent a 6-digit verification code to {tempEmail || 'your email'}.
+          We&apos;ve sent a 6-digit verification code to{" "}
+          {tempEmail || "your email"}.
         </Text>
 
         <View style={styles.otpContainer}>
@@ -164,9 +164,9 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   otpContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
     marginBottom: 30,
     width: "100%",
     alignSelf: "center",
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   otpInput: {
     width: 50,
     height: 50,
-    backgroundColor: '#EBEBEB',
+    backgroundColor: "#EBEBEB",
     borderRadius: 8,
     fontSize: 22,
     textAlign: "center",

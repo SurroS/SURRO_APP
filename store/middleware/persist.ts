@@ -3,23 +3,25 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 import Constants from "expo-constants";
 
+const APP_ENV =
+  Constants.expoConfig?.extra?.appEnv ||
+  process.env.EXPO_PUBLIC_APP_ENV ||
+  "development";
 
-const APP_ENV = Constants.expoConfig?.extra?.appEnv || process.env.EXPO_PUBLIC_APP_ENV || "development";
-
-// Check if we're in dev mode (Expo Go or local)
 const isDev = __DEV__ || APP_ENV === "development";
 
-// Use AsyncStorage in dev for easier debugging
+// Unified async storage layer compatible with Zustand persist
 const Storage = {
   async setItem(key: string, value: string) {
     try {
       if (isDev) {
         await AsyncStorage.setItem(key, value);
       } else {
+        // Expo SecureStore is keychain/keystore safe, but slower — keep async
         await SecureStore.setItemAsync(key, value);
       }
     } catch (error) {
-      console.error("Storage setItem error:", error);
+      console.error("[Storage] setItem error:", error);
     }
   },
 
@@ -31,7 +33,7 @@ const Storage = {
         return await SecureStore.getItemAsync(key);
       }
     } catch (error) {
-      console.error("Storage getItem error:", error);
+      console.error("[Storage] getItem error:", error);
       return null;
     }
   },
@@ -44,9 +46,14 @@ const Storage = {
         await SecureStore.deleteItemAsync(key);
       }
     } catch (error) {
-      console.error("Storage removeItem error:", error);
+      console.error("[Storage] removeItem error:", error);
     }
   },
 };
 
-export default Storage;
+// Ensure all 3 methods exist for Zustand
+export default {
+  setItem: Storage.setItem.bind(Storage),
+  getItem: Storage.getItem.bind(Storage),
+  removeItem: Storage.removeItem.bind(Storage),
+};

@@ -2,10 +2,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState, useRef } from "react";
-import { Platform, TextInput, Pressable } from "react-native";
+import { TextInput, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button, Card, Input, Text, XStack, YStack } from "tamagui";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { Button, Card, Input, Text, XStack, YStack, ScrollView } from "tamagui";
+import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 
 const SourceOption = ({ item, isSelected, onPress }: any) => (
   <Pressable
@@ -57,7 +57,12 @@ const SourceOption = ({ item, isSelected, onPress }: any) => (
         backgroundColor={isSelected ? "#0E0E55" : "white"}
       >
         {isSelected && (
-          <YStack width={10} height={10} borderRadius={5} backgroundColor="white" />
+          <YStack
+            width={10}
+            height={10}
+            borderRadius={5}
+            backgroundColor="white"
+          />
         )}
       </YStack>
     </XStack>
@@ -83,72 +88,141 @@ export default function HowDidYouHear() {
     router.push("/(auth)/signup");
   };
 
+  const sources = [
+    {
+      key: "Friend",
+      label: "From a friend/family",
+      bg: "#0E0E55",
+      fg: "#F2F2F2",
+      icon: "person",
+    },
+    {
+      key: "X",
+      label: "X",
+      bg: "#000000",
+      fg: "#ffffff",
+      icon: "logo-xbox",
+    },
+    {
+      key: "Facebook",
+      label: "Facebook",
+      bg: "#1877F2",
+      fg: "#ffffff",
+      icon: "logo-facebook",
+    },
+    {
+      key: "Instagram",
+      label: "Instagram",
+      bg: "#E1306C",
+      fg: "#ffffff",
+      icon: "logo-instagram",
+    },
+    {
+      key: "TikTok",
+      label: "TikTok",
+      bg: "#000000",
+      fg: "#ffffff",
+      icon: "logo-tiktok",
+    },
+    {
+      key: "YouTube",
+      label: "YouTube",
+      bg: "#FF0000",
+      fg: "#ffffff",
+      icon: "logo-youtube",
+    },
+    {
+      key: "Referral",
+      label: "Referral",
+      bg: "#0E0E55",
+      fg: "#EAEAF6",
+      icon: null,
+    },
+  ];
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "$white" }}>
-      <KeyboardAwareScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: 40, paddingHorizontal: 16 }}
-        enableOnAndroid
-        extraScrollHeight={Platform.OS === "ios" ? 80 : 60}
-        keyboardShouldPersistTaps="handled"
-      >
-        <YStack flex={1}>
-          <Text
-            fontSize={23}
-            lineHeight={32}
-            fontWeight="600"
-            textAlign="center"
-            marginBottom="$4"
-            color="$text"
-          >
-            How did you hear about us?
-          </Text>
+    <KeyboardAvoidingWrapper>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+        <ScrollView>
+          <YStack flex={1} paddingHorizontal={16}>
+            <Text
+              fontSize={23}
+              lineHeight={32}
+              fontWeight="600"
+              textAlign="center"
+              marginBottom={16}
+              color="#0E0E55"
+            >
+              How did you hear about us?
+            </Text>
 
-          <Card width="100%" maxWidth={500} alignSelf="center" padding="$3" borderRadius={12}>
-            {[  /* Source options */  
-              { key: "Friend", label: "From a friend/family", bg: "#0E0E55", fg: "#F2F2F2", icon: "person" },
-              { key: "X", label: "X", bg: "#000000", fg: "#ffffff", icon: "logo-xbox" },
-              { key: "Facebook", label: "Facebook", bg: "#1877F2", fg: "#ffffff", icon: "logo-facebook" },
-              { key: "Instagram", label: "Instagram", bg: "#E1306C", fg: "#ffffff", icon: "logo-instagram" },
-              { key: "TikTok", label: "TikTok", bg: "#000000", fg: "#ffffff", icon: "logo-tiktok" },
-              { key: "YouTube", label: "YouTube", bg: "#FF0000", fg: "#ffffff", icon: "logo-youtube" },
-              { key: "Referral", label: "Referral", bg: "#0E0E55", fg: "#EAEAF6", icon: null },
-            ].map((item) => (
-              <SourceOption
-                key={item.key}
-                item={item}
-                isSelected={selectedSource === item.key}
-                onPress={() => setSelectedSource(item.key)}
-              />
-            ))}
+            <Card
+              width="100%"
+              maxWidth={500}
+              alignSelf="center"
+              padding={12}
+              borderRadius={12}
+            >
+              {sources.map((item) => (
+                <YStack key={item.key}>
+                  <SourceOption
+                    item={item}
+                    isSelected={selectedSource === item.key}
+                    onPress={() => setSelectedSource(item.key)}
+                  />
 
-            <YStack gap="$3" width="100%" maxWidth={355} alignSelf="center" marginTop="$4">
-              <Button
-                height={55}
-                borderRadius={8}
-                backgroundColor="$primary"
-                onPress={completeOnboarding}
-                disabled={!selectedSource}
-                opacity={selectedSource ? 1 : 0.6}
+                  {selectedSource === "Referral" && item.key === "Referral" && (
+                    <TextInput
+                      style={{
+                        borderWidth: 1,
+                        borderColor: "#0E0E55",
+                        borderRadius: 8,
+                        paddingHorizontal: 12,
+                        height: 50,
+                        marginTop: 8,
+                      }}
+                      placeholder="Enter referral code"
+                      value={referralCode}
+                      onChangeText={setReferralCode}
+                    />
+                  )}
+                </YStack>
+              ))}
+
+              <YStack
+                gap={12}
+                width="100%"
+                maxWidth={355}
+                alignSelf="center"
+                marginTop={16}
               >
-                <Text color="white" fontWeight="600">
-                  Next
-                </Text>
-              </Button>
-              <Button
-                height={55}
-                borderRadius={8}
-                backgroundColor="$secondary"
-                onPress={() => router.push("/(tabs)/home/editBio")}
-              >
-                <Text color="$color12" fontWeight="600">
-                  Skip
-                </Text>
-              </Button>
-            </YStack>
-          </Card>
-        </YStack>
-      </KeyboardAwareScrollView>
-    </SafeAreaView>
+                <Button
+                  height={55}
+                  borderRadius={8}
+                  backgroundColor="#0E0E55"
+                  onPress={completeOnboarding}
+                  disabled={!selectedSource}
+                  opacity={selectedSource ? 1 : 0.6}
+                >
+                  <Text color="white" fontWeight="600">
+                    Next
+                  </Text>
+                </Button>
+                <Button
+                  height={55}
+                  borderRadius={8}
+                  backgroundColor="#E6E6E6"
+                  onPress={() => router.push("/(auth)/signup")}
+                >
+                  <Text color="#0E0E55" fontWeight="600">
+                    Skip
+                  </Text>
+                </Button>
+              </YStack>
+            </Card>
+          </YStack>
+        </ScrollView>
+      </SafeAreaView>
+    </KeyboardAvoidingWrapper>
   );
 }

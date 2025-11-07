@@ -18,6 +18,8 @@ export default function WalletFlowLayout() {
       <Stack.Screen name="paymentMode" />
       <Stack.Screen name="paymentEntry" />
       <Stack.Screen name="paymentWebView" />
+       <Stack.Screen name="addBankAccount" />
+        <Stack.Screen name="withdrawal" />
       
     </Stack>
   );

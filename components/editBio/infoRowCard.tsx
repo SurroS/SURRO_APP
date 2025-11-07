@@ -1,10 +1,11 @@
-import React from 'react';
-import { XStack, YStack, Text, Image, Stack } from 'tamagui';
-import { Images } from '../../constants/Images';
+import colors from "@/hooks/colors";
+import { ChevronRight } from "@tamagui/lucide-icons";
+import React from "react";
+import { XStack, YStack, Text, Image, Stack } from "tamagui";
 
 const CONTAINER_W = 347;
 const CONTAINER_H = 74;
-const ICON_SIZE = 32;
+const ICON_SIZE = 40;
 const BORDER_WIDTH = 1;
 
 type Props = {
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export default function InfoRowCard({ title, subtitle, icon, onPress }: Props) {
+  const Icon = icon;
   return (
     <Stack onPress={onPress} pressStyle={{ opacity: 0.8 }}>
       <XStack
@@ -38,12 +40,7 @@ export default function InfoRowCard({ title, subtitle, icon, onPress }: Props) {
           justifyContent="center"
           backgroundColor="#0E0E55"
         >
-          <Image
-            source={icon ?? Images.userIcon}
-            width={16}
-            height={16}
-            resizeMode="contain"
-          />
+          <Icon width={16} height={16} />
         </YStack>
 
         {/* Title + Subtitle */}
@@ -65,12 +62,7 @@ export default function InfoRowCard({ title, subtitle, icon, onPress }: Props) {
           alignItems="center"
           justifyContent="center"
         >
-          <Image
-            source={Images.chevronRight}
-            width={20}
-            height={20}
-            resizeMode="contain"
-          />
+          <ChevronRight size={16} color={colors.black}/>
         </YStack>
       </XStack>
     </Stack>

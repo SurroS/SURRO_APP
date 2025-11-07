@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
   },
   inner: {
     flex: 1,  
-    backgroundColor: "#fff"
+    backgroundColor: "#fff",
   },
 });
 

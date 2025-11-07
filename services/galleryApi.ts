@@ -122,12 +122,22 @@ export const getGalleryImages = async (useCache: boolean = true) => {
     console.log('📸 Fetching gallery images from API');
     const response = await makeAuthenticatedGalleryRequest('GET', '/gallery');
 
-    // Cache the response
-    if (response.data.images) {
-        await setCache(response.data.images);
+    // Backend returns an array directly, transform to expected structure
+    const images = Array.isArray(response.data) ? response.data : [];
+    
+    // Cache the images array
+    if (images.length > 0) {
+        await setCache(images);
     }
 
-    return response;
+    // Return in the expected format for compatibility
+    return {
+        ...response,
+        data: {
+            images,
+            total: images.length
+        }
+    };
 };
 
 export const deleteGalleryImage = async (imageId: string) => {
@@ -143,7 +153,7 @@ export const deleteGalleryImage = async (imageId: string) => {
 export const refreshGalleryCache = async (): Promise<any[]> => {
     await clearCache();
     const response = await getGalleryImages(false);
-    return response.data.images;
+    return response.data.images || [];
 };
 
 export const getCachedGalleryImages = async (): Promise<any[] | null> => {

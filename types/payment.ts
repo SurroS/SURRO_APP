@@ -1,5 +1,5 @@
-export type PaymentGateway = "paystack" | "flutterwave" | "stripe" | "interswitch";
-export type PaymentMode = "card" | "bank" | "ussd" | "mobile" | "quickteller";
+export type PaymentGateway = 'STRIPE' | 'PAYSTACK' | 'FLUTTERWAVE' | 'INTERSWITCH'; 
+export type PaymentMode = "card" | "bank_transfer" | "ussd" | "mobile" | "quickteller";
 
 export interface PaymentRoutes {
   PaymentMethodScreen: {};

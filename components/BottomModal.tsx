@@ -20,6 +20,19 @@ interface ButtonConfig {
   onPress?: () => void;
 }
 
+interface BottomModalProps {
+  visible: boolean;
+  image?: any;
+  icon?: keyof typeof Ionicons.glyphMap;
+  iconColor?: string;
+  title?: string;
+  message?: string;
+  buttons?: ButtonConfig[];
+  orientation?: "row" | "column";
+  onClose?: () => void;
+  success?: boolean;
+}
+
 export default function BottomModal({
   visible,
   image,
@@ -31,56 +44,50 @@ export default function BottomModal({
   orientation = "row",
   onClose,
   success = false,
-}: {
-  visible: boolean;
-  image?: any;
-  icon?: keyof typeof Ionicons.glyphMap;
-  iconColor?: string;
-  title?: string;
-  message?: string;
-  buttons?: ButtonConfig[];
-  orientation?: "row" | "column";
-  onClose?: () => void;
-  success?: boolean;
-}) {
+}: BottomModalProps) {
   const slideAnim = useRef(new Animated.Value(height)).current;
   const scaleAnim = useRef(new Animated.Value(0)).current;
 
-useEffect(() => {
-  if (visible) {
-    const animations: Animated.CompositeAnimation[] = [
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 250,
-        useNativeDriver: true,
-      }),
-    ];
-
-    if (success) {
-      animations.push(
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          friction: 5,
+  useEffect(() => {
+    if (visible) {
+      const animations: Animated.CompositeAnimation[] = [
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 250,
           useNativeDriver: true,
-        })
-      );
+        }),
+      ];
+
+      if (success) {
+        animations.push(
+          Animated.spring(scaleAnim, {
+            toValue: 1,
+            friction: 5,
+            useNativeDriver: true,
+          })
+        );
+      }
+
+      Animated.parallel(animations).start();
+    } else {
+      Animated.timing(slideAnim, {
+        toValue: height,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
     }
-
-    Animated.parallel(animations).start();
-  } else {
-    Animated.timing(slideAnim, {
-      toValue: height,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
-  }
-}, [visible]);
-
+  }, [visible]);
 
   if (!visible) return null;
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+      presentationStyle="overFullScreen"
+    >
       <View style={styles.overlay}>
         <Animated.View
           style={[styles.modalCard, { transform: [{ translateY: slideAnim }] }]}
@@ -117,11 +124,16 @@ useEffect(() => {
                   styles.button,
                   {
                     backgroundColor: b.color || "#0E0E55",
-                    marginBottom: orientation === "column" && i < buttons.length - 1 ? 10 : 0,
+                    marginBottom:
+                      orientation === "column" && i < buttons.length - 1
+                        ? 10
+                        : 0,
                   },
                 ]}
               >
-                <Text style={{ color: b.textColor || "#fff", fontWeight: "600" }}>
+                <Text
+                  style={{ color: b.textColor || "#fff", fontWeight: "600" }}
+                >
                   {b.label}
                 </Text>
               </TouchableOpacity>

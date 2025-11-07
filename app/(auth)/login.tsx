@@ -1,5 +1,5 @@
 import { useSignupForm } from "@/hooks/auth";
-import { useAuth } from "@/hooks/useAuth"; 
+import { useAuth } from "@/hooks/useAuth";
 import {
   GoogleSignin,
   isErrorWithCode,
@@ -15,7 +15,7 @@ import { ToastType } from "toastify-react-native/utils/interfaces";
 import { InputField } from "../../components/auth/InputField";
 import { OrDivider } from "../../components/auth/OrDivider";
 import { PrimaryButton } from "../../components/auth/PrimaryButton";
-import { ScreenHeader } from "../../components/auth/ScreenHeader";
+import { ScreenHeader } from "../../components/navigation/ScreenHeader";
 import { SocialButton } from "../../components/auth/SocialButton";
 import { useLoginForm } from "../../hooks/auth/useLoginForm";
 
@@ -28,7 +28,6 @@ GoogleSignin.configure({
   offlineAccess: true,
 });
 
-
 export default function LoginScreen() {
   const router = useRouter();
   const { formData, errors, updateField, validateForm } = useLoginForm();
@@ -36,7 +35,7 @@ export default function LoginScreen() {
   const { login, googleLogin, isLoading } = useAuth();
 
   const handleGoogleSignin = async () => {
-  try {
+    try {
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
 
@@ -114,7 +113,6 @@ export default function LoginScreen() {
     }
   };
 
-  
   // Regular email/password login
   const handleLogin = async () => {
     if (!validateForm()) return;
