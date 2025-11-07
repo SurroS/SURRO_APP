@@ -111,7 +111,7 @@ useEffect(() => {
           >
             {buttons.map((b, i) => (
               <TouchableOpacity
-                key={i}
+                key={b.label + i} // Using label + index to ensure unique keys
                 onPress={b.onPress}
                 style={[
                   styles.button,

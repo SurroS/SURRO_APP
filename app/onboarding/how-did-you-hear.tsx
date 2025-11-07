@@ -139,7 +139,7 @@ export default function HowDidYouHear() {
                 height={55}
                 borderRadius={8}
                 backgroundColor="$secondary"
-                onPress={() => router.push("/(auth)/signup")}
+                onPress={() => router.push("/(tabs)/home/editBio")}
               >
                 <Text color="$color12" fontWeight="600">
                   Skip

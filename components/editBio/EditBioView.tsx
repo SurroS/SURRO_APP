@@ -53,11 +53,13 @@ export default function EditBioView() {
         </YStack>
       </ScrollView>
 
-      {/* Edit Bio Modal */}
-      <EditBioModal
-        visible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
-      />
+      {/* Edit Bio Modal - conditionally rendered to ensure proper mounting/unmounting */}
+      {isModalVisible && (
+        <EditBioModal
+          visible={isModalVisible}
+          onClose={() => setIsModalVisible(false)}
+        />
+      )}
     </SafeAreaView>
   );
 }
