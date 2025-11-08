@@ -12,6 +12,8 @@ import {
     updateMedicalProfile,
     uploadEndometriumImage,
 } from '@/services/profileApi';
+import { Toast } from 'toastify-react-native';
+import { ToastType } from 'toastify-react-native/utils/interfaces';
 
 export interface ProfileState {
     surrogateProfile: SurrogateProfile | null;
@@ -100,6 +102,21 @@ export const createProfileSlice: StateCreator<ProfileStore> = (set, get) => ({
                 error: null,
             });
         } catch (error: any) {
+            // Handle 404 error specifically - profile doesn't exist
+            if (error.response?.status === 404) {
+                const message = 'No profile created for this account';
+                set({
+                    isLoading: false,
+                    error: null,
+                });
+                Toast.show({
+                    text1: message,
+                    type: 'customError' as ToastType,
+                });
+                return;
+            }
+            
+            // Handle other errors normally
             set({
                 isLoading: false,
                 error: error.response?.data?.message || 'Failed to fetch profile',
