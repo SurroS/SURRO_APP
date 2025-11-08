@@ -1,6 +1,7 @@
+import React, { useEffect, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, ViewStyle } from "react-native";
 import { ChevronDown } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
-import { Pressable, ScrollView, StyleSheet } from "react-native";
 import Animated from "react-native-reanimated";
 import { Accordion, Text, XStack, YStack } from "tamagui";
 import About from "../about";
@@ -15,7 +16,11 @@ import { useEffect, useState } from "react";
 import { calculateProfileProgress } from "@/utils/profileHelpers";
 import ProfileCompletionModal from "../ProfileCompletionModal";
 
-
+interface Step {
+  label: string;
+  route: string;
+  done: boolean;
+}
 
 export default function SurrogateScreen() {
   const galleryImages = [
@@ -53,29 +58,29 @@ export default function SurrogateScreen() {
   }, [surrogateProfile, progress, isLoading]);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <YStack flex={1} gap="$3">
-        <ProfileData />
+    <>
+      <ScrollView contentContainerStyle={styles.container}>
+        <YStack flex={1} gap="$3">
+          <ProfileData />
 
-        {/* Accordion for About + Contact */}
-        <Accordion
-          type="single"
-          collapsible
-          defaultValue={undefined} // keeps closed initially
-          borderTopStartRadius={10}
-          borderTopEndRadius={10}
-          overflow="hidden"
-        >
-          <Accordion.Item value="profile-info">
-            <AccordionTriggerWithChevron title="Profile Information" />
-            <Accordion.Content backgroundColor="white" padding="$3">
-              <YStack gap="$3">
-                <About />
-                <Contact />
-              </YStack>
-            </Accordion.Content>
-          </Accordion.Item>
-        </Accordion>
+          {/* Accordion for About + Contact */}
+          <Accordion
+            type="single"
+            collapsible
+            borderTopStartRadius={10}
+            borderTopEndRadius={10}
+            overflow="hidden"
+          >
+            <Accordion.Item value="profile-info">
+              <AccordionTriggerWithChevron title="Profile Information" />
+              <Accordion.Content backgroundColor="white" padding="$3">
+                <YStack gap="$3">
+                  <About />
+                  <Contact />
+                </YStack>
+              </Accordion.Content>
+            </Accordion.Item>
+          </Accordion>
 
         <Pressable
           onPress={() => router.push("/(tabs)/home/surrogateGuestView")}
@@ -122,7 +127,6 @@ export default function SurrogateScreen() {
   );
 }
 
-/** Custom trigger with animated Chevron */
 function AccordionTriggerWithChevron({ title }: { title: string }) {
   return (
     <Accordion.Trigger
@@ -133,26 +137,22 @@ function AccordionTriggerWithChevron({ title }: { title: string }) {
       justifyContent="space-between"
       height={48}
     >
-      {({ open }: { open: boolean }) => {
-        return (
-          <XStack
-            alignItems="center"
-            justifyContent="space-between"
-            width="100%"
-          >
-            <XStack alignItems="center" justifyContent="space-between">
-              <Text color="white" fontWeight="700" fontSize="$5">
-                {title}
-              </Text>
-              <Animated.View style={{
-                transform: [{ rotate: open ? "180deg" : "0deg" }]
-              }}>
-                <ChevronDown color="white" size={18} />
-              </Animated.View>
-            </XStack>
+      {({ open }: { open: boolean }) => (
+        <XStack alignItems="center" justifyContent="space-between" width="100%">
+          <XStack alignItems="center" justifyContent="space-between">
+            <Text color="white" fontWeight="700" fontSize="$5">
+              {title}
+            </Text>
+            <Animated.View
+              style={{
+                transform: [{ rotate: open ? "180deg" : "0deg" }],
+              }}
+            >
+              <ChevronDown color="white" size={18} />
+            </Animated.View>
           </XStack>
-        );
-      }}
+        </XStack>
+      )}
     </Accordion.Trigger>
   );
 }

@@ -4,11 +4,11 @@ import { StyleSheet, Image, TouchableOpacity, ActivityIndicator } from "react-na
 import { YStack, Text } from "tamagui";
 import { router, useLocalSearchParams } from "expo-router";
 import colors from "@/hooks/colors";
+import { ScreenHeader } from "@/components/navigation/ScreenHeader";
 
 export default function KYCPicturePreview() {
-  const { idType } = useLocalSearchParams<{ idType?: string }>();
-  const [loading, setLoading] = useState(false);
-  const [imageUri, setImageUri] = useState(require("@/assets/images/id_sample.png")); // replace with actual captured URI
+ const { idType, imageUri } = useLocalSearchParams<{ idType?: string; imageUri?: string }>(); 
+  const [loading, setLoading] = useState(false); 
 
   const handleRetake = () => {
     router.back(); // return to camera/upload screen
@@ -31,13 +31,15 @@ export default function KYCPicturePreview() {
 
   return (
     <SafeAreaView style={styles.container}>
+       <ScreenHeader title="KYC" onBackPress={() => router.back()} />
       <YStack flex={1} paddingHorizontal={20} paddingTop={20} alignItems="center">
         <Text style={styles.title}>Confirm your ID photo</Text>
         <Text style={styles.subtitle}>
           Make sure your {idType || "ID"} is clearly visible and readable before submitting.
         </Text>
 
-        <Image source={imageUri} style={styles.previewImage} />
+       <Image source={{ uri: imageUri }} style={styles.previewImage} />
+
 
         <TouchableOpacity
           onPress={handleRetake}

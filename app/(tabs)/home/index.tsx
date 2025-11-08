@@ -16,8 +16,7 @@ export default function HomeIndex() {
   return (
     <YStack flex={1} padding="$4">
       <SafeAreaView>
-        {/* Header */}
-        
+        {/* Header */} 
         <Pressable onPress={()=>router.push('/notifications')} style={{justifyContent:"center", alignItems:"flex-end"}} >
           <MaterialCommunityIcons name="bell-outline" size={24} color="black" />
         </Pressable> 

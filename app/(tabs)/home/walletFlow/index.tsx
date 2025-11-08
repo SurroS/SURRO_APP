@@ -74,7 +74,7 @@ const WalletScreen = () => {
                     </XStack>
 
                     <XStack  marginBottom={4}>
-                        <Text fontSize={16} color={colors.secondaryGray} marginRight={5}>
+                        <Text fontSize={18} color={colors.secondaryGray} marginRight={5}>
                             Total Balance
                         </Text>
                         <TouchableOpacity onPress={toggleBalanceVisibility}>

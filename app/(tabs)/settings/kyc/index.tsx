@@ -5,14 +5,17 @@ import { ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import { router } from "expo-router";
 import { FileText, Camera } from "@tamagui/lucide-icons";
 import colors from "@/hooks/colors";
+import { ScreenHeader } from "@/components/auth";
 
 export default function KYCStartScreen() {
   return (
     <SafeAreaView style={styles.container}>
+      <ScreenHeader title="KYC" onBackPress={() => router.back()} />
       <ScrollView contentContainerStyle={{ padding: 20 }}>
         <Text style={styles.title}>Verify your ID document</Text>
         <Text style={styles.subtitle}>
-          This information helps us confirm your identity and comply with legal requirements.
+          This information helps us confirm your identity and comply with legal
+          requirements.
         </Text>
 
         <YStack gap="$3" marginTop="$4">
@@ -25,19 +28,25 @@ export default function KYCStartScreen() {
               <YStack>
                 <Text style={styles.optionTitle}>A photo of your ID</Text>
                 <Text style={styles.optionSub}>
-                  We accept National ID card, Driver’s license, or International passport.
+                  We accept National ID card, Driver’s license, {"\n"}or International
+                  passport.
                 </Text>
               </YStack>
             </XStack>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.optionCard}>
-            <XStack alignItems="center" gap="$3">
+          <TouchableOpacity
+            style={styles.optionCard}
+            onPress={() => router.push("/settings/kyc/face-scan-rules")}
+          >
+            <XStack alignItems="center" gap="$3" >
               <Camera color={colors.primary} size={20} />
               <YStack>
-                <Text style={styles.optionTitle}>A quick scan of your face</Text>
+                <Text style={styles.optionTitle}>
+                  A quick scan of your face
+                </Text>
                 <Text style={styles.optionSub}>
-                  This is to confirm that you are the one on your ID card.
+                  This is to confirm that you are the one on{"\n"}your ID card.
                 </Text>
               </YStack>
             </XStack>
@@ -49,12 +58,13 @@ export default function KYCStartScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#fff", paddingTop:20, justifyContent:"center"},
   title: {
     fontSize: 20,
     fontWeight: "700",
     color: colors.primary,
     marginBottom: 6,
+    
   },
   subtitle: {
     fontSize: 14,
