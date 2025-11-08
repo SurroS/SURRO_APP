@@ -12,17 +12,12 @@ import { ScreenHeader } from "@/components/auth";
 import ProfileImageCard from "@/components/editBio/profileImageCard";
 import InfoRowCard from "@/components/editBio/infoRowCard";
 import EditProfileModal from "@/components/editBio/BioInputModal";
-import BottomModal from "@/components/BottomModal";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function EditBioView() {
   const [isDanger, setIsDanger] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { logout } = useAuth();
-
-  const handleUpdateBio = () => {
-    console.log("Bio complete");
-  };
 
   const handleLogout = () => {
     logout();
