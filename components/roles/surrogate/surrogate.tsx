@@ -12,15 +12,8 @@ import ProgressMeter from "../progressCircle";
 import Referral from "../referral";
 import WalletCard from "../wallet";
 import { useProfile } from "@/hooks/useProfile";
-import { useEffect, useState } from "react";
 import { calculateProfileProgress } from "@/utils/profileHelpers";
 import ProfileCompletionModal from "../ProfileCompletionModal";
-
-interface Step {
-  label: string;
-  route: string;
-  done: boolean;
-}
 
 export default function SurrogateScreen() {
   const galleryImages = [
@@ -39,7 +32,6 @@ export default function SurrogateScreen() {
   // Fetch profile on component mount
   useEffect(() => {
     fetchProfile();
-    console.log('surrogateProfile', surrogateProfile);
   }, [fetchProfile]);
 
   // Calculate profile progress
@@ -124,6 +116,7 @@ export default function SurrogateScreen() {
         profile={surrogateProfile}
       />
     </ScrollView>
+    </>
   );
 }
 
