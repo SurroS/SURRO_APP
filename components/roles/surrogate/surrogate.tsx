@@ -11,8 +11,9 @@ import ProgressMeter from "../progressCircle";
 import Referral from "../referral";
 import WalletCard from "../wallet";
 import { useProfile } from "@/hooks/useProfile";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { calculateProfileProgress } from "@/utils/profileHelpers";
+import ProfileCompletionModal from "../ProfileCompletionModal";
 
 
 
@@ -25,15 +26,31 @@ export default function SurrogateScreen() {
   const {
     fetchProfile,
     surrogateProfile,
+    isLoading,
   } = useProfile();
+
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Fetch profile on component mount
   useEffect(() => {
     fetchProfile();
+    console.log('surrogateProfile', surrogateProfile);
   }, [fetchProfile]);
 
   // Calculate profile progress
   const progress = calculateProfileProgress(surrogateProfile);
+
+  // Show modal if no profile or progress < 70%
+  useEffect(() => {
+    if (!isLoading) {
+      const hasProfile = surrogateProfile !== null;
+      const needsCompletion = hasProfile && progress < 70;
+      
+      if (!hasProfile || needsCompletion) {
+        setShowProfileModal(true);
+      }
+    }
+  }, [surrogateProfile, progress, isLoading]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -94,6 +111,13 @@ export default function SurrogateScreen() {
           </YStack>
         </XStack>
       </YStack>
+
+      {/* Profile Completion Modal */}
+      <ProfileCompletionModal
+        visible={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        profile={surrogateProfile}
+      />
     </ScrollView>
   );
 }
