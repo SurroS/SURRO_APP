@@ -258,13 +258,17 @@ import { YStack, XStack, Text, Button } from "tamagui";
 import colors from "@/hooks/colors";
 import PlatformInput from "./SocialSelector"; // adjust path if needed
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useProfile } from "@/hooks/useProfile";
+import { SurrogateProfileUpdate } from "@/types/profile";
+import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 
 type Social = { platform: string; handle: string };
 
 type EditProfileModalProps = {
   visible: boolean;
   onClose: () => void;
-  onSave: (data: {
+  onSave?: (data: {
     username: string;
     about: string;
     socials: Social[];
@@ -276,6 +280,7 @@ export default function BioInputModal({
   onClose,
   onSave,
 }: EditProfileModalProps) {
+  const { surrogateProfile, createProfile, updateProfile, isLoading } = useProfile();
   const [username, setUsername] = React.useState("");
   const [about, setAbout] = React.useState("");
   const [socials, setSocials] = React.useState<Social[]>([]);
@@ -323,6 +328,42 @@ export default function BioInputModal({
     };
   }, [anim]);
 
+  // Fetch profile when modal opens if not already loaded
+  // useEffect(() => {
+  //   if (visible && !surrogateProfile) {
+  //     fetchProfile();
+  //   }
+  // }, [visible, surrogateProfile, fetchProfile]);
+
+  // Initialize form fields from existing profile
+  useEffect(() => {
+    if (visible && surrogateProfile) {
+      setUsername(surrogateProfile.userName || "");
+      setAbout(surrogateProfile.aboutMe || "");
+      
+      // Map profile social fields to socials array
+      const socialsArray: Social[] = [];
+      if (surrogateProfile.facebookProfile) {
+        socialsArray.push({ platform: "Facebook", handle: surrogateProfile.facebookProfile });
+      }
+      if (surrogateProfile.instagramProfile) {
+        socialsArray.push({ platform: "Instagram", handle: surrogateProfile.instagramProfile });
+      }
+      if (surrogateProfile.twitterProfile) {
+        socialsArray.push({ platform: "Twitter", handle: surrogateProfile.twitterProfile });
+      }
+      if (surrogateProfile.threadsProfile) {
+        socialsArray.push({ platform: "Threads", handle: surrogateProfile.threadsProfile });
+      }
+      setSocials(socialsArray);
+    } else if (visible && !surrogateProfile) {
+      // Reset form when creating new profile
+      setUsername("");
+      setAbout("");
+      setSocials([]);
+    }
+  }, [visible, surrogateProfile]);
+
   // reset state when closed (optional)
   useEffect(() => {
     if (!visible) {
@@ -345,9 +386,63 @@ export default function BioInputModal({
     setSocials((p) => p.filter((s) => s.platform !== platform));
   };
 
-  const handleSave = () => {
-    onSave({ username, about, socials });
-    onClose();
+  const handleSave = async () => {
+    try {
+      // Map socials array to individual profile fields
+      const facebookProfile = socials.find(s => s.platform === "Facebook")?.handle;
+      const instagramProfile = socials.find(s => s.platform === "Instagram")?.handle;
+      const twitterProfile = socials.find(s => s.platform === "Twitter")?.handle;
+      const threadsProfile = socials.find(s => s.platform === "Threads")?.handle;
+
+      if (surrogateProfile) {
+        // Update existing profile - only include fields with values
+        const updateData: SurrogateProfileUpdate = {};
+        
+        if (username) updateData.userName = username;
+        if (about) updateData.aboutMe = about;
+        if (facebookProfile) updateData.facebookProfile = facebookProfile;
+        if (instagramProfile) updateData.instagramProfile = instagramProfile;
+        if (twitterProfile) updateData.twitterProfile = twitterProfile;
+        if (threadsProfile) updateData.threadsProfile = threadsProfile;
+
+        await updateProfile(updateData);
+        
+        Toast.show({
+          text1: "Profile updated successfully",
+          type: "customSuccess" as ToastType,
+        });
+      } else {
+        // Create new profile - only include fields with values
+        const createData: any = {};
+        
+        if (username) createData.userName = username;
+        if (about) createData.aboutMe = about;
+        if (facebookProfile) createData.facebookProfile = facebookProfile;
+        if (instagramProfile) createData.instagramProfile = instagramProfile;
+        if (twitterProfile) createData.twitterProfile = twitterProfile;
+        if (threadsProfile) createData.threadsProfile = threadsProfile;
+
+        await createProfile(createData);
+        
+        Toast.show({
+          text1: "Profile created successfully",
+          type: "customSuccess" as ToastType,
+        });
+      }
+
+      // Call optional onSave callback if provided
+      if (onSave) {
+        onSave({ username, about, socials });
+      }
+      
+      onClose();
+    } catch (error: any) {
+      Toast.show({
+        text1: surrogateProfile ? "Failed to update profile" : "Failed to create profile",
+        text2: error.response?.data?.message || "Please try again",
+        type: "customError" as ToastType,
+      });
+    }
   };
 
   if (!visible) return null;
@@ -458,6 +553,31 @@ export default function BioInputModal({
               initialPlatform="Instagram"
             />
 
+            {/* List of added socials */}
+            {socials.length > 0 && (
+              <YStack marginTop={12} gap={8}>
+                {socials.map((s) => (
+                  <XStack
+                    key={s.platform}
+                    justifyContent="space-between"
+                    alignItems="center"
+                    style={styles.addedRow}
+                  >
+                    <XStack alignItems="center" gap={8}>
+                      <Text fontWeight="600" color="#0E0E55">
+                        {s.platform}:
+                      </Text>
+                      <Text>{s.handle}</Text>
+                    </XStack>
+
+                    <TouchableOpacity onPress={() => handleRemoveSocial(s.platform)}>
+                      <Text color={colors.danger}>Remove</Text>
+                    </TouchableOpacity>
+                  </XStack>
+                ))}
+              </YStack>
+            )}
+
             <Button
               onPress={handleSave}
               backgroundColor={colors.primary}
@@ -465,8 +585,10 @@ export default function BioInputModal({
               borderRadius={10}
               height={50}
               marginTop={18}
+              disabled={isLoading}
+              opacity={isLoading ? 0.6 : 1}
             >
-              Save
+              {isLoading ? "Saving..." : surrogateProfile ? "Update Profile" : "Create Profile"}
             </Button>
           </ScrollView>
         </View>
