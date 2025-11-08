@@ -12,6 +12,7 @@ import Referral from "../referral";
 import WalletCard from "../wallet";
 import { useProfile } from "@/hooks/useProfile";
 import { useEffect } from "react";
+import { calculateProfileProgress } from "@/utils/profileHelpers";
 
 
 
@@ -23,12 +24,16 @@ export default function SurrogateScreen() {
   ]
   const {
     fetchProfile,
+    surrogateProfile,
   } = useProfile();
 
   // Fetch profile on component mount
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
+
+  // Calculate profile progress
+  const progress = calculateProfileProgress(surrogateProfile);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -79,6 +84,7 @@ export default function SurrogateScreen() {
             <WalletCard style={{ width: "100%", height: 100 }} />
             <ProgressMeter
               style={{ width: "100%", height: 210 }}
+              progress={progress}
             />
           </YStack>
 
