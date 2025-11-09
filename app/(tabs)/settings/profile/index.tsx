@@ -162,7 +162,7 @@ export default function EditBioView() {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const { logout } = useAuth();
 
-  // 🟢 Handle logout
+  //  Handle logout
   const handleLogout = () => {
     logout();
     Toast.show({
@@ -173,7 +173,7 @@ export default function EditBioView() {
     router.replace("/(auth)/login");
   };
 
-  // 🔴 Handle delete account
+  //  Handle delete account
   const handleDeleteAccount = () => {
     Alert.alert(
       "DANGER",
@@ -194,7 +194,7 @@ export default function EditBioView() {
     );
   };
 
-  // 🖼️ Pick profile image
+  // Pick profile image
   const handleChangePicture = async () => {
     try {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -227,7 +227,7 @@ export default function EditBioView() {
     }
   };
 
-  // 📝 Open edit bio modal
+  // Open edit bio modal
   const handleEditBio = () => {
     setIsModalVisible(true);
   };
