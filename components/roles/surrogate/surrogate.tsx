@@ -12,35 +12,42 @@ import ProgressMeter from "../progressCircle";
 import Referral from "../referral";
 import WalletCard from "../wallet";
 import { useProfile } from "@/hooks/useProfile";
-import ProgressStepsModal from "@/components/ProgressStepModal";
-
-interface Step {
-  label: string;
-  route: string;
-  done: boolean;
-}
+import { calculateProfileProgress } from "@/utils/profileHelpers";
+import ProfileCompletionModal from "../ProfileCompletionModal";
 
 export default function SurrogateScreen() {
-  const [modalVisible, setModalVisible] = useState(false);
-  const { fetchProfile } = useProfile();
+  const galleryImages = [
+    require("@/assets/images/couple-image.png"),
+    require("@/assets/images/couple-image.png"),
+    require("@/assets/images/couple-image.png"),
+  ]
+  const {
+    fetchProfile,
+    surrogateProfile,
+    isLoading,
+  } = useProfile();
 
+  const [showProfileModal, setShowProfileModal] = useState(false);
+
+  // Fetch profile on component mount
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
 
-  // Example step tracking
-  const steps: Step[] = [
-    { label: "Complete your profile", route: "/profile/edit", done: true },
-    {
-      label: "Set your surrogacy experience",
-      route: "/profile/experienceIntro",
-      done: false,
-    },
-    { label: "Verify your identity", route: "/settings/kyc", done: true },
-  ];
+  // Calculate profile progress
+  const progress = calculateProfileProgress(surrogateProfile);
 
-  //  Check if all steps are done
-  const allStepsDone = steps.every((s) => s.done);
+  // Show modal if no profile or progress < 70%
+  useEffect(() => {
+    if (!isLoading) {
+      const hasProfile = surrogateProfile !== null;
+      const needsCompletion = hasProfile && progress < 70;
+      
+      if (!hasProfile || needsCompletion) {
+        setShowProfileModal(true);
+      }
+    }
+  }, [surrogateProfile, progress, isLoading]);
 
   return (
     <>
@@ -67,51 +74,48 @@ export default function SurrogateScreen() {
             </Accordion.Item>
           </Accordion>
 
-          <Pressable
-            onPress={() => router.push("/(tabs)/home/surrogateGuestView")}
+        <Pressable
+          onPress={() => router.push("/(tabs)/home/surrogateGuestView")}
+        >
+          <Text
+            color="black"
+            fontWeight="bold"
+            textDecorationLine="underline"
+            textDecorationColor="#0E0E55"
+            marginBottom={8}
           >
-            <Text
-              color="black"
-              fontWeight="bold"
-              textDecorationLine="underline"
-              textDecorationColor="#0E0E55"
-              marginBottom={8}
-            >
-              View profile as guest
-            </Text>
-          </Pressable>
+            View profile as guest
+          </Text>
+        </Pressable>
+        {/* Floating Card Section */}
+        <XStack
+          flexWrap="wrap"
+          justifyContent="flex-end"
+          alignContent="flex-start"
+          gap={10}
+        >
+          <YStack width={"48%"} gap={10}>
+            <WalletCard style={{ width: "100%", height: 100 }} />
+            <ProgressMeter
+              style={{ width: "100%", height: 210 }}
+              progress={progress}
+            />
+          </YStack>
 
-          <XStack
-            flexWrap="wrap"
-            justifyContent="flex-end"
-            alignContent="flex-start"
-            gap={10}
-          >
-            <YStack width="48%" gap={10}>
-              <WalletCard style={{ width: "100%", height: 100 } as ViewStyle} />
+          <YStack width={"48%"} gap={10} flexGrow={1} >
+            <Gallery  style={{ width: "100%", height: 210 }} />
+            <Referral style={{ width: "100%", height: 160, padding:4}} />
+          </YStack>
+        </XStack>
+      </YStack>
 
-              {/* Show progress meter only if not all done */}
-              {!allStepsDone && (
-                <Pressable onPress={() => setModalVisible(true)}>
-                  <ProgressMeter style={{ width: "100%", height: 210 } as ViewStyle} />
-                </Pressable>
-              )}
-            </YStack>
-
-            <YStack width="48%" gap={10} flexGrow={1}>
-              <Gallery style={{ width: "100%", height: 210 } as ViewStyle} />
-              <Referral style={{ width: "100%", height: 160, padding: 4 } as ViewStyle} />
-            </YStack>
-          </XStack>
-        </YStack>
-      </ScrollView>
-
-      {/* Progress Modal */}
-      <ProgressStepsModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        steps={steps}
+      {/* Profile Completion Modal */}
+      <ProfileCompletionModal
+        visible={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        profile={surrogateProfile}
       />
+    </ScrollView>
     </>
   );
 }

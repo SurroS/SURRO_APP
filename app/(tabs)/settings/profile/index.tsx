@@ -4,20 +4,29 @@ import { YStack, XStack, Text, ScrollView, Button, Separator } from "tamagui";
 import { Alert, Modal } from "react-native";
 import { router } from "expo-router";
 import { User, Contact, LogOut, History } from "@tamagui/lucide-icons";
+import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 import colors from "@/hooks/colors";
 
 import { ScreenHeader } from "@/components/auth";
 import ProfileImageCard from "@/components/editBio/profileImageCard";
 import InfoRowCard from "@/components/editBio/infoRowCard";
 import EditProfileModal from "@/components/editBio/BioInputModal";
-import BottomModal from "@/components/BottomModal";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function EditBioView() {
   const [isDanger, setIsDanger] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const { logout } = useAuth();
 
-  const handleUpdateBio = () => {
-    console.log("Bio complete");
+  const handleLogout = () => {
+    logout();
+    Toast.show({
+      text1: "Logged out successfully",
+      type: "customSuccess" as ToastType,
+      text2: "You have been logged out",
+    });
+    router.replace("/onboarding/screen1");
   };
 
   const handleDeleteAccount = () => {
@@ -90,7 +99,7 @@ export default function EditBioView() {
                 color={colors.primary}
                 fontWeight="600"
                 fontSize={14}
-                onPress={() => console.log("Logged out")}
+                onPress={handleLogout}
               >
                 Log out
               </Text>
