@@ -147,7 +147,7 @@ export default function ProfileImageCard({
           source={
             imageUri
               ? { uri: imageUri }
-              : imageSrc || require("@/assets/images/avatar.jpg")
+              : imageSrc || require("@/assets/images/femaleAvatar.png")
           }
           style={styles.profileImage}
         />
@@ -161,7 +161,7 @@ export default function ProfileImageCard({
 
       {/* Edit Bio */}
       <TouchableOpacity style={styles.editBtn} onPress={onEditBio}>
-        <Text style={styles.editText}>Edit bio</Text>
+        <Text style={styles.editText}>Edit bio{" "}</Text>
         <Pen size={16} color={colors.text} style={{ marginLeft: 6 }} />
       </TouchableOpacity>
     </View>

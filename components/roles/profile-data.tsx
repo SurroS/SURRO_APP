@@ -23,7 +23,7 @@ const ProfileData = () => {
         source={
           surrogateProfile?.profilePicture
             ? { uri: surrogateProfile.profilePicture }
-            : require("@/assets/images/avatar.jpg")
+            : require("@/assets/images/femaleAvatar.png")
         }
         width={"45%"}
         height={"100%"}
