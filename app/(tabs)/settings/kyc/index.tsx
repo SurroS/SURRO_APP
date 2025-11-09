@@ -10,7 +10,9 @@ import { ScreenHeader } from "@/components/auth";
 export default function KYCStartScreen() {
   return (
     <SafeAreaView style={styles.container}>
-      <ScreenHeader title="KYC" onBackPress={() => router.back()} />
+      <YStack  marginLeft={28}>
+        <ScreenHeader title="KYC" onBackPress={() => router.back()} />
+      </YStack>
       <ScrollView contentContainerStyle={{ padding: 20 }}>
         <Text style={styles.title}>Verify your ID document</Text>
         <Text style={styles.subtitle}>
@@ -28,8 +30,8 @@ export default function KYCStartScreen() {
               <YStack>
                 <Text style={styles.optionTitle}>A photo of your ID</Text>
                 <Text style={styles.optionSub}>
-                  We accept National ID card, Driver’s license, {"\n"}or International
-                  passport.
+                  We accept National ID card, Driver’s license, {"\n"}or
+                  International passport.
                 </Text>
               </YStack>
             </XStack>
@@ -39,7 +41,7 @@ export default function KYCStartScreen() {
             style={styles.optionCard}
             onPress={() => router.push("/settings/kyc/face-scan-rules")}
           >
-            <XStack alignItems="center" gap="$3" >
+            <XStack alignItems="center" gap="$3">
               <Camera color={colors.primary} size={20} />
               <YStack>
                 <Text style={styles.optionTitle}>
@@ -58,13 +60,17 @@ export default function KYCStartScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", paddingTop:20, justifyContent:"center"},
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingTop: 25,
+    justifyContent: "center",
+  },
   title: {
     fontSize: 20,
     fontWeight: "700",
     color: colors.primary,
     marginBottom: 6,
-    
   },
   subtitle: {
     fontSize: 14,

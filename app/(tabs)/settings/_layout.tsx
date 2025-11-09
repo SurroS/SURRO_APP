@@ -37,9 +37,9 @@ export default function SettingsLayout() {
         }}
       />
       <Stack.Screen
-        name="personalisation"
+        name="personalization"
         options={{
-          headerTitle: "Personalisation",
+          headerTitle: "Personalization",
           headerTitleStyle: { fontWeight: "bold" },
           headerShown: false,
         }}
