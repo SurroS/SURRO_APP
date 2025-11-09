@@ -2,11 +2,12 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 interface PrimaryButtonProps {
-    title: string;
+    title?: string;
     onPress: () => void;
     loading?: boolean;
     disabled?: boolean;
     style?: any;
+    icon?:any
 }
 
 export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
@@ -15,14 +16,16 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
     loading = false,
     disabled = false,
     style,
+    icon
 }) => (
     <TouchableOpacity
         style={[styles.button, style, (loading || disabled) && styles.disabled]}
         onPress={onPress}
         disabled={loading || disabled}
     >
+        
         <Text style={styles.text}>
-            {loading ? 'Please wait...' : title}
+          {icon}  {loading ? 'Please wait...' : title}
         </Text>
     </TouchableOpacity>
 );

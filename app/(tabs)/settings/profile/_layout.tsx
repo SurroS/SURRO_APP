@@ -12,6 +12,22 @@ export default function SettingsLayout() {
           headerShown: false,
         }}
       />
+            <Stack.Screen
+        name="experienceForm"
+        options={{
+          headerTitle: "ExperienceForm",
+          headerTitleStyle: { fontWeight: "bold" },
+          headerShown: false,
+        }}
+      />
+            <Stack.Screen
+        name="experienceIntro"
+        options={{
+          headerTitle: "ExperienceIntro",
+          headerTitleStyle: { fontWeight: "bold" },
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
