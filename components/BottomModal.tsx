@@ -134,7 +134,10 @@ export default function BottomModal({
                 ]}
               >
                 <Text
-                  style={{ color: b.textColor || "#fff", fontWeight: "600" }}
+                  style={{
+                    color: b.textColor || "#fff",
+                    fontWeight: "600",
+                  }}
                 >
                   {b.label}
                 </Text>
@@ -196,12 +199,12 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
+   paddingTop:6
   },
   button: {
-    flex: 1,
-    paddingVertical: 12,
     borderRadius: 10,
-    alignItems: "center",
+    alignItems: "center", 
     marginHorizontal: 6,
+    paddingTop:15
   },
 });
