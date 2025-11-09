@@ -2,6 +2,8 @@ import { useProfile } from "@/hooks/useProfile";
 import { Feather } from "@expo/vector-icons";
 import { StyleSheet } from "react-native";
 import { Text, XStack, YStack } from "tamagui";
+import { Pressable } from "react-native";
+import { router } from "expo-router";
 
 const About = () => {
   const { surrogateProfile } = useProfile()
@@ -11,11 +13,12 @@ const About = () => {
         <Text fontSize="$4" fontWeight="bold" color="black">
           About
         </Text>
-        <Feather name="edit-2" size={15} color="black" />
+        <Pressable onPress={()=>router.push("/settings/profile")}>
+        <Feather  name="edit-2" size={15} color="black" />
+        </Pressable>
       </XStack>
       <Text fontSize="$3.2" color="black" textAlign="justify">{surrogateProfile ? surrogateProfile.aboutMe :
-        ("Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos." +
-          "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.")
+        ("No about, you can click on the pen icon to edit")
       }</Text>
     </YStack>
   );

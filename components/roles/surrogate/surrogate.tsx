@@ -145,16 +145,16 @@ function AccordionTriggerWithChevron({ title }: { title: string }) {
     >
       {({ open }: { open: boolean }) => (
         <XStack alignItems="center" justifyContent="space-between" width="100%">
-          <XStack alignItems="center" justifyContent="space-between">
+          <XStack alignItems="center" gap={"$11"}>
             <Text color="white" fontWeight="700" fontSize="$5">
               {title}
             </Text>
             <Animated.View
-              style={{
+              style={{ 
                 transform: [{ rotate: open ? "180deg" : "0deg" }],
               }}
             >
-              <ChevronDown color="white" size={18} />
+              <ChevronDown  color="white" size={25} />
             </Animated.View>
           </XStack>
         </XStack>
