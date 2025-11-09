@@ -8,8 +8,7 @@ import {
 import { YStack, XStack, Text } from "tamagui";
 import {
   Ionicons,
-  MaterialCommunityIcons,
-  FontAwesome5,
+  MaterialCommunityIcons, 
 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";

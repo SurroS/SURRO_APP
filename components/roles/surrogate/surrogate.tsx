@@ -33,10 +33,10 @@ export default function SurrogateScreen() {
     { label: "Complete your profile", route: "/profile/edit", done: true },
     {
       label: "Set your surrogacy experience",
-      route: "/profile/experienceIntro",
+      route: "/settings/profile/experienceIntro",
       done: false,
-    },
-    { label: "Verify your identity", route: "/settings/kyc", done: true },
+    },  
+    { label: "Verify your identity", route: "/settings/kyc", done: false },
   ];
 
   //  Check if all steps are done

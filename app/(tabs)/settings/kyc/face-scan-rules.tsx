@@ -94,6 +94,17 @@ const styles = StyleSheet.create({
     color: "#0E0E55",
     marginBottom: 14,
   },
+    instruction: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  instructionText: {
+    fontSize: 14,
+    color: "#000",
+    marginLeft: 10,
+    flexShrink: 1,
+  },
   imageContainer: {
     borderWidth: 2,
     borderColor: "#0055FF",
@@ -112,18 +123,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#555",
     marginBottom: 10,
-  },
-  instruction: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  instructionText: {
-    fontSize: 14,
-    color: "#000",
-    marginLeft: 10,
-    flexShrink: 1,
-  },
+  }, 
   button: {
     flexDirection: "row",
     backgroundColor: "#0E0E55",

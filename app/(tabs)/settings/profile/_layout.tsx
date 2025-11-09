@@ -1,7 +1,7 @@
 import React from "react";
 import { Stack } from "expo-router";
 
-export default function SettingsLayout() {
+export default function profileLayout() {
   return (
     <Stack>
       <Stack.Screen

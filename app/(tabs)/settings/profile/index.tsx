@@ -5,7 +5,7 @@ import { Alert, Modal } from "react-native";
 import { router } from "expo-router";
 import { User, Contact, LogOut, History } from "@tamagui/lucide-icons";
 import colors from "@/hooks/colors";
-
+import { useAuthStore } from "@/store/auth";
 import { ScreenHeader } from "@/components/auth";
 import ProfileImageCard from "@/components/editBio/profileImageCard";
 import InfoRowCard from "@/components/editBio/infoRowCard";
@@ -54,7 +54,7 @@ export default function EditBioView() {
           <YStack width="100%" alignItems="center" marginTop="$4">
             <ProfileImageCard
               onChangePicture={() => setIsModalVisible(true)}
-              onEditBio={() =>setIsModalVisible(!isModalVisible)}
+              onEditBio={() => setIsModalVisible(!isModalVisible)}
             />
           </YStack>
 
@@ -90,7 +90,10 @@ export default function EditBioView() {
                 color={colors.primary}
                 fontWeight="600"
                 fontSize={14}
-                onPress={() => console.log("Logged out")}
+                onPress={() => {
+                  useAuthStore.getState().logout();
+                  router.replace("/(auth)/login");
+                }}
               >
                 Log out
               </Text>
@@ -120,11 +123,12 @@ export default function EditBioView() {
       </ScrollView>
 
       <EditProfileModal
-      onSave={()=>{console.log("bio saved")}}    
-      visible={isModalVisible}
-      onClose={()=>setIsModalVisible(false)}
+        onSave={() => {
+          console.log("bio saved");
+        }}
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
       />
-
     </SafeAreaView>
   );
 }
