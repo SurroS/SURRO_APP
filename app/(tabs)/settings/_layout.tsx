@@ -52,6 +52,14 @@ export default function SettingsLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="medical"
+        options={{
+          headerTitle: "Medical",
+          headerTitleStyle: { fontWeight: "bold" },
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
