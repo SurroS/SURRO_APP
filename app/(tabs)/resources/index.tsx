@@ -47,7 +47,7 @@ export default function ResourceCentre() {
       category: "Guidelines",
       categoryColor: "#E8F4FF",
       type: "pdf",
-      sourceUrl: "https://drive.google.com/file/d/1A2B3C4D5E6F/view",
+      sourceUrl: "https://drive.google.com/file/d/1jKEhRmNlbjfukYIJJVpfqdPzutDZKS2O/view?usp=sharing",
     },
   ] as const;
 

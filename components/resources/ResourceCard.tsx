@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { XStack, YStack, Text, Image, View, Button } from "tamagui";
-import { Bookmark, Download, Play } from "@tamagui/lucide-icons";
+import { XStack, YStack, Text, Image, View } from "tamagui";
+import { Bookmark, Download } from "@tamagui/lucide-icons";
 import YoutubePlayer from "react-native-youtube-iframe";
-import * as Linking from "expo-linking";
+import { router } from "expo-router";
 
 type ResourceCardProps = {
   title: string;
@@ -31,8 +31,14 @@ const ResourceCard = ({
 }: ResourceCardProps) => {
   const [playing, setPlaying] = useState(false);
 
+  // ✅ Open PDFs inside the app
   const handleOpenPDF = () => {
-    if (sourceUrl) Linking.openURL(sourceUrl);
+    if (sourceUrl) {
+      router.push({
+        pathname: "/(tabs)/resources/documentViewer",
+        params: { url: sourceUrl, title },
+      });
+    }
   };
 
   return (
@@ -46,14 +52,14 @@ const ResourceCard = ({
       shadowOffset={{ width: 0, height: 2 }}
       marginBottom="$4"
     >
-      {/* Thumbnail / Video */}
+      {/* Thumbnail / Video / PDF */}
       <View width="100%" height={180} backgroundColor="#EEE">
         {type === "video" && videoId ? (
           <YoutubePlayer
             height={180}
             videoId={videoId}
             play={playing}
-            onChangeState={(state:any) => {
+            onChangeState={(state: any) => {
               if (state === "ended") setPlaying(false);
             }}
           />
@@ -104,7 +110,7 @@ const ResourceCard = ({
             <Bookmark
               size={18}
               color={bookmarked ? "#0A043C" : "#AAA"}
-              fill={bookmarked ? "#0A043C" : " "}
+              fill={bookmarked ? "#0A043C" : "#f8f7f7ff"}
               onPress={onBookmark}
             />
             {type === "pdf" && (
