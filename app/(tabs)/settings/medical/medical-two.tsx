@@ -6,12 +6,12 @@ import { router } from "expo-router";
 import { ScreenHeader } from "@/components/auth";
 import colors from "@/hooks/colors";
 import DropdownField from "@/components/medical/DropdownField";
-import NumberInput from "@/components/medical/NumberInput";
-import TextInputField from "@/components/medical/TextInputField";
+import TextInputField from "@/components/TextInputField";
 import MultiSelectField from "@/components/medical/MultiSelectField";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
+import NumberInputSelect from "@/components/NumberInputSelect";
 
 export default function MedicalDetailsStep2() {
   const [hasAllergies, setHasAllergies] = useState("");
@@ -171,7 +171,7 @@ export default function MedicalDetailsStep2() {
               onChange={setHadMiscarriage}
             />
             {hadMiscarriage === "Yes" && (
-              <NumberInput
+              <NumberInputSelect
                 label="How many miscarriages have you had?"
                 value={numberOfMiscarriages}
                 onChange={setNumberOfMiscarriages}

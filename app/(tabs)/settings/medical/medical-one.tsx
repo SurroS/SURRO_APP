@@ -5,7 +5,7 @@ import { router } from "expo-router";
 import { ScreenHeader } from "@/components/auth";
 import colors from "@/hooks/colors";
 import DropdownField from "@/components/medical/DropdownField";
-import NumberInput from "@/components/medical/NumberInput";
+import NumberInputSelect from "@/components/NumberInputSelect";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 
@@ -72,7 +72,7 @@ export default function MedicalDetailsStep1() {
 
             {pregnant === "Yes" && (
               <>
-                <NumberInput
+                <NumberInputSelect
                   label="How many children do you have"
                   value={children}
                   onChange={setChildren}
@@ -86,7 +86,7 @@ export default function MedicalDetailsStep1() {
                 />
 
                 {caesarean === "Yes" && (
-                  <NumberInput
+                  <NumberInputSelect
                     label="How many C-sections (cs) have you had?"
                     value={numberOfCs}
                     onChange={setNumberOfCs}

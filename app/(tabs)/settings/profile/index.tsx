@@ -93,7 +93,7 @@ export default function EditBioView() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF", paddingTop:20, padding:20 }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <YStack padding="$4" gap="$4" alignItems="center">
           {/* Header */}
@@ -117,13 +117,13 @@ export default function EditBioView() {
               title="Personal details"
               subtitle="Tell us more about yourself"
               icon={User}
-              onPress={() => {}}
+              onPress={() => router.navigate("/settings/profile/personalDetails")}
             />
             <InfoRowCard
               title="Contact information"
               subtitle="How can we reach you?"
               icon={Contact}
-              onPress={() => {}}
+              onPress={() => router.navigate("/settings/profile/contactInformation")}
             />
             <InfoRowCard
               title="Medical history"

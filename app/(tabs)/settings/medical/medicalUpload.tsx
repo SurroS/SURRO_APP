@@ -14,7 +14,7 @@ export default function MedicalUpload() {
   const handleSubmit = () => {
     if (medicalReport) {
       Toast.show({
-        text1: "Filwe uploaded successfully",
+        text1: "File uploaded successfully",
         type: "customSuccess" as ToastType,
       });
       router.push("/settings/medical/summary");

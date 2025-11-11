@@ -3,7 +3,7 @@ import React from 'react'
 
 export default function summary() {
   return (
-    <View style={{justifyContent:"center", alignItems:"center"}}>
+    <View style={{flex:1, justifyContent:"center", alignItems:"center"}}>
       <Text style={{color:"black"}}>summary</Text>
     </View>
   )

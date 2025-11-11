@@ -12,7 +12,7 @@ export default function profileLayout() {
           headerShown: false,
         }}
       />
-            <Stack.Screen
+      <Stack.Screen
         name="experienceForm"
         options={{
           headerTitle: "ExperienceForm",
@@ -20,10 +20,26 @@ export default function profileLayout() {
           headerShown: false,
         }}
       />
-            <Stack.Screen
+      <Stack.Screen
         name="experienceIntro"
         options={{
           headerTitle: "ExperienceIntro",
+          headerTitleStyle: { fontWeight: "bold" },
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="contactInformation"
+        options={{
+          headerTitle: "Contact Information",
+          headerTitleStyle: { fontWeight: "bold" },
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="personalDetails"
+        options={{
+          headerTitle: "Personal Details",
           headerTitleStyle: { fontWeight: "bold" },
           headerShown: false,
         }}

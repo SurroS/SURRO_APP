@@ -36,6 +36,14 @@ export default function medicalLayout() {
           headerShown: false,
         }}
       />
+            <Stack.Screen
+        name="summary"
+        options={{
+          headerTitle: "Summary",
+          headerTitleStyle: { fontWeight: "bold" },
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
