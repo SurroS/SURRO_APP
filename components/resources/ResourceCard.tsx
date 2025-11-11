@@ -1,62 +1,118 @@
-import React from "react";
-import { YStack, XStack, Text, Image, Button } from "tamagui";
-import Badge from "../../components/Badge";
+import React, { useState } from "react";
+import { XStack, YStack, Text, Image, View, Button } from "tamagui";
+import { Bookmark, Download, Play } from "@tamagui/lucide-icons";
+import YoutubePlayer from "react-native-youtube-iframe";
+import * as Linking from "expo-linking";
 
-export type ResourceCardProps = {
+type ResourceCardProps = {
   title: string;
-  description: string;
-  type: "Guide" | "Video" | "Template" | "FAQ";
+  author: string;
+  category: string;
+  categoryColor?: string;
   thumbnail?: string;
-  onPress: () => void;
+  type?: "video" | "pdf" | "article";
+  bookmarked?: boolean;
+  videoId?: string; // For YouTube
+  sourceUrl?: string; // For PDFs or links
+  onBookmark?: () => void;
 };
 
-export const ResourceCard: React.FC<ResourceCardProps> = ({
+const ResourceCard = ({
   title,
-  description,
-  type,
+  author,
+  category,
+  categoryColor = "#E8E8E8",
   thumbnail,
-  onPress,
-}) => {
+  type = "article",
+  bookmarked = false,
+  videoId,
+  sourceUrl,
+  onBookmark,
+}: ResourceCardProps) => {
+  const [playing, setPlaying] = useState(false);
+
+  const handleOpenPDF = () => {
+    if (sourceUrl) Linking.openURL(sourceUrl);
+  };
+
   return (
     <YStack
-      backgroundColor="$background"
-      borderRadius="$4"
-      padding="$4"
-      gap="$3"
-      elevation={2}
+      borderRadius="$5"
+      overflow="hidden"
+      backgroundColor="#FFF"
+      shadowColor="#000"
+      shadowOpacity={0.05}
+      shadowRadius={5}
+      shadowOffset={{ width: 0, height: 2 }}
+      marginBottom="$4"
     >
-      <XStack alignItems="center" gap="$4">
-        {thumbnail && (
+      {/* Thumbnail / Video */}
+      <View width="100%" height={180} backgroundColor="#EEE">
+        {type === "video" && videoId ? (
+          <YoutubePlayer
+            height={180}
+            videoId={videoId}
+            play={playing}
+            onChangeState={(state:any) => {
+              if (state === "ended") setPlaying(false);
+            }}
+          />
+        ) : type === "pdf" ? (
+          <YStack
+            alignItems="center"
+            justifyContent="center"
+            flex={1}
+            onPress={handleOpenPDF}
+          >
+            <Text fontSize={50}>📄</Text>
+            <Text color="#666" fontSize={13}>
+              Tap to open PDF
+            </Text>
+          </YStack>
+        ) : (
           <Image
             source={{ uri: thumbnail }}
-            width={60}
-            height={60}
-            borderRadius={8}
+            width="100%"
+            height="100%"
+            resizeMode="cover"
           />
         )}
+      </View>
 
-        <YStack flex={1} gap="$1">
-          <Text fontWeight="$bold" fontSize={20} color="$text">
-            {title}
-          </Text>
-          <Text fontSize={14} color="$text">
-            {description}
-          </Text>
-        </YStack>
-
-        <Badge label={type} variant={type} />
-      </XStack>
-
-      <Button
-        onPress={onPress}
-        backgroundColor="$primary"
-        borderRadius="$3"
-        alignSelf="flex-end"
-      >
-        <Text color="$background" fontWeight="$semibold" fontSize={14}>
-          View
+      {/* Details */}
+      <YStack padding="$3" gap="$2">
+        <Text fontWeight="700" color="#000" fontSize={15}>
+          {title}
         </Text>
-      </Button>
+        <Text fontSize={13} color="#666">
+          {author}
+        </Text>
+
+        <XStack justifyContent="space-between" alignItems="center">
+          <Text
+            backgroundColor={categoryColor}
+            color="#000"
+            paddingHorizontal={10}
+            paddingVertical={3}
+            borderRadius={10}
+            fontSize={12}
+          >
+            {category}
+          </Text>
+
+          <XStack gap="$3">
+            <Bookmark
+              size={18}
+              color={bookmarked ? "#0A043C" : "#AAA"}
+              fill={bookmarked ? "#0A043C" : " "}
+              onPress={onBookmark}
+            />
+            {type === "pdf" && (
+              <Download size={18} color="#AAA" onPress={handleOpenPDF} />
+            )}
+          </XStack>
+        </XStack>
+      </YStack>
     </YStack>
   );
 };

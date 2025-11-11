@@ -4,7 +4,7 @@ import { TextInput } from "react-native";
 import colors from "@/hooks/colors";
 
 type Props = {
-  label: string;
+  label?: string;
   placeholder?: string;
   value: string;
   onChangeText: (val: string) => void;

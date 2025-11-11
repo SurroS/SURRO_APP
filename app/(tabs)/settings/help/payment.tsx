@@ -6,7 +6,7 @@ export default function payment() {
     <View style={{flex:1, justifyContent:"center", alignItems:"center"}}>
       <Text style={{color:"black"}}>payment</Text>
     </View>
-  )""
+  )
 }
 
 const styles = StyleSheet.create({})
