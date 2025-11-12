@@ -5,7 +5,7 @@ import { Button, Card, Text, XStack, YStack } from "tamagui";
 import { useEffect } from "react";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
-import { useSurrogateStore } from "@/store/surrogates"; // custom hook
+import { useSurrogateStore } from "@/store/surrogates";  
 
 const SurrogatePreview = ({ style }: { style?: any }) => {
   const { surrogates, isLoading, fetchSurrogates } = useSurrogateStore();
@@ -30,15 +30,7 @@ const SurrogatePreview = ({ style }: { style?: any }) => {
       ? validSurrogates.slice(0, 3).map((s) => s.avatar)
       : [require("@/assets/images/emptyGallery.png")];
 
-  const handleNavigate = () => {
-    router.push({
-      pathname: "/(tabs)/home/surrogateList",
-      params: {
-        surrogates: JSON.stringify(validSurrogates),
-      },
-    });
-  };
-
+ 
   return (
     <Card
       bordered
