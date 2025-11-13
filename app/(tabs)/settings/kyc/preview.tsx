@@ -1,11 +1,6 @@
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
+import { StyleSheet, Image, TouchableOpacity, ActivityIndicator } from "react-native";
 import { YStack, Text } from "tamagui";
 import { router, useLocalSearchParams } from "expo-router";
 import colors from "@/hooks/colors";
@@ -13,27 +8,21 @@ import { ScreenHeader } from "@/components/navigation/ScreenHeader";
 import BottomModal from "@/components/BottomModal";
 
 export default function KYCPicturePreview() {
-  const { idType, imageUri } = useLocalSearchParams<{
-    idType?: string;
-    imageUri?: string;
-  }>();
-  const [loading, setLoading] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const params = useLocalSearchParams<Record<string, string>>();
+  const { idType, frontUri, backUri } = params;
 
-  const handleRetake = () => {
-    router.back(); // return to camera/upload screen
-  };
+  const [loading, setLoading] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      // simulate upload
       setIsModalVisible(true);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log("KYC document submitted:", imageUri); 
+      await new Promise((r) => setTimeout(r, 2000));
+      console.log("KYC document submitted:", { idType, frontUri, backUri });
       router.push("/settings/kyc/face-scan-rules");
     } catch (error) {
-      console.error("Error uploading ID:", error);
+      console.error("Upload error:", error);
     } finally {
       setIsModalVisible(false);
       setLoading(false);
@@ -45,22 +34,18 @@ export default function KYCPicturePreview() {
       <YStack marginLeft={28}>
         <ScreenHeader title="KYC" onBackPress={() => router.back()} />
       </YStack>
-      <YStack
-        flex={1}
-        paddingHorizontal={20}
-        paddingTop={20}
-        alignItems="center"
-      >
-        <Text style={styles.title}>Confirm your ID photo</Text>
+
+      <YStack paddingHorizontal={20} paddingTop={20} alignItems="center">
+        <Text style={styles.title}>Confirm your ID photos</Text>
         <Text style={styles.subtitle}>
-          Make sure your {idType || "ID"} is clearly visible and readable before
-          submitting.
+          Make sure your {idType} images are clearly visible and readable.
         </Text>
 
-        <Image source={{ uri: imageUri }} style={styles.previewImage} />
+        <Image source={{ uri: frontUri }} style={styles.previewImage} />
+        {backUri && <Image source={{ uri: backUri }} style={styles.previewImage} />}
 
         <TouchableOpacity
-          onPress={handleRetake}
+          onPress={() => router.back()}
           style={[styles.actionButton, styles.retakeButton]}
           activeOpacity={0.8}
         >
@@ -87,9 +72,9 @@ export default function KYCPicturePreview() {
 
       <BottomModal
         visible={isModalVisible}
-        title="submitted succesfully"
-        message="one last step is to take a selfie."
-        success={true}
+        title="Submitted Successfully"
+        message="One last step — take a selfie for face verification."
+        success
       />
     </SafeAreaView>
   );
@@ -115,7 +100,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 220,
     borderRadius: 12,
-    marginBottom: 30,
+    marginBottom: 20,
     resizeMode: "contain",
     backgroundColor: "#f9f9f9",
   },
