@@ -1,41 +1,47 @@
 // constants/ResourcesData.ts
 
-export const categories = ["All", "Guides", "Videos", "Templates", "FAQs"] as const;
-
 export type ResourceType = "Guide" | "Video" | "Template" | "FAQ";
 
 export type Resource = {
   id: string;
   title: string;
-  description: string;
+  author: string;
+  category: string;
+  image: any; // Image asset
   type: ResourceType;
-  thumbnail?: string;
 };
 
 export const dummyResources: Resource[] = [
   {
     id: "1",
-    title: "Surrogacy Guide for Parents",
-    description: "Learn the step-by-step process for a safe surrogacy journey.",
+    title: "How to protect your mental health as a surrogate",
+    author: "Lindy John",
+    category: "Mental wellness",
+    image: require("../assets/images/unsplash-1.png"),
     type: "Guide",
-    thumbnail: "https://via.placeholder.com/60",
   },
   {
     id: "2",
-    title: "Nutrition Tips for Surrogates",
-    description: "Healthy eating plan for pregnancy.",
+    title: "Getting the best representative as a surrogate",
+    author: "News Network",
+    category: "Legal",
+    image: require("../assets/images/unsplash-2.png"),
     type: "Guide",
   },
   {
     id: "3",
-    title: "Legal FAQ",
-    description: "Common legal questions answered for surrogates and parents.",
-    type: "FAQ",
+    title: "My experience as a surrogate",
+    author: "Jennie Ma",
+    category: "Health tips",
+    image: require("../assets/images/unsplash-3.png"),
+    type: "Guide",
   },
   {
     id: "4",
-    title: "Milestone Tracker Template",
-    description: "Track important pregnancy milestones easily.",
-    type: "Template",
+    title: "5 things to note when meeting intending parents",
+    author: "Lindy John",
+    category: "Guidelines",
+    image: require("../assets/images/pdf_reader_pro_icon.png"),
+    type: "Guide",
   },
 ];

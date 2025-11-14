@@ -1,62 +1,97 @@
 import React from "react";
-import { YStack, XStack, Text, Image, Button } from "tamagui";
-import Badge from "../../components/Badge";
+import { YStack, XStack, Text, Image } from "tamagui";
 
 export type ResourceCardProps = {
   title: string;
-  description: string;
-  type: "Guide" | "Video" | "Template" | "FAQ";
-  thumbnail?: string;
+  author: string;
+  category: string;
+  image: any; // Image asset
   onPress: () => void;
 };
 
 export const ResourceCard: React.FC<ResourceCardProps> = ({
   title,
-  description,
-  type,
-  thumbnail,
+  author,
+  category,
+  image,
   onPress,
 }) => {
   return (
     <YStack
-      backgroundColor="$background"
-      borderRadius="$4"
-      padding="$4"
-      gap="$3"
-      elevation={2}
+      width={353}
+      alignSelf="center"
+      gap={12}
+      onPress={onPress}
     >
-      <XStack alignItems="center" gap="$4">
-        {thumbnail && (
-          <Image
-            source={{ uri: thumbnail }}
-            width={60}
-            height={60}
-            borderRadius={8}
-          />
-        )}
+      <Image
+        source={image}
+        width={353}
+        height={190}
+        borderRadius={8}
+        resizeMode="cover"
+      />
 
-        <YStack flex={1} gap="$1">
-          <Text fontWeight="$bold" fontSize={20} color="$text">
-            {title}
-          </Text>
-          <Text fontSize={14} color="$text">
-            {description}
-          </Text>
-        </YStack>
-
-        <Badge label={type} variant={type} />
-      </XStack>
-
-      <Button
-        onPress={onPress}
-        backgroundColor="$primary"
-        borderRadius="$3"
-        alignSelf="flex-end"
-      >
-        <Text color="$background" fontWeight="$semibold" fontSize={14}>
-          View
+      <YStack gap={8}>
+        <Text
+          fontFamily="Body/Small Bold"
+          fontWeight="700"
+          fontSize={16}
+          color="#212121"
+        >
+          {title}
         </Text>
-      </Button>
+
+        <XStack alignItems="center" justifyContent="space-between">
+          <XStack gap={8} alignItems="center">
+            <Image
+              source={require("../../assets/images/Bookmark1.png")}
+              width={16}
+              height={20.64}
+              resizeMode="contain"
+            />
+            <Image
+              source={require("../../assets/images/download-icon.png")}
+              width={16}
+              height={20.64}
+              resizeMode="contain"
+            />
+          </XStack>
+        </XStack>
+
+        <XStack alignItems="center" justifyContent="space-between">
+          <Text
+            fontFamily="Body/Small Base"
+            fontSize={14}
+            color="#737373"
+          >
+            {author}
+          </Text>
+          <YStack
+            backgroundColor={
+              category === "Mental wellness" || category === "Health tips"
+                ? "#E4FCFBE5"
+                : category === "Legal"
+                  ? "#E6F0FF"
+                  : category === "Guidelines"
+                    ? "#FFF2E6"
+                    : "#F0F0F0"
+            }
+            paddingHorizontal={8}
+            paddingVertical={4}
+            borderRadius={4}
+            alignItems="center"
+          >
+            <Text
+              fontFamily="Body/Small Base"
+              fontSize={12}
+              color="#212121"
+              textAlign="center"
+            >
+              {category}
+            </Text>
+          </YStack>
+        </XStack>
+      </YStack>
     </YStack>
   );
 };
