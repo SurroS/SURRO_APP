@@ -93,7 +93,7 @@ export default function KYCUploadScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create({ 
   container: { flex: 1, backgroundColor: "#fff" },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
   title: {
@@ -113,3 +113,4 @@ const styles = StyleSheet.create({
   },
   camera: { flex: 1 },
 });
+    

@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, Image, TouchableOpacity, ActivityIndicator } from "react-native";
-import { YStack, Text } from "tamagui";
+import {
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
+import { YStack, Text, ScrollView } from "tamagui";
 import { router, useLocalSearchParams } from "expo-router";
 import colors from "@/hooks/colors";
 import { ScreenHeader } from "@/components/navigation/ScreenHeader";
@@ -34,48 +39,51 @@ export default function KYCPicturePreview() {
       <YStack marginLeft={28}>
         <ScreenHeader title="KYC" onBackPress={() => router.back()} />
       </YStack>
-
-      <YStack paddingHorizontal={20} paddingTop={20} alignItems="center">
-        <Text style={styles.title}>Confirm your ID photos</Text>
-        <Text style={styles.subtitle}>
-          Make sure your {idType} images are clearly visible and readable.
-        </Text>
-
-        <Image source={{ uri: frontUri }} style={styles.previewImage} />
-        {backUri && <Image source={{ uri: backUri }} style={styles.previewImage} />}
-
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={[styles.actionButton, styles.retakeButton]}
-          activeOpacity={0.8}
-        >
-          <Text style={[styles.actionText, { color: colors.primary }]}>
-            Retake
+      <ScrollView flex={1}>
+        <YStack paddingHorizontal={20} paddingTop={20} alignItems="center">
+          <Text style={styles.title}>Confirm your ID photos</Text>
+          <Text style={styles.subtitle}>
+            Make sure your {idType} images are clearly visible and readable.
           </Text>
-        </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={handleSubmit}
-          style={[styles.actionButton, styles.submitButton]}
-          disabled={loading}
-          activeOpacity={0.8}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={[styles.actionText, { color: "#fff" }]}>
-              Confirm & Continue
-            </Text>
+          <Image source={{ uri: frontUri }} style={styles.previewImage} />
+          {backUri && (
+            <Image source={{ uri: backUri }} style={styles.previewImage} />
           )}
-        </TouchableOpacity>
-      </YStack>
 
-      <BottomModal
-        visible={isModalVisible}
-        title="Submitted Successfully"
-        message="One last step — take a selfie for face verification."
-        success
-      />
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={[styles.actionButton, styles.retakeButton]}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.actionText, { color: colors.primary }]}>
+              Retake
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleSubmit}
+            style={[styles.actionButton, styles.submitButton]}
+            disabled={loading}
+            activeOpacity={0.8}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={[styles.actionText, { color: "#fff" }]}>
+                Confirm & Continue
+              </Text>
+            )}
+          </TouchableOpacity>
+        </YStack>
+
+        <BottomModal
+          visible={isModalVisible}
+          title="Submitted Successfully"
+          message="One last step — take a selfie for face verification."
+          success
+        />
+      </ScrollView>
     </SafeAreaView>
   );
 }
