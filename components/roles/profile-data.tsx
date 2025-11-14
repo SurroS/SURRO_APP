@@ -23,7 +23,7 @@ const ProfileData = () => {
         source={
           surrogateProfile?.profilePicture
             ? { uri: surrogateProfile.profilePicture }
-            : require("@/assets/images/avatar.jpg")
+            : require("@/assets/images/femaleAvatar.png")
         }
         width={"45%"}
         height={"100%"}
@@ -33,7 +33,7 @@ const ProfileData = () => {
       <YStack gap="$3">
         <XStack alignItems="center" gap="$2">
           <Text color="black" fontSize="$4" fontWeight={"bold"} textWrap="wrap">
-            {surrogateProfile ? `${surrogateProfile.firstName} ${surrogateProfile.lastName}` : "User Name"}
+            {surrogateProfile ? `${surrogateProfile.userName}` : "User Name"}
           </Text>
           {/* Add verification status if available */}
         </XStack>

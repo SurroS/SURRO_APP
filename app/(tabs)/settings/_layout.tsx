@@ -37,9 +37,9 @@ export default function SettingsLayout() {
         }}
       />
       <Stack.Screen
-        name="personalisation"
+        name="personalization"
         options={{
-          headerTitle: "Personalisation",
+          headerTitle: "Personalization",
           headerTitleStyle: { fontWeight: "bold" },
           headerShown: false,
         }}
@@ -48,6 +48,14 @@ export default function SettingsLayout() {
         name="security"
         options={{
           headerTitle: "security",
+          headerTitleStyle: { fontWeight: "bold" },
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="medical"
+        options={{
+          headerTitle: "Medical",
           headerTitleStyle: { fontWeight: "bold" },
           headerShown: false,
         }}

@@ -1,245 +1,3 @@
-// import React, { useEffect } from "react";
-// import {
-//   View,
-//   TouchableOpacity,
-//   TextInput,
-//   StyleSheet,
-//   KeyboardAvoidingView,
-//   Platform,
-//   TouchableWithoutFeedback,
-//   Keyboard,
-//   ScrollView,
-// } from "react-native";
-// import { YStack, XStack, Text, Button } from "tamagui";
-// import colors from "@/hooks/colors";
-// import PlatformInput from "./SocialSelector"; // adjust path if needed
-// import { SafeAreaView } from "react-native-safe-area-context";
-// import KeyboardAvoidingWrapper from "../keyboardAvoidingWrapper";
-
-// type Social = { platform: string; handle: string };
-
-// type EditProfileModalProps = {
-//   visible: boolean;
-//   onClose: () => void;
-//   onSave: (data: {
-//     username: string;
-//     about: string;
-//     socials: Social[];
-//   }) => void;
-// };
-
-// export default function BioInputModal({
-//   visible,
-//   onClose,
-//   onSave,
-// }: EditProfileModalProps) {
-//   const [username, setUsername] = React.useState("");
-//   const [about, setAbout] = React.useState("");
-//   const [socials, setSocials] = React.useState<Social[]>([]);
-
-//   // reset when opened/closed if you prefer
-//   useEffect(() => {
-//     if (!visible) {
-//       // keep fields if you want; uncomment to reset on close
-//       // setUsername("");
-//       // setAbout("");
-//       // setSocials([]);
-//     }
-//   }, [visible]);
-
-//   // add callback from PlatformInput: we'll pass onAdd prop
-//   const handleAddSocial = (platform: string, handle: string) => {
-//     // avoid duplicates of same platform
-//     if (socials.some((s) => s.platform === platform)) return;
-//     setSocials((p) => [{ platform, handle }, ...p]);
-//   };
-
-//   const handleRemoveSocial = (platform: string) => {
-//     setSocials((p) => p.filter((s) => s.platform !== platform));
-//   };
-
-//   const handleSave = () => {
-//     onSave({ username, about, socials });
-//     onClose();
-//   };
-
-//   if (!visible) return null;
-
-//   return (
-//     <SafeAreaView style={styles.full}>
-//       <TouchableWithoutFeedback onPress={onClose}>
-//         <View style={styles.backdrop} />
-//       </TouchableWithoutFeedback>
-
-//      <KeyboardAvoidingWrapper>
-//   <View style={styles.sheetWrapper}>
-//     <View style={styles.sheet}>
-//       {/* Header */}
-//       <XStack
-//         justifyContent="space-between"
-//         alignItems="center"
-//         style={{ marginBottom: 8 }}
-//       >
-//         <Text fontSize={18} fontWeight="700" color={colors.primary}>
-//           Edit Profile
-//         </Text>
-
-//         <TouchableOpacity onPress={onClose}>
-//           <Text color={colors.primary}>Close</Text>
-//         </TouchableOpacity>
-//       </XStack>
-
-//       <ScrollView
-//         style={{ flex: 1 }}
-//         contentContainerStyle={{ paddingBottom: 24 }}
-//         keyboardShouldPersistTaps="handled"
-//       >
-//         {/* Username */}
-//         <YStack marginBottom={12}>
-//           <Text fontWeight="600" color="#0E0E55" marginBottom={6} fontSize={14}>
-//             Username
-//           </Text>
-//           <TextInput
-//             placeholder="@username, no real names"
-//             value={username}
-//             placeholderTextColor={"gray"}
-//             onChangeText={setUsername}
-//             style={styles.input}
-//             returnKeyType="next"
-//           />
-//         </YStack>
-
-//         {/* About */}
-//         <YStack marginBottom={12}>
-//           <Text fontWeight="600" color="#0E0E55" marginBottom={6} fontSize={14}>
-//             About
-//           </Text>
-//           <TextInput
-//             multiline
-//             placeholderTextColor={"gray"}
-//             value={about}
-//             onChangeText={(text) => {
-//               if (text.length <= 300) setAbout(text);
-//             }}
-//             style={[styles.input, styles.textArea]}
-//             placeholder="Write something about yourself..."
-//             textAlignVertical="top"
-//           />
-//           <Text
-//             alignSelf="flex-end"
-//             fontSize={12}
-//             color={about.length < 300 ? colors.primary : colors.danger}
-//             marginTop={6}
-//           >
-//             {about.length}/300
-//           </Text>
-//         </YStack>
-
-//         {/* Socials */}
-//         <Text
-//           fontWeight="600"
-//           color="#0E0E55"
-//           fontSize={14}
-//           marginBottom={8}
-//         >
-//           Add Socials
-//         </Text>
-
-//         <PlatformInput onAdd={handleAddSocial} initialPlatform="Instagram" />
-
-//         {/* List of socials */}
-//         {socials.length > 0 && (
-//           <YStack marginTop={12} gap={8}>
-//             {socials.map((s) => (
-//               <XStack
-//                 key={s.platform}
-//                 justifyContent="space-between"
-//                 alignItems="center"
-//                 style={styles.addedRow}
-//               >
-//                 <XStack alignItems="center" gap={8}>
-//                   <Text fontWeight="600" color="#0E0E55">
-//                     {s.platform}:
-//                   </Text>
-//                   <Text>{s.handle}</Text>
-//                 </XStack>
-
-//                 <TouchableOpacity onPress={() => handleRemoveSocial(s.platform)}>
-//                   <Text color={colors.danger}>Remove</Text>
-//                 </TouchableOpacity>
-//               </XStack>
-//             ))}
-//           </YStack>
-//         )}
-
-//         <Button
-//           onPress={handleSave}
-//           backgroundColor={colors.primary}
-//           color="#fff"
-//           borderRadius={10}
-//           height={50}
-//           marginTop={18}
-//         >
-//           Save
-//         </Button>
-//       </ScrollView>
-//     </View>
-//   </View>
-// </KeyboardAvoidingWrapper>
-
-//     </SafeAreaView>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   full: {
-//     position: "absolute",
-//     left: 0,
-//     right: 0,
-//     top: 0,
-//     bottom: 0,
-//     zIndex: 999,
-//   },
-//   backdrop: {
-//     flex: 1,
-//     backgroundColor: "rgba(0,0,0,0.45)",
-//   },
-//   sheetWrapper: {
-//     // bottom sheet wrapper anchored to bottom
-//     position: "absolute",
-//     left: 0,
-//     right: 0,
-//     bottom: 0,
-//   },
-//   sheet: {
-//     flex:1,
-//     backgroundColor: "#fff",
-//     borderTopLeftRadius: 20,
-//     borderTopRightRadius: 20,
-//     padding: 20,
-//     maxHeight: "97%",
-//     minHeight: "97%",
-//   },
-//   input: {
-//     borderColor: colors.primary,
-//     backgroundColor: "#F8F8FA",
-//     borderRadius: 8,
-//     paddingHorizontal: 10,
-//     height: 44,
-//     color: colors.primary,
-//   },
-//   textArea: {
-//     height: 120,
-//     paddingVertical: 10,
-//   },
-//   addedRow: {
-//     paddingVertical: 8,
-//     paddingHorizontal: 8,
-//     backgroundColor: "#F8F8FA",
-//     borderRadius: 8,
-//   },
-// });
-
 // components/editBio/BioInputModal.tsx
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -258,13 +16,17 @@ import { YStack, XStack, Text, Button } from "tamagui";
 import colors from "@/hooks/colors";
 import PlatformInput from "./SocialSelector"; // adjust path if needed
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useProfile } from "@/hooks/useProfile";
+import { SurrogateProfileUpdate } from "@/types/profile";
+import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 
 type Social = { platform: string; handle: string };
 
 type EditProfileModalProps = {
   visible: boolean;
   onClose: () => void;
-  onSave: (data: {
+  onSave?: (data: {
     username: string;
     about: string;
     socials: Social[];
@@ -276,6 +38,7 @@ export default function BioInputModal({
   onClose,
   onSave,
 }: EditProfileModalProps) {
+  const { surrogateProfile, createProfile, updateProfile, isLoading } = useProfile();
   const [username, setUsername] = React.useState("");
   const [about, setAbout] = React.useState("");
   const [socials, setSocials] = React.useState<Social[]>([]);
@@ -293,7 +56,7 @@ export default function BioInputModal({
       const h = e.endCoordinates?.height ?? 0;
       setKeyboardHeight(h);
       Animated.timing(anim, {
-        toValue: -h*0.1,
+        toValue: h*0.5,
         duration: 200,
         useNativeDriver: true,
       }).start();
@@ -323,6 +86,42 @@ export default function BioInputModal({
     };
   }, [anim]);
 
+  // Fetch profile when modal opens if not already loaded
+  // useEffect(() => {
+  //   if (visible && !surrogateProfile) {
+  //     fetchProfile();
+  //   }
+  // }, [visible, surrogateProfile, fetchProfile]);
+
+  // Initialize form fields from existing profile
+  useEffect(() => {
+    if (visible && surrogateProfile) {
+      setUsername(surrogateProfile.userName || "");
+      setAbout(surrogateProfile.aboutMe || "");
+      
+      // Map profile social fields to socials array
+      const socialsArray: Social[] = [];
+      if (surrogateProfile.facebookProfile) {
+        socialsArray.push({ platform: "Facebook", handle: surrogateProfile.facebookProfile });
+      }
+      if (surrogateProfile.instagramProfile) {
+        socialsArray.push({ platform: "Instagram", handle: surrogateProfile.instagramProfile });
+      }
+      if (surrogateProfile.twitterProfile) {
+        socialsArray.push({ platform: "Twitter", handle: surrogateProfile.twitterProfile });
+      }
+      if (surrogateProfile.threadsProfile) {
+        socialsArray.push({ platform: "Threads", handle: surrogateProfile.threadsProfile });
+      }
+      setSocials(socialsArray);
+    } else if (visible && !surrogateProfile) {
+      // Reset form when creating new profile
+      setUsername("");
+      setAbout("");
+      setSocials([]);
+    }
+  }, [visible, surrogateProfile]);
+
   // reset state when closed (optional)
   useEffect(() => {
     if (!visible) {
@@ -345,9 +144,63 @@ export default function BioInputModal({
     setSocials((p) => p.filter((s) => s.platform !== platform));
   };
 
-  const handleSave = () => {
-    onSave({ username, about, socials });
-    onClose();
+  const handleSave = async () => {
+    try {
+      // Map socials array to individual profile fields
+      const facebookProfile = socials.find(s => s.platform === "Facebook")?.handle;
+      const instagramProfile = socials.find(s => s.platform === "Instagram")?.handle;
+      const twitterProfile = socials.find(s => s.platform === "Twitter")?.handle;
+      const threadsProfile = socials.find(s => s.platform === "Threads")?.handle;
+
+      if (surrogateProfile) {
+        // Update existing profile - only include fields with values
+        const updateData: SurrogateProfileUpdate = {};
+        
+        if (username) updateData.userName = username;
+        if (about) updateData.aboutMe = about;
+        if (facebookProfile) updateData.facebookProfile = facebookProfile;
+        if (instagramProfile) updateData.instagramProfile = instagramProfile;
+        if (twitterProfile) updateData.twitterProfile = twitterProfile;
+        if (threadsProfile) updateData.threadsProfile = threadsProfile;
+
+        await updateProfile(updateData);
+        
+        Toast.show({
+          text1: "Profile updated successfully",
+          type: "customSuccess" as ToastType,
+        });
+      } else {
+        // Create new profile - only include fields with values
+        const createData: any = {};
+        
+        if (username) createData.userName = username;
+        if (about) createData.aboutMe = about;
+        if (facebookProfile) createData.facebookProfile = facebookProfile;
+        if (instagramProfile) createData.instagramProfile = instagramProfile;
+        if (twitterProfile) createData.twitterProfile = twitterProfile;
+        if (threadsProfile) createData.threadsProfile = threadsProfile;
+
+        await createProfile(createData);
+        
+        Toast.show({
+          text1: "Profile created successfully",
+          type: "customSuccess" as ToastType,
+        });
+      }
+
+      // Call optional onSave callback if provided
+      if (onSave) {
+        onSave({ username, about, socials });
+      }
+      
+      onClose();
+    } catch (error: any) {
+      Toast.show({
+        text1: surrogateProfile ? "Failed to update profile" : "Failed to create profile",
+        text2: error.response?.data?.message || "Please try again",
+        type: "customError" as ToastType,
+      });
+    }
   };
 
   if (!visible) return null;
@@ -458,6 +311,27 @@ export default function BioInputModal({
               initialPlatform="Instagram"
             />
 
+            {/* List of added socials */}
+            {socials.length > 0 && (
+              <YStack marginTop={12} gap={8}>
+                {socials.map((s) => (
+                  <XStack
+                    key={s.platform}
+                    justifyContent="space-between"
+                    alignItems="center"
+                    style={styles.addedRow}
+                  >
+                    <XStack alignItems="center" gap={8}>
+                      <Text fontWeight="600" color="#0E0E55">
+                        {s.platform}:
+                      </Text>
+                      <Text>{s.handle}</Text>
+                    </XStack>
+                  </XStack>
+                ))}
+              </YStack>
+            )}
+
             <Button
               onPress={handleSave}
               backgroundColor={colors.primary}
@@ -465,8 +339,10 @@ export default function BioInputModal({
               borderRadius={10}
               height={50}
               marginTop={18}
+              disabled={isLoading}
+              opacity={isLoading ? 0.6 : 1}
             >
-              Save
+              {isLoading ? "Saving..." : surrogateProfile ? "Update Profile" : "Create Profile"}
             </Button>
           </ScrollView>
         </View>
@@ -482,8 +358,7 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
-    zIndex: 999,
-    elevation: 999,
+    zIndex: 999
   },
   backdrop: {
     flex: 1,

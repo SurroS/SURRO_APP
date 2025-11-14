@@ -1,30 +1,81 @@
 import { ChevronDown } from "@tamagui/lucide-icons";
-import { router } from "expo-router";
-import { Pressable, ScrollView, StyleSheet } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  withTiming,
-} from "react-native-reanimated";
-import { Accordion, Text, XStack, YStack } from "tamagui";
+import { useState, useEffect } from "react";
+import { ScrollView, StyleSheet, Pressable } from "react-native";
+import Animated from "react-native-reanimated";
+import { Accordion, Text, View, XStack, YStack } from "tamagui";
+import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
+
 import About from "../about";
 import Contact from "../contact";
-import Gallery from "../gallery";
 import ProfileData from "../profile-data";
 import ProgressMeter from "../progressCircle";
 import Referral from "../referral";
 import WalletCard from "../wallet";
+import SurrogatePreview from "../surrogate/SurrogatePreview";
+import { router } from "expo-router";
+import { useSurrogateStore } from "@/store/surrogates";
+
+/** Generic error boundary for safe rendering */
+function SafeRender({
+  children,
+  fallback,
+}: {
+  children: React.ReactNode;
+  fallback: React.ReactNode;
+}) {
+  try {
+    return children;
+  } catch (e) {
+    console.error("SafeRender caught an error:", e);
+    return fallback;
+  }
+}
 
 export default function ParentScreen() {
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <YStack flex={1} gap="$3">
-        <ProfileData />
+  const { surrogates, isLoading, fetchSurrogates } = useSurrogateStore();
 
-        {/* Accordion for About + Contact */}
+  useEffect(() => {
+    fetchSurrogates(true).catch((err: any) => {
+      Toast.show({
+        text1: "Failed to load surrogates",
+        type: "customError" as ToastType,
+        text2: err?.response?.data?.message || "Please try again.",
+      });
+    });
+  }, [fetchSurrogates]);
+
+  const validSurrogates =
+    Array.isArray(surrogates) && surrogates.length > 0
+      ? surrogates.filter((s) => s && s.avatar)
+      : [];
+
+  const displayAvatars =
+    validSurrogates.length > 0
+      ? validSurrogates.slice(0, 3).map((s) => s.avatar)
+      : [require("@/assets/images/emptyGallery.png")];
+
+  const handleNavigate = () => {
+    router.push({
+      pathname: "/(tabs)/home/surrogateList",
+      params: {
+        surrogates: JSON.stringify(validSurrogates),
+      },
+    });
+  };
+
+  return (
+    <ScrollView contentContainerStyle={styles.container} nestedScrollEnabled>
+      <YStack flex={1} gap="$3">
+        {/* Profile */}
+        <SafeRender fallback={<Text>Loading profile...</Text>}>
+          <ProfileData />
+        </SafeRender>
+
+        {/* Accordion Section */}
         <Accordion
           type="single"
           collapsible
-          defaultValue={undefined} // keeps closed initially
           borderTopStartRadius={10}
           borderTopEndRadius={10}
           overflow="hidden"
@@ -33,27 +84,40 @@ export default function ParentScreen() {
             <AccordionTriggerWithChevron title="Profile Information" />
             <Accordion.Content backgroundColor="white" padding="$3">
               <YStack gap="$3">
-                <About />
-                <Contact />
+                <SafeRender fallback={<Text>Loading about info...</Text>}>
+                  <About />
+                </SafeRender>
+
+                <SafeRender fallback={<Text>Loading contact info...</Text>}>
+                  <Contact />
+                </SafeRender>
               </YStack>
             </Accordion.Content>
           </Accordion.Item>
         </Accordion>
 
-        <Pressable
-          onPress={() => router.push("/(tabs)/home/surrogateGuestView")}
-        >
-          <Text
-            color="black"
-            fontWeight="bold"
-            textDecorationLine="underline"
-            textDecorationColor="#0E0E55"
-            marginBottom={8}
-          >
-            View profile as guest
-          </Text>
-        </Pressable>
-        {/* Floating Card Section */}
+        {/* Horizontal scroll - must have fixed height */}
+        <ScrollView horizontal nestedScrollEnabled style={{ height: 210 }}>
+          <SafeRender fallback={<Text>Loading surrogates...</Text>}>
+            <Pressable onPress={handleNavigate} style={{marginRight:5}}>
+              <SurrogatePreview
+                style={{ height: 200, padding: 2, width: 150 }}
+              />
+            </Pressable>
+            <View marginRight={5}>
+              <SurrogatePreview
+                style={{ height: 200, padding: 2, width: 150 }}
+              />
+            </View>
+            <View marginRight={5}>
+              <SurrogatePreview
+                style={{ height: 200, padding: 2, width: 150 }}
+              />
+            </View>
+          </SafeRender>
+        </ScrollView>
+
+        {/* Floating Cards */}
         <XStack
           flexWrap="wrap"
           justifyContent="flex-end"
@@ -61,24 +125,30 @@ export default function ParentScreen() {
           gap={10}
         >
           <YStack width={"48%"} gap={10}>
-            <WalletCard style={{ width: "100%", height: 100 }} />
+            <SafeRender fallback={<Text>Loading wallet...</Text>}>
+              <WalletCard style={{ width: "100%", height: 100 }} />
+            </SafeRender>
+          </YStack>
+
+          <YStack width={"48%"} gap={10}>
+            <SafeRender fallback={<Text>Loading referral...</Text>}>
+              <Referral style={{ width: "100%", height: 160 }} />
+            </SafeRender>
+          </YStack>
+
+          <SafeRender fallback={<Text>Loading progress...</Text>}>
             <ProgressMeter
               progress={0}
               style={{ width: "100%", height: 210 }}
             />
-          </YStack>
-
-          <YStack width={"48%"} gap={10}>
-            <Gallery style={{ width: "100%", height: 210 }} />
-            <Referral style={{ width: "100%", height: 160 }} />
-          </YStack>
+          </SafeRender>
         </XStack>
       </YStack>
     </ScrollView>
   );
 }
 
-/** Custom trigger with animated Chevron */
+/** Accordion Trigger with Animated Chevron */
 function AccordionTriggerWithChevron({ title }: { title: string }) {
   return (
     <Accordion.Trigger
@@ -89,30 +159,22 @@ function AccordionTriggerWithChevron({ title }: { title: string }) {
       justifyContent="space-between"
       height={48}
     >
-      {({ open }: { open: boolean }) => {
-        const animatedStyle = useAnimatedStyle(() => ({
-          transform: [
-            { rotate: withTiming(open ? "180deg" : "0deg", { duration: 200 }) },
-          ],
-        }));
-
-        return (
-          <XStack
-            alignItems="center"
-            justifyContent="space-between"
-            width="100%"
-          >
-            <XStack alignItems="center" justifyContent="space-between">
-              <Text color="white" fontWeight="700" fontSize="$5">
-                {title}
-              </Text>
-              <Animated.View style={animatedStyle}>
-                <ChevronDown color="white" size={18} />
-              </Animated.View>
-            </XStack>
+      {({ open }: { open?: boolean }) => (
+        <XStack alignItems="center" justifyContent="space-between" width="100%">
+          <XStack alignItems="center" gap={"$11"}>
+            <Text color="white" fontWeight="700" fontSize="$5">
+              {title}
+            </Text>
+            <Animated.View
+              style={{
+                transform: [{ rotate: open ? "180deg" : "0deg" }],
+              }}
+            >
+              <ChevronDown color="white" size={25} />
+            </Animated.View>
           </XStack>
-        );
-      }}
+        </XStack>
+      )}
     </Accordion.Trigger>
   );
 }

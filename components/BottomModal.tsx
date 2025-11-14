@@ -31,6 +31,7 @@ interface BottomModalProps {
   orientation?: "row" | "column";
   onClose?: () => void;
   success?: boolean;
+  description?: string;
 }
 
 export default function BottomModal({
@@ -43,6 +44,7 @@ export default function BottomModal({
   buttons = [],
   orientation = "row",
   onClose,
+  description,
   success = false,
 }: BottomModalProps) {
   const slideAnim = useRef(new Animated.Value(height)).current;
@@ -132,9 +134,17 @@ export default function BottomModal({
                 ]}
               >
                 <Text
-                  style={{ color: b.textColor || "#fff", fontWeight: "600" }}
+                  style={{
+                    color: b.textColor || "#fff",
+                    fontWeight: "600",
+                  }}
                 >
                   {b.label}
+                </Text>
+                <Text
+                  style={{ color: b.textColor || "#fff", fontWeight: "600" }}
+                >
+                  {description}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -189,12 +199,12 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
+   paddingTop:6
   },
   button: {
-    flex: 1,
-    paddingVertical: 12,
     borderRadius: 10,
-    alignItems: "center",
+    alignItems: "center", 
     marginHorizontal: 6,
+    paddingTop:15
   },
 });

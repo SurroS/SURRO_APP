@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { YStack } from "tamagui";
 import { Ionicons } from "@expo/vector-icons";
 import colors from "@/hooks/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -14,7 +15,9 @@ export default function KycFaceScanScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScreenHeader title="KYC" onBackPress={() => router.back()} />
+      <YStack marginLeft={28}>
+        <ScreenHeader title="KYC" onBackPress={() => router.back()} />
+      </YStack>
 
       <View style={styles.content}>
         <Text style={styles.title}>A quick scan of your face</Text>
@@ -68,6 +71,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     padding: 20,
+    paddingTop:28
   },
   header: {
     flexDirection: "row",
@@ -90,6 +94,17 @@ const styles = StyleSheet.create({
     color: "#0E0E55",
     marginBottom: 14,
   },
+    instruction: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  instructionText: {
+    fontSize: 14,
+    color: "#000",
+    marginLeft: 10,
+    flexShrink: 1,
+  },
   imageContainer: {
     borderWidth: 2,
     borderColor: "#0055FF",
@@ -108,18 +123,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#555",
     marginBottom: 10,
-  },
-  instruction: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  instructionText: {
-    fontSize: 14,
-    color: "#000",
-    marginLeft: 10,
-    flexShrink: 1,
-  },
+  }, 
   button: {
     flexDirection: "row",
     backgroundColor: "#0E0E55",

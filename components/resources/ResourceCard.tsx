@@ -1,95 +1,122 @@
-import React from "react";
-import { YStack, XStack, Text, Image } from "tamagui";
+import React, { useState } from "react";
+import { XStack, YStack, Text, Image, View } from "tamagui";
+import { Bookmark, Download } from "@tamagui/lucide-icons";
+import YoutubePlayer from "react-native-youtube-iframe";
+import { router } from "expo-router";
 
-export type ResourceCardProps = {
+type ResourceCardProps = {
   title: string;
   author: string;
   category: string;
-  image: any; // Image asset
-  onPress: () => void;
+  categoryColor?: string;
+  thumbnail?: string;
+  type?: "video" | "pdf" | "article";
+  bookmarked?: boolean;
+  videoId?: string; // For YouTube
+  sourceUrl?: string; // For PDFs or links
+  onBookmark?: () => void;
 };
 
-export const ResourceCard: React.FC<ResourceCardProps> = ({
+const ResourceCard = ({
   title,
   author,
   category,
-  image,
-  onPress,
-}) => {
+  categoryColor = "#E8E8E8",
+  thumbnail,
+  type = "article",
+  bookmarked = false,
+  videoId,
+  sourceUrl,
+  onBookmark,
+}: ResourceCardProps) => {
+  const [playing, setPlaying] = useState(false);
+
+  // ✅ Open PDFs inside the app
+  const handleOpenPDF = () => {
+    if (sourceUrl) {
+      router.push({
+        pathname: "/(tabs)/resources/documentViewer",
+        params: { url: sourceUrl, title },
+      });
+    }
+  };
+
   return (
     <YStack
-      width={353}
-      alignSelf="center"
-      gap={12}
-      onPress={onPress}
+      borderRadius="$5"
+      overflow="hidden"
+      backgroundColor="#FFF"
+      shadowColor="#000"
+      shadowOpacity={0.05}
+      shadowRadius={5}
+      shadowOffset={{ width: 0, height: 2 }}
+      marginBottom="$4"
     >
-      <Image
-        source={image}
-        width={353}
-        height={190}
-        borderRadius={8}
-        resizeMode="cover"
-      />
-
-      <YStack gap={8}>
-        <Text
-          fontFamily="Body/Small Bold"
-          fontWeight="700"
-          fontSize={16}
-          color="#212121"
-        >
-          {title}
-        </Text>
-
-        <XStack alignItems="center" justifyContent="space-between">
-          <XStack gap={8} alignItems="center">
-            <Image
-              source={require("../../assets/images/Bookmark1.png")}
-              width={16}
-              height={20.64}
-              resizeMode="contain"
-            />
-            <Image
-              source={require("../../assets/images/download-icon.png")}
-              width={16}
-              height={20.64}
-              resizeMode="contain"
-            />
-          </XStack>
-        </XStack>
-
-        <XStack alignItems="center" justifyContent="space-between">
-          <Text
-            fontFamily="Body/Small Base"
-            fontSize={14}
-            color="#737373"
-          >
-            {author}
-          </Text>
+      {/* Thumbnail / Video / PDF */}
+      <View width="100%" height={180} backgroundColor="#EEE">
+        {type === "video" && videoId ? (
+          <YoutubePlayer
+            height={180}
+            videoId={videoId}
+            play={playing}
+            onChangeState={(state: any) => {
+              if (state === "ended") setPlaying(false);
+            }}
+          />
+        ) : type === "pdf" ? (
           <YStack
-            backgroundColor={
-              category === "Mental wellness" || category === "Health tips"
-                ? "#E4FCFBE5"
-                : category === "Legal"
-                  ? "#E6F0FF"
-                  : category === "Guidelines"
-                    ? "#FFF2E6"
-                    : "#F0F0F0"
-            }
-            paddingHorizontal={8}
-            paddingVertical={4}
-            borderRadius={4}
             alignItems="center"
+            justifyContent="center"
+            flex={1}
+            onPress={handleOpenPDF}
           >
-            <Text
-              fontFamily="Body/Small Base"
-              fontSize={12}
-              color="#212121"
-              textAlign="center"
-            >
-              {category}
+            <Text fontSize={50}>📄</Text>
+            <Text color="#666" fontSize={13}>
+              Tap to open PDF
             </Text>
           </YStack>
+        ) : (
+          <Image
+            source={{ uri: thumbnail }}
+            width="100%"
+            height="100%"
+            resizeMode="cover"
+          />
+        )}
+      </View>
+
+      {/* Details */}
+      <YStack padding="$3" gap="$2">
+        <Text fontWeight="700" color="#000" fontSize={15}>
+          {title}
+        </Text>
+        <Text fontSize={13} color="#666">
+          {author}
+        </Text>
+
+        <XStack justifyContent="space-between" alignItems="center">
+          <Text
+            backgroundColor={categoryColor}
+            color="#000"
+            paddingHorizontal={10}
+            paddingVertical={3}
+            borderRadius={10}
+            fontSize={12}
+          >
+            {category}
+          </Text>
+
+          <XStack gap="$3">
+            <Bookmark
+              size={18}
+              color={bookmarked ? "#0A043C" : "#AAA"}
+              fill={bookmarked ? "#0A043C" : "#f8f7f7ff"}
+              onPress={onBookmark}
+            />
+            {type === "pdf" && (
+              <Download size={18} color="#AAA" onPress={handleOpenPDF} />
+            )}
+          </XStack>
         </XStack>
       </YStack>
     </YStack>

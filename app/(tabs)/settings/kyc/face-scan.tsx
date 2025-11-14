@@ -6,9 +6,11 @@ import * as ImagePicker from "expo-image-picker";
 import colors from "@/hooks/colors";
 import { router } from "expo-router";
 import { ScreenHeader } from "@/components/auth";
+import BottomModal from "@/components/BottomModal";
 
 export default function FaceScanScreen() {
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [isModalVisible, setModalVisible] = useState(false);
 
   const handleOpenCamera = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
@@ -18,30 +20,41 @@ export default function FaceScanScreen() {
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
+      mediaTypes: ["images"],
       quality: 1,
       cameraType: ImagePicker.CameraType.front,
     });
 
-    if (!result.canceled && result.assets?.length > 0) {
-      const uri = result.assets[0].uri;
-      setImageUri(uri);
+    if (result.canceled) {
+      alert("No image captured.");
+      return;
     }
+
+    const uri = result.assets?.[0]?.uri;
+    if (uri) setImageUri(uri);
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!imageUri) return;
+    // run backend call and store 
+    setModalVisible(true);
+
+    await new Promise((r) => setTimeout(r, 2000));
+
     router.push({
-      pathname: "/(tabs)/settings/kyc/face-preview",
+      pathname: "/(tabs)/home",
       params: { imageUri },
     });
+
+    setModalVisible(false);
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScreenHeader title="KYC" onBackPress={() => router.back()} />
+      <YStack marginLeft={28}>
+        <ScreenHeader title="KYC" onBackPress={() => router.back()} />
+      </YStack>
+
       <YStack
         flex={1}
         alignItems="center"
@@ -77,16 +90,28 @@ export default function FaceScanScreen() {
             style={styles.continueButton}
             onPress={handleContinue}
           >
-            <Text style={styles.continueText}>Continue</Text>
+            <Text style={styles.continueText}>Submit</Text>
           </TouchableOpacity>
         )}
       </YStack>
+
+      <BottomModal
+        visible={isModalVisible}
+        title="submitted successfully"
+        message="You are all set, taking you back home"
+        success={true}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", paddingTop: 20, justifyContent:"center" },
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingTop: 20,
+    justifyContent: "center",
+  },
   title: {
     fontSize: 20,
     fontWeight: "700",
@@ -129,9 +154,5 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 40,
   },
-  continueText: {
-    color: colors.primary,
-    fontWeight: "700",
-    fontSize: 16,
-  },
+  continueText: { color: colors.primary, fontWeight: "700", fontSize: 16 },
 });

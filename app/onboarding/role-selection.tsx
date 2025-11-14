@@ -1,4 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
+import { User } from "@tamagui/lucide-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet } from "react-native";
@@ -27,7 +28,7 @@ type RoleKey = typeof ROLE_ITEMS[number]["key"];
 export default function RoleSelection() {
   const router = useRouter();
   const [selectedRole, setSelectedRole] = useState<RoleKey | null>(null);
-  const { setUser } = useAuth();
+  const { setUser,user} = useAuth();
 
   const onNext = () => {
     if (!selectedRole) return;
@@ -40,7 +41,8 @@ export default function RoleSelection() {
       role: selectedRole,
       isVerified: false,
     });
-
+console.log("Role from role", selectedRole)
+console.log("User from role",user)
     // Navigate to "how did you hear" page
     router.push("/onboarding/how-did-you-hear");
   };

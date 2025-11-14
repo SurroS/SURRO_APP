@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: "center",
   },
-  addButtonText: { color: "#fff", fontWeight: "700" },
+  addButtonText: { color: "#fff", fontWeight: "400" },
 
   addedContainer: {
     marginBottom: 12,

@@ -26,7 +26,9 @@ export default function KYCSelectIDScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScreenHeader title="KYC" onBackPress={() => router.back()} />
+      <YStack marginLeft={28}>
+        <ScreenHeader title="KYC" onBackPress={() => router.back()} />
+      </YStack>
       <ScrollView contentContainerStyle={styles.scroll}>
         <Text style={styles.title}>
           Which type of ID would you like to provide?
@@ -98,7 +100,8 @@ export default function KYCSelectIDScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#fff", padding:18, paddingTop:28},
+  
   scroll: { padding: 20 },
   title: {
     fontSize: 18,

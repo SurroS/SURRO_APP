@@ -1,5 +1,4 @@
-import axios from 'axios';
-import { useAuthStore } from '@/store/auth';
+import axios from 'axios'; 
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://localhost:8081';
 
