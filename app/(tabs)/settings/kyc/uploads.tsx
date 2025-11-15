@@ -1,56 +1,67 @@
-import React, { useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, TouchableOpacity, Image, Alert } from "react-native";
-import { YStack, XStack, Text, ScrollView } from "tamagui";
+import { StyleSheet, TouchableOpacity, View, Image, Alert } from "react-native";
+import { YStack, Text } from "tamagui";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import { router, useLocalSearchParams } from "expo-router";
-import * as ImagePicker from "expo-image-picker";
-import { CheckCircle } from "@tamagui/lucide-icons";
 import colors from "@/hooks/colors";
-import { PrimaryButton, ScreenHeader } from "@/components/auth";
+import { ScreenHeader, PrimaryButton } from "@/components/auth";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function KYCUploadScreen() {
-  const { idType } = useLocalSearchParams<{ idType: string }>();
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const params = useLocalSearchParams<Record<string, string>>();
+  const { idType } = params;
 
-  const handleTakePicture = async () => {
+  const [permission, requestPermission] = useCameraPermissions();
+  const cameraRef = useRef<CameraView>(null);
+  const [capturedFront, setCapturedFront] = useState<string | null>(null);
+  const [capturedBack, setCapturedBack] = useState<string | null>(null);
+  const [step, setStep] = useState<"front" | "back">("front");
+
+  useEffect(() => {
+    if (!permission) requestPermission();
+  }, [permission]);
+
+  const handleCapture = async () => {
+    if (!cameraRef.current) return;
+
     try {
-      // ask permission first
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission required",
-          "Please allow camera access to take a picture of your ID."
-        );
-        return;
-      }
-
-      // launch camera
-      const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        quality: 1,
-        allowsEditing: true,
-      });
-
-      if (!result.canceled && result.assets?.length) {
-        const uri = result.assets[0].uri;
-        setCapturedImage(uri);
-
-        // navigate to preview
+      const photo = await cameraRef.current.takePictureAsync({ quality: 1 });
+      if (step === "front") {
+        setCapturedFront(photo.uri);
+        if (idType === "passport") {
+          // Passport only has one side
+          router.push({
+            pathname: "/settings/kyc/preview",
+            params: { idType, frontUri: photo.uri },
+          });
+        } else {
+          setStep("back");
+        }
+      } else {
+        setCapturedBack(photo.uri);
         router.push({
-          pathname: "/(tabs)/settings/kyc/preview",
-          params: { idType, imageUri: uri },
+          pathname: "/settings/kyc/preview",
+          params: { idType, frontUri: capturedFront || "", backUri: photo.uri },
         });
       }
     } catch (error) {
-      console.error("Camera error:", error);
-      Alert.alert("Error", "Failed to open camera. Please try again.");
+      console.error("Camera capture error:", error);
+      Alert.alert("Error", "Could not take picture. Try again.");
     }
   };
 
+  if (!permission?.granted) {
+    return (
+      <SafeAreaView style={styles.centered}>
+        <Text color={colors.primary}>Requesting camera permission...</Text>
+      </SafeAreaView>
+    );
+  }
+
   const readableId =
     idType === "national_id"
-      ? "National ID card"
+      ? "National ID Card"
       : idType === "drivers_license"
       ? "Driver’s License"
       : "Passport";
@@ -60,77 +71,46 @@ export default function KYCUploadScreen() {
       <YStack marginLeft={28}>
         <ScreenHeader title="KYC" onBackPress={() => router.back()} />
       </YStack>
-      <ScrollView>
-        <YStack paddingHorizontal={20} paddingTop={20} flex={1}>
-          <Text style={styles.title}>Take a picture of your ID</Text>
-          <Text style={styles.subtitle}>
-            Ensure your {readableId} is clear and all details are visible.
-          </Text>
 
-          <YStack
-            backgroundColor="#F8F8FA"
-            borderRadius={16}
-            alignItems="center"
-            justifyContent="center"
-            marginTop={30}
-            paddingVertical={40}
-          >
-            <Image
-              source={
-                capturedImage
-                  ? { uri: capturedImage }
-                  : require("@/assets/images/id_sample.png")
-              }
-              style={{ width: 180, height: 120, resizeMode: "contain" }}
-            />
-          </YStack>
+      <YStack flex={1} paddingHorizontal={20} paddingTop={20}>
+        <Text style={styles.title}>
+          {step === "front"
+            ? `Capture the FRONT of your ${readableId}`
+            : `Capture the BACK of your ${readableId}`}
+        </Text>
 
-          <YStack gap="$3" marginTop={30}>
-            <ChecklistItem text="Your ID has not expired" />
-            <ChecklistItem text="It is clear and easy to read" />
-            <ChecklistItem text="All your details are in frame" />
-          </YStack>
+        <View style={styles.cameraBox}>
+          <CameraView ref={cameraRef} style={styles.camera} />
+        </View>
 
-          <PrimaryButton
-            title="Take Picture"
-            onPress={handleTakePicture}
-            icon={<Ionicons size={20} color={"white"} name="camera" />}
-          />
-        </YStack>
-      </ScrollView>
+        <PrimaryButton
+          title={`Capture ${step === "front" ? "Front" : "Back"}`}
+          onPress={handleCapture}
+          icon={<Ionicons name="camera" size={20} color="#fff" />}
+        />
+      </YStack>
     </SafeAreaView>
   );
 }
 
-const ChecklistItem = ({ text }: { text: string }) => (
-  <XStack alignItems="center" gap="$3">
-    <CheckCircle color="#09d814ff" size={20} />
-    <Text style={styles.checkText}>{text}</Text>
-  </XStack>
-);
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 20, paddingTop: 28 },
-
+const styles = StyleSheet.create({ 
+  container: { flex: 1, backgroundColor: "#fff" },
+  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700",
     color: colors.primary,
+    textAlign: "center",
+    marginBottom: 14,
   },
-  subtitle: {
-    fontSize: 14,
-    color: "#444",
-    marginTop: 6,
+  cameraBox: {
+    width: "100%",
+    height: 300,
+    borderRadius: 16,
+    overflow: "hidden",
+    backgroundColor: "#eee",
+    marginBottom: 20,
   },
-  button: {
-    marginTop: "auto",
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 30,
-  },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "700" },
-  checkText: { fontSize: 14, color: "#333" },
+  camera: { flex: 1 },
 });
+    

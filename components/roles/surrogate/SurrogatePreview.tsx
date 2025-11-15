@@ -1,5 +1,3 @@
-import { ChevronRight, Users } from "@tamagui/lucide-icons";
-import { router } from "expo-router";
 import { Image as RNImage, StyleSheet } from "react-native";
 import { Button, Card, Text, XStack, YStack } from "tamagui";
 import { useEffect } from "react";

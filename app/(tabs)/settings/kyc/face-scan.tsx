@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet, TouchableOpacity, Image } from "react-native";
 import { YStack, Text } from "tamagui";
-import * as ImagePicker from "expo-image-picker";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import colors from "@/hooks/colors";
 import { router } from "expo-router";
 import { ScreenHeader } from "@/components/auth";
@@ -11,32 +11,41 @@ import BottomModal from "@/components/BottomModal";
 export default function FaceScanScreen() {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+
+  const cameraRef = useRef<CameraView>(null);
+  const [permission, requestPermission] = useCameraPermissions();
 
   const handleOpenCamera = async () => {
-    const permission = await ImagePicker.requestCameraPermissionsAsync();
-    if (!permission.granted) {
-      alert("Camera access is required to take your selfie.");
-      return;
+    if (!permission?.granted) {
+      const perm = await requestPermission();
+      if (!perm.granted) {
+        alert("Camera permission required.");
+        return;
+      }
     }
+    setIsCameraOpen(true);
+  };
 
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ["images"],
-      quality: 1,
-      cameraType: ImagePicker.CameraType.front,
-    });
+  const takePicture = async () => {
+    if (!cameraRef.current) return;
 
-    if (result.canceled) {
-      alert("No image captured.");
-      return;
+    try {
+      const photo = await cameraRef.current.takePictureAsync({
+        quality: 1,
+        base64: false,
+      });
+
+      setImageUri(photo.uri);
+      setIsCameraOpen(false);
+    } catch (error) {
+      console.log("Error taking picture:", error);
     }
-
-    const uri = result.assets?.[0]?.uri;
-    if (uri) setImageUri(uri);
   };
 
   const handleContinue = async () => {
     if (!imageUri) return;
-    // run backend call and store 
+
     setModalVisible(true);
 
     await new Promise((r) => setTimeout(r, 2000));
@@ -55,45 +64,58 @@ export default function FaceScanScreen() {
         <ScreenHeader title="KYC" onBackPress={() => router.back()} />
       </YStack>
 
-      <YStack
-        flex={1}
-        alignItems="center"
-        justifyContent="center"
-        paddingHorizontal={20}
-      >
-        <Text style={styles.title}>Face Verification</Text>
-        <Text style={styles.subtitle}>Image should be centered</Text>
-
-        {imageUri ? (
-          <Image source={{ uri: imageUri }} style={styles.preview} />
-        ) : (
-          <YStack
-            style={styles.placeholder}
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Text style={{ color: "#999" }}>No image captured</Text>
-          </YStack>
-        )}
-
-        <TouchableOpacity
-          style={styles.cameraButton}
-          onPress={handleOpenCamera}
+      {isCameraOpen ? (
+        <CameraView
+          ref={cameraRef}
+          style={styles.camera}
+          facing="front"
+          onCameraReady={() => console.log("Camera ready")}
         >
-          <Text style={styles.cameraText}>
-            {imageUri ? "Retake Selfie" : "Take Selfie"}
-          </Text>
-        </TouchableOpacity>
-
-        {imageUri && (
-          <TouchableOpacity
-            style={styles.continueButton}
-            onPress={handleContinue}
-          >
-            <Text style={styles.continueText}>Submit</Text>
+          <TouchableOpacity style={styles.snapButton} onPress={takePicture}>
+            <Text style={styles.snapText}>Capture</Text>
           </TouchableOpacity>
-        )}
-      </YStack>
+        </CameraView>
+      ) : (
+        <YStack
+          flex={1}
+          alignItems="center"
+          justifyContent="center"
+          paddingHorizontal={20}
+        >
+          <Text style={styles.title}>Face Verification</Text>
+          <Text style={styles.subtitle}>Image should be centered</Text>
+
+          {imageUri ? (
+            <Image source={{ uri: imageUri }} style={styles.preview} />
+          ) : (
+            <YStack
+              style={styles.placeholder}
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Text style={{ color: "#999" }}>No image captured</Text>
+            </YStack>
+          )}
+
+          <TouchableOpacity
+            style={styles.cameraButton}
+            onPress={handleOpenCamera}
+          >
+            <Text style={styles.cameraText}>
+              {imageUri ? "Retake Selfie" : "Take Selfie"}
+            </Text>
+          </TouchableOpacity>
+
+          {imageUri && (
+            <TouchableOpacity
+              style={styles.continueButton}
+              onPress={handleContinue}
+            >
+              <Text style={styles.continueText}>Submit</Text>
+            </TouchableOpacity>
+          )}
+        </YStack>
+      )}
 
       <BottomModal
         visible={isModalVisible}
@@ -110,7 +132,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     paddingTop: 20,
-    justifyContent: "center",
   },
   title: {
     fontSize: 20,
@@ -155,4 +176,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   continueText: { color: colors.primary, fontWeight: "700", fontSize: 16 },
+
+  // camera view
+  camera: {
+    flex: 1,
+  },
+  snapButton: {
+    position: "absolute",
+    bottom: 40,
+    alignSelf: "center",
+    backgroundColor: "white",
+    padding: 18,
+    borderRadius: 50,
+  },
+  snapText: {
+    fontWeight: "700",
+    color: "#000",
+  },
 });

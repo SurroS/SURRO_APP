@@ -3,7 +3,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import { YStack, XStack, Text, Button } from "tamagui";
 import { router } from "expo-router";
-import { Lock } from "@tamagui/lucide-icons";
 import colors from "@/hooks/colors";
 import { ScreenHeader } from "@/components/auth";
 
@@ -29,10 +28,9 @@ export default function KYCSelectIDScreen() {
       <YStack marginLeft={28}>
         <ScreenHeader title="KYC" onBackPress={() => router.back()} />
       </YStack>
+
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={styles.title}>
-          Which type of ID would you like to provide?
-        </Text>
+        <Text style={styles.title}>Which type of ID would you like to provide?</Text>
 
         <YStack gap="$3" marginTop="$4">
           {idOptions.map((item) => (
@@ -50,9 +48,7 @@ export default function KYCSelectIDScreen() {
                 width={22}
                 height={22}
                 borderWidth={2}
-                borderColor={
-                  selected === item.value ? colors.primary : "#C6C6C6"
-                }
+                borderColor={selected === item.value ? colors.primary : "#C6C6C6"}
                 borderRadius={20}
                 alignItems="center"
                 justifyContent="center"
@@ -83,15 +79,9 @@ export default function KYCSelectIDScreen() {
           </Text>
         </Button>
 
-        <XStack
-          marginTop={18}
-          alignItems="center"
-          justifyContent="center"
-          gap="$2"
-        >
+        <XStack marginTop={18} alignItems="center" justifyContent="center" gap="$2">
           <Text style={styles.footerText}>
-            We priotise the safty of your informatoin, We will encrypt your info
-            and store it securely, and only use it to verify your identity.
+            We prioritise your safety — we encrypt and securely store your information, using it only for identity verification.
           </Text>
         </XStack>
       </ScrollView>
@@ -100,8 +90,7 @@ export default function KYCSelectIDScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding:18, paddingTop:28},
-  
+  container: { flex: 1, backgroundColor: "#fff", padding: 18, paddingTop: 28 },
   scroll: { padding: 20 },
   title: {
     fontSize: 18,
