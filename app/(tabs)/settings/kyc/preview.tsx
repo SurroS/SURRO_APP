@@ -10,7 +10,7 @@ import { YStack, Text, ScrollView } from "tamagui";
 import { router, useLocalSearchParams } from "expo-router";
 import colors from "@/hooks/colors";
 import { ScreenHeader } from "@/components/navigation/ScreenHeader";
-import BottomModal from "@/components/BottomModal";
+import BottomModal from "@/components/modals/BottomModal";
 
 export default function KYCPicturePreview() {
   const params = useLocalSearchParams<Record<string, string>>();

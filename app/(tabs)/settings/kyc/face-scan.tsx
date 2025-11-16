@@ -6,7 +6,8 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import colors from "@/hooks/colors";
 import { router } from "expo-router";
 import { ScreenHeader } from "@/components/auth";
-import BottomModal from "@/components/BottomModal";
+import BottomModal from "@/components/modals/BottomModal";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function FaceScanScreen() {
   const [imageUri, setImageUri] = useState<string | null>(null);
@@ -101,7 +102,9 @@ export default function FaceScanScreen() {
             style={styles.cameraButton}
             onPress={handleOpenCamera}
           >
+            <Ionicons name="camera-outline" size={18} color="#fff" />
             <Text style={styles.cameraText}>
+              {" "}
               {imageUri ? "Retake Selfie" : "Take Selfie"}
             </Text>
           </TouchableOpacity>
@@ -161,6 +164,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   cameraButton: {
+    flexDirection: "row",
     backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 14,

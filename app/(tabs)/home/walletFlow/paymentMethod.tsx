@@ -9,7 +9,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const gateways: { id: PaymentGateway; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   // { id: "stripe", label: "Stripe", icon: "card" },
-  { id: "paystack", label: "Paystack", icon: "cash" },
+  { id: "PAYSTACK", label: "Paystack", icon: "cash" },
   // { id: "flutterwave", label: "Flutterwave", icon: "card" },
   // { id: "interswitch", label: "Interswitch", icon: "wallet" },
 ];

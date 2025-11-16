@@ -12,7 +12,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import BottomModal from "@/components/BottomModal";
+import BottomModal from "@/components/modals/BottomModal";
 import { useGallery } from "@/hooks/useGallery";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScreenHeader } from "@/components/auth";
@@ -121,11 +121,11 @@ export default function GalleryScreen() {
         setShowUploadSuccess(true);
         setTimeout(() => setShowUploadSuccess(false), 1500);
       } catch (error) {
-        console.error('Error uploading image:', error);
+        console.error("Error uploading image:", error);
         Toast.show({
-          text1: 'Upload failed',
-          type: 'customError' as ToastType,
-          text2: 'Failed to upload image. Please try again.',
+          text1: "Upload failed",
+          type: "customError" as ToastType,
+          text2: "Failed to upload image. Please try again.",
         });
       }
     }
@@ -169,11 +169,11 @@ export default function GalleryScreen() {
       setShowDeleteSuccess(true);
       setTimeout(() => setShowDeleteSuccess(false), 1500);
     } catch (error) {
-      console.error('Error deleting images:', error);
+      console.error("Error deleting images:", error);
       Toast.show({
-        text1: 'Delete failed',
-        type: 'customError' as ToastType,
-        text2: 'Failed to delete images. Please try again.',
+        text1: "Delete failed",
+        type: "customError" as ToastType,
+        text2: "Failed to delete images. Please try again.",
       });
       setShowDeleteConfirm(false);
     }
@@ -249,10 +249,7 @@ export default function GalleryScreen() {
             {selectionMode ? (
               `Select (${selectedIndices.length})`
             ) : (
-              <ScreenHeader
-                title="Gallery"
-                onBackPress={() => router.back()}
-              />
+              <ScreenHeader title="Gallery" onBackPress={() => router.back()} />
             )}
           </RNText>
           <View style={{ width: 40 }} />

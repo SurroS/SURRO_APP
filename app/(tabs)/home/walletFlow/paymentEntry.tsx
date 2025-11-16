@@ -60,7 +60,7 @@ export default function PaymentEntryScreen(): JSX.Element {
 
     console.log("Response =", response);
 
-    // ✅ Adjust for your actual backend structure
+ 
     const authorizationUrl =
       response?.authorization_url || response?.data?.authorization_url;
 
@@ -142,10 +142,9 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 20,
     backgroundColor: colors.primary,
-    borderRadius: 12,
-    paddingVertical: 14,
+    borderRadius: 12, 
     justifyContent: "center",
     alignItems: "center",
   },
-  buttonText: { color: colors.white, fontWeight: "700", fontSize: 16 },
+  buttonText: { color: colors.white, fontWeight: "700", fontSize: 16, },
 });

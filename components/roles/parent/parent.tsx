@@ -57,7 +57,7 @@ export default function ParentScreen() {
 
   const handleNavigate = () => {
     router.push({
-      pathname: "/(tabs)/home/surrogateList",
+      pathname: "/(tabs)/home/surrogate/surrogateList",
       params: {
         surrogates: JSON.stringify(validSurrogates),
       },

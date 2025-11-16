@@ -1,7 +1,7 @@
 // components/editBio/EditBioModal.tsx
 import React, { useState } from "react";
 import { YStack, XStack, Text, Button, Input } from "tamagui";
-import BottomModal from "../BottomModal"; // use the team lead's BottomModal
+import BottomModal from "../modals/BottomModal"; // use the team lead's BottomModal
 
 interface Props {
   visible: boolean;
@@ -23,7 +23,7 @@ const EditBioModal: React.FC<Props> = ({ visible, onClose }) => {
 
   const handleSave = () => {
     // Here you would typically save the data to state management, API, etc.
-    console.log('Saving bio fields:', bioFields);
+    console.log("Saving bio fields:", bioFields);
     onClose(); // Close the modal after saving
   };
 
@@ -44,7 +44,9 @@ const EditBioModal: React.FC<Props> = ({ visible, onClose }) => {
       {/* Modal custom content */}
       <YStack gap="$3" marginBottom="$4">
         {bioFields.map((field) => (
-          <YStack key={field.id} gap="$1"> {/* Key is already unique */}
+          <YStack key={field.id} gap="$1">
+            {" "}
+            {/* Key is already unique */}
             <Text fontWeight="600">{field.label}</Text>
             <Input
               value={field.value}

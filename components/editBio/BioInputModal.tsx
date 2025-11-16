@@ -283,7 +283,7 @@ export default function BioInputModal({
                   if (text.length <= 300) setAbout(text);
                 }}
                 style={[styles.input, styles.textArea]}
-                placeholder="Write something about yourself..."
+                placeholder="Tell us how much this opportunity means to you..."
                 textAlignVertical="top"
               />
               <Text
@@ -311,7 +311,7 @@ export default function BioInputModal({
               initialPlatform="Instagram"
             />
 
-            {/* List of added socials */}
+            {/* List of added socials
             {socials.length > 0 && (
               <YStack marginTop={12} gap={8}>
                 {socials.map((s) => (
@@ -330,7 +330,7 @@ export default function BioInputModal({
                   </XStack>
                 ))}
               </YStack>
-            )}
+            )} */}
 
             <Button
               onPress={handleSave}

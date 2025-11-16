@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { StyleSheet, TextInput } from "react-native";
 import { YStack, XStack, Text, Button } from "tamagui";
 import { SafeAreaView } from "react-native-safe-area-context";
-import BottomModal from "@/components/BottomModal";
+import BottomModal from "@/components/modals/BottomModal";
 import colors from "@/hooks/colors";
 import { router } from "expo-router";
 import { ActivityIndicator } from "react-native";

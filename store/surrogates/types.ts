@@ -4,6 +4,8 @@ export interface Surrogate {
   id: string;
   name: string;
   avatar?: string;
+  age:string;
+  country:string
 }
 
 // --- Surrogate List State ---

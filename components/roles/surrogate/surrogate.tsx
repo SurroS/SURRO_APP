@@ -16,11 +16,7 @@ import { calculateProfileProgress } from "@/utils/profileHelpers";
 import ProfileCompletionModal from "../ProfileCompletionModal";
 
 export default function SurrogateScreen() {
-  const galleryImages = [
-    require("@/assets/images/couple-image.png"),
-    require("@/assets/images/couple-image.png"),
-    require("@/assets/images/couple-image.png"),
-  ]
+
   const {
     fetchProfile,
     surrogateProfile,

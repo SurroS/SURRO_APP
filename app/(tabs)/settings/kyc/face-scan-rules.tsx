@@ -58,9 +58,8 @@ export default function KycFaceScanScreen() {
       </View>
 
       {/* Button */}
-      <TouchableOpacity style={styles.button} onPress={handleTakePicture}>
-        <Ionicons name="camera-outline" size={18} color="#fff" />
-        <Text style={styles.buttonText}>Take picture</Text>
+      <TouchableOpacity style={styles.button} onPress={handleTakePicture}> 
+        <Text style={styles.buttonText}>Next</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

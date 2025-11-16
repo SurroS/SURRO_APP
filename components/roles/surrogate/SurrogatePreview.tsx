@@ -3,7 +3,7 @@ import { Button, Card, Text, XStack, YStack } from "tamagui";
 import { useEffect } from "react";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
-import { useSurrogateStore } from "@/store/surrogates";  
+import { useSurrogateStore } from "@/store/surrogates";
 
 const SurrogatePreview = ({ style }: { style?: any }) => {
   const { surrogates, isLoading, fetchSurrogates } = useSurrogateStore();
@@ -28,7 +28,6 @@ const SurrogatePreview = ({ style }: { style?: any }) => {
       ? validSurrogates.slice(0, 3).map((s) => s.avatar)
       : [require("@/assets/images/emptyGallery.png")];
 
- 
   return (
     <Card
       bordered
@@ -38,7 +37,7 @@ const SurrogatePreview = ({ style }: { style?: any }) => {
       style={[style, styles.card]}
     >
       {/* Header */}
-      <XStack alignItems="center" gap="$2" marginBottom="$3"> 
+      <XStack alignItems="center" gap="$2" marginBottom="$3">
         <Text fontSize="$3.5" fontWeight="600" color="#0E0E55">
           Suggested Surrogates
         </Text>
@@ -51,27 +50,25 @@ const SurrogatePreview = ({ style }: { style?: any }) => {
             key={index}
             source={typeof img === "string" ? { uri: img } : img}
             style={{
-              width:"90%",
+              width: "85%",
               height: "100%",
               position: "absolute",
-              left: index * 35,
+              left: index * 8,
               zIndex: displayAvatars.length - index,
-              borderWidth: 2,
-              borderColor: "white",
               shadowColor: "#000",
-              shadowOpacity: 0.15,
+              shadowOpacity: 0.5,
               shadowOffset: { width: 0, height: 2 },
               shadowRadius: 3,
               backgroundColor: "#f5f5f5",
-              rotation:10
-              
+              borderRadius: 5,
+              transform: [{ rotate: "-8deg" }],
             }}
             resizeMode="cover"
+            
           />
         ))}
 
         {/* Button overlay */}
-
       </YStack>
     </Card>
   );
