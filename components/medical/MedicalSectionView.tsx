@@ -1,5 +1,14 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, Linking } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Linking,
+} from "react-native";
+import { Entypo } from "@expo/vector-icons";
+import colors from "@/hooks/colors";
 
 interface MedicalData {
   genotype?: string;
@@ -21,20 +30,36 @@ interface MedicalData {
   disabilities?: string;
   hadMiscarriage?: string;
   numberOfMiscarriages?: number;
-  medicalReport?: string|undefined; 
+  medicalReport?: string | undefined;
 }
 
 interface Props {
   data: MedicalData;
   containerStyle?: object;
+  reportVisible: boolean;
+  unlockReport: () => void;
 }
 
-export default function MedicalSection({ data, containerStyle }: Props) {
-  const renderArray = (arr?: string[]) => (arr && arr.length > 0 ? arr.join(", ") : "-");
+export default function MedicalSection({
+  data,
+  containerStyle,
+  reportVisible,
+  unlockReport,
+}: Props) {
+  const renderArray = (arr?: string[]) =>
+    arr && arr.length > 0 ? arr.join(", ") : "-";
 
-  const openFile = (uri: string) => {
+  const openFile = (uri: string | undefined) => {
     // For PDFs/images
-    Linking.openURL(uri).catch(err => console.error("Failed to open file", err));
+
+    data.medicalReport.endsWith(".pdf") ? (
+      <Text style={{ color: colors.white }}>View Lab result</Text>
+    ) : (
+      <Image source={{ uri: data.medicalReport }} style={styles.reportImage} />
+    );
+    Linking.openURL(uri).catch((err) =>
+      console.error("Failed to open file", err)
+    );
   };
 
   return (
@@ -82,7 +107,9 @@ export default function MedicalSection({ data, containerStyle }: Props) {
         <Text style={styles.label}>Chronic Illness:</Text>
         <Text style={styles.value}>
           {data.hasChronicIllness === "yes"
-            ? `${renderArray(data.chronicIllnesses)}${data.otherChronicIllness ? ", " + data.otherChronicIllness : ""}`
+            ? `${renderArray(data.chronicIllnesses)}${
+                data.otherChronicIllness ? ", " + data.otherChronicIllness : ""
+              }`
             : "No"}
         </Text>
       </View>
@@ -111,17 +138,26 @@ export default function MedicalSection({ data, containerStyle }: Props) {
       <View style={styles.row}>
         <Text style={styles.label}>Miscarriage:</Text>
         <Text style={styles.value}>
-          {data.hadMiscarriage === "yes" ? data.numberOfMiscarriages ?? "-" : "No"}
+          {data.hadMiscarriage === "yes"
+            ? data.numberOfMiscarriages ?? "-"
+            : "No"}
         </Text>
       </View>
 
-      {data.medicalReport && (
-        <TouchableOpacity onPress={() => openFile(data.medicalReport)} style={styles.fileButton}>
-          {data.medicalReport.endsWith(".pdf") ? (
-            <Text style={styles.fileText}>View PDF Report</Text>
-          ) : (
-            <Image source={{ uri: data.medicalReport }} style={styles.reportImage} />
-          )}
+      {reportVisible && data.medicalReport ? (
+        <>
+          <Text style={styles.label}>Lab Result</Text>
+          <TouchableOpacity
+            onPress={() => openFile(data.medicalReport)}
+            style={styles.fileButton}
+          >
+            <Text style={{ color: colors.white }}>View Lab result</Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <TouchableOpacity onPress={unlockReport} style={styles.lockedReport}>
+          <Text style={styles.lockedText}>Lab Result Locked</Text>
+          <Entypo name="lock" size={18} color="gray" />
         </TouchableOpacity>
       )}
     </View>
@@ -155,15 +191,31 @@ const styles = StyleSheet.create({
   },
   fileButton: {
     marginTop: 12,
+    borderWidth: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 5,
+    backgroundColor: colors.primary,
+    width: "100%",
+    height: 50,
   },
   fileText: {
-    color: "#0A2A66",
+    color: colors.white,
     fontWeight: "600",
   },
   reportImage: {
-    width: "100%",
     height: 200,
     borderRadius: 8,
     marginTop: 8,
+  },
+  lockedReport: {
+    padding: 20,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  lockedText: {
+    color: "gray",
+    fontSize: 14,
   },
 });

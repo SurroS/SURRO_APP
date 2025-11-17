@@ -1,6 +1,7 @@
 import React from "react";
 import { Modal, View, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
 
+
 interface Props {
   visible: boolean;
   onClose: () => void;

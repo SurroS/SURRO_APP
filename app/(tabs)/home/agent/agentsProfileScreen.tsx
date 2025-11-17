@@ -11,45 +11,18 @@ import { Button } from "tamagui";
 import colors from "@/hooks/colors";
 import { ImageCarousel } from "@/components/ImageCarousel";
 import { SafeAreaView } from "react-native-safe-area-context";
-import image1 from "@/assets/images/image1.jpg";
+import image1 from "@/assets/images/agentImage.png";
 import image2 from "@/assets/images/image2.jpg";
 import image3 from "@/assets/images/image3.jpg";
 import { PaymentModal } from "@/components/payment";
 import Entypo from "@expo/vector-icons/Entypo";
 import BioSection from "@/components/roles/BioSectionView";
-import MedicalSection from "@/components/medical/MedicalSectionView";
 import ContactSection from "@/components/roles/ContactSectionView";
-import SurrogacyExperienceSection from "@/components/roles/surrogate/SurrogacyExperienceView";
 import { Facebook, Instagram } from "@tamagui/lucide-icons";
 import HeaderInfo from "@/components/roles/HeaderInfoSection";
-import ChatMethodModal from "@/components/modals/SelectChatMethod";
-import { Toast } from "toastify-react-native";
-import { ToastType } from "toastify-react-native/utils/interfaces";
-import { router } from "expo-router";
 
-const SurrogateImages = [
-  "https://picsum.photos/600/600",
-  "https://picsum.photos/700/700",
-  "https://picsum.photos/600/600",
-];
-const MedicalData = {
-  genotype: "AA",
-  bloodGroup: "O+",
-  pregnant: "No",
-  children: 1,
-  caesarean: "No",
-  numberOfCs: 0,
-  hasAllergies: "yes",
-  allergies: "Peanuts",
-  hasChronicIllness: "no",
-  takesMedication: "no",
-  hadSurgery: "no",
-  hasDisability: "no",
-  hadMiscarriage: "yes",
-  numberOfMiscarriages: 1,
-  medicalReport:
-    "https://drive.google.com/file/d/1jKEhRmNlbjfukYIJJVpfqdPzutDZKS2O/view?usp=sharing",
-};
+const AgentImages = [image1, image2, image3, image1];
+
 const ContactData = {
   country: "Nigeria",
   state: "Lagos",
@@ -66,7 +39,7 @@ const ContactData = {
   },
 };
 const ExperienceData = [
-  { question: "Have you ever been a surrogate?", answer: "Yes" },
+  { question: "Have you ever been a agent?", answer: "Yes" },
   {
     question: "Did you carry single or multiple babies?",
     answer: "Single",
@@ -82,31 +55,10 @@ const ExperienceData = [
   },
 ];
 
-export default function SurrogateProfileScreen() {
+export default function AgentProfileScreen() {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [showChatModal, setShowChatModal] = useState(false);
 
-  const HandleUnlockReoprt = () => {
-    setShowPaymentModal(true);
-  };
-  const HandlePayment = () => {
-    setIsUnlocked(true);
-    // add payment logic here
-    setShowPaymentModal(false);
-    setShowChatModal(true)
-    Toast.show({
-      text1: "Payment successful",
-      type: "customSuccess" as ToastType,
-      text2: "you now have complete access to surrogate's data",
-    });
-  };
-  
-  const HandleUseAgent =()=>{
-    router.push("/(tabs)/home/agent/agentsListScreen")
-  }
-
-  const HandleChat = () => {};
   return (
     <View style={styles.container}>
       <SafeAreaView>
@@ -118,7 +70,13 @@ export default function SurrogateProfileScreen() {
           <View style={styles.carouselContainer}>
             <ImageCarousel
               images={
-                isUnlocked ? SurrogateImages : [image1, image2, image3, image1]
+                isUnlocked
+                  ? AgentImages
+                  : [
+                      "https://picsum.photos/600/600",
+                      "https://picsum.photos/700/700",
+                      "https://picsum.photos/600/600",
+                    ]
               }
               unlocked={isUnlocked}
             />
@@ -138,15 +96,7 @@ export default function SurrogateProfileScreen() {
             isUnlocked={isUnlocked}
           />
 
-          <BioSection
-            title="About"
-            content="i love to eat rice and beans, only on weekends"
-          />
-          <MedicalSection
-            data={MedicalData}
-            reportVisible={isUnlocked}
-            unlockReport={HandleUnlockReoprt}
-          />
+          <BioSection title="About" content="I am a fine agent" />
 
           {/* --- CONTACT INFO --- */}
           <View style={styles.contactWrapper}>
@@ -164,45 +114,24 @@ export default function SurrogateProfileScreen() {
               </TouchableOpacity>
             )}
           </View>
-          <SurrogacyExperienceSection data={ExperienceData} />
-          {!isUnlocked && (
-            <TouchableOpacity
-              onPress={() => setShowPaymentModal(true)}
-              style={styles.openNowButton}
-            >
-              <Text style={{ color: colors.white }}>Unlock now</Text>
-              <Entypo name="lock" size={18} color="white" />
-            </TouchableOpacity>
-          )}
         </ScrollView>
         <PaymentModal
           visible={showPaymentModal}
           onClose={() => setShowPaymentModal(false)}
         >
           <Text style={styles.paymentDescription}>
-            You will be charged N50,000 from your wallet, To start a
-            conversation with this surrogate,
+            To start a conversation with this agent, you need to pay N50,000
           </Text>
-          <Button style={styles.payButton} onPress={HandlePayment}>
-            Pay N50,000 to unlock
+          <Button
+            style={styles.payButton}
+            onPress={() => {
+              setIsUnlocked(true);
+              setShowPaymentModal(false);
+            }}
+          >
+            Pay $10 to unlock
           </Button>
         </PaymentModal>
-        <ChatMethodModal
-          visible={showChatModal}
-          onClose={() => setShowChatModal(false)}
-        >
-          <Text style={styles.paymentDescription}>
-            If you would like to keep your identity anonymous we recommend that you
-            use an agent, clicking direct message will show your identity to the
-            surrogate.
-          </Text>
-          <Button style={styles.payButton} onPress={HandleUseAgent}>
-            Use An Agent
-          </Button>
-          <Button style={styles.payButton} onPress={HandleChat}>
-            Direct Message
-          </Button>
-        </ChatMethodModal>
       </SafeAreaView>
     </View>
   );
@@ -215,6 +144,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
+    paddingBottom: 100,
   },
   carouselContainer: {
     height: 200,
@@ -282,23 +212,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#444444",
     marginBottom: 12,
-    fontWeight: "700",
   },
   payButton: {
     backgroundColor: colors.primary,
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    marginVertical:10
-  },
-  openNowButton: {
-    flexDirection: "row",
-    gap: 10,
-    marginTop: 16,
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    justifyContent: "center",
   },
 });

@@ -1,8 +1,9 @@
 import React, { useRef, useState } from "react";
-import { ScrollView, Dimensions, Image, StyleSheet } from "react-native";
-import { View, Text, Button, XStack } from "tamagui";
+import { ScrollView, Dimensions, Image, StyleSheet, Pressable } from "react-native";
+import { View, Text, XStack } from "tamagui";
 import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
+import ImageViewing from "react-native-image-viewing";
 
 interface Props {
   images: string[];
@@ -15,9 +16,19 @@ export function ImageCarousel({ images, unlocked }: Props) {
   const scrollRef = useRef<ScrollView>(null);
   const [page, setPage] = useState(0);
 
+  // full screen image modal
+  const [viewerVisible, setViewerVisible] = useState(false);
+  const [activeImage, setActiveImage] = useState(0);
+
   const handleScroll = (e: any) => {
     const position = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
     setPage(position);
+  };
+
+  const openFullScreen = (index: number) => {
+    if (!unlocked) return; // locked users cannot view
+    setActiveImage(index);
+    setViewerVisible(true);
   };
 
   return (
@@ -34,6 +45,7 @@ export function ImageCarousel({ images, unlocked }: Props) {
           <Text style={styles.unlockText}>Unlock to view gallery</Text>
         </View>
       )}
+
       <ScrollView
         ref={scrollRef}
         horizontal
@@ -43,21 +55,21 @@ export function ImageCarousel({ images, unlocked }: Props) {
         scrollEventThrottle={16}
       >
         {images.map((uri, index) => (
-          <View key={index} style={styles.imageWrapper}>
+          <Pressable
+            key={index}
+            style={styles.imageWrapper}
+            onPress={() => openFullScreen(index)}
+          >
             <Image
-              source={typeof uri === "string" ? { uri } : uri}
+              source={{ uri }}
               style={styles.image}
               resizeMode="cover"
             />
 
             {!unlocked && (
-              <BlurView
-                intensity={100}
-                tint="dark"
-                style={styles.blurOverlay}
-              ></BlurView>
+              <BlurView intensity={100} tint="dark" style={styles.blurOverlay} />
             )}
-          </View>
+          </Pressable>
         ))}
       </ScrollView>
 
@@ -69,6 +81,16 @@ export function ImageCarousel({ images, unlocked }: Props) {
           />
         ))}
       </XStack>
+
+      {/* --- Fullscreen Image Viewer --- */}
+      <ImageViewing
+        images={images.map((url) => ({ uri: url }))}
+        imageIndex={activeImage}
+        visible={viewerVisible}
+        onRequestClose={() => setViewerVisible(false)}
+        swipeToCloseEnabled
+        doubleTapToZoomEnabled
+      />
     </View>
   );
 }
@@ -87,7 +109,7 @@ const styles = StyleSheet.create({
     position: "relative",
     borderRadius: 12,
     overflow: "hidden",
-    backgroundColor: "#000000",
+    backgroundColor: "#000",
   },
   image: {
     width: "100%",
@@ -97,20 +119,11 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: "100%",
     height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
   },
   unlockText: {
     color: "#ffffff",
     fontSize: 16,
     marginTop: 12,
-  },
-  unlockButton: {
-    marginTop: 14,
-    backgroundColor: "#0A2A66",
-    borderRadius: 6,
-    paddingVertical: 10,
-    paddingHorizontal: 28,
   },
   pagination: {
     position: "absolute",
