@@ -1,27 +1,31 @@
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { YStack, XStack, Text, ScrollView, Separator } from "tamagui";
+import { YStack, XStack, Text, ScrollView } from "tamagui";
 import { Alert } from "react-native";
 import { router } from "expo-router";
-import { User, Contact, LogOut, History } from "@tamagui/lucide-icons";
+import { LogOut } from "@tamagui/lucide-icons";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import * as ImagePicker from "expo-image-picker";
 
 import colors from "@/hooks/colors";
 import { ScreenHeader } from "@/components/auth";
-import ProfileImageCard from "@/components/editBio/profileImageCard";
-import InfoRowCard from "@/components/editBio/infoRowCard";
 import EditProfileModal from "@/components/editBio/BioInputModal";
 import { useAuth } from "@/hooks/useAuth";
+
+// Optional: role-specific subcomponents
+import AgentBio from "@/components/roles/agent/AgentBio";
+import ParentBio from "@/components/roles/parent/ParentBio";
+import SurrogateBio from "@/components/roles/surrogate/SurrogateBio";
 
 export default function EditBioView() {
   const [isDanger, setIsDanger] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
-  //  Handle logout
+  const Role = user?.role?.trim();
+
   const handleLogout = () => {
     logout();
     Toast.show({
@@ -32,7 +36,6 @@ export default function EditBioView() {
     router.replace("/(auth)/login");
   };
 
-  //  Handle delete account
   const handleDeleteAccount = () => {
     Alert.alert(
       "DANGER",
@@ -40,20 +43,14 @@ export default function EditBioView() {
       [
         {
           text: "OK",
-          onPress: () => {
-            console.log("Account deleted");
-          },
+          onPress: () => console.log("Account deleted"),
           style: "destructive",
         },
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
+        { text: "Cancel", style: "cancel" },
       ]
     );
   };
 
-  // Pick profile image
   const handleChangePicture = async () => {
     try {
       const permission =
@@ -67,7 +64,7 @@ export default function EditBioView() {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ["images"],
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
@@ -87,51 +84,58 @@ export default function EditBioView() {
     }
   };
 
-  // Open edit bio modal
   const handleEditBio = () => {
+    //handle push and zustand update here
     setIsModalVisible(true);
   };
 
+  // Role-based rendering
+  const renderRoleContent = () => {
+    switch (Role) {
+      case "AGENT":
+        return (
+          <AgentBio
+            onChangePicture={handleChangePicture}
+            onEditBio={handleEditBio}
+          />
+        );
+      case "INTENDED_PARENT":
+        return (
+          <ParentBio
+            onChangePicture={handleChangePicture}
+            onEditBio={handleEditBio}
+          />
+        );
+      case "SURROGATE":
+        return (
+          <SurrogateBio
+            onChangePicture={handleChangePicture}
+            onEditBio={handleEditBio}
+          />
+        );
+      default:
+        return (
+          <YStack flex={1} justifyContent="center" alignItems="center">
+            <Text>Loading...</Text>
+          </YStack>
+        );
+    }
+  };
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF", paddingTop:20, padding:20 }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#FFF", paddingTop: 20, padding: 20 }}
+    >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <YStack padding="$4" gap="$4" alignItems="center">
-          {/* Header */}
           <ScreenHeader
             title="Profile Information"
             onBackPress={() => router.back()}
           />
 
-          {/* Profile Image */}
-          <YStack width="100%" alignItems="center" marginTop="$4">
-            <ProfileImageCard
-              onChangePicture={handleChangePicture}
-              onEditBio={handleEditBio}
-              imageSrc={profileImage ? { uri: profileImage } : undefined}
-            />
-          </YStack>
+          {/* Role-based profile content */}
+          {renderRoleContent()}
 
-          {/* Info Rows */}
-          <YStack gap="$3" marginTop="$3">
-            <InfoRowCard
-              title="Personal details"
-              subtitle="Tell us more about yourself"
-              icon={User}
-              onPress={() => router.navigate("/settings/profile/personalDetails")}
-            />
-            <InfoRowCard
-              title="Contact information"
-              subtitle="How can we reach you?"
-              icon={Contact}
-              onPress={() => router.navigate("/settings/profile/contactInformation")}
-            />
-            <InfoRowCard
-              title="Medical history"
-              subtitle="Tell us about your health"
-              icon={History}
-              onPress={() => router.navigate("/settings/medical")}
-            />
-          </YStack>
           {/* Danger + Logout */}
           <YStack marginTop="$5" gap="$3" alignItems="center">
             <XStack alignItems="center" gap="$2">
@@ -169,17 +173,16 @@ export default function EditBioView() {
         </YStack>
       </ScrollView>
 
-      {/* Bio Edit Modal */}
       <EditProfileModal
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
         onSave={() => {
-          console.log("bio saved");
+          console.log("Bio saved");
           Toast.show({
             text1: "Bio updated!",
             type: "customSuccess" as ToastType,
           });
         }}
-        visible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
       />
     </SafeAreaView>
   );

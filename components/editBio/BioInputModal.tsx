@@ -349,7 +349,7 @@ export default function BioInputModal({
       </Animated.View>
     </SafeAreaView>
   );
-}
+} 
 
 const styles = StyleSheet.create({
   full: {

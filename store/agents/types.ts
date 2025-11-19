@@ -1,27 +1,20 @@
-import { StateCreator } from "zustand";
-
-export interface Agent {
-  id: string;
-  name: string;
-  avatar?: string;
-  age:string;
-  country:string
-}
+// store/profile/agents/listTypes.ts
+import { AgentProfile } from "../profile/agent/types";
 
 // --- Agent List State ---
 export interface AgentListState {
-  agents: Agent[];
+  agents: AgentProfile[];
   isLoading: boolean;
   error: string | null;
 }
 
 // --- Agent List Actions ---
 export interface AgentListActions {
-  fetchAgent: (showToast?: boolean) => Promise<void>;
-  setAgent: (data: Agent[]) => void;
+  fetchAgents: (showToast?: boolean) => Promise<void>;
+  setAgents: (data: AgentProfile[]) => void;
   setLoading: (val: boolean) => void;
   setError: (err: string | null) => void;
 }
 
 // Combined type
-export type AgentStore = AgentListState & AgentListActions;
+export type AgentListStore = AgentListState & AgentListActions;

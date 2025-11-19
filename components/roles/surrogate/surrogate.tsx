@@ -7,7 +7,7 @@ import { Accordion, Text, XStack, YStack } from "tamagui";
 import About from "../about";
 import Contact from "../contact";
 import Gallery from "../gallery";
-import ProfileData from "../profile-data";
+import ProfileData from "../surrogate/SurrogateProfile-data";
 import ProgressMeter from "../progressCircle";
 import Referral from "../referral";
 import WalletCard from "../wallet";
@@ -16,12 +16,7 @@ import { calculateProfileProgress } from "@/utils/profileHelpers";
 import ProfileCompletionModal from "../ProfileCompletionModal";
 
 export default function SurrogateScreen() {
-
-  const {
-    fetchProfile,
-    surrogateProfile,
-    isLoading,
-  } = useProfile();
+  const { fetchProfile, surrogateProfile, isLoading } = useProfile();
 
   const [showProfileModal, setShowProfileModal] = useState(false);
 
@@ -38,7 +33,7 @@ export default function SurrogateScreen() {
     if (!isLoading) {
       const hasProfile = surrogateProfile !== null;
       const needsCompletion = hasProfile && progress < 70;
-      
+
       if (!hasProfile || needsCompletion) {
         setShowProfileModal(true);
       }
@@ -51,7 +46,7 @@ export default function SurrogateScreen() {
   //     label: "Set your surrogacy experience",
   //     route: "/settings/profile/experienceIntro",
   //     done: false,
-  //   },  
+  //   },
   //   { label: "Verify your identity", route: "/settings/kyc", done: false },
   // ];
 
@@ -83,48 +78,48 @@ export default function SurrogateScreen() {
             </Accordion.Item>
           </Accordion>
 
-        <Pressable
-          onPress={() => router.push("/(tabs)/home/surrogateGuestView")}
-        >
-          <Text
-            color="black"
-            fontWeight="bold"
-            textDecorationLine="underline"
-            textDecorationColor="#0E0E55"
-            marginBottom={8}
+          <Pressable
+            onPress={() => router.push("/(tabs)/home/surrogateGuestView")}
           >
-            View profile as guest
-          </Text>
-        </Pressable>
-        {/* Floating Card Section */}
-        <XStack
-          flexWrap="wrap"
-          justifyContent="flex-end"
-          alignContent="flex-start"
-          gap={10}
-        >
-          <YStack width={"48%"} gap={10}>
-            <WalletCard style={{ width: "100%", height: 100 }} />
-            <ProgressMeter
-              style={{ width: "100%", height: 210 }}
-              progress={progress}
-            />
-          </YStack>
+            <Text
+              color="black"
+              fontWeight="bold"
+              textDecorationLine="underline"
+              textDecorationColor="#0E0E55"
+              marginBottom={8}
+            >
+              View profile as guest
+            </Text>
+          </Pressable>
+          {/* Floating Card Section */}
+          <XStack
+            flexWrap="wrap"
+            justifyContent="flex-end"
+            alignContent="flex-start"
+            gap={10}
+          >
+            <YStack width={"48%"} gap={10}>
+              <WalletCard style={{ width: "100%", height: 100 }} />
+              <ProgressMeter
+                style={{ width: "100%", height: 210 }}
+                progress={progress}
+              />
+            </YStack>
 
-          <YStack width={"48%"} gap={10} flexGrow={1} >
-            <Gallery  style={{ width: "100%", height: 210 }} />
-            <Referral style={{ width: "100%", height: 160, padding:4}} />
-          </YStack>
-        </XStack>
-      </YStack>
+            <YStack width={"48%"} gap={10} flexGrow={1}>
+              <Gallery style={{ width: "100%", height: 210 }} />
+              <Referral style={{ width: "100%", height: 160, padding: 4 }} />
+            </YStack>
+          </XStack>
+        </YStack>
 
-      {/* Profile Completion Modal */}
-      <ProfileCompletionModal
-        visible={showProfileModal}
-        onClose={() => setShowProfileModal(false)}
-        profile={surrogateProfile}
-      />
-    </ScrollView>
+        {/* Profile Completion Modal */}
+        <ProfileCompletionModal
+          visible={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          profile={surrogateProfile}
+        />
+      </ScrollView>
     </>
   );
 }
@@ -146,11 +141,11 @@ function AccordionTriggerWithChevron({ title }: { title: string }) {
               {title}
             </Text>
             <Animated.View
-              style={{ 
+              style={{
                 transform: [{ rotate: open ? "180deg" : "0deg" }],
               }}
             >
-              <ChevronDown  color="white" size={25} />
+              <ChevronDown color="white" size={25} />
             </Animated.View>
           </XStack>
         </XStack>

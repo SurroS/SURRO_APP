@@ -1,108 +1,48 @@
+// store/profile/agents/listSlice.ts
 import { StateCreator } from "zustand";
-import { Agent, AgentStore } from "./Types";
-import image1 from "@/assets/images/image1.jpg";
-import image2 from "@/assets/images/image2.jpg";
-import image3 from "@/assets/images/image3.jpg";
+import { AgentProfile } from "../profile/agent/types";
+import { getAgentList } from "@/services/profileApi"; // API call
 
-export const createAgentSlice: StateCreator<
-  AgentStore,
+export interface AgentListStore {
+  agents: AgentProfile[];
+  isLoading: boolean;
+  error: string | null;
+
+  fetchAgents: (showToast?: boolean) => Promise<void>;
+  setAgents: (data: AgentProfile[]) => void;
+  setLoading: (val: boolean) => void;
+  setError: (err: string | null) => void;
+}
+
+export const createAgentListSlice: StateCreator<
+  AgentListStore,
   [],
   [],
-  AgentStore
+  AgentListStore
 > = (set) => ({
   agents: [],
   isLoading: false,
   error: null,
 
-  async fetchAgent(showToast = false) { //replace this with the real logic 
+  fetchAgents: async (showToast = false) => {
     try {
       set({ isLoading: true });
 
-      const response = await new Promise<Agent[]>((resolve) =>
-        setTimeout(
-          () =>
-            resolve([
-              {
-                id: "1",
-                name: "Jane Doe",
-                avatar: image1,
-                age: "20",
-                country: "nigeria",
-              },
-              {
-                id: "2",
-                name: "Mary Ann",
-                avatar: image2,
-                age: "20",
-                country: "nigeria",
-              },
-              {
-                id: "3",
-                name: "Tina Joe",
-                avatar: image3,
-                age: "20",
-                country: "nigeria",
-              },
-              {
-                id: "4",
-                name: "Jane Doe",
-                avatar: image1,
-                age: "20",
-                country: "nigeria",
-              },
-              {
-                id: "5",
-                name: "Mary Ann",
-                avatar: image2,
-                age: "20",
-                country: "nigeria",
-              },
-              {
-                id: "6",
-                name: "Tina Joe",
-                avatar: image3,
-                age: "20",
-                country: "nigeria",
-              },
-              {
-                id: "7",
-                name: "Jane Doe",
-                avatar: "https://i.pravatar.cc/150?img=2",
-                age: "20",
-                country: "nigeria",
-              },
-              {
-                id: "8",
-                name: "Mary Ann",
-                avatar: "https://i.pravatar.cc/150?img=1",
-                age: "20",
-                country: "nigeria",
-              },
-              {
-                id: "9",
-                name: "Tina Joe",
-                avatar: "https://i.pravatar.cc/150?img=3",
-                age: "20",
-                country: "nigeria",
-              },
-            ]),
-          1000   
-        )
-      );
-
-      set({ agents: response, isLoading: false, error: null });
-    } catch (error: any) {
+      const res = await getAgentList(); // fetch array of agents
+      set({ agents: res.data.user, isLoading: false, error: null });
+    } catch (err: any) {
       set({
         isLoading: false,
-        error: error?.message || "Failed to fetch agents",
+        error: err.message || "Failed to fetch agents",
       });
-      throw error;
+      if (showToast) {
+        // optionally show toast
+      }
+      throw err;
     }
   },
 
-  // matches your interface exactly
-  setAgent: (data) => set({ agents: data }),
+  setAgents: (data) => set({ agents: data }),
   setLoading: (val) => set({ isLoading: val }),
   setError: (err) => set({ error: err }),
 });
- 

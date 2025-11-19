@@ -21,6 +21,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ScreenHeader } from "@/components/auth";
 import { router } from "expo-router";
 import colors from "@/hooks/colors";
+import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const CARD_HEIGHT = SCREEN_HEIGHT * 0.55;
@@ -44,13 +46,19 @@ export default function SurrogateList() {
     cardIndexRef.current = cardIndex;
     filteredListRef.current = surrogates;
   }, [cardIndex, surrogates]);
-
+    // --- Fetch surrogates on mount
+   
   useEffect(() => {
+    
     if (surrogates.length === 0) {
-      fetchSurrogates(true).catch((error) => {
-        console.error("Failed to fetch surrogates:", error);
-        Alert.alert("Error", "Failed to load surrogates");
+    fetchSurrogates(true).catch((err: any) => {
+      console.log(surrogates.map((surrogate)=>surrogate.id))
+      Toast.show({
+        text1: "Failed to load surrogates",
+        type: "customError" as ToastType,
+        text2: err?.response?.data?.message || "Please try again.",
       });
+    });
     }
   }, [surrogates.length, fetchSurrogates]);
 

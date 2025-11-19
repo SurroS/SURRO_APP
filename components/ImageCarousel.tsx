@@ -1,9 +1,16 @@
 import React, { useRef, useState } from "react";
-import { ScrollView, Dimensions, Image, StyleSheet, Pressable } from "react-native";
+import {
+  ScrollView,
+  Dimensions,
+  Image,
+  StyleSheet,
+  Pressable,
+} from "react-native";
 import { View, Text, XStack } from "tamagui";
 import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
 import ImageViewing from "react-native-image-viewing";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface Props {
   images: string[];
@@ -61,13 +68,17 @@ export function ImageCarousel({ images, unlocked }: Props) {
             onPress={() => openFullScreen(index)}
           >
             <Image
-              source={{ uri }}
+              source={typeof uri === "string" ? { uri } : uri}
               style={styles.image}
               resizeMode="cover"
             />
 
             {!unlocked && (
-              <BlurView intensity={100} tint="dark" style={styles.blurOverlay} />
+              <BlurView
+                intensity={100}
+                tint="dark"
+                style={styles.blurOverlay}
+              />
             )}
           </Pressable>
         ))}
@@ -84,12 +95,38 @@ export function ImageCarousel({ images, unlocked }: Props) {
 
       {/* --- Fullscreen Image Viewer --- */}
       <ImageViewing
-        images={images.map((url) => ({ uri: url }))}
+        images={images.map((item) =>
+          typeof item === "string" ? { uri: item } : item
+        )}
         imageIndex={activeImage}
         visible={viewerVisible}
         onRequestClose={() => setViewerVisible(false)}
         swipeToCloseEnabled
         doubleTapToZoomEnabled
+        HeaderComponent={() => (
+          <SafeAreaView
+            style={{
+              width: "100%",
+              flexDirection: "row",
+              justifyContent: "flex-end",
+              paddingRight: 16,
+              paddingTop: 6,
+            }}
+          >
+            <Pressable
+              onPress={() => setViewerVisible(false)}
+              style={{
+                padding: 6,
+                borderRadius: 100,
+                backgroundColor: "rgba(0,0,0,0.45)",
+              }}
+            >
+              <Text style={{ fontSize: 26, color: "#fff", fontWeight: "600" }}>
+                ✕
+              </Text>
+            </Pressable>
+          </SafeAreaView>
+        )}
       />
     </View>
   );

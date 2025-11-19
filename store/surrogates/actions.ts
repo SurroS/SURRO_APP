@@ -1,8 +1,12 @@
 import { StateCreator } from "zustand";
 import { Surrogate, SurrogateStore } from "./types";
-import image1 from "@/assets/images/image1.jpg";
-import image2 from "@/assets/images/image2.jpg";
-import image3 from "@/assets/images/image3.jpg";
+import { getUsersByRole } from "@/services/profileApi";
+
+const fallbackSurrogates: Surrogate[] = [
+  { id: "1", name: "Jane Doe", avatar: require("@/assets/images/image1.jpg"), age: "20", country: "Nigeria" },
+  { id: "2", name: "Mary Ann", avatar: require("@/assets/images/image2.jpg"), age: "20", country: "Nigeria" },
+  { id: "3", name: "Tina Joe", avatar: require("@/assets/images/image3.jpg"), age: "20", country: "Nigeria" },
+];
 
 export const createSurrogateSlice: StateCreator<
   SurrogateStore,
@@ -18,87 +22,23 @@ export const createSurrogateSlice: StateCreator<
     try {
       set({ isLoading: true });
 
-      // Simulate API call //change this to main aPI calls
-      const response = await new Promise<Surrogate[]>((resolve) =>
-        setTimeout(
-          () =>
-            resolve([
-              {
-                id: "1",
-                name: "Jane Doe",
-                avatar: image1,
-                age: "20",
-                country: "nigeria",
-              },
-              {
-                id: "2",
-                name: "Mary Ann",
-                avatar: image2,
-                age: "20",
-                country: "nigeria",
-              },
-              {
-                id: "3",
-                name: "Tina Joe",
-                avatar: image3,
-                age: "20",
-                country: "nigeria",
-              },
-              {
-                id: "4",
-                name: "Jane Doe",
-                avatar: image1,
-                age: "20",
-                country: "nigeria",
-              },
-              {
-                id: "5",
-                name: "Mary Ann",
-                avatar: image2,
-                age: "20",
-                country: "nigeria",
-              },
-              {
-                id: "6",
-                name: "Tina Joe",
-                avatar: image3,
-                age: "20",
-                country: "nigeria",
-              },
-              {
-                id: "7",
-                name: "Jane Doe",
-                avatar: "https://i.pravatar.cc/150?img=2",
-                age: "20",
-                country: "nigeria",
-              },
-              {
-                id: "8",
-                name: "Mary Ann",
-                avatar: "https://i.pravatar.cc/150?img=1",
-                age: "20",
-                country: "nigeria",
-              },
-              {
-                id: "9",
-                name: "Tina Joe",
-                avatar: "https://i.pravatar.cc/150?img=3",
-                age: "20",
-                country: "nigeria",
-              },
-            ]),
-          1000
-        )
-      );
+      const response = await getUsersByRole("SURROGATE");
+      
+      let surrogates: Surrogate[] = response?.data.users || [];
+      console.log("SURROGATE ACCOUNT IDs:", surrogates.map((u) => u.id));
+      // Use fallback if API returns empty
+      if (!Array.isArray(surrogates) || surrogates.length === 0) {
+        surrogates = fallbackSurrogates;
+        console.log("Surrogate call =",response)
+      }
 
-      set({ surrogates: response, isLoading: false, error: null });
+      set({ surrogates, isLoading: false, error: null });
     } catch (error: any) {
-      set({
-        isLoading: false,
-        error: error?.message || "Failed to fetch surrogates",
-      });
+      // fallback if API call fails
+      set({ surrogates: fallbackSurrogates, isLoading: false, error: error?.message || "Failed to fetch surrogates" });
+      console.log("Surrogate call =",this.surrogates)
       throw error;
-    }
+    } 
   },
 
   setSurrogates: (data) => set({ surrogates: data }),

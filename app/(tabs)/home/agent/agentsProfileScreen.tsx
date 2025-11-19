@@ -11,9 +11,7 @@ import { Button } from "tamagui";
 import colors from "@/hooks/colors";
 import { ImageCarousel } from "@/components/ImageCarousel";
 import { SafeAreaView } from "react-native-safe-area-context";
-import image1 from "@/assets/images/agentImage.png";
-import image2 from "@/assets/images/image2.jpg";
-import image3 from "@/assets/images/image3.jpg";
+
 import { PaymentModal } from "@/components/payment";
 import Entypo from "@expo/vector-icons/Entypo";
 import BioSection from "@/components/roles/BioSectionView";
@@ -21,7 +19,12 @@ import ContactSection from "@/components/roles/ContactSectionView";
 import { Facebook, Instagram } from "@tamagui/lucide-icons";
 import HeaderInfo from "@/components/roles/HeaderInfoSection";
 
-const AgentImages = [image1, image2, image3, image1];
+
+const image1 = require("@/assets/images/agentImage.png")
+const image2 = require("@/assets/images/agentImage.png")
+const image3 = require("@/assets/images/agentImage.png")
+
+const AgentImages = [image1, image2, image3];
 
 const ContactData = {
   country: "Nigeria",

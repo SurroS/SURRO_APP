@@ -1,9 +1,9 @@
 import { StateCreator } from 'zustand';
 import {
     SurrogateProfile,
-    SurrogateProfileUpdate,
+    SurrogateProfileUpdate, 
     MedicalProfile,
-    MedicalProfileUpdate,
+    MedicalProfileUpdate
 } from '@/types/profile';
 import {
     createSurrogateProfile,

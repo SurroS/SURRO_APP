@@ -8,13 +8,14 @@ import { ToastType } from "toastify-react-native/utils/interfaces";
 
 import About from "../about";
 import Contact from "../contact";
-import ProfileData from "../profile-data";
+import ProfileData from "./ParentProfileData";
 import ProgressMeter from "../progressCircle";
 import Referral from "../referral";
 import WalletCard from "../wallet";
 import SurrogatePreview from "../surrogate/SurrogatePreview";
 import { router } from "expo-router";
 import { useSurrogateStore } from "@/store/surrogates";
+import AgentPreview from "../agent/AgentPreviewCard";
 
 /** Generic error boundary for safe rendering */
 function SafeRender({
@@ -55,7 +56,15 @@ export default function ParentScreen() {
       ? validSurrogates.slice(0, 3).map((s) => s.avatar)
       : [require("@/assets/images/emptyGallery.png")];
 
-  const handleNavigate = () => {
+  const ViewSurrogates = () => {
+    router.push({
+      pathname: "/(tabs)/home/surrogate/surrogateList",
+      params: {
+        surrogates: JSON.stringify(validSurrogates),
+      },
+    });
+  };
+    const ViewAgents = () => {
     router.push({
       pathname: "/(tabs)/home/surrogate/surrogateList",
       params: {
@@ -99,13 +108,13 @@ export default function ParentScreen() {
         {/* Horizontal scroll - must have fixed height */}
         <ScrollView horizontal nestedScrollEnabled style={{ height: 210 }}>
           <SafeRender fallback={<Text>Loading surrogates...</Text>}>
-            <Pressable onPress={handleNavigate} style={{marginRight:5}}>
+            <Pressable onPress={ViewSurrogates} style={{ marginRight: 5 }}>
               <SurrogatePreview
                 style={{ height: 200, padding: 2, width: 150 }}
               />
             </Pressable>
-            <View marginRight={5}>
-              <SurrogatePreview
+            <View onPress={ViewAgents} marginRight={5}>
+              <AgentPreview
                 style={{ height: 200, padding: 2, width: 150 }}
               />
             </View>

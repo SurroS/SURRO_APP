@@ -5,6 +5,7 @@ import { YStack, Text, Button, Select } from "tamagui";
 import { useRouter } from "expo-router";
 import colors from "@/hooks/colors";
 import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 import { useBankAccounts } from "@/hooks/payment/useBankAccounts";
 
 export default function AddBankAccountScreen() {
@@ -18,8 +19,13 @@ export default function AddBankAccountScreen() {
   const [accountNumber, setAccountNumber] = useState("");
 
   const handleSubmit = async () => {
-    if (!holderName || !accountType || !routingNumber || !accountNumber) {
-      Toast.error("Please fill in all fields");
+    // if (!holderName || !accountType || !routingNumber || !accountNumber) {
+       if (!holderName || !bankName|| !accountNumber) {
+      Toast.show({
+        text1: "Please fill in all fields",
+        type: "customError" as ToastType,
+        text2: "make sure the you entered all details",
+      });
       return;
     }
 
@@ -30,10 +36,18 @@ export default function AddBankAccountScreen() {
         routingNumber,
         accountNumber,
       });
-      Toast.success("Bank account added successfully");
+      Toast.show({
+        text1: "Bank account added successfully",
+        type: "customSuccess" as ToastType,
+      });
+
       router.back();
     } catch (err) {
-      Toast.error("Failed to add account. Try again.");
+      Toast.show({
+        text1: "Failed to add account. Try again.",
+        type: "customSError" as ToastType,
+        text2: "something went wrong, try again later",
+      });
     }
   };
 

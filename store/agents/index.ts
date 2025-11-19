@@ -1,7 +1,8 @@
+// store/profile/agents/listStore.ts
 import { create } from "zustand";
-import { createAgentSlice } from "./actions";
-import { AgentStore } from "./Types";
+import { createAgentListSlice } from "./actions";
+import { AgentListStore } from "./types";
 
-export const useAgentStore = create<AgentStore>()((...a) => ({
-  ...createAgentSlice(...a),
+export const useAgentListStore = create<AgentListStore>()((...a) => ({
+  ...createAgentListSlice(...a),
 }));
