@@ -2,6 +2,7 @@ import colors from "@/hooks/colors";
 import { ChevronRight } from "@tamagui/lucide-icons";
 import React from "react";
 import { XStack, YStack, Text, Image, Stack } from "tamagui";
+import { Image as RNImage } from 'react-native';
 
 const CONTAINER_W = 347;
 const CONTAINER_H = 74;
@@ -16,7 +17,31 @@ type Props = {
 };
 
 export default function InfoRowCard({ title, subtitle, icon, onPress }: Props) {
-  const Icon = icon;
+  // Function to render the icon based on its type
+  const renderIcon = () => {
+    if (!icon) {
+      return null; // Return null if no icon is provided
+    }
+
+    // Check if icon is a React component
+    if (typeof icon === 'function' || (React.isValidElement(icon))) {
+      return React.cloneElement(icon as React.ReactElement, { width: 16, height: 16 });
+    }
+
+    // If icon is an image source (string/number), render it as an image
+    if (typeof icon === 'string' || typeof icon === 'number') {
+      return <RNImage source={icon} style={{ width: 16, height: 16 }} />;
+    }
+
+    // If it's an imported image object with uri (like from constants/Images)
+    if (icon && typeof icon === 'object' && (icon as any).uri) {
+      return <RNImage source={icon} style={{ width: 16, height: 16 }} />;
+    }
+
+    // For cases where it's already a component but not a function
+    return <Stack>{icon}</Stack>;
+  };
+
   return (
     <Stack onPress={onPress} pressStyle={{ opacity: 0.8 }}>
       <XStack
@@ -40,7 +65,7 @@ export default function InfoRowCard({ title, subtitle, icon, onPress }: Props) {
           justifyContent="center"
           backgroundColor="#0E0E55"
         >
-          <Icon width={16} height={16} />
+          {renderIcon()}
         </YStack>
 
         {/* Title + Subtitle */}
