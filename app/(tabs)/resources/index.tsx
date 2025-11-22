@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView, TextInput, Pressable } from "react-native";
+import { SafeAreaView, ScrollView, TextInput, Pressable } from "react-native";
 import { YStack, XStack, Text, View, Button } from "tamagui";
 import { Search, Filter, Bookmark } from "@tamagui/lucide-icons";
 import { ScreenHeader } from "@/components/auth";
@@ -56,8 +55,7 @@ export default function ResourceCentre() {
     const matchesSearch =
       item.title.toLowerCase().includes(search.toLowerCase()) ||
       item.category.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory =
-      !selectedCategory || item.category === selectedCategory;
+    const matchesCategory = !selectedCategory || item.category === selectedCategory;
     const matchesType = !selectedType || item.type === selectedType;
     return matchesSearch && matchesCategory && matchesType;
   });
@@ -67,7 +65,6 @@ export default function ResourceCentre() {
       ? filteredResources.filter((item) => bookmarks.includes(item.title))
       : filteredResources;
 
-  // Bookmark handler
   const handleBookmark = (item: any) => {
     setBookmarks((prev) =>
       prev.includes(item.title)
@@ -102,9 +99,7 @@ export default function ResourceCentre() {
           <Search size={18} color="#888" />
           <TextInput
             placeholder={
-              selectedCategory
-                ? `${selectedCategory}`
-                : "Search by title or category"
+              selectedCategory ? `${selectedCategory}` : "Search by title or category"
             }
             placeholderTextColor="#888"
             value={search}
@@ -159,7 +154,6 @@ export default function ResourceCentre() {
       {/* Filter modal */}
       {filterVisible && (
         <>
-          {/* Backdrop — closes when pressed */}
           <Pressable
             onPress={() => setFilterVisible(false)}
             style={{
@@ -172,7 +166,6 @@ export default function ResourceCentre() {
             }}
           />
 
-          {/* Modal content */}
           <View
             position="absolute"
             bottom={0}
@@ -181,14 +174,9 @@ export default function ResourceCentre() {
             backgroundColor="#FFF"
             borderTopLeftRadius={20}
             borderTopRightRadius={20}
-            padding={20} 
+            padding={20}
           >
-            {/* Header row with title + close */}
-            <XStack
-              justifyContent="space-between"
-              alignItems="center"
-              marginBottom={10}
-            >
+            <XStack justifyContent="space-between" alignItems="center" marginBottom={10}>
               <Text fontWeight="700" fontSize={16}>
                 Filter by
               </Text>
@@ -199,30 +187,21 @@ export default function ResourceCentre() {
               </Pressable>
             </XStack>
 
-            {/* Category section */}
             <Text fontSize={14} marginBottom={6}>
               Category
             </Text>
-            {["Mental wellness", "Legal", "Guidelines", "Health tips"].map(
-              (cat) => (
-                <Pressable
-                  key={cat}
-                  onPress={() => setSelectedCategory(cat)}
-                  style={{
-                    paddingVertical: 6,
-                  }}
-                >
-                  <Text
-                    color={selectedCategory === cat ? "#0A043C" : "#555"}
-                    fontWeight={selectedCategory === cat ? "700" : "400"}
-                  >
-                    {cat}
-                  </Text>
-                </Pressable>
-              )
-            )}
+            {["Mental wellness", "Legal", "Guidelines", "Health tips"].map((cat) => (
+              <Pressable
+                key={cat}
+                onPress={() => setSelectedCategory(cat)}
+                style={{ paddingVertical: 6 }}
+              >
+                <Text color={selectedCategory === cat ? "#0A043C" : "#555"} fontWeight={selectedCategory === cat ? "700" : "400"}>
+                  {cat}
+                </Text>
+              </Pressable>
+            ))}
 
-            {/* Type section */}
             <Text fontSize={14} marginTop={10} marginBottom={6}>
               Type
             </Text>
@@ -230,20 +209,14 @@ export default function ResourceCentre() {
               <Pressable
                 key={t}
                 onPress={() => setSelectedType(t)}
-                style={{
-                  paddingVertical: 6,
-                }}
+                style={{ paddingVertical: 6 }}
               >
-                <Text
-                  color={selectedType === t ? "#0A043C" : "#555"}
-                  fontWeight={selectedType === t ? "700" : "400"}
-                >
+                <Text color={selectedType === t ? "#0A043C" : "#555"} fontWeight={selectedType === t ? "700" : "400"}>
                   {t}
                 </Text>
               </Pressable>
             ))}
 
-            {/* Action buttons */}
             <XStack marginTop={15} justifyContent="space-between" gap="$3">
               <Button
                 flex={1}

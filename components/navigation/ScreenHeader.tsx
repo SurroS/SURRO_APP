@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity } from 'react-native';
+import { XStack, YStack, Text } from 'tamagui';
 
 interface ScreenHeaderProps {
     title: string;
@@ -13,31 +14,18 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
     onBackPress,
     style,
 }) => (
-    <View style={[styles.container, style]}>
-        <TouchableOpacity onPress={onBackPress} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={28} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.title}>{title}</Text>
-    </View>
+    <XStack
+      width="100%"
+      alignItems="center"
+      justifyContent="center"
+      position="relative"
+      style={style}
+    >
+      <TouchableOpacity onPress={onBackPress} position="absolute" left={0} padding={4}>
+        <Ionicons name="arrow-back" size={28} color="#000" />
+      </TouchableOpacity>
+      <Text fontSize={21} fontWeight="bold" color="$text">
+        {title}
+      </Text>
+    </XStack>
 );
-
-const styles = StyleSheet.create({
-    container: {
-        width: '100%',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 40,
-        position: 'relative',
-    },
-    backButton: {
-        position: 'absolute',
-        left: 0,
-        padding: 4,
-    },
-    title: {
-        fontSize: 21,
-        fontWeight:"bold",
-        color: '#000',
-    },
-});
