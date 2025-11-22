@@ -92,7 +92,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Camera, Pen } from "@tamagui/lucide-icons";
 import colors from "@/hooks/colors";
 
-const CARD_W = 197;
+
 const CARD_H = 156;
 
 type Props = {
@@ -170,7 +170,7 @@ export default function ProfileImageCard({
 
 const styles = StyleSheet.create({
   container: {
-    width: CARD_W,
+    width: "100%",
     height: CARD_H,
     alignItems: "center",
     justifyContent: "center",

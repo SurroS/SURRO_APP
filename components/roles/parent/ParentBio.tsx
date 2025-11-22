@@ -3,13 +3,13 @@ import React from "react";
 import { YStack, Text } from "tamagui";
 import RoleCommonProfile from "@/components/editBio/RoleCommonProfile";
 
-interface AgentBioProps {
+interface ParentBioProps {
   profileImage?: { uri: string };
   onChangePicture: () => void;
   onEditBio: () => void;
 }
 
-export default function ParentBio(props: AgentBioProps) {
+export default function ParentBio(props: ParentBioProps) {
   return (
     <YStack gap="$3" width="100%">
       <RoleCommonProfile {...props} />

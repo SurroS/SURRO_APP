@@ -18,7 +18,7 @@ export default function RoleCommonProfile({
   onEditBio,
 }: RoleCommonProfileProps) {
   return (
-    <YStack width="100%" alignItems="center" marginTop="$4">
+    <YStack width="100%"  marginTop="$6">
       <ProfileImageCard
         imageSrc={profileImage}
         onChangePicture={onChangePicture}

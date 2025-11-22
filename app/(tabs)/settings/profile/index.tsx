@@ -94,10 +94,15 @@ export default function EditBioView() {
     switch (Role) {
       case "AGENT":
         return (
-          <AgentBio
+          // <AgentBio
+          //   onChangePicture={handleChangePicture}
+          //   onEditBio={handleEditBio}
+          // />
+               <ParentBio
             onChangePicture={handleChangePicture}
             onEditBio={handleEditBio}
           />
+
         );
       case "INTENDED_PARENT":
         return (
@@ -126,8 +131,8 @@ export default function EditBioView() {
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#FFF", paddingTop: 20, padding: 20 }}
     >
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <YStack padding="$4" gap="$4" alignItems="center">
+      <ScrollView contentContainerStyle={{ flex: 1 }}>
+        <YStack gap="$6" alignItems="center">
           <ScreenHeader
             title="Profile Information"
             onBackPress={() => router.back()}
