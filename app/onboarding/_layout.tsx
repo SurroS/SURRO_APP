@@ -6,7 +6,8 @@ export default function OnboardingLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="screen1" options={{ title: "Welcome to Surro" }} />
       <Stack.Screen name="role-selection" />
-        <Stack.Screen name="how-did-you-hear" />
+      <Stack.Screen name="how-did-you-hear" />
+      <Stack.Screen name="learn-surrogacy-journey" />
     </Stack>
   );
 }
