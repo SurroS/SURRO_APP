@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { YStack, Text, Input, Button, Spinner } from "tamagui";
 import { useLocalSearchParams } from "expo-router";
 import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 import colors from "@/hooks/colors";
 import { useTypedRouter } from "@/hooks/payment/useTypedRouter";
 import { initiatePaymentFrontend } from "@/services/paymentApi";
@@ -14,7 +15,7 @@ interface PaymentInitPayload {
   amount: number;
   gateway: PaymentGateway | "AUTO";
   channel: PaymentMode | "card";
-  location: string;
+  //     location: string;
 }
 
 interface PaymentInitResponse {
@@ -43,7 +44,11 @@ export default function PaymentEntryScreen(): JSX.Element {
   const numericAmount = parseFloat(amount);
 
   if (isNaN(numericAmount) || numericAmount <= 0) {
-    Toast.error("Invalid amount. Please enter a valid number.");
+          Toast.show({
+            text1: "Invalid amount. Please enter a valid number.",
+            type: "customError" as ToastType,
+            text2: "please enter a value not less 1",
+          });
     return;
   }
 
@@ -53,7 +58,6 @@ export default function PaymentEntryScreen(): JSX.Element {
       amount: numericAmount,
       gateway,
       channel: mode, 
-      location: "NG",
     };
 
     const response = await initiatePaymentFrontend(payload, token);
@@ -61,8 +65,7 @@ export default function PaymentEntryScreen(): JSX.Element {
     console.log("Response =", response);
 
  
-    const authorizationUrl =
-      response?.authorization_url || response?.data?.authorization_url;
+    const authorizationUrl = response?.data?.authorization_url;
 
     if (!authorizationUrl) {
       throw new Error("Invalid payment initialization response.");

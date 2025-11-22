@@ -2,9 +2,7 @@ import { ChevronDown } from "@tamagui/lucide-icons";
 import { useState, useEffect } from "react";
 import { ScrollView, StyleSheet, Pressable } from "react-native";
 import Animated from "react-native-reanimated";
-import { Accordion, Text, View, XStack, YStack } from "tamagui";
-import { Toast } from "toastify-react-native";
-import { ToastType } from "toastify-react-native/utils/interfaces";
+import { Accordion, Text, View, XStack, YStack } from "tamagui"; 
 
 import About from "../about";
 import Contact from "../contact";
@@ -14,7 +12,6 @@ import Referral from "../referral";
 import WalletCard from "../wallet";
 import SurrogatePreview from "../surrogate/SurrogatePreview";
 import { router } from "expo-router";
-import { useSurrogateStore } from "@/store/surrogates";
 import AgentPreview from "../agent/AgentPreviewCard";
 
 /** Generic error boundary for safe rendering */
@@ -34,42 +31,14 @@ function SafeRender({
 }
 
 export default function ParentScreen() {
-  const { surrogates, isLoading, fetchSurrogates } = useSurrogateStore();
-
-  useEffect(() => {
-    fetchSurrogates(true).catch((err: any) => {
-      Toast.show({
-        text1: "Failed to load surrogates",
-        type: "customError" as ToastType,
-        text2: err?.response?.data?.message || "Please try again.",
-      });
-    });
-  }, [fetchSurrogates]);
-
-  const validSurrogates =
-    Array.isArray(surrogates) && surrogates.length > 0
-      ? surrogates.filter((s) => s && s.avatar)
-      : [];
-
-  const displayAvatars =
-    validSurrogates.length > 0
-      ? validSurrogates.slice(0, 3).map((s) => s.avatar)
-      : [require("@/assets/images/emptyGallery.png")];
-
   const ViewSurrogates = () => {
     router.push({
       pathname: "/(tabs)/home/surrogate/surrogateList",
-      params: {
-        surrogates: JSON.stringify(validSurrogates),
-      },
     });
   };
-    const ViewAgents = () => {
+  const ViewAgents = () => {
     router.push({
-      pathname: "/(tabs)/home/surrogate/surrogateList",
-      params: {
-        surrogates: JSON.stringify(validSurrogates),
-      },
+      pathname: "/(tabs)/home/agent/agentsListScreen",
     });
   };
 
@@ -114,15 +83,13 @@ export default function ParentScreen() {
               />
             </Pressable>
             <View onPress={ViewAgents} marginRight={5}>
-              <AgentPreview
-                style={{ height: 200, padding: 2, width: 150 }}
-              />
+              <AgentPreview style={{ height: 200, padding: 2, width: 150 }} />
             </View>
-            <View marginRight={5}>
+            {/* <View marginRight={5}>
               <SurrogatePreview
                 style={{ height: 200, padding: 2, width: 150 }}
               />
-            </View>
+            </View> */}
           </SafeRender>
         </ScrollView>
 

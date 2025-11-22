@@ -33,7 +33,7 @@ const Dropdown = ({
 
   return (
     <YStack gap="$1">
-      {label && <Label color={colors.text}>{label}</Label>}
+      {label && <Label fontWeight="600"fontSize={15} color={colors.text}>{label}</Label>}
 
       <Pressable
         onPress={() => setVisible(true)}

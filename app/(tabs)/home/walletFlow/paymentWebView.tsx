@@ -4,9 +4,9 @@ import { WebView } from "react-native-webview";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { YStack, Text } from "tamagui";
 import colors from "@/hooks/colors";
-import { PaymentGateway, PaymentMode } from "@/types/payment";
-import { Toast } from "toastify-react-native";
+import { PaymentGateway, PaymentMode } from "@/types/payment"; 
 import { SafeAreaView } from "react-native-safe-area-context";
+
 
 export default function PaymentWebViewScreen() {
   const router = useRouter();

@@ -46,19 +46,18 @@ export default function SurrogateList() {
     cardIndexRef.current = cardIndex;
     filteredListRef.current = surrogates;
   }, [cardIndex, surrogates]);
-    // --- Fetch surrogates on mount
-   
+  // --- Fetch surrogates on mount
+
   useEffect(() => {
-    
     if (surrogates.length === 0) {
-    fetchSurrogates(true).catch((err: any) => {
-      console.log(surrogates.map((surrogate)=>surrogate.id))
-      Toast.show({
-        text1: "Failed to load surrogates",
-        type: "customError" as ToastType,
-        text2: err?.response?.data?.message || "Please try again.",
+      fetchSurrogates(true).catch((err: any) => {
+        console.log(surrogates.map((surrogate) => surrogate.id));
+        Toast.show({
+          text1: "Failed to load surrogates",
+          type: "customError" as ToastType,
+          text2: err?.response?.data?.message || "Please try again.",
+        });
       });
-    });
     }
   }, [surrogates.length, fetchSurrogates]);
 
@@ -152,18 +151,21 @@ export default function SurrogateList() {
       );
     }
 
-    if (filteredList.length === 0 || cardIndex >= filteredList.length) {
+    if (filteredList.length === 0 || cardIndex >= filteredList.length ||surrogates.length === 0  ) {
       return (
         <YStack alignItems="center" justifyContent="center" flex={1}>
           <Image
-            source={require("@/assets/images/emptySurrogate.png")}
+            source={require("@/assets/images/noImage.png")}
             style={{ width: SCREEN_WIDTH * 0.7, height: CARD_HEIGHT * 0.6 }}
             resizeMode="contain"
           />
           <Text style={{ fontSize: 18, marginVertical: 16 }}>
             No more profiles
           </Text>
-          <Button
+          <Button 
+            marginLeft={10}
+            backgroundColor={colors.primary}
+            borderRadius={8}
             onPress={() => {
               setCardIndex(0);
               fetchSurrogates(true);

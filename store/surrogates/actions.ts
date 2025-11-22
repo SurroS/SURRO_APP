@@ -24,7 +24,8 @@ export const createSurrogateSlice: StateCreator<
 
       const response = await getUsersByRole("SURROGATE");
       
-      let surrogates: Surrogate[] = response?.data.users || [];
+      // let surrogates: Surrogate[] = response?.data.users || [];
+      let surrogates: Surrogate[] =  [];
       console.log("SURROGATE ACCOUNT IDs:", surrogates.map((u) => u.id));
       // Use fallback if API returns empty
       if (!Array.isArray(surrogates) || surrogates.length === 0) {

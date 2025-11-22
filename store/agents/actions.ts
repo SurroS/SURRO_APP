@@ -1,7 +1,31 @@
 // store/profile/agents/listSlice.ts
 import { StateCreator } from "zustand";
 import { AgentProfile } from "../profile/agent/types";
-import { getAgentList } from "@/services/profileApi"; // API call
+import { getUsersByRole } from "@/services/profileApi";
+
+const fallbackAgent: AgentProfile[] = [
+  {
+    id: "1",
+    userName: "Jane Doe",
+    avatar: require("@/assets/images/agentImage.png"),
+    age: "20",
+    country: "Nigeria",
+  },
+  {
+    id: "2",
+    userName: "Mary Ann",
+    avatar: require("@/assets/images/image3.jpg"),
+    age: "20",
+    country: "Nigeria",
+  },
+  {
+    id: "3",
+    userName: "Tina Joe",
+    avatar: require("@/assets/images/agentImage.png"),
+    age: "20",
+    country: "Nigeria",
+  },
+];
 
 export interface AgentListStore {
   agents: AgentProfile[];
@@ -28,17 +52,45 @@ export const createAgentListSlice: StateCreator<
     try {
       set({ isLoading: true });
 
-      const res = await getAgentList(); // fetch array of agents
-      set({ agents: res.data.user, isLoading: false, error: null });
-    } catch (err: any) {
+      const res = await getUsersByRole("AGENT");
+
+      //let Agents: AgentProfile[] = res.data?.users ||[]; //this works
+
+      let Agents: AgentProfile[] = [];
+      console.log(
+        "single agent array",
+        Agents.map((agent, index) => agent)
+      );
+
+      if (Array.isArray(Agents) && Agents.length > 0) {
+        set({
+          agents: Agents,
+          isLoading: false,
+          error: null,
+        });
+        console.log("Agents loaded from API:", Agents);
+        return;
+      }
+
+      // Empty or invalid response → fallback
       set({
+        agents: fallbackAgent,
+        isLoading: false,
+        error: null,
+      });
+      console.log("API returned no usable data → using fallback.");
+    } catch (err: any) {
+      console.error("Error fetching agents:", err);
+
+      set({
+        agents: fallbackAgent,
         isLoading: false,
         error: err.message || "Failed to fetch agents",
       });
+
       if (showToast) {
-        // optionally show toast
+        // Show toast if needed
       }
-      throw err;
     }
   },
 

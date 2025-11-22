@@ -12,7 +12,7 @@ type Props = {
 
 const TextInputField = ({ label, placeholder, value, onChangeText }: Props) => (
   <YStack gap="$2">
-    <Text fontWeight="600" color={colors.text}>
+    <Text fontWeight="600"fontSize={15} color={colors.text}>
       {label}
     </Text>
     <TextInput

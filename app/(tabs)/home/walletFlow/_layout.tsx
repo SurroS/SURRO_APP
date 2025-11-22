@@ -10,17 +10,12 @@ export default function WalletFlowLayout() {
     >
       {/* Redirect entry (index) */}
       <Stack.Screen name="paymentMethod" />
-      <Stack.Screen name="index" /> 
-      {/* <Stack.Screen name="interswitchPayment" />
-      <Stack.Screen name="stripePayment" />
-      <Stack.Screen name="flutterwavePayment" />
-      <Stack.Screen name="paystackPayment" /> */}
+      <Stack.Screen name="index" />
       <Stack.Screen name="paymentMode" />
       <Stack.Screen name="paymentEntry" />
       <Stack.Screen name="paymentWebView" />
-       <Stack.Screen name="addBankAccount" />
-        <Stack.Screen name="withdrawal" />
-      
+      <Stack.Screen name="addBankAccount" />
+      <Stack.Screen name="withdrawal" />
     </Stack>
   );
 }

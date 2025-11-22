@@ -34,13 +34,15 @@ export interface AgentCertification {
 
 export interface AgentProfile {
   id: string;
-  userName: string;
-  fullName: string;
+  name?:string
+  age:string|number
+  userName?: string;
+  fullName?: string;
   dateOfBirth?: Date;
-  countryOfResidence?: string;
-  isAvailable: boolean;
+  country?: string;
+  isAvailable?: boolean;
   profilePicture?: string;
-  avatar?: string; // <-- add this
+  avatar?: string; 
 
   about?: string;
   performance?: AgentPerformance;
@@ -53,7 +55,7 @@ export interface AgentProfile {
 
 
 export interface AgentProfileState {
-  agentProfile: AgentProfile | null;
+  agentProfile?: AgentProfile | null;
   isLoading: boolean;
   error: string | null;
 }

@@ -1,12 +1,12 @@
 export interface ParentProfile {
   id: string;
+  fullName:string
   userName: string;
   profilePicture?: string;
   countryOfResidence?: string;
   yearsOfTrying?: number;
   about?: string;
   languagesSpoken?: string[];
-  isAvailable?: boolean;
 }
 
 export interface ParentProfileState {

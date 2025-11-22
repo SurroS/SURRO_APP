@@ -6,17 +6,6 @@ import { useParentProfileStore } from "@/store/profile/parent";
 const ProfileData = () => {
   const { parentProfile, updateParentProfile } = useParentProfileStore();
 
-  const handleStatusPress = async () => {
-    if (parentProfile) {
-      try {
-        await updateParentProfile({ isAvailable: !parentProfile.isAvailable });
-        console.log("Status updated:", !parentProfile.isAvailable);
-      } catch (error) {
-        console.error("Failed to update status:", error);
-      }
-    }
-  };
-
   return (
     <XStack margin={2} gap="$4" alignItems="flex-start" height={150} flex={1}>
       <Image
@@ -33,18 +22,23 @@ const ProfileData = () => {
       <YStack gap="$3">
         <XStack alignItems="center" gap="$2">
           <Text color="black" fontSize="$4" fontWeight="bold" textWrap="wrap">
-            {parentProfile?.userName || "User Name"}
+            {parentProfile?.fullName || "Full Name"}
+          </Text>
+        </XStack>
+        <XStack alignItems="center" gap="$2">
+          <Text color="black" fontSize="$3" textWrap="wrap">
+            {parentProfile ? `@${parentProfile?.userName}` : "@UserName"}
           </Text>
         </XStack>
 
         <XStack alignItems="center" gap="$2">
           <Ionicons name="location-outline" size={19} color="#666" />
           <Text color="black" fontSize="$3">
-            {parentProfile?.countryOfResidence || "Location not set"}
+            {parentProfile?.countryOfResidence || "Set Locetion"}
           </Text>
         </XStack>
 
-        <XStack alignItems="center" gap="$2">
+        {/* <XStack alignItems="center" gap="$2">
           <Text
             color={parentProfile?.isAvailable ? "green" : "red"}
             fontSize="$3"
@@ -52,7 +46,7 @@ const ProfileData = () => {
           >
             {parentProfile?.isAvailable ? "Available" : "Unavailable"}
           </Text>
-        </XStack>
+        </XStack> */}
       </YStack>
     </XStack>
   );

@@ -1,5 +1,6 @@
 import React from "react";
 import { YStack, XStack, Text, Input, View } from "tamagui";
+import colors from "@/hooks/colors";
 
 type NumberInputSelectProps = {
   label?: string;
@@ -33,7 +34,7 @@ const NumberInputSelect = ({
   return (
     <YStack gap="$2">
       {label && (
-        <Text fontWeight="700" color="#000" fontSize={15}>
+        <Text fontWeight="600"fontSize={15} color={colors.text}>
           {label}
         </Text>
       )}

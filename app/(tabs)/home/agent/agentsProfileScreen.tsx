@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  Touchable,
   TouchableOpacity,
 } from "react-native";
 import { Button } from "tamagui";
@@ -16,13 +15,20 @@ import { PaymentModal } from "@/components/payment";
 import Entypo from "@expo/vector-icons/Entypo";
 import BioSection from "@/components/roles/BioSectionView";
 import ContactSection from "@/components/roles/ContactSectionView";
-import { Facebook, Instagram } from "@tamagui/lucide-icons";
+import { Facebook, ImageOff, Instagram } from "@tamagui/lucide-icons";
 import HeaderInfo from "@/components/roles/HeaderInfoSection";
+import AgentPerformanceSection from "@/components/roles/agent/PerormanceSection";
+import AgentAdditionalDetails from "@/components/roles/agent/AditionalDetails";
+import AgentServices from "@/components/roles/agent/AgentServiceOffered";
+import AgentCertifications from "@/components/roles/agent/AgentCertification";
+import EmptyWalletModal from "@/components/modals/EmptyWalletModal";
+import { router } from "expo-router";
+import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 
-
-const image1 = require("@/assets/images/agentImage.png")
-const image2 = require("@/assets/images/agentImage.png")
-const image3 = require("@/assets/images/agentImage.png")
+const image1 = require("@/assets/images/agentImage.png");
+const image2 = require("@/assets/images/maleAvatar.png");
+const image3 = require("@/assets/images/femaleAvatar.png");
 
 const AgentImages = [image1, image2, image3];
 
@@ -61,6 +67,26 @@ const ExperienceData = [
 export default function AgentProfileScreen() {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showWalletModal, setShowWalletModal] = useState(false);
+  const wallet = 5000;
+
+  const handleTopUp = () => {
+    setShowWalletModal(false);
+    router.push("/(tabs)/home/walletFlow");
+  };
+  const handlePayment = () => {
+    if (wallet < 1) {
+      setShowWalletModal(true);
+    } else {
+      setShowPaymentModal(false);
+      setIsUnlocked(true);
+      Toast.show({
+        text1: "Payment successful",
+        type: "customSuccess" as ToastType,
+        text2: "You now have complete access to surrogate's data",
+      });
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -76,7 +102,7 @@ export default function AgentProfileScreen() {
                 isUnlocked
                   ? AgentImages
                   : [
-                      "https://picsum.photos/600/600",
+                      "https://picsum.photos/800/500",
                       "https://picsum.photos/700/700",
                       "https://picsum.photos/600/600",
                     ]
@@ -100,6 +126,18 @@ export default function AgentProfileScreen() {
           />
 
           <BioSection title="About" content="I am a fine agent" />
+          <AgentPerformanceSection
+            matches={10}
+            rating={5}
+            responseTime="1 hour"
+            activeCases={1}
+          />
+
+          <AgentAdditionalDetails
+            languages={["Yoruba", "English", "Hausa"]}
+            experience="2 years"
+            coverage="Yola and its axis"
+          />
 
           {/* --- CONTACT INFO --- */}
           <View style={styles.contactWrapper}>
@@ -117,7 +155,26 @@ export default function AgentProfileScreen() {
               </TouchableOpacity>
             )}
           </View>
+          <AgentServices
+            services={[
+              "Matching Assistance",
+              "Legal Cordination",
+              "Progress Tracking and follow up",
+            ]}
+          />
+          <AgentCertifications
+            certifications={[
+              { name: "certificate of nursing", verified: true },
+            ]}
+          />
         </ScrollView>
+
+        <EmptyWalletModal
+          visible={showWalletModal}
+          onClose={() => setShowWalletModal(false)}
+          onTopUp={handleTopUp}
+        />
+
         <PaymentModal
           visible={showPaymentModal}
           onClose={() => setShowPaymentModal(false)}
@@ -125,13 +182,7 @@ export default function AgentProfileScreen() {
           <Text style={styles.paymentDescription}>
             To start a conversation with this agent, you need to pay N50,000
           </Text>
-          <Button
-            style={styles.payButton}
-            onPress={() => {
-              setIsUnlocked(true);
-              setShowPaymentModal(false);
-            }}
-          >
+          <Button style={styles.payButton} onPress={handlePayment}>
             Pay $10 to unlock
           </Button>
         </PaymentModal>

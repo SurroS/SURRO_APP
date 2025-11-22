@@ -20,7 +20,7 @@ export default function NumberInput({
 }: NumberInputProps) {
   return (
     <View style={{ width:width }}>
-      {label && <Label style={styles.label}>{label}</Label>}
+      {label && <Label fontWeight="600"fontSize={15} color={colors.text}>{label}</Label>}
       <TextInput
         style={styles.input}
         placeholder={placeholder}

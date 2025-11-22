@@ -14,11 +14,6 @@ export type UserRole = "SURROGATE" | "INTENDED_PARENT" | "AGENT";
 
 export const getUsersByRole = (role: UserRole) =>
   makeAuthenticatedProfileRequest("GET", `/users/by-role/${role}`);
-
-export const getAgentList = () => {getUsersByRole("AGENT")};
-export const getParentList = () => getUsersByRole("INTENDED_PARENT");
-export const getSurrogateList = () => getUsersByRole("SURROGATE");
-
 // ---- AUTH REQUEST WRAPPER ----
 export const makeAuthenticatedProfileRequest = async (
   method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE",

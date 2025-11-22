@@ -5,7 +5,10 @@ export interface Surrogate {
   name: string;
   avatar?: string;
   age:string;
-  country:string
+  country:string,
+  height?:string, 
+  weight?:string,
+  children?:string|number, 
 }
 
 // --- Surrogate List State ---

@@ -9,6 +9,7 @@ const AgentPreview = ({ style }: { style?: any }) => {
   const { agents, isLoading, fetchAgents } = useAgentListStore();
 
   useEffect(() => {
+    console.log("Agents =", agents)
     fetchAgents(true).catch((err: any) => {
       Toast.show({
         text1: "Failed to load agents",

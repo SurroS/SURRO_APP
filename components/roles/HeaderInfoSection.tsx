@@ -4,6 +4,7 @@ import { Button } from "tamagui";
 import Entypo from "@expo/vector-icons/Entypo";
 import colors from "@/hooks/colors";
 
+
 interface Props {
   name: string;
   username: string;
