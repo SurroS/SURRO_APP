@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TextInput, View, Text } from "react-native";
+import { TextInput, Text, ActivityIndicator } from "react-native";
 import { YStack, XStack, Button, Label, ScrollView } from "tamagui";
 import CountryFlag from "react-native-country-flag";
 import colors from "@/hooks/colors";
@@ -9,11 +9,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Dropdown from "@/components/DropDown";
 import TextInputField from "@/components/TextInputField";
 import { getAllCountries } from "@/utils/countries";
-import { getStatesByCountry, getLgaByState } from "@/utils/states";
+import { getStatesByCountry } from "@/utils/states";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
+import { useProfile } from "@/hooks/useProfile";
 
 export default function ContactInformationScreen() {
+  const { surrogateProfile, updateProfile, fetchProfile, isLoading } = useProfile();
   const [countries, setCountries] = useState<any[]>([]);
   const [statesList, setStatesList] = useState<string[]>([]);
   const [country, setCountry] = useState<any>(null);
@@ -31,7 +33,33 @@ export default function ContactInformationScreen() {
       const data = await getAllCountries();
       setCountries(data);
     })();
+    if (!surrogateProfile) {
+      fetchProfile();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (surrogateProfile && countries.length > 0) {
+      setPhone1(surrogateProfile.phone1 || "");
+      setPhone2(surrogateProfile.phone2 || "");
+      setEmergency(surrogateProfile.emergencyContactPhone || "");
+      setRelationship(surrogateProfile.emergencyContactRelation || "");
+      setStreet(surrogateProfile.address || "");
+      setZip(surrogateProfile.zipCode || "");
+      setState(surrogateProfile.stateOfOrigin || "");
+      
+      if (surrogateProfile.countryOfResidence) {
+        const foundCountry = countries.find(
+          (c) => c.name === surrogateProfile.countryOfResidence
+        );
+        if (foundCountry) {
+          setCountry(foundCountry);
+          getStatesByCountry(foundCountry.name).then(setStatesList);
+        }
+      }
+    }
+  }, [surrogateProfile, countries]);
 
   const handleSelectCountry = async (selected: any) => {
     setCountry(selected);
@@ -39,7 +67,7 @@ export default function ContactInformationScreen() {
     setStatesList(states);
   };
 
-  const HandleSave = () => {
+  const handleSave = async () => {
     if (
       !country ||
       !state ||
@@ -56,12 +84,39 @@ export default function ContactInformationScreen() {
       });
       return;
     }
-    router.push("/settings/medical");
-    Toast.show({
-      text1: "Profile updated successfully",
-      type: "customSuccess" as ToastType,
-    });
-    console.log("contact data saved");
+
+    try {
+      const fullPhone1 = country?.dialCode ? `${country.dialCode}${phone1}` : phone1;
+      const fullPhone2 = phone2 && country?.dialCode ? `${country.dialCode}${phone2}` : phone2;
+      const fullEmergency = country?.dialCode ? `${country.dialCode}${emergency}` : emergency;
+
+      const profileData = {
+        countryOfResidence: country.name,
+        stateOfOrigin: state,
+        address: street,
+        zipCode: zip,
+        phone1: fullPhone1,
+        phone2: fullPhone2 || undefined,
+        emergencyContactPhone: fullEmergency,
+        emergencyContactRelation: relationship,
+      };
+
+      await updateProfile(profileData);
+
+      Toast.show({
+        text1: "Contact information updated successfully",
+        type: "customSuccess" as ToastType,
+        text2: "Your contact details have been saved",
+      });
+
+      router.push("/settings/medical");
+    } catch (error: any) {
+      Toast.show({
+        text1: "Update Failed",
+        type: "customError" as ToastType,
+        text2: error?.response?.data?.message || "Failed to update contact information. Please try again.",
+      });
+    }
   };
 
   return (
@@ -166,9 +221,11 @@ export default function ContactInformationScreen() {
             color="white"
             size="$4"
             marginTop={20}
-            onPress={() => HandleSave()}
+            disabled={isLoading}
+            opacity={isLoading ? 0.7 : 1}
+            onPress={handleSave}
           >
-            Save
+            {isLoading ? <ActivityIndicator color="white" /> : "Save"}
           </Button>
         </YStack>
       </ScrollView>
