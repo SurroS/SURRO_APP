@@ -44,6 +44,39 @@ export default function profileLayout() {
           headerShown: false,
         }}
       />
+
+      <Stack.Screen
+        name="AgentCoverageSection"
+        options={{
+          headerTitle: "Agent Coverage Section",
+          headerTitleStyle: { fontWeight: "bold" },
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="AgentExperienceSection"
+        options={{
+          headerTitle: "Agent Experience Section",
+          headerTitleStyle: { fontWeight: "bold" },
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="AgentLanguagesSection"
+        options={{
+          headerTitle: "Agent Languages Section",
+          headerTitleStyle: { fontWeight: "bold" },
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="AgentSpecializationSection"
+        options={{
+          headerTitle: "Agent Specialization Section",
+          headerTitleStyle: { fontWeight: "bold" },
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

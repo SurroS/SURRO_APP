@@ -94,11 +94,7 @@ export default function EditBioView() {
     switch (Role) {
       case "AGENT":
         return (
-          // <AgentBio
-          //   onChangePicture={handleChangePicture}
-          //   onEditBio={handleEditBio}
-          // />
-               <ParentBio
+          <AgentBio
             onChangePicture={handleChangePicture}
             onEditBio={handleEditBio}
           />
@@ -131,7 +127,7 @@ export default function EditBioView() {
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#FFF", paddingTop: 20, padding: 20 }}
     >
-      <ScrollView contentContainerStyle={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <YStack gap="$6" alignItems="center">
           <ScreenHeader
             title="Profile Information"

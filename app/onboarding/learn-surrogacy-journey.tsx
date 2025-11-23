@@ -119,7 +119,7 @@ export default function LearnSurrogacyJourneyScreen() {
             theme="active"
             onPress={() => {
               // Navigate to editBio screen when "Get started" is pressed
-              router.push("/(tabs)/home/editBio");
+              router.push("/(tabs)/home");
             }}
           >
             <Text

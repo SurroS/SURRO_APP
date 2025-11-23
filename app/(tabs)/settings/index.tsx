@@ -85,7 +85,6 @@ export default function SettingsScreen():React.ReactNode{
                   <Text style={styles.description}>{item.description}</Text>
                 </YStack>
               </XStack>
-
               <Ionicons
                 name="chevron-forward"
                 size={20}

@@ -91,7 +91,7 @@ export default function HowDidYouHear() {
   const sources = [
     {
       key: "Friend",
-      label: "From a friend/family",
+      label: "Friend/family",
       bg: "#0E0E55",
       fg: "#F2F2F2",
       icon: "person",

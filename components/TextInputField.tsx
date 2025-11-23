@@ -8,9 +8,10 @@ type Props = {
   placeholder?: string;
   value: string;
   onChangeText: (val: string) => void;
+  multiline?:boolean
 };
 
-const TextInputField = ({ label, placeholder, value, onChangeText }: Props) => (
+const TextInputField = ({ label, placeholder, value, onChangeText, multiline }: Props) => (
   <YStack gap="$2">
     <Text fontWeight="600"fontSize={15} color={colors.text}>
       {label}
@@ -21,8 +22,10 @@ const TextInputField = ({ label, placeholder, value, onChangeText }: Props) => (
         borderWidth: 1,
         borderRadius: 5,
         color:colors.text, 
-        padding:15
+        padding:15,
+        
       }}
+      multiline={multiline}
       placeholder={placeholder}
       placeholderTextColor={"gray"}
       value={value}

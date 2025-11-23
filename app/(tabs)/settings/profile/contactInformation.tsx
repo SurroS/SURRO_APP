@@ -16,16 +16,19 @@ import { ToastType } from "toastify-react-native/utils/interfaces";
 export default function ContactInformationScreen() {
   const [countries, setCountries] = useState<any[]>([]);
   const [statesList, setStatesList] = useState<string[]>([]);
+  const [lgaList, setLgaList] = useState<string[]>([]);
+
   const [country, setCountry] = useState<any>(null);
-  const [state, setState] = useState("");
+  const [state, setState] = useState<string | null>(null);
+  const [lga, setLga] = useState<string | null>(null);
   const [street, setStreet] = useState("");
   const [zip, setZip] = useState("");
   const [phone1, setPhone1] = useState("");
   const [phone2, setPhone2] = useState("");
   const [emergency, setEmergency] = useState("");
-  const [lGA, setLGA] = useState("");
   const [relationship, setRelationship] = useState("");
 
+  // Fetch countries on mount
   useEffect(() => {
     (async () => {
       const data = await getAllCountries();
@@ -33,43 +36,53 @@ export default function ContactInformationScreen() {
     })();
   }, []);
 
+  // When country changes
   const handleSelectCountry = async (selected: any) => {
     setCountry(selected);
-    const states = await getStatesByCountry(selected.name);
-    setStatesList(states);
+    setState(null);
+    setLga(null);
+    setStatesList([]);
+    setLgaList([]);
+    if (selected?.name) {
+      const states = await getStatesByCountry(selected.name);
+      setStatesList(states);
+    }
   };
 
-  const HandleSave = () => {
-    if (
-      !country ||
-      !state ||
-      !lGA ||
-      !street ||
-      !zip ||
-      !phone1 ||
-      !emergency ||
-      !relationship
-    ) {
+  // When state changes
+  const handleSelectState = async (selectedState: string) => {
+    setState(selectedState);
+    setLga(null);
+    setLgaList([]);
+    if (country && selectedState) {
+      const lgas = await getLgaByState(country.name, selectedState);
+      setLgaList(lgas);
+    }
+  };
+
+  // Save data
+  const handleSave = () => {
+    if (!country || !state || !lga || !street || !zip || !phone1 || !emergency || !relationship) {
       Toast.show({
         text1: "Please fill all required fields",
         type: "customError" as ToastType,
       });
       return;
     }
-    router.push("/settings/medical");
+
     Toast.show({
       text1: "Profile updated successfully",
       type: "customSuccess" as ToastType,
     });
+
+    router.push("/settings/medical");
     console.log("contact data saved");
   };
 
   return (
     <SafeAreaView style={{ flex: 1, padding: 20, backgroundColor: "#fff" }}>
-      <ScreenHeader
-        title="Contact Information"
-        onBackPress={() => router.back()}
-      />
+      <ScreenHeader title="Contact Information" onBackPress={() => router.back()} />
+
       <ScrollView style={{ flex: 1 }}>
         <YStack gap="$4">
           {/* Country */}
@@ -80,40 +93,35 @@ export default function ContactInformationScreen() {
             options={countries}
             onSelect={handleSelectCountry}
           />
+
           {/* State */}
           <Dropdown
             label="State"
             placeholder="Select a state"
-            value={state}
+            value={state || ""}
             options={statesList}
-            onSelect={(val) => setState(val.name || val)}
+            onSelect={handleSelectState}
           />
-          <TextInputField
+
+          {/* LGA */}
+          <Dropdown
             label="Local Government Area"
-            placeholder="LGA"
-            value={lGA}
-            onChangeText={setLGA}
+            placeholder="Select an LGA"
+            value={lga || ""}
+            options={lgaList}
+            onSelect={setLga}
           />
-          <TextInputField
-            label="Street address"
-            placeholder="Street address"
-            value={street}
-            onChangeText={setStreet}
-          />
-          <TextInputField
-            label="Zip code"
-            placeholder="Zip code"
-            value={zip}
-            onChangeText={setZip}
-          />
-          {/* Phone number */}
-          {[
-            "Phone number",
-            "Phone number 2 (optional)",
-            "Emergency contact number",
-          ].map((label, i) => (
+
+          {/* Street & Zip */}
+          <TextInputField label="Street address" placeholder="Street address" value={street} onChangeText={setStreet} />
+          <TextInputField label="Zip code" placeholder="Zip code" value={zip} onChangeText={setZip} />
+
+          {/* Phone numbers */}
+          {["Phone number", "Phone number 2 (optional)", "Emergency contact number"].map((label, i) => (
             <YStack key={label} gap="$1">
-              <Label color={colors.text}>{label}</Label>
+              <Label fontWeight="600" fontSize={15} color={colors.text}>
+                {label}
+              </Label>
               <XStack
                 alignItems="center"
                 borderWidth={1}
@@ -121,53 +129,38 @@ export default function ContactInformationScreen() {
                 borderRadius={8}
                 overflow="hidden"
               >
-                <XStack
-                  alignItems="center"
-                  paddingHorizontal={8}
-                  borderRightWidth={1}
-                  borderColor="#E6E6E6"
-                >
-                  <CountryFlag
-                    isoCode={country?.iso2?.toLowerCase() || "ng"}
-                    size={18}
+                <XStack alignItems="center" paddingHorizontal={8} borderRightWidth={1} borderColor="#E6E6E6">
+                  <CountryFlag isoCode={country?.iso2?.toLowerCase() || "ng"} size={18} />
+                  <TextInput
+                    style={{
+                      flex: 1,
+                      height: 50,
+                      paddingHorizontal: 10,
+                      color: colors.text,
+                      fontSize: 16,
+                    }}
+                    value={i === 0 ? phone1 : i === 1 ? phone2 : emergency}
+                    onChangeText={i === 0 ? setPhone1 : i === 1 ? setPhone2 : setEmergency}
+                    placeholder="0000000000"
+                    placeholderTextColor="#9B9B9B"
+                    keyboardType="numeric"
                   />
-                  <Text style={{ color: colors.text, marginLeft: 4 }}>
-                    {country?.dialCode || "+234"}
-                  </Text>
                 </XStack>
-                <TextInput
-                  style={{
-                    flex: 1,
-                    height: 50,
-                    paddingHorizontal: 10,
-                    color: colors.text,
-                    fontSize: 16,
-                  }}
-                  value={i === 0 ? phone1 : i === 1 ? phone2 : emergency}
-                  onChangeText={
-                    i === 0 ? setPhone1 : i === 1 ? setPhone2 : setEmergency
-                  }
-                  placeholder="0000000000"
-                  placeholderTextColor="#9B9B9B"
-                  keyboardType="numeric"
-                />
               </XStack>
             </YStack>
           ))}
+
+          {/* Relationship */}
           <Dropdown
             label="Relationship with emergency contact"
             placeholder="Select relationship"
-            value={relationship}
+            value={relationship || ""}
             options={["Spouse", "Parent", "Sibling", "Friend"]}
-            onSelect={(val) => setRelationship(val.name || val)}
+            onSelect={setRelationship}
           />
-          <Button
-            backgroundColor="#0A043C"
-            color="white"
-            size="$4"
-            marginTop={20}
-            onPress={() => HandleSave()}
-          >
+
+          {/* Save button */}
+          <Button backgroundColor="#0A043C" color="white" size="$4" marginTop={20} onPress={handleSave}>
             Save
           </Button>
         </YStack>
