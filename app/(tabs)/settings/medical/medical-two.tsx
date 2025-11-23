@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { YStack, Text, Button, ScrollView, View } from "tamagui";
 import { router, useLocalSearchParams } from "expo-router";
+import { useProfile } from "@/hooks/useProfile";
 
 import { ScreenHeader } from "@/components/auth";
 import colors from "@/hooks/colors";
@@ -15,6 +16,8 @@ import NumberInputSelect from "@/components/NumberInputSelect";
 
 export default function MedicalDetailsStep2() {
   const params = useLocalSearchParams<Record<string, string>>();
+  const { surrogateProfile, medicalProfile, fetchProfile } = useProfile();
+  const medical = surrogateProfile?.medical || medicalProfile;
   
   const [hasAllergies, setHasAllergies] = useState("");
   const [allergies, setAllergies] = useState("");
@@ -34,6 +37,41 @@ export default function MedicalDetailsStep2() {
 
   const [hadMiscarriage, setHadMiscarriage] = useState("");
   const [numberOfMiscarriages, setNumberOfMiscarriages] = useState(0);
+
+  useEffect(() => {
+    if (!params.genotype && !medical && !surrogateProfile) {
+      fetchProfile();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (medical && !params.genotype) {
+      const chronicDetails = medical.chronicIllnessDetails || "None";
+      if (chronicDetails !== "None") {
+        setHasChronicIllness("Yes");
+        const illnesses = chronicDetails.split(", ").filter(i => i && i !== "Other");
+        setChronicIllnesses(illnesses);
+        const otherMatch = chronicDetails.match(/Other[,\s]*(.+)/);
+        if (otherMatch) {
+          setOtherChronicIllness(otherMatch[1].trim());
+        }
+      } else {
+        setHasChronicIllness("No");
+      }
+
+      const complications = medical.pregnancyComplicationsDetails || "None";
+      if (complications.includes("Miscarriage")) {
+        setHadMiscarriage("Yes");
+        const match = complications.match(/(\d+)/);
+        if (match) {
+          setNumberOfMiscarriages(parseInt(match[1], 10));
+        }
+      } else {
+        setHadMiscarriage("No");
+      }
+    }
+  }, [medical, params]);
 
   const handleContinue = () => {
     const chronicIllnessDetails = hasChronicIllness === "Yes" 
@@ -88,7 +126,6 @@ export default function MedicalDetailsStep2() {
 
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
           <YStack padding="$4" gap="$5" marginTop="$2">
-            {/* Allergies */}
             <DropdownField
               label="Do you have any allergies?"
               value={hasAllergies}
@@ -104,7 +141,6 @@ export default function MedicalDetailsStep2() {
               />
             )}
 
-            {/* Chronic Illness */}
             <DropdownField
               label="Do you have any chronic illnesses?"
               value={hasChronicIllness}
@@ -130,7 +166,6 @@ export default function MedicalDetailsStep2() {
               </>
             )}
 
-            {/* Medications */}
             <DropdownField
               label="Are you currently taking any medications?"
               value={takesMedication}
@@ -146,7 +181,6 @@ export default function MedicalDetailsStep2() {
               />
             )}
 
-            {/* Surgeries */}
             <DropdownField
               label="Have you had any surgeries or hospitalizations?"
               value={hadSurgery}
@@ -162,7 +196,6 @@ export default function MedicalDetailsStep2() {
               />
             )}
 
-            {/* Disabilities */}
             <DropdownField
               label="Do you have any disabilities or physical limitations?"
               value={hasDisability}
@@ -178,7 +211,6 @@ export default function MedicalDetailsStep2() {
               />
             )}
 
-            {/* Miscarriages */}
             <DropdownField
               label="Have you ever had a miscarriage?"
               value={hadMiscarriage}
@@ -193,7 +225,6 @@ export default function MedicalDetailsStep2() {
               />
             )}
 
-            {/* Buttons */}
             <YStack marginTop="$3" gap="$2">
               <Button
                 backgroundColor={colors.primary}

@@ -93,16 +93,16 @@ export const createProfileSlice: StateCreator<ProfileStore> = (set, get) => ({
             set({ isLoading: true, error: null });
 
             const response = await getSurrogateProfile();
-            const { profile, medicalProfile } = response.data;
+            const { profile } = response.data;
+            const medicalProfile = profile?.medical || null;
 
             set({
                 surrogateProfile: profile,
-                medicalProfile: medicalProfile || null,
+                medicalProfile: medicalProfile,
                 isLoading: false,
                 error: null,
             });
         } catch (error: any) {
-            // Handle 404 error specifically - profile doesn't exist
             if (error.response?.status === 404) {
                 const message = 'No profile created for this account';
                 set({
@@ -116,7 +116,6 @@ export const createProfileSlice: StateCreator<ProfileStore> = (set, get) => ({
                 return;
             }
             
-            // Handle other errors normally
             set({
                 isLoading: false,
                 error: error.response?.data?.message || 'Failed to fetch profile',

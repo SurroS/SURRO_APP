@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { YStack, Button, ScrollView, View } from "tamagui";
 import { router } from "expo-router";
@@ -6,14 +6,35 @@ import { ScreenHeader } from "@/components/auth";
 import colors from "@/hooks/colors";
 import DropdownField from "@/components/medical/DropdownField";
 import NumberInputSelect from "@/components/NumberInputSelect";
+import { useProfile } from "@/hooks/useProfile";
 
 export default function MedicalDetailsStep1() {
+  const { surrogateProfile, medicalProfile, fetchProfile } = useProfile();
   const [genotype, setGenotype] = useState("");
   const [bloodGroup, setBloodGroup] = useState("");
   const [pregnant, setPregnant] = useState("");
   const [children, setChildren] = useState(0);
   const [caesarean, setCaesarean] = useState("");
   const [numberOfCs, setNumberOfCs] = useState(0);
+
+  const medical = surrogateProfile?.medical || medicalProfile;
+
+  useEffect(() => {
+    if (!medical && !surrogateProfile) {
+      fetchProfile();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (medical) {
+      setGenotype(medical.genotype || "");
+      setBloodGroup(medical.bloodGroup || "");
+      setPregnant(medical.pregnancyExperience ? "Yes" : "No");
+      setChildren(medical.numberofChildren || 0);
+      setCaesarean(medical.ceasareanSection ? "Yes" : "No");
+    }
+  }, [medical]);
 
   const handleContinue = () => {
     router.push({
@@ -32,7 +53,6 @@ export default function MedicalDetailsStep1() {
     router.push("/settings/medical");
   };
 
-  //  Check if form is complete
   const isFormValid =
     genotype &&
     bloodGroup &&
@@ -50,7 +70,6 @@ export default function MedicalDetailsStep1() {
       </View>
       <ScrollView contentContainerStyle={{ flexGrow: 1, padding: "$3" }}>
         <YStack padding="$4" gap="$4">
-          {/* Form Fields */}
           <YStack gap="$4" marginTop="$4">
             <DropdownField
               label="Genotype"
@@ -99,7 +118,6 @@ export default function MedicalDetailsStep1() {
             )}
           </YStack>
 
-          {/* Buttons */}
           <YStack marginTop="$3" gap="$2">
             <Button
               backgroundColor={isFormValid ? colors.primary : "#CCC"}

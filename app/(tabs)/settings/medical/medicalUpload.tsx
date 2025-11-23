@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ActivityIndicator } from "react-native";
 import { YStack, Button, ScrollView, Text, View } from "tamagui";
@@ -13,8 +13,23 @@ import { uploadEndometriumImage as uploadEndometriumImageApi } from "@/services/
 
 export default function MedicalUpload() {
   const params = useLocalSearchParams<Record<string, string>>();
-  const { updateMedicalProfile, isLoading } = useProfile();
+  const { surrogateProfile, medicalProfile, updateMedicalProfile, fetchProfile, isLoading } = useProfile();
   const [medicalReport, setMedicalReport] = useState<any>(null);
+  const medical = surrogateProfile?.medical || medicalProfile;
+
+  useEffect(() => {
+    if (!params.genotype && !medical && !surrogateProfile) {
+      fetchProfile();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (medical?.endometriumUploadUrl && !medicalReport) {
+      setMedicalReport({ uri: medical.endometriumUploadUrl });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [medical]);
 
   const handleSubmit = async () => {
     try {
@@ -38,8 +53,8 @@ export default function MedicalUpload() {
           const uploadResponse = await uploadEndometriumImageApi(formData);
           endometriumUploadUrl = uploadResponse.data?.medicalProfile?.endometriumUploadUrl || 
                                 uploadResponse.data?.endometriumUploadUrl || "";
-        } catch (uploadError) {
-          console.warn("File upload failed, continuing without file URL:", uploadError);
+        } catch {
+          // File upload failed, continuing without file URL
         }
       }
 
@@ -64,7 +79,6 @@ export default function MedicalUpload() {
 
       router.push("/settings/medical/summary");
     } catch (error: any) {
-      console.error("Medical profile submission error:", error);
       Toast.show({
         text1: "Submission Failed",
         type: "customError" as ToastType,
@@ -95,7 +109,6 @@ export default function MedicalUpload() {
 
       router.push("/settings/medical/summary");
     } catch (error: any) {
-      console.error("Medical profile submission error:", error);
       Toast.show({
         text1: "Submission Failed",
         type: "customError" as ToastType,
