@@ -50,11 +50,13 @@ export const makeAuthenticatedKYCRequest = async (
  * Submit KYC documents (ID front and optional back)
  * @param idFront - Front side of ID document (required)
  * @param idBack - Back side of ID document (optional)
+ * @param faceScan - Face scan/selfie image (optional)
  * @returns KYC submission response
  */
 export const submitKYC = async (
   idFront: { uri: string; type: string; name: string },
-  idBack?: { uri: string; type: string; name: string }
+  idBack?: { uri: string; type: string; name: string },
+  faceScan?: { uri: string; type: string; name: string }
 ): Promise<KYCSubmitResponse> => {
   const token = await secureGet('auth_token');
 
@@ -78,6 +80,15 @@ export const submitKYC = async (
       uri: idBack.uri,
       type: idBack.type || 'image/jpeg',
       name: idBack.name || 'idBack.jpg',
+    } as any);
+  }
+
+  // Append face scan image (optional)
+  if (faceScan) {
+    formData.append('faceScan', {
+      uri: faceScan.uri,
+      type: faceScan.type || 'image/jpeg',
+      name: faceScan.name || 'faceScan.jpg',
     } as any);
   }
 

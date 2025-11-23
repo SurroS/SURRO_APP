@@ -65,7 +65,10 @@ export default function KYCPicturePreview() {
 
       setTimeout(() => {
         setIsModalVisible(false);
-        router.push("/settings/kyc/face-scan-rules");
+        router.push({
+          pathname: "/settings/kyc/face-scan-rules",
+          params: { idFrontUri: frontUri },
+        });
       }, 2000);
     } catch (error: any) {
       console.error("KYC submission error:", error);
