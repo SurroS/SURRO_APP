@@ -2,15 +2,20 @@ import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { YStack } from "tamagui";
 import { Ionicons } from "@expo/vector-icons";
-import colors from "@/hooks/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScreenHeader } from "@/components/auth";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
 export default function KycFaceScanScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<Record<string, string>>();
+  const { idFrontUri } = params;
+  
   const handleTakePicture = () => {
-    router.push("/settings/kyc/face-scan");
+    router.push({
+      pathname: "/settings/kyc/face-scan",
+      params: { idFrontUri },
+    });
   };
 
   return (
