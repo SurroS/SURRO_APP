@@ -9,13 +9,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Dropdown from "@/components/DropDown";
 import TextInputField from "@/components/TextInputField";
 import { getAllCountries } from "@/utils/countries";
-import { getStatesByCountry } from "@/utils/states";
+import { getStatesByCountry, getLgaByState } from "@/utils/states";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { useProfile } from "@/hooks/useProfile";
 
 export default function ContactInformationScreen() {
-  const { surrogateProfile, updateProfile, fetchProfile, isLoading } = useProfile();
+  const { surrogateProfile, updateProfile, fetchProfile, isLoading } =
+    useProfile();
   const [countries, setCountries] = useState<any[]>([]);
   const [statesList, setStatesList] = useState<string[]>([]);
   const [lgaList, setLgaList] = useState<string[]>([]);
@@ -51,7 +52,7 @@ export default function ContactInformationScreen() {
       setStreet(surrogateProfile.address || "");
       setZip(surrogateProfile.zipCode || "");
       setState(surrogateProfile.stateOfOrigin || "");
-      
+
       if (surrogateProfile.countryOfResidence) {
         const foundCountry = countries.find(
           (c) => c.name === surrogateProfile.countryOfResidence
@@ -76,11 +77,23 @@ export default function ContactInformationScreen() {
     }
   };
 
+  // When state changes
+  const handleSelectState = async (selectedState: string) => {
+    setState(selectedState);
+    setLga(null);
+    setLgaList([]);
+    if (country && selectedState) {
+      const lgas = await getLgaByState(country.name, selectedState);
+      setLgaList(lgas);
+    }
+  };
+
+  // Save data
   const handleSave = async () => {
     if (
       !country ||
       !state ||
-      !lGA ||
+      !lga ||
       !street ||
       !zip ||
       !phone1 ||
@@ -95,9 +108,14 @@ export default function ContactInformationScreen() {
     }
 
     try {
-      const fullPhone1 = country?.dialCode ? `${country.dialCode}${phone1}` : phone1;
-      const fullPhone2 = phone2 && country?.dialCode ? `${country.dialCode}${phone2}` : phone2;
-      const fullEmergency = country?.dialCode ? `${country.dialCode}${emergency}` : emergency;
+      const fullPhone1 = country?.dialCode
+        ? `${country.dialCode}${phone1}`
+        : phone1;
+      const fullPhone2 =
+        phone2 && country?.dialCode ? `${country.dialCode}${phone2}` : phone2;
+      const fullEmergency = country?.dialCode
+        ? `${country.dialCode}${emergency}`
+        : emergency;
 
       const profileData = {
         countryOfResidence: country.name,
@@ -123,14 +141,19 @@ export default function ContactInformationScreen() {
       Toast.show({
         text1: "Update Failed",
         type: "customError" as ToastType,
-        text2: error?.response?.data?.message || "Failed to update contact information. Please try again.",
+        text2:
+          error?.response?.data?.message ||
+          "Failed to update contact information. Please try again.",
       });
     }
   };
 
   return (
     <SafeAreaView style={{ flex: 1, padding: 20, backgroundColor: "#fff" }}>
-      <ScreenHeader title="Contact Information" onBackPress={() => router.back()} />
+      <ScreenHeader
+        title="Contact Information"
+        onBackPress={() => router.back()}
+      />
 
       <ScrollView style={{ flex: 1 }}>
         <YStack gap="$4">
@@ -162,11 +185,25 @@ export default function ContactInformationScreen() {
           />
 
           {/* Street & Zip */}
-          <TextInputField label="Street address" placeholder="Street address" value={street} onChangeText={setStreet} />
-          <TextInputField label="Zip code" placeholder="Zip code" value={zip} onChangeText={setZip} />
+          <TextInputField
+            label="Street address"
+            placeholder="Street address"
+            value={street}
+            onChangeText={setStreet}
+          />
+          <TextInputField
+            label="Zip code"
+            placeholder="Zip code"
+            value={zip}
+            onChangeText={setZip}
+          />
 
           {/* Phone numbers */}
-          {["Phone number", "Phone number 2 (optional)", "Emergency contact number"].map((label, i) => (
+          {[
+            "Phone number",
+            "Phone number 2 (optional)",
+            "Emergency contact number",
+          ].map((label, i) => (
             <YStack key={label} gap="$1">
               <Label fontWeight="600" fontSize={15} color={colors.text}>
                 {label}
@@ -178,8 +215,16 @@ export default function ContactInformationScreen() {
                 borderRadius={8}
                 overflow="hidden"
               >
-                <XStack alignItems="center" paddingHorizontal={8} borderRightWidth={1} borderColor="#E6E6E6">
-                  <CountryFlag isoCode={country?.iso2?.toLowerCase() || "ng"} size={18} />
+                <XStack
+                  alignItems="center"
+                  paddingHorizontal={8}
+                  borderRightWidth={1}
+                  borderColor="#E6E6E6"
+                >
+                  <CountryFlag
+                    isoCode={country?.iso2?.toLowerCase() || "ng"}
+                    size={18}
+                  />
                   <TextInput
                     style={{
                       flex: 1,
@@ -189,8 +234,10 @@ export default function ContactInformationScreen() {
                       fontSize: 16,
                     }}
                     value={i === 0 ? phone1 : i === 1 ? phone2 : emergency}
-                    onChangeText={i === 0 ? setPhone1 : i === 1 ? setPhone2 : setEmergency}
-                    placeholder="0000000000"
+                    onChangeText={
+                      i === 0 ? setPhone1 : i === 1 ? setPhone2 : setEmergency
+                    }
+                    placeholder="0123456789"
                     placeholderTextColor="#9B9B9B"
                     keyboardType="numeric"
                   />
