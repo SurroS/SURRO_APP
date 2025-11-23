@@ -11,26 +11,69 @@ import { router, useLocalSearchParams } from "expo-router";
 import colors from "@/hooks/colors";
 import { ScreenHeader } from "@/components/navigation/ScreenHeader";
 import BottomModal from "@/components/modals/BottomModal";
+import { useKYC } from "@/hooks/useKYC";
+import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 
 export default function KYCPicturePreview() {
   const params = useLocalSearchParams<Record<string, string>>();
   const { idType, frontUri, backUri } = params;
+  const { submitKYC, isLoading } = useKYC();
 
-  const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
+  const getFileName = (uri: string, defaultName: string): string => {
+    const parts = uri.split("/");
+    const fileName = parts[parts.length - 1];
+    return fileName || defaultName;
+  };
+
+  const getMimeType = (uri: string): string => {
+    if (uri.endsWith(".png")) return "image/png";
+    if (uri.endsWith(".jpg") || uri.endsWith(".jpeg")) return "image/jpeg";
+    return "image/jpeg";
+  };
+
   const handleSubmit = async () => {
-    setLoading(true);
+    if (!frontUri) {
+      Toast.show({
+        text1: "Error",
+        type: "customError" as ToastType,
+        text2: "Front ID image is required",
+      });
+      return;
+    }
+
     try {
+      const idFront = {
+        uri: frontUri,
+        type: getMimeType(frontUri),
+        name: getFileName(frontUri, "idFront.jpg"),
+      };
+
+      const idBack = backUri
+        ? {
+            uri: backUri,
+            type: getMimeType(backUri),
+            name: getFileName(backUri, "idBack.jpg"),
+          }
+        : undefined;
+
+      await submitKYC(idFront, idBack);
+
       setIsModalVisible(true);
-      await new Promise((r) => setTimeout(r, 2000));
-      console.log("KYC document submitted:", { idType, frontUri, backUri });
-      router.push("/settings/kyc/face-scan-rules");
-    } catch (error) {
-      console.error("Upload error:", error);
-    } finally {
-      setIsModalVisible(false);
-      setLoading(false);
+
+      setTimeout(() => {
+        setIsModalVisible(false);
+        router.push("/settings/kyc/face-scan-rules");
+      }, 2000);
+    } catch (error: any) {
+      console.error("KYC submission error:", error);
+      Toast.show({
+        text1: "Submission Failed",
+        type: "customError" as ToastType,
+        text2: error?.message || "Failed to submit KYC documents. Please try again.",
+      });
     }
   };
 
@@ -64,10 +107,10 @@ export default function KYCPicturePreview() {
           <TouchableOpacity
             onPress={handleSubmit}
             style={[styles.actionButton, styles.submitButton]}
-            disabled={loading}
+            disabled={isLoading}
             activeOpacity={0.8}
           >
-            {loading ? (
+            {isLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={[styles.actionText, { color: "#fff" }]}>
