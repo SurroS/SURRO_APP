@@ -1,15 +1,23 @@
 import React, { useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, TouchableOpacity, Image } from "react-native";
+import { StyleSheet, TouchableOpacity, Image, ActivityIndicator } from "react-native";
 import { YStack, Text } from "tamagui";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import colors from "@/hooks/colors";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { ScreenHeader } from "@/components/auth";
 import BottomModal from "@/components/modals/BottomModal";
 import { Ionicons } from "@expo/vector-icons";
+import { useKYC } from "@/hooks/useKYC";
+import { compressKYCImage } from "@/utils/imageCompression";
+import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 
 export default function FaceScanScreen() {
+  const params = useLocalSearchParams<Record<string, string>>();
+  const { idFrontUri } = params;
+  const { submitKYC, isLoading } = useKYC();
+  
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -45,18 +53,74 @@ export default function FaceScanScreen() {
   };
 
   const handleContinue = async () => {
-    if (!imageUri) return;
+    if (!imageUri) {
+      Toast.show({
+        text1: "Error",
+        type: "customError" as ToastType,
+        text2: "Please take a selfie first",
+      });
+      return;
+    }
 
-    setModalVisible(true);
+    if (!idFrontUri) {
+      Toast.show({
+        text1: "Error",
+        type: "customError" as ToastType,
+        text2: "ID front image is missing. Please start over.",
+      });
+      router.back();
+      return;
+    }
 
-    await new Promise((r) => setTimeout(r, 2000));
+    try {
+      Toast.show({
+        text1: "Processing...",
+        type: "customWarning" as ToastType,
+        text2: "Compressing and submitting your verification",
+      });
 
-    router.push({
-      pathname: "/(tabs)/home",
-      params: { imageUri },
-    });
+      const compressedFaceUri = await compressKYCImage(imageUri);
+      const compressedIdFrontUri = await compressKYCImage(idFrontUri);
 
-    setModalVisible(false);
+      const idFront = {
+        uri: compressedIdFrontUri,
+        type: "image/jpeg",
+        name: "idFront.jpg",
+      };
+
+      const faceScan = {
+        uri: compressedFaceUri,
+        type: "image/jpeg",
+        name: "faceScan.jpg",
+      };
+
+      await submitKYC(idFront, undefined, faceScan);
+
+      setModalVisible(true);
+
+      setTimeout(() => {
+        setModalVisible(false);
+        router.push("/(tabs)/home");
+      }, 2000);
+    } catch (error: any) {
+      console.error("KYC submission error:", error);
+      
+      let errorMessage = "Failed to submit verification. Please try again.";
+      
+      if (error?.response?.status === 413) {
+        errorMessage = "File size too large. Please retake photos and try again.";
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      Toast.show({
+        text1: "Submission Failed",
+        type: "customError" as ToastType,
+        text2: errorMessage,
+      });
+    }
   };
 
   return (
@@ -113,8 +177,13 @@ export default function FaceScanScreen() {
             <TouchableOpacity
               style={styles.continueButton}
               onPress={handleContinue}
+              disabled={isLoading}
             >
-              <Text style={styles.continueText}>Submit</Text>
+              {isLoading ? (
+                <ActivityIndicator color={colors.primary} />
+              ) : (
+                <Text style={styles.continueText}>Submit</Text>
+              )}
             </TouchableOpacity>
           )}
         </YStack>

@@ -1,28 +1,120 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ActivityIndicator } from "react-native";
 import { YStack, Button, ScrollView, Text, View } from "tamagui";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { ScreenHeader } from "@/components/auth";
 import UploadCard from "@/components/medical/uploadCard";
 import colors from "@/hooks/colors";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
+import { useProfile } from "@/hooks/useProfile";
+import { uploadEndometriumImage as uploadEndometriumImageApi } from "@/services/profileApi";
 
 export default function MedicalUpload() {
+  const params = useLocalSearchParams<Record<string, string>>();
+  const { surrogateProfile, medicalProfile, updateMedicalProfile, fetchProfile, isLoading } = useProfile();
   const [medicalReport, setMedicalReport] = useState<any>(null);
+  const medical = surrogateProfile?.medical || medicalProfile;
 
-  const handleSubmit = () => {
-    if (medicalReport) {
+  useEffect(() => {
+    if (!params.genotype && !medical && !surrogateProfile) {
+      fetchProfile();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (medical?.endometriumUploadUrl && !medicalReport) {
+      setMedicalReport({ uri: medical.endometriumUploadUrl });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [medical]);
+
+  const handleSubmit = async () => {
+    try {
+      let endometriumUploadUrl = "";
+
+      if (medicalReport) {
+        Toast.show({
+          text1: "Uploading file...",
+          type: "customWarning" as ToastType,
+          text2: "Please wait",
+        });
+
+        const formData = new FormData();
+        formData.append("file", {
+          uri: medicalReport.uri,
+          type: medicalReport.mimeType || medicalReport.type || "image/jpeg",
+          name: medicalReport.name || "endometrium.jpg",
+        } as any);
+
+        try {
+          const uploadResponse = await uploadEndometriumImageApi(formData);
+          endometriumUploadUrl = uploadResponse.data?.medicalProfile?.endometriumUploadUrl || 
+                                uploadResponse.data?.endometriumUploadUrl || "";
+        } catch {
+          // File upload failed, continuing without file URL
+        }
+      }
+
+      const medicalData = {
+        genotype: params.genotype || "",
+        bloodGroup: params.bloodGroup || "",
+        pregnancyExperience: params.pregnancyExperience === "true",
+        numberofChildren: parseInt(params.numberofChildren || "0", 10),
+        ceasareanSection: params.ceasareanSection === "true",
+        chronicIllnessDetails: params.chronicIllnessDetails || "None",
+        pregnancyComplicationsDetails: params.pregnancyComplicationsDetails || "None",
+        ...(endometriumUploadUrl && { endometriumUploadUrl }),
+      };
+
+      await updateMedicalProfile(medicalData);
+
       Toast.show({
-        text1: "File uploaded successfully",
+        text1: "Medical profile updated successfully",
         type: "customSuccess" as ToastType,
+        text2: "Your medical information has been saved",
       });
+
       router.push("/settings/medical/summary");
+    } catch (error: any) {
+      Toast.show({
+        text1: "Submission Failed",
+        type: "customError" as ToastType,
+        text2: error?.response?.data?.message || "Failed to update medical profile. Please try again.",
+      });
     }
   };
 
-  const handleContinueLater = () => {
-    router.push("/settings/medical/summary");
+  const handleContinueLater = async () => {
+    try {
+      const medicalData = {
+        genotype: params.genotype || "",
+        bloodGroup: params.bloodGroup || "",
+        pregnancyExperience: params.pregnancyExperience === "true",
+        numberofChildren: parseInt(params.numberofChildren || "0", 10),
+        ceasareanSection: params.ceasareanSection === "true",
+        chronicIllnessDetails: params.chronicIllnessDetails || "None",
+        pregnancyComplicationsDetails: params.pregnancyComplicationsDetails || "None",
+      };
+
+      await updateMedicalProfile(medicalData);
+
+      Toast.show({
+        text1: "Medical profile updated",
+        type: "customSuccess" as ToastType,
+        text2: "You can upload documents later",
+      });
+
+      router.push("/settings/medical/summary");
+    } catch (error: any) {
+      Toast.show({
+        text1: "Submission Failed",
+        type: "customError" as ToastType,
+        text2: error?.response?.data?.message || "Failed to update medical profile. Please try again.",
+      });
+    }
   };
 
   return (
@@ -50,16 +142,21 @@ export default function MedicalUpload() {
             <Button
               backgroundColor={colors.primary}
               color="#FFF"
-              disabled={!medicalReport}
-              opacity={!medicalReport ? 0.5 : 1}
+              disabled={isLoading}
+              opacity={isLoading ? 0.7 : 1}
               onPress={handleSubmit}
             >
-              Submit
+              {isLoading ? (
+                <ActivityIndicator color="#FFF" />
+              ) : (
+                "Submit"
+              )}
             </Button>
 
             <Button
               backgroundColor="#E9F3FF"
               color={colors.primary}
+              disabled={isLoading}
               onPress={handleContinueLater}
             >
               Continue Later
