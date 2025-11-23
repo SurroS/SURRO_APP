@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { YStack, Text, Button, ScrollView, View } from "tamagui";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 
 import { ScreenHeader } from "@/components/auth";
 import colors from "@/hooks/colors";
@@ -14,6 +14,8 @@ import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 import NumberInputSelect from "@/components/NumberInputSelect";
 
 export default function MedicalDetailsStep2() {
+  const params = useLocalSearchParams<Record<string, string>>();
+  
   const [hasAllergies, setHasAllergies] = useState("");
   const [allergies, setAllergies] = useState("");
 
@@ -34,11 +36,24 @@ export default function MedicalDetailsStep2() {
   const [numberOfMiscarriages, setNumberOfMiscarriages] = useState(0);
 
   const handleContinue = () => {
-    Toast.show({
-      text1: "Profile updated successfully",
-      type: "customSuccess" as ToastType,
+    const chronicIllnessDetails = hasChronicIllness === "Yes" 
+      ? chronicIllnesses.length > 0
+        ? chronicIllnesses.join(", ") + (otherChronicIllness ? `, ${otherChronicIllness}` : "")
+        : otherChronicIllness || "None"
+      : "None";
+
+    const pregnancyComplicationsDetails = hadMiscarriage === "Yes"
+      ? `Miscarriages: ${numberOfMiscarriages}`
+      : "None";
+
+    router.push({
+      pathname: "/settings/medical/medicalUpload",
+      params: {
+        ...params,
+        chronicIllnessDetails,
+        pregnancyComplicationsDetails,
+      },
     });
-    router.push("/settings/medical/medicalUpload");
   };
 
   const handleContinueLater = () => {

@@ -1,13 +1,11 @@
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { YStack, Text, Button, ScrollView, XStack, View } from "tamagui";
+import { YStack, Button, ScrollView, View } from "tamagui";
 import { router } from "expo-router";
 import { ScreenHeader } from "@/components/auth";
 import colors from "@/hooks/colors";
 import DropdownField from "@/components/medical/DropdownField";
 import NumberInputSelect from "@/components/NumberInputSelect";
-import { Toast } from "toastify-react-native";
-import { ToastType } from "toastify-react-native/utils/interfaces";
 
 export default function MedicalDetailsStep1() {
   const [genotype, setGenotype] = useState("");
@@ -18,11 +16,16 @@ export default function MedicalDetailsStep1() {
   const [numberOfCs, setNumberOfCs] = useState(0);
 
   const handleContinue = () => {
-    Toast.show({
-      text1: "Profile updated successfully",
-      type: "customSuccess" as ToastType,
+    router.push({
+      pathname: "/settings/medical/medical-two",
+      params: {
+        genotype,
+        bloodGroup,
+        pregnancyExperience: (pregnant === "Yes").toString(),
+        numberofChildren: children.toString(),
+        ceasareanSection: (caesarean === "Yes").toString(),
+      },
     });
-    router.push("/settings/medical/medical-two");
   };
 
   const handleContinueLater = () => {
