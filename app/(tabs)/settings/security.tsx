@@ -1,4 +1,4 @@
-import { StyleSheet, TextInput, Alert } from "react-native";
+import { StyleSheet, TextInput } from "react-native";
 import { YStack, Text } from "tamagui";
 import usechangePasswordForm from "@/hooks/auth/useChangePasswordForm";
 import { PrimaryButton } from "@/components/auth";
@@ -7,18 +7,40 @@ import colors from "@/hooks/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScreenHeader } from "@/components/navigation/ScreenHeader";
 import { router } from "expo-router";
+import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 
 export default function ChangePasswordScreen() {
   const { formData, errors, updateField, validateForm, resetForm } =
     usechangePasswordForm();
-  const { isLoading } = useAuth();
+  const { changePassword, isLoading } = useAuth();
 
-  const handleSubmit = () => {
-    if (validateForm()) {
-      Alert.alert("Success", "Password changed successfully!");
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      Toast.show({
+        text1: "Validation Error",
+        type: "customError" as ToastType,
+        text2: "Please fix the errors before continuing",
+      });
+      return;
+    }
+
+    try {
+      await changePassword(formData);
+      
+      Toast.show({
+        text1: "Password changed successfully",
+        type: "customSuccess" as ToastType,
+        text2: "Your password has been updated",
+      });
+      
       resetForm();
-    } else {
-      Alert.alert("Error", "Please fix the errors before continuing");
+    } catch (error: any) {
+      Toast.show({
+        text1: "Password Change Failed",
+        type: "customError" as ToastType,
+        text2: error?.response?.data?.message || "Failed to change password. Please try again.",
+      });
     }
   };
 
