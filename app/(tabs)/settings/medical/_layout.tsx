@@ -37,13 +37,14 @@ export default function medicalLayout() {
         }}
       />
             <Stack.Screen
-        name="summary"
+        name="medicalHistorySummary"
         options={{
-          headerTitle: "Summary",
+          headerTitle: "Medical History Summary",
           headerTitleStyle: { fontWeight: "bold" },
           headerShown: false,
         }}
       />
+      
     </Stack>
   );
 }

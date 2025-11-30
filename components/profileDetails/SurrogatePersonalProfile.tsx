@@ -4,6 +4,7 @@ import { YStack } from "tamagui";
 import NumberInput from "@/components/NumberInput";
 import NumberInputSelect from "@/components/NumberInputSelect";
 import { SurrogateStore } from "@/store/surrogates/types";
+import SharedPersonalFields from "./SharedPersonalDetails";
 
 export default function SurrogatePersonalFields({
   height,
@@ -12,9 +13,31 @@ export default function SurrogatePersonalFields({
   setHeight,
   setWeight,
   setChildren,
-}:any) {
+
+  fullName,
+  country,
+  dob,
+  maritalStatus,
+  countries,
+  setFirstName,
+  setCountry,
+  setDob,
+  setMaritalStatus,
+}: any) {
   return (
     <YStack gap="$4" marginTop="$4">
+      <SharedPersonalFields
+        fullName={fullName}
+        country={country}
+        dob={dob}
+        maritalStatus={maritalStatus}
+        countries={countries}
+        setFirstName={setFirstName}
+        setCountry={setCountry}
+        setDob={setDob}
+        setMaritalStatus={setMaritalStatus}
+      />
+
       <NumberInput
         label="Height (cm)"
         value={height}

@@ -8,11 +8,12 @@ import { useForgotPasswordForm } from "@/hooks/auth/useForgotPasswordForm";
 import { useAuth } from "@/hooks/useAuth";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
+import { useResetPasswordForm } from "@/hooks/auth";
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
   const { email, error, updateEmail, validateForm } = useForgotPasswordForm();
-  const { forgotPassword, isLoading } = useAuth();
+  const { forgotPassword, isLoading, resetPassword} = useAuth();
 
   const handleForgotPassword = async () => {
     if (!validateForm()) {
@@ -24,7 +25,7 @@ export default function ForgotPasswordScreen() {
       Alert.alert("Success", "Password reset instructions sent to your email.");
       console.log(updateEmail);
       console.log(validateForm);
-      console.log(email);
+      console.log(email); 
       // Navigation will be handled by the auth store state changes
     } catch (err) {
       Toast.show({

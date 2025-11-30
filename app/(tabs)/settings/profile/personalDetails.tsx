@@ -18,10 +18,24 @@ import { useAgentProfile } from "@/hooks/useAgentProfile";
 
 export default function PersonalInformationScreen() {
   const Role = useAuth().user?.role?.trim();
-  
-  const { surrogateProfile, updateProfile, fetchProfile, isLoading: surrogateLoading } = useProfile();
-  const { parentProfile, updateParentProfile, fetchParentProfile, isLoading: parentLoading } = useParentProfile();
-  const { agentProfile, updateAgentProfile, isLoading: agentLoading } = useAgentProfile();
+
+  const {
+    surrogateProfile,
+    updateProfile,
+    fetchProfile,
+    isLoading: surrogateLoading,
+  } = useProfile();
+  const {
+    parentProfile,
+    updateParentProfile,
+    fetchParentProfile,
+    isLoading: parentLoading,
+  } = useParentProfile();
+  const {
+    agentProfile,
+    updateAgentProfile,
+    isLoading: agentLoading,
+  } = useAgentProfile();
 
   const isLoading = surrogateLoading || parentLoading || agentLoading;
 
@@ -42,7 +56,7 @@ export default function PersonalInformationScreen() {
       const data = await getAllCountries();
       setCountries(data);
     })();
-    
+
     if (Role === "SURROGATE" && !surrogateProfile) {
       fetchProfile();
     } else if (Role === "INTENDED_PARENT" && !parentProfile) {
@@ -61,7 +75,7 @@ export default function PersonalInformationScreen() {
         setHeight(surrogateProfile.height || "");
         setWeight(surrogateProfile.weight || "");
         setChildren(surrogateProfile.numberOfChildren || 0);
-        
+
         if (surrogateProfile.countryOfOrigin) {
           const foundCountry = countries.find(
             (c) => c.name === surrogateProfile.countryOfOrigin
@@ -74,7 +88,7 @@ export default function PersonalInformationScreen() {
         const fullNameParts = parentProfile.fullName?.split(" ") || [];
         setFirstName(fullNameParts[0] || "");
         setLastName(fullNameParts.slice(1).join(" ") || "");
-        
+
         if (parentProfile.countryOfResidence) {
           const foundCountry = countries.find(
             (c) => c.name === parentProfile.countryOfResidence
@@ -84,11 +98,19 @@ export default function PersonalInformationScreen() {
           }
         }
       } else if (Role === "AGENT" && agentProfile) {
-        const nameParts = (agentProfile.fullName || agentProfile.name || "").split(" ");
+        const nameParts = (
+          agentProfile.fullName ||
+          agentProfile.name ||
+          ""
+        ).split(" ");
         setFirstName(nameParts[0] || "");
         setLastName(nameParts.slice(1).join(" ") || "");
-        setDob(agentProfile.dateOfBirth ? new Date(agentProfile.dateOfBirth).toISOString().split("T")[0] : "");
-        
+        setDob(
+          agentProfile.dateOfBirth
+            ? new Date(agentProfile.dateOfBirth).toISOString().split("T")[0]
+            : ""
+        );
+
         if (agentProfile.country) {
           const foundCountry = countries.find(
             (c) => c.name === agentProfile.country
@@ -109,14 +131,7 @@ export default function PersonalInformationScreen() {
           type: "customError" as ToastType,
         });
         return;
-      }
-      if (children === 0) {
-        Toast.show({
-          text1: "Number of children is required",
-          type: "customError" as ToastType,
-        });
-        return;
-      }
+      } 
     } else if (Role === "INTENDED_PARENT" || Role === "AGENT") {
       if (!firstName || !country || !dob || !maritalStatus) {
         Toast.show({
@@ -134,13 +149,13 @@ export default function PersonalInformationScreen() {
           weight,
           numberOfChildren: children,
         };
-        
+
         if (firstName) profileData.firstName = firstName;
         if (lastName) profileData.lastName = lastName;
         if (country) profileData.countryOfOrigin = country.name;
         if (dob) profileData.dateOfBirth = dob;
         if (maritalStatus) profileData.maritalStatus = maritalStatus;
-        
+
         await updateProfile(profileData);
       } else if (Role === "INTENDED_PARENT") {
         const profileData = {
@@ -171,7 +186,9 @@ export default function PersonalInformationScreen() {
       Toast.show({
         text1: "Update Failed",
         type: "customError" as ToastType,
-        text2: error?.response?.data?.message || "Failed to update personal information. Please try again.",
+        text2:
+          error?.response?.data?.message ||
+          "Failed to update personal information. Please try again.",
       });
     }
   };
@@ -186,10 +203,18 @@ export default function PersonalInformationScreen() {
 
         <ScrollView style={{ flex: 1, padding: 20 }}>
           <YStack gap="$4">
-
             {/* Role-specific fields */}
             {Role === "SURROGATE" && (
               <SurrogatePersonalFields
+                fullName={firstName}
+                country={country}
+                dob={dob}
+                maritalStatus={maritalStatus}
+                countries={countries}
+                setFirstName={setFirstName}
+                setCountry={setCountry}
+                setDob={setDob}
+                setMaritalStatus={setMaritalStatus}
                 height={height}
                 weight={weight}
                 // eslint-disable-next-line react/no-children-prop

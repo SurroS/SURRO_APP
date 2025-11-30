@@ -78,15 +78,15 @@ export default function ContactInformationScreen() {
   };
 
   // When state changes
-  const handleSelectState = async (selectedState: string) => {
-    setState(selectedState);
-    setLga(null);
-    setLgaList([]);
-    if (country && selectedState) {
-      const lgas = await getLgaByState(country.name, selectedState);
-      setLgaList(lgas);
-    }
-  };
+  // const handleSelectState = async (selectedState: string) => {
+  //   setState(selectedState);
+  //   setLga(null);
+  //   setLgaList([]);
+  //   if (country && selectedState) {
+  //     const lgas = await getLgaByState(country.name, selectedState);
+  //     setLgaList(lgas);
+  //   }
+  // };
 
   // Save data
   const handleSave = async () => {
@@ -167,21 +167,19 @@ export default function ContactInformationScreen() {
           />
 
           {/* State */}
-          <Dropdown
+          <TextInputField
             label="State"
-            placeholder="Select a state"
+            placeholder="Enter your state"
             value={state || ""}
-            options={statesList}
-            onSelect={handleSelectState}
+            onChangeText={setState}
           />
 
           {/* LGA */}
-          <Dropdown
+          <TextInputField
             label="Local Government Area"
-            placeholder="Select an LGA"
+            placeholder="Enter your LGA"
             value={lga || ""}
-            options={lgaList}
-            onSelect={setLga}
+            onChangeText={setLga}
           />
 
           {/* Street & Zip */}

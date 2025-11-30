@@ -1,9 +1,10 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Dimensions, SafeAreaView } from "react-native";
+import { Dimensions} from "react-native";
 import { Button, Text, View, YStack } from "tamagui";
 import { ScreenHeader } from "@/components/auth";
 import YoutubePlayer from "react-native-youtube-iframe";
+import { SafeAreaView } from "react-native-safe-area-context";
 import colors from "@/hooks/colors";
 
 // Screen dimensions

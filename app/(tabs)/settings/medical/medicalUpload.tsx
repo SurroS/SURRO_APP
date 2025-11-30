@@ -107,7 +107,7 @@ export default function MedicalUpload() {
         text2: "You can upload documents later",
       });
 
-      router.push("/settings/medical/summary");
+      router.push("/(tabs)/settings/medical/medicalHistorySummary");
     } catch (error: any) {
       Toast.show({
         text1: "Submission Failed",

@@ -4,6 +4,7 @@ import { YStack } from "tamagui";
 import TextInputField from "@/components/TextInputField";
 import Dropdown from "@/components/DropDown";
 import NumberInput from "@/components/NumberInput";
+import DateInput from "../DateInput";
 
 export default function SharedPersonalFields({
   fullName, 
@@ -24,23 +25,17 @@ export default function SharedPersonalFields({
         value={fullName}
         onChangeText={setFirstName}
       />
-
-      {/* <TextInputField
-        label="Last name"
-        placeholder="Last name"
-        value={lastName}
-        onChangeText={setLastName}
-      /> */}
+ 
 
       <Dropdown
-        label="Country"
+        label="Country of origin"
         placeholder="Select a country"
         value={country?.name || ""}
         options={countries}
         onSelect={setCountry}
       />
 
-      <NumberInput
+      <DateInput
         label="Date of birth"
         placeholder="DD/MM/YYYY"
         value={dob}

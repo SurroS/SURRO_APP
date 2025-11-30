@@ -65,7 +65,7 @@ const NumberInputSelect = ({
         {/* Value input */}
         <Input
           keyboardType="numeric"
-          value={String(value || "")}
+          value={String(value || "0")}
           onChangeText={handleTextChange}
           placeholder={placeholder || "Enter value"}
           textAlign="center"

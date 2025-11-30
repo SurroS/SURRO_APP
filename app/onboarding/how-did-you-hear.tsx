@@ -209,27 +209,26 @@ export default function HowDidYouHear() {
                   </Text>
                 </Button>
                 <Button
-  height={55}
-  borderRadius={8}
-  backgroundColor="#E6E6E6"
-  onPress={async () => {
-    // Set referral info to complete onboarding step
-    if (selectedSource) {
-      if (selectedSource === "Referral" && referralCode) {
-        setReferralInfo(selectedSource, referralCode);
-      } else {
-        setReferralInfo(selectedSource);
-      }
-    }
-    // Navigate to editBio screen
-    router.push("/(tabs)/home/editBio");
-  }}
->
-  <Text color="#0E0E55" fontWeight="600">
-    Skip
-  </Text>
-</Button>
-
+                  height={55}
+                  borderRadius={8}
+                  backgroundColor="#E6E6E6"
+                  onPress={async () => {
+                    // Set referral info to complete onboarding step
+                    if (selectedSource) {
+                      if (selectedSource === "Referral" && referralCode) {
+                        setReferralInfo(selectedSource, referralCode);
+                      } else {
+                        setReferralInfo(selectedSource);
+                      }
+                    }
+                    // Navigate to editBio screen
+                    router.push("/(auth)/signup");
+                  }}
+                >
+                  <Text color="#0E0E55" fontWeight="600">
+                    Skip
+                  </Text>
+                </Button>
               </YStack>
             </Card>
           </YStack>

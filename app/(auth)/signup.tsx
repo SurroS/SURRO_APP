@@ -73,7 +73,7 @@ export default function SignupScreen() {
           text2: "Welcome back!",
         });
 
-        router.replace("/(tabs)/home");
+        router.replace("/onboarding/learn-surrogacy-journey");
       } else {
         console.log("Google auth was rejected by user");
         Toast.show({
