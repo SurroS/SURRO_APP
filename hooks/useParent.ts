@@ -8,6 +8,8 @@ export const useParentProfile = () => {
     fetchParentProfile,
     createParentProfile,
     updateParentProfile,
+    saveParentSurrogate,
+    updateParentMatchPreference,
     clearParentProfile,
   } = useParentProfileStore();
 
@@ -18,6 +20,8 @@ export const useParentProfile = () => {
     fetchParentProfile,
     createParentProfile,
     updateParentProfile,
+    saveParentSurrogate,
+    updateParentMatchPreference,
     clearParentProfile,
   };
 };
