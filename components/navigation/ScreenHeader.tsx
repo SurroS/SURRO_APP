@@ -4,7 +4,7 @@ import { TouchableOpacity } from "react-native";
 import { XStack, YStack, Text } from "tamagui";
 
 interface ScreenHeaderProps {
-  title: string;
+  title?: string;
   onBackPress: () => void;
   style?: any;
 }

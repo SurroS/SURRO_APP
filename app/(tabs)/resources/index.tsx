@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { SafeAreaView, ScrollView, TextInput, Pressable } from "react-native";
+import { ScrollView, TextInput, Pressable } from "react-native";
 import { YStack, XStack, Text, View, Button } from "tamagui";
 import { Search, Filter, Bookmark } from "@tamagui/lucide-icons";
 import { ScreenHeader } from "@/components/auth";
 import ResourceCard from "@/components/resources/ResourceCard";
 import { router } from "expo-router";
 import colors from "@/hooks/colors";
+import { SafeAreaView } from "react-native-safe-area-context";
+import HelpServiceButton from "@/components/HelpServiceButton";
 
 export default function ResourceCentre() {
   const [tab, setTab] = useState("general");
@@ -149,8 +151,10 @@ export default function ResourceCentre() {
             No resources found.
           </Text>
         )}
+        
       </ScrollView>
-
+    {/* Floating Customer Support Button */}
+      <HelpServiceButton />
       {/* Filter modal */}
       {filterVisible && (
         <>
@@ -240,6 +244,7 @@ export default function ResourceCentre() {
             </XStack>
           </View>
         </>
+
       )}
     </SafeAreaView>
   );

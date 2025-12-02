@@ -6,6 +6,7 @@ import { useGallery } from "@/hooks/useGallery";
 import { useEffect } from "react";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
+import { Pressable } from "react-native";
 
 const Gallery = ({ style }: { style?: any }) => {
   const { images, isLoading, fetchImages } = useGallery();
@@ -41,73 +42,74 @@ const Gallery = ({ style }: { style?: any }) => {
   };
 
   return (
-    <Card
-      bordered
-      borderColor="#E5E5E5"
-      padding="$3"
-      borderRadius="$4"
-      style={[style, styles.card]}
-    >
-      {/* Header */}
-      <XStack alignItems="center" gap="$2">
-        <Images color="#0E0E55" size={18} />
-        <Text fontSize="$4" fontWeight="600" color="#0E0E55">
-          Gallery
-        </Text>
-      </XStack>
-
-      {/* Image Stack */}
-      <YStack
-        alignItems="center"
-        justifyContent="center"
-        flex={1}
-        width="100%"
-        height="100%"
-        position="relative"
+    <Pressable onPress={handleNavigate}>
+      <Card
+        bordered
+        borderColor="#E5E5E5"
+        padding="$3"
+        borderRadius="$4"
+        style={[style, styles.card]}
       >
-        {displayImages.map((img, index) => (
-          <RNImage
-            key={index}
-            source={typeof img === "string" ? { uri: img } : img}
-            style={{
-              width: "100%",
-              height: "100%",
-              borderRadius: 10,
-              position: "absolute",
-              top: 0,
-              left: index * 12,
-              zIndex: displayImages.length - index,
-              borderWidth: 2,
-              borderColor: "white",
-              shadowColor: "#000",
-              shadowOpacity: 0.15,
-              shadowOffset: { width: 0, height: 2 },
-              shadowRadius: 3,
-              backgroundColor: "#f5f5f5",
-            }}
-            resizeMode="cover"
-          />
-        ))}
+        {/* Header */}
+        <XStack alignItems="center" gap="$2">
+          <Images color="#0E0E55" size={18} />
+          <Text fontSize="$4" fontWeight="600" color="#0E0E55">
+            Gallery
+          </Text>
+        </XStack>
 
-        {/* Button overlay */}
-        <Button
-          size="$2"
-          position="absolute"
-          bottom={-10}
-          right={10}
-          zIndex={10000}
-          iconAfter={ChevronRight}
-          variant="outlined"
-          borderColor="#0E0E55"
-          borderRadius="$5"
-          color="#0E0E55"
-          onPress={handleNavigate}
-          disabled={isLoading}
+        {/* Image Stack */}
+        <YStack
+          alignItems="center"
+          justifyContent="center"
+          flex={1}
+          width="100%"
+          height="100%"
+          position="relative"
         >
-          <Text color="#0E0E55">{validImages.length}</Text>
-        </Button>
-      </YStack>
-    </Card>
+          {displayImages.map((img, index) => (
+            <RNImage
+              key={index}
+              source={typeof img === "string" ? { uri: img } : img}
+              style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: 10,
+                position: "absolute",
+                top: 0,
+                left: index * 12,
+                zIndex: displayImages.length - index,
+                borderWidth: 2,
+                borderColor: "white",
+                shadowColor: "#000",
+                shadowOpacity: 0.15,
+                shadowOffset: { width: 0, height: 2 },
+                shadowRadius: 3,
+                backgroundColor: "#f5f5f5",
+              }}
+              resizeMode="cover"
+            />
+          ))}
+
+          {/* Button overlay */}
+          <Button
+            size="$2"
+            position="absolute"
+            bottom={-10}
+            right={10}
+            zIndex={10000}
+            iconAfter={ChevronRight}
+            variant="outlined"
+            borderColor="#0E0E55"
+            borderRadius="$5"
+            color="#0E0E55"
+            disabled={isLoading}
+          >
+            <Text color="#0E0E55">{validImages.length}</Text>
+          </Button>
+        </YStack>
+      </Card>
+    </Pressable>
   );
 };
 
