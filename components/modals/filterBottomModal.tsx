@@ -9,6 +9,8 @@ import {
 } from "react-native";
 import { Button, YStack, XStack } from "tamagui";
 import { getAllCountries } from "@/utils/countries";
+import { useAuth } from "@/hooks/useAuth";
+import { useParentProfile } from "@/hooks/useParent";
 
 type FilterOptions = {
   country?: string;
@@ -36,6 +38,8 @@ export default function FilterModal({
   onClose,
   onApply,
 }: FilterModalProps) {
+  const { user } = useAuth();
+  const { updateParentMatchPreference } = useParentProfile();
   const [countries, setCountries] = useState<{ name: string }[]>([]);
   const [loadingCountries, setLoadingCountries] = useState<boolean>(true);
 
@@ -72,13 +76,26 @@ export default function FilterModal({
     setSelectedPregnancy([]);
   };
 
-  const applyFilters = () => {
-    onApply({
+  const applyFilters = async () => {
+    const filterOptions = {
       country: selectedCountry ?? undefined,
       religion: selectedReligion ?? undefined,
       race: selectedRace ?? undefined,
       pregnancyHistory: selectedPregnancy,
-    });
+    };
+
+    // Save match preferences if user is a parent
+    const isParent = user?.role?.trim() === "INTENDED_PARENT";
+    if (isParent) {
+      try {
+        await updateParentMatchPreference(filterOptions);
+      } catch (error: any) {
+        // Silently fail - don't block filter application if save fails
+        console.log("Failed to save match preferences:", error?.message);
+      }
+    }
+
+    onApply(filterOptions);
     onClose();
   };
 

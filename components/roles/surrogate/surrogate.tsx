@@ -32,7 +32,7 @@ export default function SurrogateScreen() {
   useEffect(() => {
     if (!isLoading) {
       const hasProfile = surrogateProfile !== null;
-      const needsCompletion = hasProfile && progress < 70;
+      const needsCompletion = hasProfile && progress < 100;
 
       if (!hasProfile || needsCompletion) {
         setShowProfileModal(true);
