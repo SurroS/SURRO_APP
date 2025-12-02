@@ -1,7 +1,7 @@
 import { StateCreator } from "zustand";
-import { 
-  getParentProfile, 
-  createParentProfile as createParentProfileApi, 
+import {
+  getParentProfile,
+  createParentProfile as createParentProfileApi,
   updateParentProfile as updateParentProfileApi,
   saveParentSurrogate as saveParentSurrogateApi,
   updateParentMatchPreference as updateParentMatchPreferenceApi

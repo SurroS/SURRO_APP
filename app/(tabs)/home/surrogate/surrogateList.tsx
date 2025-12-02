@@ -4,7 +4,6 @@ import {
   Text,
   Dimensions,
   Image,
-  Alert,
   PanResponder,
 } from "react-native";
 import Animated, {
@@ -23,6 +22,8 @@ import { router } from "expo-router";
 import colors from "@/hooks/colors";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
+import { useAuth } from "@/hooks/useAuth";
+import { useParentProfile } from "@/hooks/useParent";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const CARD_HEIGHT = SCREEN_HEIGHT * 0.55;
@@ -30,6 +31,8 @@ const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
 
 export default function SurrogateList() {
   const { surrogates, fetchSurrogates, isLoading } = useSurrogateStore();
+  const { user } = useAuth();
+  const { saveParentSurrogate } = useParentProfile();
   const [cardIndex, setCardIndex] = useState(0);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [filters, setFilters] = useState<any>([]);
@@ -90,15 +93,26 @@ export default function SurrogateList() {
     handleSwipe();
   }, [handleSwipe]);
 
-  const handleViewProfile = useCallback(() => {
+  const handleViewProfile = useCallback(async () => {
     const currentCard = filteredListRef.current[cardIndexRef.current];
     if (!currentCard) return;
+
+    // Save surrogate if user is a parent
+    const isParent = user?.role?.trim() === "INTENDED_PARENT";
+    if (isParent) {
+      try {
+        await saveParentSurrogate({ surrogateId: currentCard.id });
+      } catch (error: any) {
+        // Silently fail - don't block navigation if save fails
+        console.log("Failed to save surrogate:", error?.message);
+      }
+    }
 
     router.push({
       pathname: "/(tabs)/home/surrogate/surrogateProfileScreen",
       params: { id: currentCard.id },
     });
-  }, []);
+  }, [user, saveParentSurrogate]);
 
   const resetCardPosition = useCallback(() => {
     translateX.value = withSpring(0);
@@ -151,7 +165,7 @@ export default function SurrogateList() {
       );
     }
 
-    if (filteredList.length === 0 || cardIndex >= filteredList.length ||surrogates.length === 0  ) {
+    if (filteredList.length === 0 || cardIndex >= filteredList.length || surrogates.length === 0) {
       return (
         <YStack alignItems="center" justifyContent="center" flex={1}>
           <Image
@@ -162,7 +176,7 @@ export default function SurrogateList() {
           <Text style={{ fontSize: 18, marginVertical: 16 }}>
             No more profiles
           </Text>
-          <Button 
+          <Button
             marginLeft={10}
             backgroundColor={colors.primary}
             borderRadius={8}
