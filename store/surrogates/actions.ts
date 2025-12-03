@@ -4,7 +4,7 @@ import { getUsersByRole } from "@/services/profileApi";
 
 const fallbackSurrogates: Surrogate[] = [
   { id: "1", name: "Jane Doe", avatar: require("@/assets/images/image1.jpg"), age: "20", country: "Nigeria" },
-  { id: "2", name: "Mary Ann", avatar: require("@/assets/images/image2.jpg"), age: "20", country: "Nigeria" },
+  { id: "2", name: "Mary Ann", avatar: require("@/assets/images/image21.jpg"), age: "20", country: "Nigeria" },
   { id: "3", name: "Tina Joe", avatar: require("@/assets/images/image3.jpg"), age: "20", country: "Nigeria" },
 ];
 

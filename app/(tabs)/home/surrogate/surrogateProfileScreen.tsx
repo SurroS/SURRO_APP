@@ -27,7 +27,7 @@ import EmptyWalletModal from "@/components/modals/EmptyWalletModal";
 
 const SurrogateImages = [
   require("@/assets/images/image1.jpg"),
-  require("@/assets/images/image2.jpg"),
+  require("@/assets/images/image21.jpg"),
   require("@/assets/images/image3.jpg"),
 ];
 
