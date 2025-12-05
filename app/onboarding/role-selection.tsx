@@ -97,7 +97,9 @@ export default function RoleSelection() {
                 justifyContent="center"
                 alignItems="center"
                 borderWidth={2}
-                borderColor={selectedRole === item.key ? "$primary" : "#CFCFCF"}
+                borderColor={
+                  selectedRole === item.key ? colors.primary : "#CFCFCF"
+                }
                 backgroundColor="#FFFFFF"
               >
                 {selectedRole === item.key && (
@@ -105,7 +107,7 @@ export default function RoleSelection() {
                     width={12}
                     height={12}
                     borderRadius={6}
-                    backgroundColor="$primary"
+                    backgroundColor={colors.primary}
                   />
                 )}
               </YStack>

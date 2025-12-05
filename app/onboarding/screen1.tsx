@@ -51,9 +51,7 @@ const ImageCard = ({
   img2,
   header,
   message,
-  width = CARD_WIDTH_DEFAULT,
-  height = CARD_HEIGHT_DEFAULT,
-  marginRight = CARD_SPACING,
+  width = CARD_WIDTH_DEFAULT, 
 }: {
   img1: any;
   img2: any;
@@ -95,15 +93,14 @@ const ImageCard = ({
         fontSize={SCREEN_WIDTH * 0.05}
         fontWeight="bold"
         textAlign="center"
-        color="$primary"
+        color={colors.primary}
       >
         {header}
       </Text>
       <Text
-        fontSize={SCREEN_WIDTH * 0.035}
+        fontSize={"$3"}
         fontWeight="500"
-        textAlign="center"
-        lineHeight={SCREEN_HEIGHT * 0.02}
+        textAlign="center" 
         color="#737373"
       >
         {message}
