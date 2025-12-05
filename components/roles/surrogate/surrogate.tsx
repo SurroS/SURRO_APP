@@ -42,7 +42,7 @@ export default function SurrogateScreen() {
 
   return (
     <>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         <YStack flex={1} gap="$3">
           <ProfileData />
 

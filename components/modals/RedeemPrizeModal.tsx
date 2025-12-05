@@ -16,10 +16,11 @@ import {
   Dimensions,
 } from "react-native";
 
-import ReferralCard, { Referral } from "./ReferralCard";
-import SearchBox from "./SearchBox";
-import TabSwitcher from "./TabSwitcher";
-import SummaryCard from "./SummaryCard";
+import ReferralCard, { Referral } from "@/components/ReferralCard";
+import SearchBox from "@/components/SearchBox";
+import TabSwitcher from "@/components/TabSwitcher";
+import SummaryCard from "@/components/SummaryCard";
+import colors from "@/hooks/colors";
 
 interface Props {
   visible: boolean;
@@ -72,7 +73,7 @@ const RedeemPrizeModal: React.FC<Props> = ({
           key="content"
           width="100%"
           maxHeight={Dimensions.get("window").height * 0.9}
-          backgroundColor="$background"
+          backgroundColor={colors.background}
           borderTopLeftRadius={20}
           borderTopRightRadius={20}
           position="absolute"
@@ -154,7 +155,7 @@ const RedeemPrizeModal: React.FC<Props> = ({
                   height={FOOTER_HEIGHT}
                   justifyContent="center"
                   alignItems="center"
-                  backgroundColor="$background"
+                  backgroundColor={colors.background}
                   padding={12}
                 >
                   <Button

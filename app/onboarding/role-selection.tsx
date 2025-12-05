@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet } from "react-native";
 import { Button, Image, Text, XStack, YStack } from "tamagui";
+import colors from "@/hooks/colors";
 
 const ROLE_ITEMS = [
   {
@@ -23,12 +24,12 @@ const ROLE_ITEMS = [
   },
 ] as const;
 
-type RoleKey = typeof ROLE_ITEMS[number]["key"];
+type RoleKey = (typeof ROLE_ITEMS)[number]["key"];
 
 export default function RoleSelection() {
   const router = useRouter();
   const [selectedRole, setSelectedRole] = useState<RoleKey | null>(null);
-  const { setUser,user} = useAuth();
+  const { setUser, user } = useAuth();
 
   const onNext = () => {
     if (!selectedRole) return;
@@ -41,14 +42,14 @@ export default function RoleSelection() {
       role: selectedRole,
       isVerified: false,
     });
-console.log("Role from role", selectedRole)
-console.log("User from role",user)
+    console.log("Role from role", selectedRole);
+    console.log("User from role", user);
     // Navigate to "how did you hear" page
     router.push("/onboarding/how-did-you-hear");
   };
 
   return (
-    <YStack flex={1} padding="$4" marginTop="$5" backgroundColor="$background">
+    <YStack flex={1} padding="$4" marginTop="$5" backgroundColor={colors.white}>
       {/* Header */}
       <Text
         fontSize={22}
@@ -79,7 +80,12 @@ console.log("User from role",user)
             >
               <XStack alignItems="center" gap={12} style={{ flex: 1 }}>
                 <Image source={item.image} />
-                <Text fontSize={16} fontWeight="500" color="#111111" style={{ flexShrink: 1 }}>
+                <Text
+                  fontSize={16}
+                  fontWeight="500"
+                  color="#111111"
+                  style={{ flexShrink: 1 }}
+                >
                   {item.label}
                 </Text>
               </XStack>
@@ -122,7 +128,7 @@ console.log("User from role",user)
         <Text
           fontSize={16}
           fontWeight="600"
-          color={selectedRole ? "$background" : "#9E9E9E"}
+          color={selectedRole ? colors.white : "#9E9E9E"}
         >
           Next
         </Text>

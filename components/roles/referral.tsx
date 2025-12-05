@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { StyleSheet } from "react-native";
 import { Button, Card, Text, XStack, YStack } from "tamagui";
 import { useAuth } from "@/hooks/useAuth";
+import colors from "@/hooks/colors";
 
 const Referral = ({ style }: { style?: any }) => {
   const { user } = useAuth();
@@ -15,6 +16,7 @@ const Referral = ({ style }: { style?: any }) => {
   return (
     <Card
       bordered
+      backgroundColor={colors.white}
       borderColor="#E5E5E5"
       padding="$3"
       borderRadius="$4"

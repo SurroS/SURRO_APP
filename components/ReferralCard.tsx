@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { XStack, YStack, Text, Button, Dialog, Avatar } from "tamagui";
+import colors from "@/hooks/colors";
 
 export interface Referral {
   id: string; // unique per referral
@@ -22,7 +23,7 @@ const ReferralCard: React.FC<Props> = ({ referral }) => {
 
   return (
     <XStack
-      backgroundColor="$background"
+      backgroundColor={colors.white}
       borderRadius="$4"
       padding="$3"
       justifyContent="space-between"
@@ -32,7 +33,7 @@ const ReferralCard: React.FC<Props> = ({ referral }) => {
       {/* Left: Avatar + Email */}
       <XStack alignItems="center" gap={12}>
         <Avatar circular size="$3">
-          <Avatar.Fallback backgroundColor="$primary">
+          <Avatar.Fallback backgroundColor={colors.primary}>
             <Text fontSize={20} fontWeight="600">
               {referral.name[0]?.toUpperCase()}
             </Text>
@@ -51,7 +52,7 @@ const ReferralCard: React.FC<Props> = ({ referral }) => {
             <Button
               size="$3"
               borderRadius={8}
-              backgroundColor="$primary"
+              backgroundColor={colors.primary}
               key={`trigger-${referral.id}`}
             >
               <Text color="white">Redeem</Text>
@@ -62,7 +63,7 @@ const ReferralCard: React.FC<Props> = ({ referral }) => {
           <Dialog.Portal>
             <Dialog.Overlay
               key={`overlay-${referral.id}`}
-              backgroundColor="$primary"
+              backgroundColor={colors.primary}
               opacity={0.5}
             />
             <Dialog.Content
@@ -70,7 +71,7 @@ const ReferralCard: React.FC<Props> = ({ referral }) => {
               width={300}
               padding={16}
               borderRadius={12}
-              backgroundColor="$background"
+              backgroundColor={colors.white}
               // No absolute positioning → stays under trigger button
             >
               <YStack gap={12} alignItems="center">
@@ -94,7 +95,7 @@ const ReferralCard: React.FC<Props> = ({ referral }) => {
                   <Button
                     size="$3"
                     borderRadius={8}
-                    backgroundColor="$primary"
+                    backgroundColor={colors.white}
                     onPress={handleRedeem}
                     key={`confirm-${referral.id}`}
                   >

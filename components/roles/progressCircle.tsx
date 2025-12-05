@@ -1,3 +1,4 @@
+import colors from "@/hooks/colors";
 import { StyleSheet, ViewStyle } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { Card, Text, YStack } from "tamagui";
@@ -16,6 +17,7 @@ const ProgressMeter = ({ style, progress = 0 }: ProgressMeterProps) => {
     <Card
       bordered
       borderColor={"#E5E5E5"}
+      backgroundColor={colors.white}
       padding="$2"
       borderRadius="$4"
       alignItems="center"

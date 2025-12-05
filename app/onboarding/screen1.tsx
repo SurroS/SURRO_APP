@@ -1,5 +1,6 @@
 // app/onboarding/screen2.tsx
 
+import colors from "@/hooks/colors";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import { Dimensions, FlatList, ViewToken } from "react-native";
@@ -132,7 +133,7 @@ export default function Screen2() {
         alignItems: "center",
       }}
     > 
-      <YStack flex={1} backgroundColor="$background" paddingHorizontal="$4">
+      <YStack flex={1} backgroundColor={colors.white} paddingHorizontal="$4">
         {/* Header */}
         <YStack alignItems="center" paddingTop="$4">
           <Image
@@ -140,7 +141,7 @@ export default function Screen2() {
             width={SCREEN_WIDTH * 0.19}
             height={SCREEN_WIDTH * 0.19}
           />
-          <Text fontSize={22} fontWeight="800" color="$primary">
+          <Text fontSize={22} fontWeight="800" color={colors.primary}>
             SURRO
           </Text> 
         </YStack>
@@ -179,7 +180,7 @@ export default function Screen2() {
               width={index === activeIndex ? 20 : 8}
               height={8}
               borderRadius={20}
-              backgroundColor={index === activeIndex ? "$primary" : "$secondary"}
+              backgroundColor={index === activeIndex ? colors.primary : colors.secondry}
             />
           ))}
         </XStack>

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { useSurrogateStore } from "@/store/surrogates";
+import colors from "@/hooks/colors";
 
 const SurrogatePreview = ({ style }: { style?: any }) => {
   const { surrogates, isLoading, fetchSurrogates } = useSurrogateStore();
@@ -31,6 +32,7 @@ const SurrogatePreview = ({ style }: { style?: any }) => {
   return (
     <Card
       bordered
+      backgroundColor={colors.white}
       borderColor="#E5E5E5"
       padding="$3"
       borderRadius="$4"
@@ -64,7 +66,6 @@ const SurrogatePreview = ({ style }: { style?: any }) => {
               transform: [{ rotate: "-8deg" }],
             }}
             resizeMode="cover"
-            
           />
         ))}
 
