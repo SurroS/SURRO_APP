@@ -14,6 +14,7 @@ import { Conversation } from "@/types/chat";
 import { secureGet } from "@/utils/storage";
 import colors from "@/hooks/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
+import HelpServiceButton from "@/components/HelpServiceButton";
 
 export default function ChatListScreen() {
   const router = useRouter();
@@ -94,7 +95,12 @@ export default function ChatListScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
-      <YStack flex={1} paddingHorizontal={20} paddingTop={20} justifyContent="center">
+      <YStack
+        flex={1}
+        paddingHorizontal={20}
+        paddingTop={20}
+        justifyContent="center"
+      >
         <Text
           fontSize={20}
           fontWeight="700"
@@ -128,13 +134,7 @@ export default function ChatListScreen() {
       </YStack>
 
       {/* Floating Customer Support Button */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={handleSupportPress}
-        activeOpacity={0.8}
-      >
-        <Ionicons name="headset" size={26} color="#fff" />
-      </TouchableOpacity>
+      <HelpServiceButton />
     </SafeAreaView>
   );
 }

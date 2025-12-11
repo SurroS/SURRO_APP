@@ -2,7 +2,7 @@ import { ChevronDown } from "@tamagui/lucide-icons";
 import { useState, useEffect } from "react";
 import { ScrollView, StyleSheet, Pressable } from "react-native";
 import Animated from "react-native-reanimated";
-import { Accordion, Text, View, XStack, YStack } from "tamagui"; 
+import { Accordion, Text, View, XStack, YStack } from "tamagui";
 
 import About from "../about";
 import Contact from "../contact";
@@ -43,7 +43,11 @@ export default function ParentScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container} nestedScrollEnabled>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      nestedScrollEnabled
+      showsVerticalScrollIndicator={false}
+    >
       <YStack flex={1} gap="$3">
         {/* Profile */}
         <SafeRender fallback={<Text>Loading profile...</Text>}>
@@ -85,11 +89,6 @@ export default function ParentScreen() {
             <View onPress={ViewAgents} marginRight={5}>
               <AgentPreview style={{ height: 200, padding: 2, width: 150 }} />
             </View>
-            {/* <View marginRight={5}>
-              <SurrogatePreview
-                style={{ height: 200, padding: 2, width: 150 }}
-              />
-            </View> */}
           </SafeRender>
         </ScrollView>
 

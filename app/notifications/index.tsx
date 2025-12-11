@@ -8,6 +8,7 @@ import { Feather } from "@expo/vector-icons"; // <- react-native icon
 import NotificationItem from "@/components/notifications/NotificationItem";
 import { notifications } from "@/constants/notifications";
 import { Colors } from "@/constants/Colors";
+import colors from "@/hooks/colors";
 
 const NotificationScreen = () => {
   const router = useRouter();
@@ -16,7 +17,7 @@ const NotificationScreen = () => {
     <SafeAreaView style={{ flex: 1 }}>
       <YStack
         flex={1}
-        backgroundColor="$background"
+        backgroundColor={colors.white}
         paddingHorizontal="$4"
         paddingTop="$4"
         gap="$4"

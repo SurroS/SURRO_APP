@@ -1,67 +1,71 @@
 // stores/agent/agent.types.ts
 
-export interface AgentSocials {
-  facebook?: string;
-  x?: string;
-  instagram?: string;
-  tiktok?: string;
+export interface AgentCertification {
+  name: string;
+  valid: string; // e.g., "2025-12-31"
 }
 
 export interface AgentPerformance {
-  successfulMatches: number;
-  averageRating: number;
+  matches: number;
+  rating: number;
   responseTime: string; // e.g., "1 hour"
   activeCases: number;
 }
 
-export interface AgentAdditionalDetails {
-  languagesSpoken?: string;
-  yearsOfExperience?: string;
-  pregnancyHistory?: string;
-}
-
-export interface AgentServices {
-  matchingGuidance?: boolean;
-  legalOrMedicalCoordination?: boolean;
-  emotionalSupport?: boolean;
-  progressTracking?: boolean;
-}
-
-export interface AgentCertification {
-  title: string;
-  status: "Verified" | "Pending" | "Expired";
-}
-
 export interface AgentProfile {
   id: string;
-  name?:string
-  age:string|number
   userName?: string;
   fullName?: string;
-  dateOfBirth?: Date;
+  dateOfBirth?: string;
   country?: string;
-  isAvailable?: boolean;
-  profilePicture?: string;
-  avatar?: string; 
-
   about?: string;
-  performance?: AgentPerformance;
-  additionalDetails?: AgentAdditionalDetails;
-  socials?: AgentSocials;
-  services?: AgentServices;
-  certifications?: AgentCertification[];
+  isAvailable?: boolean;
   contactLocked?: boolean;
+  profilePicture?: string;
+  avatar?: string;
+
+  // Social profiles
+  facebookProfile?: string;
+  instagramProfile?: string;
+  twitterProfile?: string;
+  threadsProfile?: string;
+
+  // Compensation
+  compensation?: string;
+  negotiable?: string;
+
+  // Contact info
+  phone1?: string;
+  phone2?: string;
+  emergencyPhone?: string;
+  publicEmail?: string;
+
+  // Location
+  state?: string;
+  city?: string;
+  address?: string;
+
+  // Skills & experience
+  languages?: string[];
+  services?: string[];
+  certifications?: AgentCertification[];
+  performance?: AgentPerformance;
+
+  // Legacy fields for compatibility
+  name?: string;
+  age?: string | number;
 }
 
-
 export interface AgentProfileState {
-  agentProfile?: AgentProfile | null;
+  agentProfile: AgentProfile | null;
   isLoading: boolean;
   error: string | null;
 }
 
 export interface AgentProfileActions {
   setAgentProfile: (profile: AgentProfile) => void;
+  fetchAgentProfile: () => Promise<void>;
+  createAgentProfile: (data: Partial<AgentProfile>) => Promise<void>;
   updateAgentProfile: (changes: Partial<AgentProfile>) => Promise<void>;
   clearAgentProfile: () => void;
 }

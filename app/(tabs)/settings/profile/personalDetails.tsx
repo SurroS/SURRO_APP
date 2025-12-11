@@ -34,6 +34,7 @@ export default function PersonalInformationScreen() {
   const {
     agentProfile,
     updateAgentProfile,
+    fetchAgentProfile,
     isLoading: agentLoading,
   } = useAgentProfile();
 
@@ -61,6 +62,8 @@ export default function PersonalInformationScreen() {
       fetchProfile();
     } else if (Role === "INTENDED_PARENT" && !parentProfile) {
       fetchParentProfile();
+    } else if (Role === "AGENT" && !agentProfile) {
+      fetchAgentProfile();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -131,7 +134,7 @@ export default function PersonalInformationScreen() {
           type: "customError" as ToastType,
         });
         return;
-      } 
+      }
     } else if (Role === "INTENDED_PARENT" || Role === "AGENT") {
       if (!firstName || !country || !dob || !maritalStatus) {
         Toast.show({
@@ -169,7 +172,7 @@ export default function PersonalInformationScreen() {
         const profileData = {
           fullName: firstName.trim(),
           country: country.name,
-          dateOfBirth: dob ? new Date(dob) : undefined,
+          dateOfBirth: dob || undefined,
           maritalStatus,
         };
         await updateAgentProfile(profileData);

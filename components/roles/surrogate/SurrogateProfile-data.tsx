@@ -48,7 +48,7 @@ const ProfileData = () => {
         <XStack alignItems="center" gap="$2">
           <Feather name="calendar" size={19} color="#666" />
           <Text color="black" fontSize="$3">
-            {surrogateProfile?.dateOfBirth || "DOB not set"}
+            {surrogateProfile?.dateOfBirth?.split("T00") || "DOB not set"}
           </Text>
         </XStack>
 

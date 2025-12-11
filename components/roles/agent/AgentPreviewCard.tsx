@@ -1,15 +1,16 @@
 import { Image as RNImage, StyleSheet } from "react-native";
-import { Card, Text, XStack, YStack } from "tamagui"; 
+import { Card, Text, XStack, YStack } from "tamagui";
 import { useEffect } from "react";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { useAgentListStore } from "@/store/agents";
+import colors from "@/hooks/colors";
 
 const AgentPreview = ({ style }: { style?: any }) => {
   const { agents, isLoading, fetchAgents } = useAgentListStore();
 
   useEffect(() => {
-    console.log("Agents =", agents)
+    console.log("Agents =", agents);
     fetchAgents(true).catch((err: any) => {
       Toast.show({
         text1: "Failed to load agents",
@@ -33,6 +34,7 @@ const AgentPreview = ({ style }: { style?: any }) => {
     <Card
       bordered
       borderColor="#E5E5E5"
+      backgroundColor={colors.white}
       padding="$3"
       borderRadius="$4"
       style={[style, styles.card]}

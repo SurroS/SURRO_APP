@@ -6,6 +6,8 @@ export const useAgentProfile = () => {
     isLoading,
     error,
     setAgentProfile,
+    fetchAgentProfile,
+    createAgentProfile,
     updateAgentProfile,
     clearAgentProfile,
   } = useAgentProfileStore();
@@ -18,6 +20,8 @@ export const useAgentProfile = () => {
 
     // Actions
     setAgentProfile,
+    fetchAgentProfile,
+    createAgentProfile,
     updateAgentProfile,
     clearAgentProfile,
   };

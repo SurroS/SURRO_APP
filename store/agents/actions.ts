@@ -1,7 +1,7 @@
-// store/profile/agents/listSlice.ts
+// store/agents/actions.ts
 import { StateCreator } from "zustand";
 import { AgentProfile } from "../profile/agent/types";
-import { getUsersByRole } from "@/services/profileApi";
+import { getAllAgents, getAgentById } from "@/services/profileApi";
 
 const fallbackAgent: AgentProfile[] = [
   {
@@ -29,11 +29,14 @@ const fallbackAgent: AgentProfile[] = [
 
 export interface AgentListStore {
   agents: AgentProfile[];
+  selectedAgent: AgentProfile | null;
   isLoading: boolean;
   error: string | null;
 
   fetchAgents: (showToast?: boolean) => Promise<void>;
+  fetchAgentById: (agentId: string) => Promise<AgentProfile | null>;
   setAgents: (data: AgentProfile[]) => void;
+  setSelectedAgent: (agent: AgentProfile | null) => void;
   setLoading: (val: boolean) => void;
   setError: (err: string | null) => void;
 }
@@ -45,6 +48,7 @@ export const createAgentListSlice: StateCreator<
   AgentListStore
 > = (set) => ({
   agents: [],
+  selectedAgent: null,
   isLoading: false,
   error: null,
 
@@ -52,23 +56,15 @@ export const createAgentListSlice: StateCreator<
     try {
       set({ isLoading: true });
 
-      const res = await getUsersByRole("AGENT");
+      const res = await getAllAgents();
+      const agents: AgentProfile[] = res.data?.data || res.data?.agents || [];
 
-      //let Agents: AgentProfile[] = res.data?.users ||[]; //this works
-
-      let Agents: AgentProfile[] = [];
-      console.log(
-        "single agent array",
-        Agents.map((agent, index) => agent)
-      );
-
-      if (Array.isArray(Agents) && Agents.length > 0) {
+      if (Array.isArray(agents) && agents.length > 0) {
         set({
-          agents: Agents,
+          agents: agents,
           isLoading: false,
           error: null,
         });
-        console.log("Agents loaded from API:", Agents);
         return;
       }
 
@@ -78,10 +74,7 @@ export const createAgentListSlice: StateCreator<
         isLoading: false,
         error: null,
       });
-      console.log("API returned no usable data → using fallback.");
     } catch (err: any) {
-      console.error("Error fetching agents:", err);
-
       set({
         agents: fallbackAgent,
         isLoading: false,
@@ -94,7 +87,31 @@ export const createAgentListSlice: StateCreator<
     }
   },
 
+  fetchAgentById: async (agentId: string) => {
+    try {
+      set({ isLoading: true });
+
+      const res = await getAgentById(agentId);
+      const agent: AgentProfile = res.data?.data || res.data;
+
+      set({
+        selectedAgent: agent,
+        isLoading: false,
+        error: null,
+      });
+
+      return agent;
+    } catch (err: any) {
+      set({
+        isLoading: false,
+        error: err.message || "Failed to fetch agent",
+      });
+      return null;
+    }
+  },
+
   setAgents: (data) => set({ agents: data }),
+  setSelectedAgent: (agent) => set({ selectedAgent: agent }),
   setLoading: (val) => set({ isLoading: val }),
   setError: (err) => set({ error: err }),
 });

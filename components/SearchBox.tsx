@@ -1,6 +1,8 @@
 import React from "react";
 import { Input, XStack } from "tamagui";
 import { Search } from "@tamagui/lucide-icons";
+import { color } from "@tamagui/themes";
+import colors from "@/hooks/colors";
 
 type SearchBoxProps = {
   value: string;
@@ -13,13 +15,13 @@ const SearchBox: React.FC<SearchBoxProps> = ({ value, onChangeText, placeholder 
     width="100%"
     height={44}
     borderRadius={10}
-    backgroundColor="$grey"
+    backgroundColor={colors.gray}
     alignItems="center"
     paddingHorizontal={12}
     marginBottom={12}
     gap={8}
   >
-    <Search size={18} color="$text" />
+    <Search size={18} color={colors.text} />
     <Input
       value={value}
       onChangeText={onChangeText}
@@ -29,7 +31,7 @@ const SearchBox: React.FC<SearchBoxProps> = ({ value, onChangeText, placeholder 
       borderWidth={0}
       backgroundColor="transparent"
       fontSize={15}
-      color="$text"
+      color={colors.text}
     />
   </XStack>
 );

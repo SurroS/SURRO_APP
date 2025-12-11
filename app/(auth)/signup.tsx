@@ -19,13 +19,9 @@ import { ScreenHeader } from "../../components/navigation/ScreenHeader";
 import { SocialButton } from "../../components/auth/SocialButton";
 import { useSignupForm } from "../../hooks/auth/useSignupForm";
 
-import {
-  GoogleSignin,
-  isErrorWithCode,
-  isSuccessResponse,
-  statusCodes,
-} from "@react-native-google-signin/google-signin";
+import { GoogleSignin, statusCodes } from "@react-native-google-signin/google-signin";
 
+// Configure Google Sign-In
 GoogleSignin.configure({
   iosClientId: process.env.GOOGLE_IOS_CLIENT_ID,
   webClientId: process.env.GOOGLE_WEB_CLIENT_ID,
@@ -36,93 +32,75 @@ GoogleSignin.configure({
 export default function SignupScreen() {
   const router = useRouter();
   const { signupFormData, errors, updateField, validateForm } = useSignupForm();
-  const { register, googleLogin, appleLogin, isLoading, error, requiresOtp } =
-    useAuth();
+  const { register, googleLogin, isLoading } = useAuth();
 
+  // Handle Google Sign-Up
   const handleGoogleSignup = async () => {
     try {
       await GoogleSignin.hasPlayServices();
-      const response = await GoogleSignin.signIn();
+      const userInfo = await GoogleSignin.signIn();
 
-      if (isSuccessResponse(response)) {
-        let idToken = response.data?.idToken;
+      let idToken = userInfo.idToken;
+      if (!idToken) {
+        const tokens = await GoogleSignin.getTokens();
+        idToken = tokens.idToken;
+      }
+      if (!idToken) throw new Error("Google returned null idToken");
 
-        // Sometimes idToken isn’t directly included
-        if (!idToken) {
-          const tokens = await GoogleSignin.getTokens();
-          idToken = tokens.idToken;
-        }
+      console.log("====== GOOGLE SIGNUP SUCCESS ======");
+      console.log("ID Token:", idToken);
+      console.log("User Info:", userInfo.user);
 
-        if (!idToken) {
-          throw new Error("Google returned null idToken");
-        }
+      // Call your backend action
+      await googleLogin({
+        idToken,
+        role: signupFormData?.role,
+      });
 
-        console.log("====== GOOGLE LOGIN SUCCESS ======");
-        console.log("ID Token:", idToken);
-        console.log("User Info:", response.data?.user);
+      Toast.show({
+        text1: "Google Sign-Up Success",
+        type: "customSuccess" as ToastType,
+        text2: "Welcome!",
+      });
 
-        // Call the store action (handles backend + state)
-        await googleLogin({
-          idToken,
-          role: signupFormData?.role, // Only used if signing up
-        });
+      router.replace("/onboarding/learn-surrogacy-journey");
+    } catch (error: any) {
+      console.error("Google Sign-In error:", error);
 
-        Toast.show({
-          text1: "Google Sign-In Success",
-          type: "customSuccess" as ToastType,
-          text2: "Welcome back!",
-        });
-
-        router.replace("/onboarding/learn-surrogacy-journey");
-      } else {
-        console.log("Google auth was rejected by user");
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         Toast.show({
           text1: "Sign-in cancelled",
           type: "customError" as ToastType,
           text2: "You cancelled the Google sign-in process.",
         });
-      }
-    } catch (error) {
-      if (isErrorWithCode(error)) {
-        switch (error.code) {
-          case statusCodes.IN_PROGRESS:
-            Toast.show({
-              text1: "Google Sign-in in progress",
-              type: "customWarning" as ToastType,
-              text2: "Please wait while sign-in completes.",
-            });
-            break;
-          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-            Toast.show({
-              text1: "Play Services not available",
-              type: "customError" as ToastType,
-              text2: "Your Google Play Services may be outdated.",
-            });
-            break;
-          default:
-            console.log("Google Sign-In error:", error);
-            Toast.show({
-              text1: "Google Sign-in failed",
-              type: "customError" as ToastType,
-              text2: "An unexpected error occurred.",
-            });
-        }
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        Toast.show({
+          text1: "Google Sign-in in progress",
+          type: "customWarning" as ToastType,
+          text2: "Please wait while sign-in completes.",
+        });
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        Toast.show({
+          text1: "Play Services not available",
+          type: "customError" as ToastType,
+          text2: "Your Google Play Services may be outdated.",
+        });
       } else {
-        console.log("Unknown Google Sign-In error:", error);
         Toast.show({
           text1: "Sign-in failed",
           type: "customError" as ToastType,
-          text2: "Unknown error occurred during Google login",
+          text2: "An unexpected error occurred.",
         });
       }
     }
   };
 
+  // Regular email/password signup
   const handleSignup = async () => {
-    if (!validateForm()) return; // stop if form is invalid
+    if (!validateForm()) return;
     try {
-      await register(signupFormData); // attempt registration
-      router.push("/(auth)/otp"); // replace with your actual OTP route
+      await register(signupFormData);
+      router.push("/(auth)/otp");
     } catch (err) {
       console.error("Signup error:", err);
       Toast.show({

@@ -8,6 +8,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, YStack, Spinner } from "tamagui";
 import { Pressable } from "react-native";
+import HelpServiceButton from "@/components/HelpServiceButton";
 
 export default function HomeIndex() {
   const Role = useAuth().user?.role?.trim(); // trim in case of trailing spaces
@@ -36,6 +37,9 @@ export default function HomeIndex() {
             <Spinner size="large" />
           </YStack>
         )}
+
+            {/* Floating Customer Support Button */}
+              <HelpServiceButton />
 
       </SafeAreaView>
     </YStack>

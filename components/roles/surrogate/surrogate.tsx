@@ -39,23 +39,10 @@ export default function SurrogateScreen() {
       }
     }
   }, [surrogateProfile, progress, isLoading]);
-  // Example step tracking
-  // const steps: Step[] = [
-  //   { label: "Complete your profile", route: "/profile/edit", done: true },
-  //   {
-  //     label: "Set your surrogacy experience",
-  //     route: "/settings/profile/experienceIntro",
-  //     done: false,
-  //   },
-  //   { label: "Verify your identity", route: "/settings/kyc", done: false },
-  // ];
-
-  // //  Check if all steps are done
-  // const allStepsDone = steps.every((s) => s.done);
 
   return (
     <>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         <YStack flex={1} gap="$3">
           <ProfileData />
 

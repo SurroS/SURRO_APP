@@ -4,12 +4,17 @@ import {
   createParentProfile as createParentProfileApi,
   updateParentProfile as updateParentProfileApi,
   saveParentSurrogate as saveParentSurrogateApi,
-  updateParentMatchPreference as updateParentMatchPreferenceApi
+  removeSavedSurrogate as removeSavedSurrogateApi,
+  getSavedSurrogates as getSavedSurrogatesApi,
+  updateParentMatchPreference as updateParentMatchPreferenceApi,
+  getParentMatches as getParentMatchesApi
 } from "@/services/profileApi";
 import { ParentProfileStore } from "./types";
 
 export const createParentProfileSlice: StateCreator<ParentProfileStore> = (set, get) => ({
   parentProfile: null,
+  savedSurrogates: [],
+  matches: [],
   isLoading: false,
   error: null,
 
@@ -38,19 +43,18 @@ export const createParentProfileSlice: StateCreator<ParentProfileStore> = (set, 
   updateParentProfile: async (data) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await updateParentProfileApi(data);
-      set({ parentProfile: res.data.data, isLoading: false });
-    } catch (err: any) {
-      set({ error: err.message, isLoading: false });
-    }
-  },
+      const currentProfile = get().parentProfile;
+      let res;
 
-  saveParentSurrogate: async (surrogateData) => {
-    set({ isLoading: true, error: null });
-    try {
-      const res = await saveParentSurrogateApi(surrogateData);
-      set({ isLoading: false });
-      return res.data;
+      if (currentProfile) {
+        // Profile exists, update it
+        res = await updateParentProfileApi(data);
+      } else {
+        // No profile, create one
+        res = await createParentProfileApi(data);
+      }
+
+      set({ parentProfile: res.data.data, isLoading: false });
     } catch (err: any) {
       set({ error: err.message, isLoading: false });
       throw err;
@@ -69,5 +73,57 @@ export const createParentProfileSlice: StateCreator<ParentProfileStore> = (set, 
     }
   },
 
-  clearParentProfile: () => set({ parentProfile: null }),
+  fetchParentMatches: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const res = await getParentMatchesApi();
+      set({ matches: res.data.data, isLoading: false });
+      return res.data.data;
+    } catch (err: any) {
+      set({ error: err.message, isLoading: false });
+      throw err;
+    }
+  },
+
+  saveParentSurrogate: async (surrogateData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const res = await saveParentSurrogateApi(surrogateData);
+      set({ isLoading: false });
+      return res.data;
+    } catch (err: any) {
+      set({ error: err.message, isLoading: false });
+      throw err;
+    }
+  },
+
+  removeSavedSurrogate: async (surrogateId) => {
+    set({ isLoading: true, error: null });
+    try {
+      await removeSavedSurrogateApi(surrogateId);
+      // Remove from local state
+      const currentSaved = get().savedSurrogates;
+      set({
+        savedSurrogates: currentSaved.filter((s: any) => s.id !== surrogateId),
+        isLoading: false
+      });
+    } catch (err: any) {
+      set({ error: err.message, isLoading: false });
+      throw err;
+    }
+  },
+
+  fetchSavedSurrogates: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const res = await getSavedSurrogatesApi();
+      set({ savedSurrogates: res.data.data, isLoading: false });
+      return res.data.data;
+    } catch (err: any) {
+      set({ error: err.message, isLoading: false });
+      throw err;
+    }
+  },
+
+  clearParentProfile: () => set({ parentProfile: null, savedSurrogates: [], matches: [] }),
 });

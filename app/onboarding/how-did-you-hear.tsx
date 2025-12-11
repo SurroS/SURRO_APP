@@ -6,6 +6,7 @@ import { TextInput, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Card, Input, Text, XStack, YStack, ScrollView } from "tamagui";
 import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
+import colors from "@/hooks/colors";
 
 const SourceOption = ({ item, isSelected, onPress }: any) => (
   <Pressable
@@ -142,9 +143,9 @@ export default function HowDidYouHear() {
 
   return (
     <KeyboardAvoidingWrapper>
-      <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
         <ScrollView>
-          <YStack flex={1} paddingHorizontal={16}>
+          <YStack flex={1} padding={16} >
             <Text
               fontSize={23}
               lineHeight={32}
@@ -160,6 +161,7 @@ export default function HowDidYouHear() {
               width="100%"
               maxWidth={500}
               alignSelf="center"
+              backgroundColor={colors.background}
               padding={12}
               borderRadius={12}
             >

@@ -86,18 +86,32 @@ export const uploadEndometriumImage = async (imageData: FormData) => {
 // ----------------------------------------------------
 //  AGENT
 // ----------------------------------------------------
+
+// POST /agents/profile - Create agent profile
 export const createAgentProfile = (profileData: any) =>
   makeAuthenticatedProfileRequest("POST", "/agents/profile", profileData);
 
+// GET /agents/profile - Get current logged-in Agent Profile
+export const getAgentProfile = () =>
+  makeAuthenticatedProfileRequest("GET", "/agents/profile");
+
+// PATCH /agents/profile - Update Agent Profile details
 export const updateAgentProfile = (profileData: any) =>
   makeAuthenticatedProfileRequest("PATCH", "/agents/profile", profileData);
 
-export const getAgentProfile = () =>
-  makeAuthenticatedProfileRequest("GET", "/agents/profile/me");
+// GET /agents - List all available agents
+export const getAllAgents = () =>
+  makeAuthenticatedProfileRequest("GET", "/agents");
+
+// GET /agents/{id} - Get a specific agent by Profile ID
+export const getAgentById = (agentId: string) =>
+  makeAuthenticatedProfileRequest("GET", `/agents/${agentId}`);
 
 // ----------------------------------------------------
 // PARENT (INTENDED PARENTS)
 // ----------------------------------------------------
+
+// POST /intended-parents/profile - Submit intended parent profile
 export const createParentProfile = (profileData: any) =>
   makeAuthenticatedProfileRequest(
     "POST",
@@ -105,27 +119,47 @@ export const createParentProfile = (profileData: any) =>
     profileData
   );
 
+// PATCH /intended-parents/profile - Update intended parent profile (partial update)
 export const updateParentProfile = (profileData: any) =>
   makeAuthenticatedProfileRequest(
     "PATCH",
-    "/intended-parents/match",
+    "/intended-parents/profile",
     profileData
   );
 
-  export const saveParentSurrogate = (profileData: any) =>
+// GET /intended-parents/profile/me - Get current intended parent profile
+export const getParentProfile = () =>
+  makeAuthenticatedProfileRequest("GET", "/intended-parents/profile/me");
+
+// PATCH /intended-parents/match-preferences - Update match preferences
+export const updateParentMatchPreference = (preferenceData: any) =>
+  makeAuthenticatedProfileRequest(
+    "PATCH",
+    "/intended-parents/match-preferences",
+    preferenceData
+  );
+
+// GET /intended-parents/matches - Get surrogate matches for intended parent
+export const getParentMatches = () =>
+  makeAuthenticatedProfileRequest("GET", "/intended-parents/matches");
+
+// POST /intended-parents/save - Save a surrogate to favorites
+export const saveParentSurrogate = (surrogateData: { surrogateId: string }) =>
   makeAuthenticatedProfileRequest(
     "POST",
     "/intended-parents/save",
-    profileData
-  );
-export const updateParentMatchPreference = (profileData: any) =>
-  makeAuthenticatedProfileRequest(
-    "POST",
-    "/intended-parents/match-preferences",
-    profileData
+    surrogateData
   );
 
-export const getParentProfile = () =>
-  makeAuthenticatedProfileRequest("GET", "/parents/profile/me");
+// DELETE /intended-parents/save/{id} - Remove a saved surrogate
+export const removeSavedSurrogate = (surrogateId: string) =>
+  makeAuthenticatedProfileRequest(
+    "DELETE",
+    `/intended-parents/save/${surrogateId}`
+  );
+
+// GET /intended-parents/saved - Get all saved surrogates
+export const getSavedSurrogates = () =>
+  makeAuthenticatedProfileRequest("GET", "/intended-parents/saved");
 
 export default profileApi;

@@ -2,6 +2,11 @@
 
 import { StateCreator } from "zustand";
 import { AgentProfileStore } from "./types";
+import {
+  getAgentProfile,
+  createAgentProfile as createAgentProfileApi,
+  updateAgentProfile as updateAgentProfileApi,
+} from "@/services/profileApi";
 
 export const createAgentProfileSlice: StateCreator<
   AgentProfileStore,
@@ -22,27 +27,44 @@ export const createAgentProfileSlice: StateCreator<
       error: null,
     }),
 
-  updateAgentProfile: async (changes) => {
-    const current = get().agentProfile;
-    if (!current) return;
-
+  fetchAgentProfile: async () => {
+    set({ isLoading: true, error: null });
     try {
-      set({ isLoading: true });
+      const res = await getAgentProfile();
+      set({ agentProfile: res.data.data, isLoading: false });
+    } catch (err: any) {
+      set({ error: err.message, isLoading: false });
+    }
+  },
 
-      const updated = { ...current, ...changes };
+  createAgentProfile: async (data) => {
+    set({ isLoading: true, error: null });
+    try {
+      const res = await createAgentProfileApi(data);
+      set({ agentProfile: res.data.data, isLoading: false });
+    } catch (err: any) {
+      set({ error: err.message, isLoading: false });
+    }
+  },
 
-      // await api.updateProfile(updated);
+  updateAgentProfile: async (changes) => {
+    set({ isLoading: true, error: null });
+    try {
+      const currentProfile = get().agentProfile;
+      let res;
 
-      set({
-        agentProfile: updated,
-        isLoading: false,
-        error: null,
-      });
-    } catch {
-      set({
-        isLoading: false,
-        error: "Failed to update agent profile",
-      });
+      if (currentProfile) {
+        // Profile exists, update it
+        res = await updateAgentProfileApi(changes);
+      } else {
+        // No profile, create one
+        res = await createAgentProfileApi(changes);
+      }
+
+      set({ agentProfile: res.data.data, isLoading: false });
+    } catch (err: any) {
+      set({ error: err.message, isLoading: false });
+      throw err;
     }
   },
 

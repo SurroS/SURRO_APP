@@ -88,7 +88,12 @@ export default function FilterModal({
     const isParent = user?.role?.trim() === "INTENDED_PARENT";
     if (isParent) {
       try {
-        await updateParentMatchPreference(filterOptions);
+        // Map filter options to API match preferences format
+        const matchPreferences = {
+          matchCountry: selectedCountry ?? undefined,
+          matchReligion: selectedReligion ?? undefined,
+        };
+        await updateParentMatchPreference(matchPreferences);
       } catch (error: any) {
         // Silently fail - don't block filter application if save fails
         console.log("Failed to save match preferences:", error?.message);
