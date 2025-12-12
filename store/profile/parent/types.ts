@@ -20,6 +20,8 @@ export interface ParentProfileActions {
   fetchParentProfile: () => Promise<void>;
   createParentProfile: (data: any) => Promise<void>;
   updateParentProfile: (changes: Partial<ParentProfile>) => Promise<void>;
+  saveParentSurrogate: (profileData: any) => Promise<any>;
+  updateParentMatchPreference: (preferenceData: any) => Promise<any>;
   clearParentProfile: () => void;
 }
 
