@@ -4,16 +4,16 @@ import { Button } from "tamagui";
 import Entypo from "@expo/vector-icons/Entypo";
 import colors from "@/hooks/colors";
 
-
 interface Props {
   name: string;
   username: string;
   location: string;
   age: number;
+  city?: string;
 
   maritalStatus: string;
-  height: string; // "5ft 7in" or "170cm"
-  weight: string; // "70kg"
+  height?: string;
+  weight?: string;
   currency?: any;
 
   compensation: number;
@@ -27,6 +27,7 @@ export default function HeaderInfo({
   name,
   username,
   location,
+  city,
   age,
   maritalStatus,
   height,
@@ -47,7 +48,9 @@ export default function HeaderInfo({
 
       {/* LOCATION + AGE */}
       <View style={styles.locationRow}>
-        <Text style={styles.locationText}>{location}</Text>
+        <Text style={styles.locationText}>
+          {location} {city}
+        </Text>
         <Text style={styles.dot}>•</Text>
         <Text style={styles.locationText}>{age} Years</Text>
       </View>

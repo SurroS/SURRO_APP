@@ -1,7 +1,6 @@
-// stores/agent/agent.actions.ts
-
 import { StateCreator } from "zustand";
-import { AgentProfileStore } from "./types";
+import { AgentProfileStore, AgentProfile } from "./types";
+import { getAllAgents } from "@/services/profileApi";
 
 export const createAgentProfileSlice: StateCreator<
   AgentProfileStore,
@@ -9,47 +8,59 @@ export const createAgentProfileSlice: StateCreator<
   [],
   AgentProfileStore
 > = (set, get) => ({
+  //------------------------------
   // STATE
+  //------------------------------
   agentProfile: null,
+  agents: [],
   isLoading: false,
   error: null,
 
+  //------------------------------
   // ACTIONS
-  setAgentProfile: (profile) =>
-    set({
-      agentProfile: profile,
-      isLoading: false,
-      error: null,
-    }),
+  //------------------------------
+  setLoading: (val) => set({ isLoading: val }),
 
-  updateAgentProfile: async (changes) => {
+  setError: (err) => set({ error: err }),
+
+  setAgentProfile: (profile) => set({ agentProfile: profile }),
+
+  updateAgentProfile: async (changes: Partial<AgentProfile>) => {
     const current = get().agentProfile;
     if (!current) return;
 
-    try {
-      set({ isLoading: true });
-
-      const updated = { ...current, ...changes };
-
-      // await api.updateProfile(updated);
-
-      set({
-        agentProfile: updated,
-        isLoading: false,
-        error: null,
-      });
-    } catch {
-      set({
-        isLoading: false,
-        error: "Failed to update agent profile",
-      });
-    }
+    set({
+      agentProfile: {
+        ...current,
+        ...changes,
+      },
+    });
   },
 
-  clearAgentProfile: () =>
-    set({
-      agentProfile: null,
-      isLoading: false,
-      error: null,
-    }),
+  clearAgentProfile: () => set({ agentProfile: null }),
+
+  setAgents: (list) => set({ agents: list }),
+
+  //------------------------------
+  // API
+  //------------------------------
+  fetchAgents: async () => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const res = await getAllAgents()
+
+      const data = await res.data;
+
+      if (!res) {
+        throw new Error(data?.message || "Failed to fetch agents");
+      }
+
+      set({ agents: data });
+    } catch (err: any) {
+      set({ error: err.message });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 });

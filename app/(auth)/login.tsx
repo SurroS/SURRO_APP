@@ -48,7 +48,7 @@ export default function LoginScreen() {
       console.log("ID Token:", idToken);
       console.log("User Info:", userInfo.user);
 
-      // Call your backend login/signup
+     
       await googleLogin({
         idToken,
         role: signupFormData?.role,

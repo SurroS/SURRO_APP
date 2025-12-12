@@ -7,8 +7,7 @@ import { TamaguiProvider } from "tamagui";
 import ToastManager from "toastify-react-native";
 import config from "../tamagui.config";
 import toastConfig from "@/components/toastConfig";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { GestureHandlerRootView } from "react-native-gesture-handler"; 
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -35,6 +34,7 @@ export default function RootLayout() {
             animationStyle="slide"
             isRTL={true}
           />
+          
         </TamaguiProvider>
       </KeyboardProvider>
     </GestureHandlerRootView>

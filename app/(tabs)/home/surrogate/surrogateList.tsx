@@ -1,11 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import {
-  View,
-  Text,
-  Dimensions,
-  Image,
-  PanResponder,
-} from "react-native";
+import { View, Text, Dimensions, Image, PanResponder } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -97,15 +91,12 @@ export default function SurrogateList() {
     const currentCard = filteredListRef.current[cardIndexRef.current];
     if (!currentCard) return;
 
-    // Save surrogate if user is a parent
     const isParent = user?.role?.trim() === "INTENDED_PARENT";
+
     if (isParent) {
       try {
         await saveParentSurrogate({ surrogateId: currentCard.id });
-      } catch (error: any) {
-        // Silently fail - don't block navigation if save fails
-        console.log("Failed to save surrogate:", error?.message);
-      }
+      } catch {}
     }
 
     router.push({
@@ -165,7 +156,11 @@ export default function SurrogateList() {
       );
     }
 
-    if (filteredList.length === 0 || cardIndex >= filteredList.length || surrogates.length === 0) {
+    if (
+      filteredList.length === 0 ||
+      cardIndex >= filteredList.length ||
+      surrogates.length === 0
+    ) {
       return (
         <YStack alignItems="center" justifyContent="center" flex={1}>
           <Image

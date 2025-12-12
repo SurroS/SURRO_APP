@@ -1,5 +1,5 @@
 import { Image as RNImage, StyleSheet } from "react-native";
-import { Button, Card, Text, XStack, YStack } from "tamagui";
+import { Card, Text, XStack, YStack } from "tamagui";
 import { useEffect } from "react";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
@@ -45,31 +45,31 @@ const SurrogatePreview = ({ style }: { style?: any }) => {
         </Text>
       </XStack>
 
-      {/* Avatars Stack */}
-      <YStack alignItems="center" justifyContent="center" flex={1} width="100%">
+      {/* Avatar Stack */}
+      <YStack
+        alignItems="center"
+        justifyContent="center"
+        width="100%"
+        height={110}
+        overflow="visible"
+      >
         {displayAvatars.map((img, index) => (
           <RNImage
             key={index}
             source={typeof img === "string" ? { uri: img } : img}
-            style={{
-              width: "85%",
-              height: "100%",
-              position: "absolute",
-              left: index * 8,
-              zIndex: displayAvatars.length - index,
-              shadowColor: "#000",
-              shadowOpacity: 0.5,
-              shadowOffset: { width: 0, height: 2 },
-              shadowRadius: 3,
-              backgroundColor: "#f5f5f5",
-              borderRadius: 5,
-              transform: [{ rotate: "-8deg" }],
-            }}
+            style={[
+              styles.avatar,
+              {
+                left: index * 15,
+                zIndex: displayAvatars.length - index,
+                transform: [
+                  { rotate: index === 0 ? "-6deg" : index === 1 ? "4deg" : "-3deg" },
+                ],
+              },
+            ]}
             resizeMode="cover"
           />
         ))}
-
-        {/* Button overlay */}
       </YStack>
     </Card>
   );
@@ -79,11 +79,23 @@ export default SurrogatePreview;
 
 const styles = StyleSheet.create({
   card: {
-    overflow: "hidden",
+    overflow: "visible",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
     shadowOpacity: 0.15,
     shadowRadius: 3,
+  },
+
+  avatar: {
+    width: 85,
+    height: 110,
+    position: "absolute",
+    borderRadius: 10,
+    backgroundColor: "#f5f5f5",
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
   },
 });

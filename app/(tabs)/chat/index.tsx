@@ -1,4 +1,4 @@
-// app/(tabs)/chat/ChatListScreen.tsx
+// /app/(tabs)/chat/index.tsx
 import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
@@ -10,56 +10,62 @@ import {
 import { YStack, XStack, Text, Avatar } from "tamagui";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { Conversation } from "@/types/chat";
-import { secureGet } from "@/utils/storage";
-import colors from "@/hooks/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import HelpServiceButton from "@/components/HelpServiceButton";
+import colors from "@/hooks/colors";
+import { secureGet } from "@/utils/storage";
+
+import { getConversations } from "@/services/chatApi";
+
+interface Conversation {
+  id: string;
+  lastMessage?: { content: string; createdAt?: string };
+  participants: { id: string; name: string; avatarUrl?: string; role?: string }[];
+}
 
 export default function ChatListScreen() {
   const router = useRouter();
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [myId, setMyId] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchChats = async () => {
+    let active = true;
+
+    (async () => {
+      setIsLoading(true);
+
+      const uid = await secureGet("userId");
+      if (!active) return;
+      setMyId(uid ?? null);
+
       try {
-        setIsLoading(true);
-        const token = await secureGet("token");
-        const role = await secureGet("role");
-        setUserRole(role);
+        const result = await getConversations();
+        if (!active) return;
 
-        const res = await fetch(
-          "https://dev.surrosantara.space/api/v1/chat/conversation",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        if (!res.ok) throw new Error("Failed to load conversations");
-
-        const data = await res.json();
-        setConversations(data);
+        setConversations(Array.isArray(result) ? result : []);
       } catch (err) {
-        console.error("Chat fetch error:", err);
+        console.warn("Failed to load conversations", err);
       } finally {
-        setIsLoading(false);
+        if (active) setIsLoading(false);
       }
-    };
+    })();
 
-    fetchChats();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const renderItem = ({ item }: { item: Conversation }) => {
-    const otherUser = item.participants.find((p) => p.role !== userRole);
+    const other =
+      item.participants?.find((p) => p.id !== myId) || item.participants?.[0];
 
     return (
       <TouchableOpacity
         style={styles.chatCard}
         onPress={() =>
           router.push({
-            pathname: "/(tabs)/chat/ChatBoxScreen",
+            pathname: "/(tabs)/chat/[conversationId]",
             params: { conversationId: item.id },
           })
         }
@@ -67,17 +73,28 @@ export default function ChatListScreen() {
         <XStack alignItems="center">
           <Avatar circular size={50}>
             <Avatar.Image
-              src={otherUser?.avatarUrl || "https://placehold.co/100x100"}
+              src={
+                other?.avatarUrl && other.avatarUrl.length > 0
+                  ? other.avatarUrl
+                  : "https://placehold.co/100x100"
+              }
             />
           </Avatar>
+
           <YStack marginLeft={12} width="75%">
-            <Text fontSize={16} fontWeight="600" color={colors.primary}>
-              {otherUser?.name || "Unknown"}
+            <Text fontSize={16} fontWeight="700" color={colors.primary}>
+              {other?.name || "Unknown User"}
             </Text>
-            <Text fontSize={13} color={colors.secondaryGray} numberOfLines={1}>
+
+            <Text
+              fontSize={13}
+              color={colors.secondaryGray}
+              numberOfLines={1}
+            >
               {item.lastMessage?.content || "No messages yet"}
             </Text>
           </YStack>
+
           <Ionicons
             name="chevron-forward"
             size={20}
@@ -86,11 +103,6 @@ export default function ChatListScreen() {
         </XStack>
       </TouchableOpacity>
     );
-  };
-
-  const handleSupportPress = () => {
-    // Navigate to support bot / customer care screen
-    router.push("/(tabs)/chat/supportChat");
   };
 
   return (
@@ -112,28 +124,21 @@ export default function ChatListScreen() {
 
         {isLoading ? (
           <ActivityIndicator size="large" color={colors.primary} />
-        ) : conversations.length > 0 ? (
+        ) : (
           <FlatList
             data={conversations}
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
             contentContainerStyle={{ paddingBottom: 80 }}
+            ListEmptyComponent={
+              <View style={{ alignItems: "center", marginTop: 50 }}>
+                <Text color={colors.secondaryGray}>No conversations yet</Text>
+              </View>
+            }
           />
-        ) : (
-          <YStack alignItems="center" justifyContent="center" flex={1}>
-            <Ionicons
-              name="chatbubble-outline"
-              size={60}
-              color={colors.secondaryGray}
-            />
-            <Text color={colors.secondaryGray} marginTop={10}>
-              No messages yet
-            </Text>
-          </YStack>
         )}
       </YStack>
 
-      {/* Floating Customer Support Button */}
       <HelpServiceButton />
     </SafeAreaView>
   );
@@ -150,21 +155,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowOffset: { width: 0, height: 1 },
     elevation: 2,
-  },
-  fab: {
-    position: "absolute",
-    bottom: 25,
-    right: 25,
-    backgroundColor: "#0E0E55",
-    borderRadius: 30,
-    width: 60,
-    height: 60,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 6,
   },
 });

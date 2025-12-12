@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { Pressable } from "react-native";
+import colors from "@/hooks/colors";
 
 const Gallery = ({ style }: { style?: any }) => {
   const { images, isLoading, fetchImages } = useGallery();
@@ -46,6 +47,7 @@ const Gallery = ({ style }: { style?: any }) => {
       <Card
         bordered
         borderColor="#E5E5E5"
+        backgroundColor={colors.background}
         padding="$3"
         borderRadius="$4"
         style={[style, styles.card]}

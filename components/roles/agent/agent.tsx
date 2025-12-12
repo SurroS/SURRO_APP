@@ -9,8 +9,6 @@ import ProfileData from "./AgentProfileData"; // <-- changed
 import ProgressMeter from "../progressCircle";
 import Referral from "../referral";
 import WalletCard from "../wallet";
-// import ParentPreviewCard from "../parent/ParentPreviewCard"; // <-- new
-import AgentPreview from "../agent/AgentPreviewCard";
 import SurrogatePreview from "../surrogate/SurrogatePreview";
 import { router } from "expo-router";
 

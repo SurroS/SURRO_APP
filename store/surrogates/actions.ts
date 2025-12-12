@@ -1,13 +1,54 @@
 import { StateCreator } from "zustand";
-import { Surrogate, SurrogateStore } from "./types";
-import { getUsersByRole } from "@/services/profileApi";
+import {
+  Surrogate,
+  SurrogateStore,
+} from "./types";
+import {
+  getAllSurrogates,
+} from "@/services/profileApi";
 
-const fallbackSurrogates: Surrogate[] = [
-  { id: "1", name: "Jane Doe", avatar: require("@/assets/images/image1.jpg"), age: "20", country: "Nigeria" },
-  { id: "2", name: "Mary Ann", avatar: require("@/assets/images/image21.jpg"), age: "20", country: "Nigeria" },
-  { id: "3", name: "Tina Joe", avatar: require("@/assets/images/image3.jpg"), age: "20", country: "Nigeria" },
+// -----------------------------------------------------
+// Helpers
+// -----------------------------------------------------
+const getAge = (dob?: string | null) => {
+  if (!dob) return "N/A";
+  const date = new Date(dob);
+  return Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24 * 365)).toString();
+};
+
+const getDisplayName = (userName?: string | null, firstName?: string | null) =>
+  `${userName ?? ""} ${firstName ?? ""}`.trim() || "Unknown";
+
+const mapApiSurrogate = (apiItem: any): Surrogate => ({
+  id: apiItem.id,
+  name: getDisplayName(apiItem.firstName, apiItem.lastName),
+  avatar:
+    apiItem.profilePicture ??
+    apiItem.user?.profilePictureUrl ??
+    undefined,
+  age: getAge(apiItem.dateOfBirth),
+  country: apiItem.countryOfResidence ?? apiItem.countryOfOrigin ?? "Unknown",
+  height: apiItem.height,
+  weight: apiItem.weight,
+  children: apiItem.numberOfChildren,
+});
+
+// -----------------------------------------------------
+// Fallback when API fails
+// -----------------------------------------------------
+export const fallbackSurrogates: Surrogate[] = [
+  {
+    id: "1",
+    name: "Jane Doe",
+    avatar: require("@/assets/images/image1.jpg"),
+    age: "20",
+    country: "Nigeria",
+  },
 ];
 
+// -----------------------------------------------------
+// Slice
+// -----------------------------------------------------
 export const createSurrogateSlice: StateCreator<
   SurrogateStore,
   [],
@@ -18,31 +59,44 @@ export const createSurrogateSlice: StateCreator<
   isLoading: false,
   error: null,
 
-  async fetchSurrogates(showToast = false) {
+  setSurrogates: (data) => set({ surrogates: data }),
+
+  setLoading: (val) => set({ isLoading: val }),
+
+  setError: (err) => set({ error: err }),
+
+  async fetchSurrogates() {
     try {
       set({ isLoading: true });
 
-      const response = await getUsersByRole("SURROGATE");
-      
-      // let surrogates: Surrogate[] = response?.data.users || [];
-      let surrogates: Surrogate[] =  [];
-      console.log("SURROGATE ACCOUNT IDs:", surrogates.map((u) => u.id));
-      // Use fallback if API returns empty
-      if (!Array.isArray(surrogates) || surrogates.length === 0) {
-        surrogates = fallbackSurrogates;
-        console.log("Surrogate call =",response)
+      const res = await getAllSurrogates();
+
+      let surrogates: Surrogate[] = [];
+
+      if (Array.isArray(res.data) && res.data.length > 0) {
+        surrogates = res.data.map(mapApiSurrogate);
       }
 
-      set({ surrogates, isLoading: false, error: null });
-    } catch (error: any) {
-      // fallback if API call fails
-      set({ surrogates: fallbackSurrogates, isLoading: false, error: error?.message || "Failed to fetch surrogates" });
-      console.log("Surrogate call =",this.surrogates)
-      throw error;
-    } 
-  },
+      if (surrogates.length === 0) {
+        console.warn("Surrogates API empty → using fallback");
+        surrogates = fallbackSurrogates;
+      }
 
-  setSurrogates: (data) => set({ surrogates: data }),
-  setLoading: (val) => set({ isLoading: val }),
-  setError: (err) => set({ error: err }),
+      set({
+        surrogates,
+        isLoading: false,
+        error: null,
+      });
+    } catch (err: any) {
+      console.error("Surrogate fetch error:", err);
+
+      set({
+        surrogates: fallbackSurrogates,
+        isLoading: false,
+        error: err?.message ?? "Failed to load surrogates",
+      });
+
+      throw err;
+    }
+  },
 });

@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { Button } from "tamagui";
 import colors from "@/hooks/colors";
@@ -15,78 +16,126 @@ import { PaymentModal } from "@/components/payment";
 import Entypo from "@expo/vector-icons/Entypo";
 import BioSection from "@/components/roles/BioSectionView";
 import ContactSection from "@/components/roles/ContactSectionView";
-import { Facebook, ImageOff, Instagram } from "@tamagui/lucide-icons";
 import HeaderInfo from "@/components/roles/HeaderInfoSection";
 import AgentPerformanceSection from "@/components/roles/agent/PerormanceSection";
 import AgentAdditionalDetails from "@/components/roles/agent/AditionalDetails";
 import AgentServices from "@/components/roles/agent/AgentServiceOffered";
 import AgentCertifications from "@/components/roles/agent/AgentCertification";
 import EmptyWalletModal from "@/components/modals/EmptyWalletModal";
-import { router } from "expo-router";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
+import { router, useLocalSearchParams } from "expo-router";
+import { AGENT_TRANSACTIONS } from "@/types/agentTransactionType";
+import { getAgentById } from "@/services/profileApi"; 
 
-const image1 = require("@/assets/images/agentImage.png");
-const image2 = require("@/assets/images/maleAvatar.png");
-const image3 = require("@/assets/images/femaleAvatar.png");
-
-const AgentImages = [image1, image2, image3];
-
-const ContactData = {
-  country: "Nigeria",
-  state: "Lagos",
-  lGA: "Ikeja",
-  street: "123 Victoria Island",
-  zip: "100001",
-  phone1: "+2348012345678",
-  phone2: "+2348098765432",
-  emergency: "+2348023344556",
-  relationship: "Sister",
-  social: {
-    Facebook: "https://facebook.com/profile",
-    Instagram: "https://instagram.com/profile",
-  },
-};
-const ExperienceData = [
-  { question: "Have you ever been a agent?", answer: "Yes" },
-  {
-    question: "Did you carry single or multiple babies?",
-    answer: "Single",
-  },
-  {
-    question: "How much will you want to be compensated?",
-    answer: "$5,000",
-  },
-  { question: "Is this amount negotiable?", answer: "Yes" },
-  {
-    question: "Anything else you'd like to share?",
-    answer: "It was a rewarding experience.",
-  },
+const fallbackImages = [
+  "https://picsum.photos/800/500",
+  "https://picsum.photos/700/700",
+  "https://picsum.photos/600/600",
 ];
 
 export default function AgentProfileScreen() {
+  const { id } = useLocalSearchParams();
+  const [agent, setAgent] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
-  const wallet = 5000;
+  const wallet = agent?.wallet;
+  const transaction = AGENT_TRANSACTIONS.GET_SURROGATE;
+  // -----------------------------
+  // Fetch Agent
+  // -----------------------------
+  useEffect(() => {
+    if (!id) return;
+       console.log("OtherId from Profile Pre:", id);
+    const fetchAgent = async () => {
+      try {
+        const res = await getAgentById(id as string);
+        setAgent(res.data);
+      } catch (err: any) {
+        Toast.show({
+          text1: "Failed to load agent",
+          type: "customError" as ToastType,
+          text2: err?.response?.data?.message || "Please try again.",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchAgent();
+  }, [id]);
+
+  // -----------------------------
+  // Payment Handlers
+  // -----------------------------
   const handleTopUp = () => {
     setShowWalletModal(false);
     router.push("/(tabs)/home/walletFlow");
   };
+
+const handleChat = () => {
+  if (!id) {
+    Toast.show({
+      text1: "Cannot start chat",
+      type: "customError" as ToastType,
+      text2: "Agent ID missing",
+    });
+    return;
+  }
+
+  router.push({
+    pathname: "/(tabs)/chat/[conversationId]",
+    params: {
+      otherUserId: id,
+    },
+  });
+};
+
   const handlePayment = () => {
-    if (wallet < 1) {
+    if (wallet < transaction.amount) {
       setShowWalletModal(true);
+      return;
     } else {
-      setShowPaymentModal(false);
       setIsUnlocked(true);
+      setShowPaymentModal(false);
+
       Toast.show({
         text1: "Payment successful",
         type: "customSuccess" as ToastType,
-        text2: "You now have complete access to surrogate's data",
+        text2: "You now have full access to agent data",
       });
     }
   };
+
+  // -----------------------------
+  // Loading State
+  // -----------------------------
+  if (loading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={{ marginTop: 10 }}>Loading agent profile...</Text>
+      </View>
+    );
+  }
+
+  if (!agent) {
+    return (
+      <View style={styles.loaderContainer}>
+        <Text> No Agent found..</Text>
+      </View>
+    );
+  }
+
+  // -----------------------------
+  // Dynamic Images
+  // -----------------------------
+  const unlockedImages = agent?.gallery ? [agent.gallery] : fallbackImages;
+
+  const lockedImages = fallbackImages;
 
   return (
     <View style={styles.container}>
@@ -98,51 +147,70 @@ export default function AgentProfileScreen() {
           {/* --- IMAGE CAROUSEL --- */}
           <View style={styles.carouselContainer}>
             <ImageCarousel
-              images={
-                isUnlocked
-                  ? AgentImages
-                  : [
-                      "https://picsum.photos/800/500",
-                      "https://picsum.photos/700/700",
-                      "https://picsum.photos/600/600",
-                    ]
-              }
+              images={isUnlocked ? unlockedImages : lockedImages}
               unlocked={isUnlocked}
             />
           </View>
 
+          {/* --- HEADER INFO --- */}
           <HeaderInfo
-            name="Michelle John"
-            username="Micah"
-            location="California"
-            age={29}
-            maritalStatus="Single"
-            height="5ft 6in"
-            weight="67kg"
-            compensation={5000000}
-            isNegotiable={true}
-            onChatPress={() => setShowPaymentModal(true)}
+            name={agent?.fullName || "Unnamed Agent"}
+            username={agent?.userName || "No Username"}
+            location={agent?.country || "Unknown"}
+            city={agent?.city || "N/A"}
+            age={agent?.age || "N/A"}
+            maritalStatus="N/A"
+            height="N/A"
+            weight="N/A"
+            compensation={agent?.compensation || 0}
+            isNegotiable={agent?.negotiable || false}
+            onChatPress={() => {
+              if (!isUnlocked) {
+                setShowPaymentModal(true);
+                return;
+              }
+              handleChat();
+            }}
             isUnlocked={isUnlocked}
           />
 
-          <BioSection title="About" content="I am a fine agent" />
-          <AgentPerformanceSection
-            matches={10}
-            rating={5}
-            responseTime="1 hour"
-            activeCases={1}
+          {/* --- ABOUT --- */}
+          <BioSection
+            title="About"
+            content={agent?.about || "No description available."}
           />
 
+          {/* --- PERFORMANCE --- */}
+          <AgentPerformanceSection
+            matches={agent?.performance?.matches || 0}
+            rating={agent?.performance?.rating || 0}
+            responseTime={agent?.performance?.responseTime || "N/A"}
+            activeCases={agent?.performance?.activeCases || 0}
+          />
+
+          {/* --- ADDITIONAL DETAILS --- */}
           <AgentAdditionalDetails
-            languages={["Yoruba", "English", "Hausa"]}
-            experience="2 years"
-            coverage="Yola and its axis"
+            languages={agent?.additionalDetails?.languages || []}
+            experience={agent?.additionalDetails?.experience || "N/A"}
+            coverage={agent?.additionalDetails?.coverage || "N/A"}
           />
 
           {/* --- CONTACT INFO --- */}
           <View style={styles.contactWrapper}>
             {isUnlocked ? (
-              <ContactSection data={ContactData} />
+              <ContactSection
+                data={{
+                  country: agent?.country || "N/A",
+                  phone1: agent?.phone1 || "N/A",
+                  phone2: agent?.phone2 || "N/A",
+                  emergency: agent?.emergencyPhone || "N/A",
+                  social: {
+                    Facebook: agent?.facebookProfile,
+                    Instagram: agent?.instagramProfile,
+                    X: agent?.twitterProfile,
+                  },
+                }}
+              />
             ) : (
               <TouchableOpacity
                 onPress={() => setShowPaymentModal(true)}
@@ -155,26 +223,24 @@ export default function AgentProfileScreen() {
               </TouchableOpacity>
             )}
           </View>
+
+          {/* --- SERVICES --- */}
           <AgentServices
-            services={[
-              "Matching Assistance",
-              "Legal Cordination",
-              "Progress Tracking and follow up",
-            ]}
+            services={agent?.services || ["No services added yet"]}
           />
-          <AgentCertifications
-            certifications={[
-              { name: "certificate of nursing", verified: true },
-            ]}
-          />
+
+          {/* --- CERTIFICATIONS --- */}
+          <AgentCertifications certifications={agent?.certifications || []} />
         </ScrollView>
 
+        {/* WALLET MODAL */}
         <EmptyWalletModal
           visible={showWalletModal}
           onClose={() => setShowWalletModal(false)}
           onTopUp={handleTopUp}
         />
 
+        {/* PAYMENT MODAL */}
         <PaymentModal
           visible={showPaymentModal}
           onClose={() => setShowPaymentModal(false)}
@@ -182,8 +248,9 @@ export default function AgentProfileScreen() {
           <Text style={styles.paymentDescription}>
             To start a conversation with this agent, you need to pay N50,000
           </Text>
+
           <Button style={styles.payButton} onPress={handlePayment}>
-            Pay $10 to unlock
+            Pay N50,000 to unlock
           </Button>
         </PaymentModal>
       </SafeAreaView>
@@ -191,15 +258,12 @@ export default function AgentProfileScreen() {
   );
 }
 
+// -----------------------------
+// STYLES
+// -----------------------------
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-  },
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 100,
-  },
+  container: { flex: 1, backgroundColor: "#ffffff" },
+  scrollContent: { padding: 20, paddingBottom: 100 },
   carouselContainer: {
     height: 200,
     marginBottom: 20,
@@ -208,63 +272,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#f0f0f0",
   },
-  headerSection: {
-    marginBottom: 20,
-  },
-  name: {
-    fontSize: 22,
-    fontWeight: "700",
-  },
-  username: {
-    fontSize: 14,
-    color: "#666666",
-    marginTop: 4,
-  },
-  locationRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 8,
-  },
-  locationText: {
-    fontSize: 14,
-    color: "#444444",
-  },
-  dot: {
-    marginHorizontal: 6,
-    color: "#444444",
-  },
-  chatButton: {
-    marginTop: 16,
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-  },
-  contactWrapper: {
-    marginVertical: 20,
-  },
+
+  contactWrapper: { marginVertical: 20 },
   lockedContact: {
     padding: 20,
     backgroundColor: "#f5f5f5",
     borderRadius: 12,
     alignItems: "center",
   },
-  lockedText: {
-    color: "gray",
-    fontSize: 14,
-  },
-  paymentFooter: {
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-    backgroundColor: "#ffffff",
-    padding: 20,
-    borderTopWidth: 1,
-    borderColor: "#dddddd",
-  },
+  lockedText: { color: "gray", fontSize: 14 },
+
   paymentDescription: {
     textAlign: "center",
-    color: "#444444",
+    color: "#444",
     marginBottom: 12,
   },
   payButton: {
@@ -272,5 +292,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 20,
+  },
+
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

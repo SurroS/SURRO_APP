@@ -37,9 +37,7 @@ export default function HomeIndex() {
             <Spinner size="large" />
           </YStack>
         )}
-
-            {/* Floating Customer Support Button */}
-              <HelpServiceButton />
+ 
 
       </SafeAreaView>
     </YStack>

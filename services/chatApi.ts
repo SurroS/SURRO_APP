@@ -1,24 +1,35 @@
-import api  from "@/services/api";
-import type { Conversation, Message } from "@/types/chat";
+import api from "./api"; 
 
-export async function createConversation(otherUserId: string): Promise<Conversation> {
-  const { data } = await api.post<Conversation>("/chat/conversation", { otherUserId });
-  return data;
+ 
+
+export async function debugCreateConversation(otherUserId) {
+  console.log("➡ Creating conversation with:", otherUserId);
+
+  const res = await api.post("/chat/conversation", {
+    otherUserId,
+  });
+
+  console.log("✔ Conversation created:", res.data);
+  return res.data.data;
 }
 
-export async function sendMessageRest(payload: {
-  conversationId: string;
-  content?: string;
-  attachmentUrl?: string | null;
-}): Promise<Message> {
-  const { data } = await api.post<Message>("/chat/message", payload);
-  return data;
+export async function debugFetchMessages(conversationId) {
+  console.log("➡ Fetching messages for:", conversationId);
+
+  const res = await api.get(`/chat/messages/${conversationId}`);
+
+  console.log("✔ Messages fetched:", res.data);
+  return res.data.data;
 }
 
-export async function fetchMessages(conversationId: string, limit = 50, before?: string) {
-  // Your backend path: /api/v1/chat/messages/{conversationId}
-  // Accept query params like ?limit=50&before=isoDate if supported.
-  const url = `/chat/messages/${conversationId}`;
-  const { data } = await api.get<Message[]>(url, { params: { limit, before } });
-  return data;
+export async function debugSendMessage(conversationId, text) {
+  console.log("➡ Sending message:", { conversationId, text });
+
+  const res = await api.post("/chat/message", {
+    conversationId,
+    content: text,
+  });
+
+  console.log("✔ Message sent:", res.data);
+  return res.data.data;
 }

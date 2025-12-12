@@ -1,7 +1,7 @@
 // store/profile/agents/listSlice.ts
 import { StateCreator } from "zustand";
 import { AgentProfile } from "../profile/agent/types";
-import { getUsersByRole } from "@/services/profileApi";
+import { getAllAgents, getUsersByRole } from "@/services/profileApi";
 
 const fallbackAgent: AgentProfile[] = [
   {
@@ -52,14 +52,13 @@ export const createAgentListSlice: StateCreator<
     try {
       set({ isLoading: true });
 
-      const res = await getUsersByRole("AGENT");
+      const res = await getAllAgents();
 
-      //let Agents: AgentProfile[] = res.data?.users ||[]; //this works
-
-      let Agents: AgentProfile[] = [];
+      let Agents: AgentProfile[] = res?.data ||[]; 
+   
       console.log(
         "single agent array",
-        Agents.map((agent, index) => agent)
+        Agents.map((agent, index) => agent.id)
       );
 
       if (Array.isArray(Agents) && Agents.length > 0) {

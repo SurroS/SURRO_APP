@@ -1,19 +1,24 @@
+import colors from "@/hooks/colors";
 import { Wallet } from "@tamagui/lucide-icons";
 import { Link } from "expo-router"; // 1. Import Link
 import { ImageBackground, StyleSheet, TouchableOpacity } from "react-native";
 import { Card, Text, XStack, YStack } from "tamagui";
 
-// File: [Your File Path]/WalletCard.tsx
+ 
 
 const WalletCard = ({ style }: any) => {
-  return (
-    // Set href to the simple router path: /walletflow
-    <Link 
-      href="/home/walletFlow" 
-      asChild // Pass press behavior down to the TouchableOpacity
+  return ( 
+    <Link
+      href="/home/walletFlow"
+      asChild  
     >
-      <TouchableOpacity activeOpacity={0.85} style={{ flex: 1, }}>
-        <Card bordered overflow="hidden" borderRadius="$4" style={[style, styles.card]}>
+      <TouchableOpacity activeOpacity={0.85} style={{ flex: 1 }}>
+        <Card
+          bordered
+          overflow="hidden"
+          borderRadius="$4"
+          style={[style, styles.card]}
+        >
           <ImageBackground
             source={require("../../assets/images/wallet_Bg.png")}
             resizeMode="cover"

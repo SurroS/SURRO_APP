@@ -1,3 +1,4 @@
+// components/chat/ChatInput.tsx
 import React, { useState } from "react";
 import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { SendHorizontal } from "@tamagui/lucide-icons";
@@ -5,7 +6,7 @@ import colors from "@/hooks/colors";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
-  disabled:boolean
+  disabled: boolean;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
@@ -27,8 +28,12 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
         value={text}
         onChangeText={setText}
       />
-      <TouchableOpacity onPress={handleSend} style={styles.sendButton}
-      disabled={disabled}>
+
+      <TouchableOpacity
+        onPress={handleSend}
+        style={styles.sendButton}
+        disabled={disabled}
+      >
         <SendHorizontal size={22} color="#fff" />
       </TouchableOpacity>
     </View>

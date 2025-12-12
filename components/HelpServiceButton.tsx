@@ -29,8 +29,8 @@ export default function HelpServiceButton() {
       onPress={handleSupportPress}
       activeOpacity={0.8}
     >
-      <Ionicons name="headset" size={20} color="#fff" />
-      <Text fontWeight={"600"}>Help</Text>
+      <Ionicons name="headset" size={20} color={colors.primary} />
+      <Text fontWeight={"600"} color={colors.primary}>Help</Text>
     </TouchableOpacity>
   );
 }
@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 10,
     shadowColor: "#000",
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 1 },
     elevation: 2,
   },
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 25,
     right: 25,
-    backgroundColor: "#0E0E55",
+    backgroundColor: colors.secondry,
     borderRadius: 30,
     width: 60,
     height: 60,
