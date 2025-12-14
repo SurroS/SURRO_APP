@@ -52,12 +52,12 @@ export default function MedicalSection({
   const openFile = (uri: string | undefined) => {
     // For PDFs/images
 
-    data.medicalReport.endsWith(".pdf") ? (
+    data?.medicalReport?.endsWith(".pdf") ? (
       <Text style={{ color: colors.white }}>View Lab result</Text>
     ) : (
-      <Image source={{ uri: data.medicalReport }} style={styles.reportImage} />
+      <Image source={{ uri: data.medicalReport  }} style={styles.reportImage} />
     );
-    Linking.openURL(uri).catch((err) =>
+    Linking.openURL(uri as any).catch((err) =>
       console.error("Failed to open file", err)
     );
   };
@@ -144,7 +144,7 @@ export default function MedicalSection({
         </Text>
       </View>
 
-      {reportVisible && data.medicalReport ? (
+      {reportVisible  ? (
         <>
           <Text style={styles.label}>Lab Result</Text>
           <TouchableOpacity

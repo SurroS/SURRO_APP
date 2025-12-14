@@ -26,7 +26,8 @@ import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { router, useLocalSearchParams } from "expo-router";
 import { AGENT_TRANSACTIONS } from "@/types/agentTransactionType";
-import { getAgentById } from "@/services/profileApi"; 
+import { getAgentById } from "@/services/profileApi";
+import { User } from "@tamagui/lucide-icons";
 
 const fallbackImages = [
   "https://picsum.photos/800/500",
@@ -49,7 +50,7 @@ export default function AgentProfileScreen() {
   // -----------------------------
   useEffect(() => {
     if (!id) return;
-       console.log("OtherId from Profile Pre:", id);
+    console.log("OtherId from Profile Pre:", id);
     const fetchAgent = async () => {
       try {
         const res = await getAgentById(id as string);
@@ -76,23 +77,23 @@ export default function AgentProfileScreen() {
     router.push("/(tabs)/home/walletFlow");
   };
 
-const handleChat = () => {
-  if (!id) {
-    Toast.show({
-      text1: "Cannot start chat",
-      type: "customError" as ToastType,
-      text2: "Agent ID missing",
-    });
-    return;
-  }
+  const handleChat = () => {
+    if (!id) {
+      Toast.show({
+        text1: "Cannot start chat",
+        type: "customError" as ToastType,
+        text2: "try again later",
+      });
+      return;
+    }
 
-  router.push({
-    pathname: "/(tabs)/chat/[conversationId]",
-    params: {
-      otherUserId: id,
-    },
-  });
-};
+    router.push({
+      pathname: `/(tabs)/chat/conversation`,
+      params: {
+        otherUserId: agent?.userId,
+      },
+    });
+  };
 
   const handlePayment = () => {
     if (wallet < transaction.amount) {

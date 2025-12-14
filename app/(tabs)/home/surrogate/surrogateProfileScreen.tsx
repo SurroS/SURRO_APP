@@ -25,9 +25,8 @@ import EmptyWalletModal from "@/components/modals/EmptyWalletModal";
 import { getSurrogateById } from "@/services/profileApi";
 import { fallbackSurrogates } from "@/store/surrogates/actions";
 import { useAuthStore } from "@/store/auth";
-import { useWalletStore } from "@/store/wallet/walletStore"; 
+import { useWalletStore } from "@/store/wallet/walletStore";
 import { SURROGATE_TRANSACTIONS } from "@/types/surrogateTransactionTypes";
- 
 
 export default function SurrogateProfileScreen() {
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -35,15 +34,16 @@ export default function SurrogateProfileScreen() {
   const [showChatModal, setShowChatModal] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
   const { user, token } = useAuthStore();
-  console.log("current User:", user)
+  console.log("current User:", user);
 
   const { balance, debit, fetchBalance } = useWalletStore();
 
+  const params = useLocalSearchParams();
+  const surrogateId = typeof params?.id === "string" ? params.id : null;
 
-  const { id } = useLocalSearchParams();
   const [surrogate, setSurrogate] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-
+  const wallet = surrogate?.wallet;
   const transaction = SURROGATE_TRANSACTIONS.PROFILE_BOOST;
 
   // Load backend profile
@@ -51,70 +51,80 @@ export default function SurrogateProfileScreen() {
     loadSurrogate();
   }, []);
   useEffect(() => {
-  if (user?.id) {
-    fetchBalance(user.id, token || null);
-  }
-}, [user]);
-
-
-  const loadSurrogate = async () => {
-    try {
-      setLoading(true);
-      const { data } = await getSurrogateById(id as string);
-      console.log("Single surrogate:", data.profile);
-      if (data?.profile) {
-        setSurrogate(data.profile);
-      } else {
-        const fallback = fallbackSurrogates.find((s) => s.id === id);
-        setSurrogate(fallback || null);
-      }
-    } catch (error) {
-      console.log("Surrogate fetch error:", error);
-      const fallback = fallbackSurrogates.find((s) => s.id === id);
-      setSurrogate(fallback || null);
-    } finally {
-      setLoading(false);
+    if (user) {
+      fetchBalance(user.id, token || null);
     }
-  };
+  }, [user]);
 
- const HandlePayment = async () => {
-  if (!user?.id) return;
-
-  const cost = transaction.amount; // e.g. 3000 or 50000
-
-  if (balance < cost) {
-    setShowWalletModal(true);
+  const handleChat = () => {
+  if (!surrogate?.userId) {
+    Toast.show({
+      text1: "Chat unavailable",
+      text2: "This profile cannot be messaged yet",
+      type: "customError" as ToastType,
+    });
     return;
   }
 
-  const result = await debit(
-    user.id,
-    cost,
-    token || null,
-    {
-      description: transaction.description,
-      currency: "NGN",
+  router.push({
+    pathname: "/(tabs)/chat/conversation",
+    params: {
+      otherUserId: surrogate.userId,
+    },
+  });
+};
+
+
+const loadSurrogate = async () => {
+  if (!surrogateId) {
+    console.warn("⚠ No surrogate ID provided");
+    setSurrogate(null);
+    setLoading(false);
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const { data } = await getSurrogateById(surrogateId);
+
+    if (data?.profile) {
+      setSurrogate(data.profile);
+    } else {
+      const fallback = fallbackSurrogates.find(
+        (s:any) => s.id === surrogateId
+      );
+      setSurrogate(fallback ?? null);
     }
-  );
+  } catch (error) {
+    console.log("Surrogate fetch error:", error);
 
-  if (result !== null) {
-    setIsUnlocked(true);
-    setShowPaymentModal(false);
-    setShowChatModal(true);
+    const fallback = fallbackSurrogates.find(
+      (s:any) => s.id === surrogateId
+    );
 
-    Toast.show({
-      text1: "Payment Successful",
-      type: "customSuccess" as ToastType,
-      text2: "You now have full access to this surrogate",
-    });
-  } else {
-    Toast.show({
-      text1: "Payment Failed",
-      type: "costomError" as ToastType,
-    });
+    setSurrogate(fallback ?? null);
+  } finally {
+    setLoading(false);
   }
 };
 
+
+  const handlePayment = () => {
+    if (wallet < transaction.amount) {
+      setShowWalletModal(true);
+      return;
+    } else {
+      setIsUnlocked(true);
+      setShowPaymentModal(false);
+
+      Toast.show({
+        text1: "Payment successful",
+        type: "customSuccess" as ToastType,
+        text2: "You now have full access to agent data",
+      });
+    }
+  };
 
   const HandleUseAgent = () =>
     router.push("/(tabs)/home/agent/agentsListScreen");
@@ -239,8 +249,14 @@ export default function SurrogateProfileScreen() {
           {/* HEADER */}
           <HeaderInfo
             {...headerData}
-            onChatPress={() => setShowPaymentModal(true)}
             isUnlocked={isUnlocked}
+            onChatPress={() => {
+              if (!isUnlocked) {
+                setShowPaymentModal(true);
+                return;
+              }
+              handleChat();
+            }}
           />
 
           {/* ABOUT */}
@@ -299,7 +315,7 @@ export default function SurrogateProfileScreen() {
             You will be charged N50,000 from your wallet to start a conversation
             with this surrogate.
           </Text>
-          <Button style={styles.payButton} onPress={HandlePayment}>
+          <Button style={styles.payButton} onPress={handlePayment}>
             Pay N50,000 to unlock
           </Button>
         </PaymentModal>
@@ -315,7 +331,7 @@ export default function SurrogateProfileScreen() {
           <Button style={styles.payButton} onPress={HandleUseAgent}>
             Use An Agent
           </Button>
-          <Button style={styles.payButton} onPress={()=>{}}>
+          <Button style={styles.payButton} onPress={handleChat}>
             Direct Message
           </Button>
         </ChatMethodModal>

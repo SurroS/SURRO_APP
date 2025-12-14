@@ -10,7 +10,7 @@ import {
 import { useLocalSearchParams } from "expo-router";
 import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 import ChatInput from "@/components/chat/chatInput";
-import { useChat } from "@/hooks/chat/useChat";
+import { useChatSimple } from "@/hooks/chat/useChat";
 import type { Message } from "@/types/chat";
 import colors from "@/hooks/colors";
 import { secureGet } from "@/utils/storage";

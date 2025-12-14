@@ -3,6 +3,8 @@ import { StateCreator } from "zustand";
 export interface Surrogate {
   id: string;
   name: string;
+  userName:string
+  wallet:any
   avatar?: string;
   age:string;
   country:string,

@@ -19,7 +19,7 @@ export default function ChatLayout() {
         }}
       />
       <Stack.Screen
-        name="[conversationId]"
+        name="conversation"
         options={{
           headerTitle: "Conversation",
           headerShown: false,

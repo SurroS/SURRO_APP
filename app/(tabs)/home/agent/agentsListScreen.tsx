@@ -24,6 +24,7 @@ import { ScreenHeader } from "@/components/auth";
 import FilterModal from "@/components/modals/filterBottomModal";
 import { useAgentListStore } from "@/store/agents";
 import { ToastType } from "toastify-react-native/utils/interfaces";
+import { ViewStyle } from "react-native";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -44,7 +45,7 @@ export default function AgentList() {
   const rotate = useSharedValue(0);
 
   // ------------------------------------------
-  // ✅ Load agents ONCE
+  //Load agents ONCE
   // ------------------------------------------
   useEffect(() => {
     fetchAgents(true).catch((err: any) => {
@@ -69,7 +70,7 @@ export default function AgentList() {
   }, [agents.length]);
 
   // ------------------------------------------
-  // ✅ Swipe handler
+  // Swipe handler
   // ------------------------------------------
   const handleSwipe = useCallback(() => {
     setCardIndex((i) => i + 1);
@@ -119,7 +120,7 @@ export default function AgentList() {
   }));
 
   // ------------------------------------------
-  // ✅ Navigation
+  // Navigation
   // ------------------------------------------
   const openProfile = () => {
     const current = agents[cardIndex];
@@ -133,24 +134,21 @@ export default function AgentList() {
   };
 
   // ------------------------------------------
-  // ✅ UI helpers
+  // UI helpers
   // ------------------------------------------
   const renderCard = (agent: any, isTop: boolean) => {
-    return (
-      <Animated.View
-        style={[
-          {
-            width: SCREEN_WIDTH * 0.9,
-            height: CARD_HEIGHT,
-            borderRadius: 14,
-            overflow: "hidden",
-            backgroundColor: "#fafafa",
-            justifyContent: "flex-end",
-          },
-          isTop && animatedStyle,
-        ]}
-        {...(isTop ? panResponder.panHandlers : {})}
-      >
+    if (cardIndex >= agents.length) {
+      return (
+        <View
+          style={{ alignItems: "center", justifyContent: "center", flex: 1 }}
+        >
+          <Text>No more profiles</Text>
+        </View>
+      );
+    }
+
+    const CardInner = (
+      <>
         <Image
           source={{ uri: agent.avatar }}
           style={{ width: "100%", height: "100%", position: "absolute" }}
@@ -159,26 +157,54 @@ export default function AgentList() {
 
         <View style={{ backgroundColor: "rgba(0,0,0,0.35)", padding: 20 }}>
           <Text style={{ color: "#fff", fontSize: 28, fontWeight: "800" }}>
-            {agent.userName ||"N/A"}
+            {agent.userName ||
+              agent.username ||
+              agent.user?.userName ||
+              agent.profile?.userName ||
+              "N/A"}
           </Text>
 
           <Text style={{ color: "#fff", fontSize: 16 }}>
-            <Ionicons name="location" size={14} /> {agent.country ||"N/A"}{" "}
-            <Ionicons name="calendar" size={14} /> {agent.age ||"N/A"} yrs
+            <Ionicons name="location" size={14} /> {agent.country || "N/A"}{" "}
+            <Ionicons name="calendar" size={14} /> {agent.age || "N/A"} yrs
           </Text>
         </View>
-      </Animated.View>
+      </>
     );
+ 
+const baseStyle: ViewStyle = {
+  width: SCREEN_WIDTH * 0.9,
+  height: CARD_HEIGHT,
+  borderRadius: 14,
+  overflow: "hidden",
+  backgroundColor: "#fafafa",
+  justifyContent: "flex-end",
+};
+
+
+    if (isTop) {
+      return (
+        <Animated.View
+          style={[baseStyle, animatedStyle]}
+          {...panResponder.panHandlers}
+        >
+          {CardInner}
+        </Animated.View>
+      );
+    }
+
+    // Non-top cards are static previews
+    return <View style={baseStyle}>{CardInner}</View>;
   };
 
   // ------------------------------------------
-  // ✅ Loading / empty & normal state
+  // Loading / empty & normal state
   // ------------------------------------------
   if (isLoading) {
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <YStack flex={1} alignItems="center" justifyContent="center">
-          <Text>Loading agents...</Text>
+          <Text>Loading Surrogates...</Text>
         </YStack>
       </SafeAreaView>
     );
@@ -204,7 +230,7 @@ export default function AgentList() {
   const current = agents[cardIndex];
 
   // ------------------------------------------
-  // ✅ Main render
+  // Main render
   // ------------------------------------------
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff", paddingTop: 20 }}>

@@ -1,0 +1,273 @@
+import React, { useEffect, useRef, useState } from "react";
+import {
+  FlatList,
+  View,
+  Text as RNText,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
+import { useLocalSearchParams } from "expo-router";
+import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
+import ChatInput from "@/components/chat/chatInput";
+import colors from "@/hooks/colors";
+import { useAuthStore } from "@/store/auth";
+import {
+  fetchMessages,
+  createConversation,
+  sendMessage,
+} from "@/services/chatApi";
+import type { Message } from "@/types/chat";
+import { setCachedConversation } from "@/utils/chatCache";
+
+/* -----------------------------------------
+ * Helpers
+ * ----------------------------------------*/
+
+const normalizeMessage = (msg: any, fallbackId?: string): Message => ({
+  id:
+    typeof msg?.id === "string"
+      ? msg.id
+      : fallbackId ?? `temp-${Date.now()}-${Math.random()}`,
+  conversationId: msg?.conversationId,
+  content: msg?.content ?? "",
+  attachmentUrl: msg?.attachmentUrl ?? null,
+  createdAt: msg?.createdAt ?? new Date().toISOString(),
+  sender: {
+    id: msg?.sender?.id ?? "system",
+    name: msg?.sender?.name ?? "System",
+    role: msg?.sender?.role,
+  },
+  status: msg?.status ?? "SENT",
+  failed: msg?.failed ?? false,
+});
+
+export default function ChatBoxScreen() {
+  const { otherUserId } = useLocalSearchParams<Record<string, string>>();
+  const currentUser = useAuthStore((s) => s.user);
+  const currentUserId = currentUser?.id;
+
+  const [conversationId, setConversationId] = useState<string>();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const flatRef = useRef<FlatList<Message>>(null);
+
+  /* -----------------------------------------
+   * CREATE CONVERSATION + LOAD MESSAGES
+   * ----------------------------------------*/
+  useEffect(() => {
+    if (!otherUserId) return;
+
+    const loadConversation = async () => {
+      setLoading(true);
+      try {
+        const convo = await createConversation(otherUserId);
+
+        if (!convo?.id) {
+          throw new Error("Conversation creation failed");
+        }
+
+        setConversationId(convo.id);
+        setCachedConversation(otherUserId, convo.id);
+
+        const fetched = await fetchMessages(convo.id);
+
+        if (Array.isArray(fetched) && fetched.length > 0) {
+          setMessages(fetched.map((m) => normalizeMessage(m)));
+        } else {
+          setMessages([
+            normalizeMessage({
+              id: "system-1",
+              content: "Conversation has started, send your message",
+              sender: { id: "system", name: "System" },
+            }),
+          ]);
+        }
+      } catch (err) {
+        console.error("Failed to load conversation:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadConversation();
+  }, [otherUserId]);
+
+  /* -----------------------------------------
+   * message status
+   * ----------------------------------------*/
+  const renderTicks = (status?: string) => {
+    if (!status) return null;
+
+    let text = "✔";
+    let color = "#999";
+
+    if (status === "DELIVERED") {
+      text = "✔✔";
+    }
+
+    if (status === "READ") {
+      text = "✔✔";
+      color = colors.primary; // blue
+    }
+
+    return <RNText style={[styles.ticks, { color }]}>{text}</RNText>;
+  };
+
+  /* -----------------------------------------
+   * SEND MESSAGE
+   * ----------------------------------------*/
+  const handleSend = async (text: string) => {
+    if (!conversationId || !text.trim()) return;
+
+    const tempId = `temp-${Date.now()}`;
+
+    const optimistic: Message = {
+      id: tempId,
+      content: text.trim(),
+      createdAt: new Date().toISOString(),
+      sender: {
+        id: currentUserId!,
+        name: currentUser?.name ?? "Me",
+      },
+      status: "SENDING",
+    };
+
+    setMessages((prev) => [optimistic, ...prev]);
+
+    try {
+      const sentRaw = await sendMessage(conversationId, text.trim());
+
+      const sent = sentRaw?.content || sentRaw;
+
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === tempId
+            ? {
+                ...m,
+                id: sent?.id ?? tempId,
+                createdAt: sent?.createdAt ?? m.createdAt,
+                status: sent?.status ?? "SENT",
+              }
+            : m
+        )
+      );
+    } catch (err) {
+      console.error("Send message failed:", err);
+
+      setMessages((prev) =>
+        prev.map((m) => (m.id === tempId ? { ...m, failed: true } : m))
+      );
+    }
+  };
+
+  /* -----------------------------------------
+   * RENDER MESSAGE
+   * ----------------------------------------*/
+  const renderItem = ({ item }: { item: Message }) => {
+    const isMine = item.sender?.id === currentUserId;
+
+    return (
+      <View
+        style={[styles.messageRow, isMine ? styles.myRow : styles.theirRow]}
+      >
+        <View
+          style={[styles.bubble, isMine ? styles.myBubble : styles.theirBubble]}
+        >
+          {!!item.content && (
+            <RNText
+              style={[
+                styles.messageText,
+                isMine ? styles.myText : styles.theirText,
+              ]}
+            >
+              {item.content}
+            </RNText>
+          )}
+ 
+          <RNText style={styles.time}>
+            {new Date(item.createdAt).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+            {isMine && !item.failed && (
+              <>
+                {"  "}
+                {renderTicks(item.status)}
+              </>
+            )}
+          </RNText>
+
+          {item.failed && <RNText style={styles.failed}>Failed to send</RNText>}
+        </View>
+      </View>
+    );
+  };
+
+  if (loading) {
+    return (
+      <KeyboardAvoidingWrapper>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      </KeyboardAvoidingWrapper>
+    );
+  }
+
+  return (
+    <KeyboardAvoidingWrapper>
+      <View style={styles.container}>
+        <FlatList
+          ref={flatRef}
+          data={messages}
+          inverted
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={{ padding: 12, paddingBottom: 20 }}
+        />
+        <ChatInput onSend={handleSend} disabled={loading} />
+      </View>
+    </KeyboardAvoidingWrapper>
+  );
+}
+
+/* -----------------------------------------
+ * Styles
+ * ----------------------------------------*/
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#fff", paddingTop: 25 },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  messageRow: { marginVertical: 6, paddingHorizontal: 6 },
+  myRow: { alignSelf: "flex-end", maxWidth: "80%" },
+  theirRow: { alignSelf: "flex-start", maxWidth: "80%" },
+
+  bubble: { padding: 10, borderRadius: 12 },
+  myBubble: { backgroundColor: "#0E0E55" },
+  theirBubble: {
+    backgroundColor: "#F3F3F3",
+    borderWidth: 1,
+    borderColor: "#EEE",
+  },
+
+  messageText: { fontSize: 15 },
+  myText: { color: "#fff" },
+  theirText: { color: "#111" },
+
+  time: {
+    fontSize: 11,
+    color: "#999",
+    marginTop: 6,
+    alignSelf: "flex-end",
+  },
+
+  failed: { fontSize: 11, color: "red", marginTop: 4 },
+  ticks: {
+    fontSize: 11,
+    marginLeft: 4,
+  },
+});

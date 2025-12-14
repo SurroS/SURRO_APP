@@ -1,4 +1,3 @@
-// /app/(tabs)/chat/index.tsx
 import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
@@ -14,14 +13,36 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import HelpServiceButton from "@/components/HelpServiceButton";
 import colors from "@/hooks/colors";
 import { secureGet } from "@/utils/storage";
+import { GetAllChat } from "@/services/chatApi";
+import { Image } from "react-native";
 
-import { getConversations } from "@/services/chatApi";
+// 👇 local fallback avatar
+import defaultAvatar from "@/assets/images/agentImage.png";
 
 interface Conversation {
   id: string;
   lastMessage?: { content: string; createdAt?: string };
-  participants: { id: string; name: string; avatarUrl?: string; role?: string }[];
+  participants: {
+    id: string;
+    name: string;
+    avatarUrl?: string;
+    role?: string;
+  }[];
 }
+
+// 👇 fallback conversations (UI-safe)
+const FALLBACK_CONVERSATIONS: Conversation[] = [
+  {
+    id: "fallback-1",
+    lastMessage: { content: "Welcome to chat 👋" },
+    participants: [{ id: "u1", name: "Support Team" }],
+  },
+  {
+    id: "fallback-2",
+    lastMessage: { content: "This is a sample conversation" },
+    participants: [{ id: "u2", name: "Demo User" }],
+  },
+];
 
 export default function ChatListScreen() {
   const router = useRouter();
@@ -40,12 +61,18 @@ export default function ChatListScreen() {
       setMyId(uid ?? null);
 
       try {
-        const result = await getConversations();
+        const result = await GetAllChat();
         if (!active) return;
 
-        setConversations(Array.isArray(result) ? result : []);
+        if (Array.isArray(result) && result.length > 0) {
+          setConversations(result);
+        } else {
+          console.warn("⚠ Empty chat list, using fallback");
+          setConversations(FALLBACK_CONVERSATIONS);
+        }
       } catch (err) {
-        console.warn("Failed to load conversations", err);
+        console.warn("❌ Chat list failed, using fallback", err);
+        setConversations(FALLBACK_CONVERSATIONS);
       } finally {
         if (active) setIsLoading(false);
       }
@@ -71,14 +98,23 @@ export default function ChatListScreen() {
         }
       >
         <XStack alignItems="center">
-          <Avatar circular size={50}>
-            <Avatar.Image
-              src={
-                other?.avatarUrl && other.avatarUrl.length > 0
-                  ? other.avatarUrl
-                  : "https://placehold.co/100x100"
-              }
-            />
+          <Avatar  size={60}>
+            {other?.avatarUrl ? (
+              <Avatar.Image src={other.avatarUrl} />
+            ) : (
+              <Avatar.Fallback>
+                <Image
+                  resizeMode="cover"
+                  source={defaultAvatar}
+                  style={{
+                    width: 50,
+                    height: 50, 
+                    borderRadius:10,
+                    alignSelf: "center",
+                  }}
+                />
+              </Avatar.Fallback>
+            )}
           </Avatar>
 
           <YStack marginLeft={12} width="75%">
@@ -86,11 +122,7 @@ export default function ChatListScreen() {
               {other?.name || "Unknown User"}
             </Text>
 
-            <Text
-              fontSize={13}
-              color={colors.secondaryGray}
-              numberOfLines={1}
-            >
+            <Text fontSize={13} color={colors.secondaryGray} numberOfLines={1}>
               {item.lastMessage?.content || "No messages yet"}
             </Text>
           </YStack>
@@ -107,12 +139,7 @@ export default function ChatListScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
-      <YStack
-        flex={1}
-        paddingHorizontal={20}
-        paddingTop={20}
-        justifyContent="center"
-      >
+      <YStack flex={1} paddingHorizontal={20} paddingTop={20}>
         <Text
           fontSize={20}
           fontWeight="700"

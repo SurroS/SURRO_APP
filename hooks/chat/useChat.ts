@@ -1,100 +1,104 @@
-// // hooks/chat/useChat.ts
-// import { useState, useEffect } from "react";
-// import { useAuthStore } from "@/store/auth";
-// import {
-//   createOrGetConversation,
-//   getConversationMessages,
-//   sendChatMessage,
-// } from "@/services/chatApi";
-// import type { Message, Conversation } from "@/types/chat";
-// import { useLocalSearchParams } from "expo-router";
+// hooks/chat/useChatSimple.ts
+import { useState, useEffect } from "react";
+import { useAuthStore } from "@/store/auth";
+import { 
+  createConversation,
+  fetchMessages,
+  sendMessage,
+} from "@/services/chatApi";
+import { explainAxiosError } from "@/utils/apiErrors";
 
-// export function useChat() {
-//   const user = useAuthStore((s) => s.user);
-//   const { otherUserId } = useLocalSearchParams();
+export function useChatSimple(otherUserId?: string) {
+  const user = useAuthStore((s) => s.user);
 
-//   const [conversationId, setConversationId] = useState<string | undefined>();
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-//   const [messages, setMessages] = useState<Message[]>([]);
-//   const [loadingHistory, setLoadingHistory] = useState(true);
+  // ------------------------------------------------------
+  //  Create conversation automatically if otherUserId provided
+  // ------------------------------------------------------
+  useEffect(() => {
+    if (!otherUserId || conversationId) return;
 
-//   // ------------------------------------------------------
-//   // 1. CREATE / GET CONVERSATION
-//   // ------------------------------------------------------
-//   useEffect(() => {
-//     async () => {
-//       if (!otherUserId) return;
-//       try {
-//         const convo: Conversation = await createOrGetConversation(
-//           otherUserId as string
-//         );
-//         console.error("otherUserId", otherUserId);
-//         console.error("conversation Id", convo.id);
-//         setConversationId(convo.id);
-//       } catch (err) {
-//         console.error("Failed to create/get conversation:", err);
-//       }
-//     };
-//   }, [otherUserId]);
+    const initConversation = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const convo = await createConversation(otherUserId);
+        setConversationId(convo.id);
+      } catch (err) {
+        const info = explainAxiosError(err);
+        console.log("Conversation creation failed", info);
+        setError(info.message || "Failed to create conversation");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-//   // ------------------------------------------------------
-//   // 2. LOAD MESSAGES WHEN conversationId IS READY
-//   // ------------------------------------------------------
-//   useEffect(() => {
-//     async function loadHistory() {
-//       if (!conversationId) return;
+    initConversation();
+  }, [otherUserId, conversationId]);
 
-//       setLoadingHistory(true);
-//       try {
-//         const msgs = await getConversationMessages(conversationId);
-//         setMessages(msgs);
-//       } catch (err) {
-//         console.warn("Load history failed:", err);
-//       }
-//       setLoadingHistory(false);
-//     }
+  // ------------------------------------------------------
+  //  Fetch messages once conversationId exists
+  // ------------------------------------------------------
+  useEffect(() => {
+    if (!conversationId) return;
 
-//     loadHistory();
-//   }, [conversationId]);
+    const loadMessages = async () => {
+      setLoading(true);
+      try {
+        const msgs = await fetchMessages(conversationId);
+        setMessages(msgs);
+      } catch (err) {
+        const info = explainAxiosError(err);
+        console.log("Fetch messages failed", info);
+        setError(info.message || "Failed to fetch messages");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-//   // ------------------------------------------------------
-//   // 3. SEND A MESSAGE
-//   // ------------------------------------------------------
-//   async function sendMessage(text: string) {
-//     if (!conversationId || !text.trim()) return;
-//     console.log("conversationId from useChat", conversationId);
-//     // Temporary bubble
-//     const temp: Message = {
-//       id: Math.random().toString(),
-//       content: text,
-//       createdAt: new Date().toISOString(),
-//       sender: {
-//         id: user?.id || "",
-//         name: user?.username || "User",
-//         role: user?.role,
-//       },
-//       failed: false,
-//     };
+    loadMessages();
+  }, [conversationId]);
 
-//     setMessages((prev) => [...prev, temp]);
+  // ------------------------------------------------------
+  // Send a new message
+  // ------------------------------------------------------
+  const handleSendMessage = async (text: string) => {
+    if (!conversationId || !text.trim()) return;
 
-//     try {
-//       const saved = await sendChatMessage(conversationId, text);
+    // Optimistic UI: add temp message
+    const tempMsg = {
+      id: Math.random().toString(),
+      content: text,
+      sender: { id: user?.id, name: user?.username },
+      createdAt: new Date().toISOString(),
+      failed: false,
+    };
+    setMessages((prev) => [...prev, tempMsg]);
 
-//       setMessages((prev) => prev.map((m) => (m.id === temp.id ? saved : m)));
-//     } catch (err) {
-//       console.error("sendMessage error:", err);
+    try {
+      const savedMsg = await sendMessage(conversationId, text);
+      setMessages((prev) =>
+        prev.map((m) => (m.id === tempMsg.id ? savedMsg : m))
+      );
+    } catch (err) {
+      const info = explainAxiosError(err);
+      console.log("Send message failed", info);
+      // mark temp message as failed
+      setMessages((prev) =>
+        prev.map((m) => (m.id === tempMsg.id ? { ...m, failed: true } : m))
+      );
+    }
+  };
 
-//       setMessages((prev) =>
-//         prev.map((m) => (m.id === temp.id ? { ...m, failed: true } : m))
-//       );
-//     }
-//   }
-
-//   return {
-//     messages,
-//     sendMessage,
-//     loadingHistory,
-//     conversationId,
-//   };
-// }
+  return {
+    messages,
+    conversationId,
+    loading,
+    error,
+    sendMessage: handleSendMessage,
+  };
+}

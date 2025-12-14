@@ -13,6 +13,7 @@ export interface Conversation {
   lastMessage?: { content: string; createdAt: string };
 }
 
+export type MessageStatus = "SENDING" | "SENT" | "DELIVERED" | "READ";
 export interface Message {
   id: string;
   conversationId?: string | undefined;
@@ -25,6 +26,7 @@ export interface Message {
   attachmentUrl?: string;
   createdAt: string;
   otherParticipant?: string;
+  status?: MessageStatus;
   failed?: boolean;
 }
 
@@ -46,3 +48,11 @@ export interface Participants {
   userId: string;
   role: "INTENDED_PARENT" | "SURROGATE" | "AGENT";
 }
+ 
+export interface Sender {
+  id: string;
+  name: string;
+  role?: string;
+}
+
+

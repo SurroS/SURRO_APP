@@ -47,8 +47,7 @@ export default function SurrogateList() {
 
   useEffect(() => {
     if (surrogates.length === 0) {
-      fetchSurrogates(true).catch((err: any) => {
-        console.log(surrogates.map((surrogate) => surrogate.id));
+     fetchSurrogates(true).catch((err: any) => {
         Toast.show({
           text1: "Failed to load surrogates",
           type: "customError" as ToastType,
@@ -101,7 +100,7 @@ export default function SurrogateList() {
 
     router.push({
       pathname: "/(tabs)/home/surrogate/surrogateProfileScreen",
-      params: { id: currentCard.id },
+      params: { id: currentCard?.id },
     });
   }, [user, saveParentSurrogate]);
 
@@ -115,8 +114,8 @@ export default function SurrogateList() {
   const panResponder = React.useMemo(
     () =>
       PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: () => true,
+        onStartShouldSetPanResponder: () => false,
+        onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > 5,
         onPanResponderMove: (_, gestureState) => {
           translateX.value = gestureState.dx;
           translateY.value = gestureState.dy;
@@ -138,7 +137,6 @@ export default function SurrogateList() {
       }),
     [handleSwipe, resetCardPosition]
   );
-
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
       { translateX: translateX.value },
@@ -148,109 +146,68 @@ export default function SurrogateList() {
   }));
 
   const renderCardStack = () => {
-    if (isLoading) {
+    if (cardIndex >= surrogates.length) {
       return (
         <YStack alignItems="center" justifyContent="center" flex={1}>
-          <Text>Loading surrogates...</Text>
+          <Text>No more profiles</Text>
         </YStack>
       );
     }
 
-    if (
-      filteredList.length === 0 ||
-      cardIndex >= filteredList.length ||
-      surrogates.length === 0
-    ) {
-      return (
-        <YStack alignItems="center" justifyContent="center" flex={1}>
-          <Image
-            source={require("@/assets/images/noImage.png")}
-            style={{ width: SCREEN_WIDTH * 0.7, height: CARD_HEIGHT * 0.6 }}
-            resizeMode="contain"
-          />
-          <Text style={{ fontSize: 18, marginVertical: 16 }}>
-            No more profiles
+    const currentCard = surrogates[cardIndex];
+    const nextCards = surrogates.slice(cardIndex + 1, cardIndex + 3);
+
+    const CardContent = (card: any) => (
+      
+      <>
+        <Image
+          source={{ uri: card.avatar }}
+          style={{ width: "100%", height: "100%", position: "absolute" }}
+          resizeMode="cover"
+        />
+        <View style={{ backgroundColor: "rgba(0,0,0,0.35)", padding: 20 }}>
+          <Text style={{ color: "#fff", fontSize: 28, fontWeight: "800" }}>
+            {card.userName ||
+              card.username ||
+              card.user?.userName ||
+              card.profile?.userName ||
+              "N/A"}
           </Text>
-          <Button
-            marginLeft={10}
-            backgroundColor={colors.primary}
-            borderRadius={8}
-            onPress={() => {
-              setCardIndex(0);
-              fetchSurrogates(true);
+
+          <Text style={{ color: "#fff", fontSize: 16 }}>
+            <Ionicons card="location" size={14} /> {card.country || "N/A"}{" "}
+            <Ionicons name="calendar" size={14} /> {card.age || "N/A"} yrs
+          </Text>
+        </View>
+      </>
+    );
+    
+    return (
+      <>
+        {/* Static preview cards */}
+        {nextCards.map((card, index) => (
+          <View
+            key={card.id}
+            style={{
+              position: "absolute",
+              width: SCREEN_WIDTH * 0.9,
+              height: CARD_HEIGHT,
+              borderRadius: 12,
+              overflow: "hidden",
+              backgroundColor: "#fafafa",
+              justifyContent: "flex-end",
+              top: (index + 1) * 8,
+              zIndex: 1,
+              elevation: 1,
             }}
           >
-            Reload
-          </Button>
-        </YStack>
-      );
-    }
-
-    const visibleCards = filteredList.slice(cardIndex, cardIndex + 3);
-
-    return visibleCards.map((card, index) => {
-      const isTopCard = index === 0;
-      const cardStyle = {
-        top: index * 8,
-        zIndex: visibleCards.length - index,
-      };
-
-      const CardContent = (
-        <>
-          <Image
-            source={
-              typeof card.avatar === "string"
-                ? { uri: card.avatar }
-                : card.avatar
-            }
-            style={{ width: "100%", height: "100%", position: "absolute" }}
-            resizeMode="cover"
-            onError={() => console.log("Failed to load image for:", card.name)}
-          />
-          <View style={{ backgroundColor: "rgba(0,0,0,0.35)", padding: 20 }}>
-            <Text style={{ color: "#fff", fontSize: 28, fontWeight: "800" }}>
-              {card.name}
-            </Text>
-            <Text style={{ color: "#fff", fontSize: 16, fontWeight: "600" }}>
-              <Ionicons name="location" size={16} /> {card.country || "country"}{" "}
-              <Ionicons name="calendar" size={16} />{" "}
-              {card.age + "years" || "age years"}
-            </Text>
+            {CardContent(card)}
           </View>
-        </>
-      );
+        ))}
 
-      if (isTopCard) {
-        return (
-          <Animated.View
-            key={`${card.id}-${cardIndex}-${index}`}
-            style={[
-              {
-                position: "absolute",
-                width: SCREEN_WIDTH * 0.9,
-                height: CARD_HEIGHT,
-                borderRadius: 12,
-                overflow: "hidden",
-                backgroundColor: "#fafafa",
-                justifyContent: "flex-end",
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 6,
-                elevation: 3,
-              },
-              animatedStyle,
-            ]}
-            {...panResponder.panHandlers}
-          >
-            {CardContent}
-          </Animated.View>
-        );
-      }
-
-      return (
-        <View
-          key={`${card.id}-${cardIndex}-${index}`}
+        {/* ONE interactive card */}
+        <Animated.View
+          key={currentCard.id}
           style={[
             {
               position: "absolute",
@@ -260,20 +217,27 @@ export default function SurrogateList() {
               overflow: "hidden",
               backgroundColor: "#fafafa",
               justifyContent: "flex-end",
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 6,
-              elevation: 3,
+              zIndex: 10,
+              elevation: 5,
             },
-            cardStyle,
+            animatedStyle,
           ]}
+          {...panResponder.panHandlers}
         >
-          {CardContent}
-        </View>
-      );
-    });
+          {CardContent(currentCard)}
+        </Animated.View>
+      </>
+    );
   };
+  if (isLoading) {
+    return (
+      <SafeAreaView style={{ flex: 1 }}>
+        <YStack flex={1} alignItems="center" justifyContent="center">
+          <Text>Loading agents...</Text>
+        </YStack>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff", paddingTop: 20 }}>

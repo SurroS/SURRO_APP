@@ -16,33 +16,61 @@ const getAge = (dob?: string | null) => {
   return Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24 * 365)).toString();
 };
 
-const getDisplayName = (userName?: string | null, firstName?: string | null) =>
-  `${userName ?? ""} ${firstName ?? ""}`.trim() || "Unknown";
+const getDisplayName = (
+  firstName?: string | null,
+  lastName?: string | null,
+  userName?: string | null
+) =>
+  `${firstName ?? ""} ${lastName ?? ""}`.trim() ||
+  userName ||
+  "Unknown";
 
 const mapApiSurrogate = (apiItem: any): Surrogate => ({
   id: apiItem.id,
-  name: getDisplayName(apiItem.firstName, apiItem.lastName),
+ wallet:apiItem.wallet,
+  userName:
+    apiItem.userName ??
+    apiItem.username ??
+    apiItem.user?.userName ??
+    null,
+
+  name: getDisplayName(
+    apiItem.firstName,
+    apiItem.lastName,
+    apiItem.userName ?? apiItem.user?.userName
+  ),
+
   avatar:
     apiItem.profilePicture ??
+    apiItem.profilePictureUrl ??
     apiItem.user?.profilePictureUrl ??
     undefined,
-  age: getAge(apiItem.dateOfBirth),
-  country: apiItem.countryOfResidence ?? apiItem.countryOfOrigin ?? "Unknown",
+
+  age: getAge(apiItem.dateOfBirth ?? apiItem.dob),
+
+  country:
+    apiItem.countryOfResidence ??
+    apiItem.countryOfOrigin ??
+    apiItem.country ??
+    "Unknown",
+
   height: apiItem.height,
   weight: apiItem.weight,
   children: apiItem.numberOfChildren,
 });
 
+
 // -----------------------------------------------------
 // Fallback when API fails
 // -----------------------------------------------------
-export const fallbackSurrogates: Surrogate[] = [
+export const fallbackSurrogates: any = [
   {
     id: "1",
     name: "Jane Doe",
     avatar: require("@/assets/images/image1.jpg"),
     age: "20",
     country: "Nigeria",
+
   },
 ];
 
