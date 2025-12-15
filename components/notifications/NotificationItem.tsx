@@ -1,94 +1,80 @@
-// components/notifications/NotificationItem.tsx
 import React from "react";
-import { XStack, YStack, Text, Separator, Image } from "tamagui";
+import { TouchableOpacity } from "react-native";
+import { XStack, YStack, Text, Image } from "tamagui";
+import { Notification } from "@/store/notifications";
+import colors from "@/hooks/colors";
 
-export type Notification = {
-  id: string;
-  type: "profile" | "message" | "profileSetup" | "views";
-  title: string;
-  message: string;
-  time: string;
-};
-
-// Local icon imports
+// Icons
 import messageIcon from "@/assets/images/message-icon.png";
 import profileSetup2 from "@/assets/images/profile-setup-2.png";
 import profileSetupIcon from "@/assets/images/profile-setup-icon.png";
 import profileView from "@/assets/images/profile-view.png";
 
 type Props = {
-  item: Notification;
+  item?: Notification;
+  selected?: boolean;
+  onPress?: () => void;
+  onLongPress?: () => void;
 };
 
-// Icon mapping (without colored circle)
-const iconStyles: Record<Notification["type"], { icon: any }> = {
-  profile: { icon: profileSetupIcon },
-  message: { icon: messageIcon },
-  profileSetup: { icon: profileSetup2 },
-  views: { icon: profileView },
+const iconByType: Partial<Record<Notification["type"], any>> = {
+  GENERAL: messageIcon,
+  PROFILE_SETUP: profileSetupIcon,
+  PROFILE_VIEWS: profileView,
+  PROFILE_BOOST: profileSetup2,
 };
 
-// Font sizes and line heights based on Figma design
 const FONT = {
-  title: { fontSize: 16, lineHeight: 26 }, // Body/Base: 16px, line-height 160%
-  message: { fontSize: 14, lineHeight: 21 }, // Body/Small Base: 14px, line-height 150%
+  title: { fontSize: 16, lineHeight: 26 },
 };
 
-const NotificationItem = ({ item }: Props) => {
-  const { icon } = iconStyles[item.type];
+const formatTime = (timestamp: number) =>
+  new Date(timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+const NotificationItem = ({ item, selected, onPress, onLongPress }: Props) => {
+  if (!item) return null;
+
+  const icon = iconByType[item.type] ?? messageIcon;
 
   return (
-    <YStack>
-      <XStack
-        alignItems="center"
-        justifyContent="space-between"
-        paddingVertical="$3"
-        paddingHorizontal="$4"
+    <TouchableOpacity onPress={onPress} onLongPress={onLongPress} activeOpacity={0.7}>
+      <YStack
+        backgroundColor={selected ? "#dde6ff" : "#fff"}
+        borderRadius={10}
+        borderWidth={0.5}
+        borderColor={colors.gray}
       >
-        {/* Left section: Icon + text */}
-        <XStack alignItems="center" gap="$3" flex={1}>
-          {/* Icon  */}
-          <Image source={icon} width={22} height={22} resizeMode="contain" />
-
-          {/* Title and message */}
-          <YStack flex={1}>
+        <XStack alignItems="center" justifyContent="space-between" paddingVertical="$3" paddingHorizontal="$4">
+          <XStack alignItems="center" gap="$3" flex={1}>
+            <Image source={icon} width={22} height={22} resizeMode="contain" />
             <Text
-              fontFamily="Body/Base"
-              fontWeight="600" // Regular
+              fontWeight="600"
               fontSize={FONT.title.fontSize}
               lineHeight={FONT.title.lineHeight}
               color="#212121"
             >
               {item.title}
             </Text>
-            <Text
-              fontFamily="Body/Small Base"
-              fontWeight="600" // Regular
-              fontSize={FONT.message.fontSize}
-              lineHeight={FONT.message.lineHeight}
-              color="#545453"
-              numberOfLines={2}
-            >
-              {item.message}
+          </XStack>
+
+          <XStack alignItems="center" gap={5}>
+            <Text fontWeight="600" color="#545453">
+              {formatTime(item.createdAt)}
             </Text>
-          </YStack>
+
+            {/* Red dot for unread messages */}
+            {!item.read && (
+              <YStack
+                width={10}
+                height={10}
+                borderRadius={5}
+                backgroundColor="#E63946"
+              />
+            )}
+          </XStack>
         </XStack>
-
-        {/* Right section: Time */}
-        <Text
-          fontFamily="Body/Small Base"
-          fontWeight="600"
-          fontSize={FONT.message.fontSize}
-          lineHeight={FONT.message.lineHeight}
-          color="#545453"
-        >
-          {item.time}
-        </Text>
-      </XStack>
-
-      {/* Subtle separator line */}
-      <Separator borderColor="$text" opacity={0.1} marginLeft={60} />
-    </YStack>
+      </YStack>
+    </TouchableOpacity>
   );
 };
 

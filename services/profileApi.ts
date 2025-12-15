@@ -98,11 +98,23 @@ export const getAgentProfile = () =>
 export const createParentProfile = (d: any) =>
   makeAuthenticatedProfileRequest("POST", "/intended-parents/profile", d);
 
-export const updateParentProfile = (d: any) =>
-  makeAuthenticatedProfileRequest("PATCH", "/intended-parents/match", d);
+export const updateParentSurrogateMatch = (d: any) =>
+  makeAuthenticatedProfileRequest(
+    "PATCH",
+    "/intended-parents/match-preferences",
+    d
+  );
+export const fetchParentMatch = (d: any) =>
+  makeAuthenticatedProfileRequest(
+    "GET",
+    "/intended-parents/matches",
+    d
+  );
 
-export const saveParentSurrogate = (d: any) =>
+export const saveParentSurrogateMatch = (d: any) =>
   makeAuthenticatedProfileRequest("POST", "/intended-parents/save", d);
+export const GetsavedParentSurrogateMatch = (d: any) =>
+  makeAuthenticatedProfileRequest("GET", "/intended-parents/saved", d);
 
 export const updateParentMatchPreference = (d: any) =>
   makeAuthenticatedProfileRequest(
@@ -112,6 +124,6 @@ export const updateParentMatchPreference = (d: any) =>
   );
 
 export const getParentProfile = () =>
-  makeAuthenticatedProfileRequest("GET", "/parents/profile/me");
+  makeAuthenticatedProfileRequest("GET", "/intended-parents/profile/me");
 
 export default profileApi;

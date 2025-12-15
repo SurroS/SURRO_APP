@@ -1,7 +1,10 @@
 import { ChevronDown } from "@tamagui/lucide-icons";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { ScrollView, StyleSheet, Pressable } from "react-native";
-import Animated from "react-native-reanimated";
+import Animated, {
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 import { Accordion, Text, View, XStack, YStack } from "tamagui";
 
 import About from "../about";
@@ -11,8 +14,9 @@ import ProgressMeter from "../progressCircle";
 import Referral from "../referral";
 import WalletCard from "../wallet";
 import SurrogatePreview from "../surrogate/SurrogatePreview";
-import { router } from "expo-router";
 import AgentPreview from "../agent/AgentPreviewCard";
+import { router } from "expo-router";
+import { getParentProfile } from "@/services/profileApi";
 
 /** Generic error boundary for safe rendering */
 function SafeRender({
@@ -31,15 +35,25 @@ function SafeRender({
 }
 
 export default function ParentScreen() {
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const profile = await getParentProfile();
+        console.log("parentData", profile);
+      } catch (err) {
+        console.log("unable to fetch parent data", err);
+      }
+    };
+
+    loadProfile();
+  }, []);
+
   const ViewSurrogates = () => {
-    router.push({
-      pathname: "/(tabs)/home/surrogate/surrogateList",
-    });
+    router.push("/(tabs)/home/surrogate/surrogateList");
   };
+
   const ViewAgents = () => {
-    router.push({
-      pathname: "/(tabs)/home/agent/agentsListScreen",
-    });
+    router.push("/(tabs)/home/agent/agentsListScreen");
   };
 
   return (
@@ -78,17 +92,20 @@ export default function ParentScreen() {
           </Accordion.Item>
         </Accordion>
 
-        {/* Horizontal scroll - must have fixed height */}
+        {/* Horizontal scroll */}
         <ScrollView horizontal nestedScrollEnabled style={{ height: 210 }}>
-          <SafeRender fallback={<Text>Loading surrogates...</Text>}>
+          <SafeRender fallback={<Text>Loading previews...</Text>}>
             <Pressable onPress={ViewSurrogates} style={{ marginRight: 5 }}>
               <SurrogatePreview
                 style={{ height: 200, padding: 2, width: 150 }}
               />
             </Pressable>
-            <View onPress={ViewAgents} marginRight={5}>
-              <AgentPreview style={{ height: 200, padding: 2, width: 150 }} />
-            </View>
+
+            <Pressable onPress={ViewAgents} style={{ marginRight: 5 }}>
+              <AgentPreview
+                style={{ height: 200, padding: 2, width: 150 }}
+              />
+            </Pressable>
           </SafeRender>
         </ScrollView>
 
@@ -134,22 +151,27 @@ function AccordionTriggerWithChevron({ title }: { title: string }) {
       justifyContent="space-between"
       height={48}
     >
-      {({ open }: { open?: boolean }) => (
-        <XStack alignItems="center" justifyContent="space-between" width="100%">
-          <XStack alignItems="center" gap={"$11"}>
-            <Text color="white" fontWeight="700" fontSize="$5">
-              {title}
-            </Text>
-            <Animated.View
-              style={{
-                transform: [{ rotate: open ? "180deg" : "0deg" }],
-              }}
-            >
-              <ChevronDown color="white" size={25} />
-            </Animated.View>
+      {({ open }: { open?: boolean }) => {
+        const animatedStyle = useAnimatedStyle(() => ({
+          transform: [
+            { rotate: withTiming(open ? "180deg" : "0deg", { duration: 200 }) },
+          ],
+        }));
+
+        return (
+          <XStack alignItems="center" justifyContent="space-between" width="100%">
+            <XStack alignItems="center" gap="$11">
+              <Text color="white" fontWeight="700" fontSize="$5">
+                {title}
+              </Text>
+
+              <Animated.View style={animatedStyle}>
+                <ChevronDown color="white" size={25} />
+              </Animated.View>
+            </XStack>
           </XStack>
-        </XStack>
-      )}
+        );
+      }}
     </Accordion.Trigger>
   );
 }
