@@ -7,29 +7,27 @@ import { Accordion, Text, XStack, YStack } from "tamagui";
 import About from "../about";
 import Contact from "../contact";
 import Gallery from "../gallery";
-import ProfileData from "../surrogate/SurrogateProfile-data";
 import ProgressMeter from "../progressCircle";
 import Referral from "../referral";
 import WalletCard from "../wallet";
-import { useProfile } from "@/hooks/useProfile";
+import { useSurrogateProfile } from "@/hooks/profile/useSurrogateProfile";
 import { calculateProfileProgress } from "@/utils/profileHelpers";
 import ProfileCompletionModal from "../ProfileCompletionModal";
+import ProfileData from "@/components/profileDetails/ProfileData";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function SurrogateScreen() {
-  const { fetchProfile, surrogateProfile, isLoading } = useProfile();
+  const { surrogateProfile, isLoading, toggleAvailability } =
+    useSurrogateProfile();
+  const { user } = useAuth();
 
   const [showProfileModal, setShowProfileModal] = useState(false);
-
-  // Fetch profile on component mount
-  useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
-
   // Calculate profile progress
   const progress = calculateProfileProgress(surrogateProfile);
 
   // Show modal if no profile or progress < 70%
   useEffect(() => {
+    console.log("[Home] surrogateprofile", surrogateProfile);
     if (!isLoading) {
       const hasProfile = surrogateProfile !== null;
       const needsCompletion = hasProfile && progress < 100;
@@ -42,9 +40,22 @@ export default function SurrogateScreen() {
 
   return (
     <>
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
         <YStack flex={1} gap="$3">
-          <ProfileData />
+          <ProfileData
+            name={
+              surrogateProfile?.userName ||
+              `${surrogateProfile?.firstName ?? ""} ${surrogateProfile?.lastName ?? ""}`.trim()
+            }
+            avatarUrl={surrogateProfile?.profilePicture || surrogateProfile?.avatar}
+            location={surrogateProfile?.countryOfResidence || surrogateProfile?.country}
+            dateOfBirth={surrogateProfile?.dateOfBirth?.split("T")[0]}
+            isAvailable={surrogateProfile?.isAvailable}
+            onToggleAvailability={toggleAvailability}
+          />
 
           {/* Accordion for About + Contact */}
           <Accordion
@@ -58,8 +69,17 @@ export default function SurrogateScreen() {
               <AccordionTriggerWithChevron title="Profile Information" />
               <Accordion.Content backgroundColor="white" padding="$3">
                 <YStack gap="$3">
-                  <About />
-                  <Contact />
+                  <About aboutMe={surrogateProfile?.aboutMe} />
+                  <Contact
+                    phoneNumber={surrogateProfile?.phone1}
+                    email={user?.email}
+                    socials={{
+                      facebook: surrogateProfile?.facebookProfile,
+                      instagram: surrogateProfile?.instagramProfile,
+                      twitter: surrogateProfile?.twitterProfile,
+                      tiktok: surrogateProfile?.tiktokProfile,
+                    }}
+                  />
                 </YStack>
               </Accordion.Content>
             </Accordion.Item>
@@ -105,6 +125,7 @@ export default function SurrogateScreen() {
           visible={showProfileModal}
           onClose={() => setShowProfileModal(false)}
           profile={surrogateProfile}
+          redirectPath="/(tabs)/settings/profile"
         />
       </ScrollView>
     </>

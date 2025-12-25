@@ -1,83 +1,91 @@
 export interface User {
-    id: string;
-    email: string;
-    password?: string; // Only present in API responses, not in frontend state
-    role: 'INTENDED_PARENT' | 'SURROGATE' | 'AGENT';
-    isVerified: boolean;
-    isApproved: boolean;
-    createdAt: string;
-    updatedAt: string;
-    isOnline: boolean;
-    lastSeen: string;
-    googleId?: string | null;
-    appleId?: string | null;
-    profilePictureUrl?: string | null;
-    kycStatus: 'NOT_STARTED' | 'PENDING' | 'APPROVED' | 'REJECTED';
-    referralCode: string;
-    referredById?: string | null;
-    // Optional fields that might be added later
-    name?: string;
-    username?: string;
-    location?: string;
-    status?: string;
-    dob?: string;
-    avatar?: string;
+  id: string;
+  email: string;
+  password?: string; // Only present in API responses, not in frontend state
+  role: "INTENDED_PARENT" | "SURROGATE" | "AGENT";
+  isVerified: boolean;
+  isApproved: boolean;
+  createdAt: string;
+  updatedAt: string;
+  isOnline: boolean;
+  lastSeen: string;
+  googleId?: string | null;
+  appleId?: string | null;
+  profilePictureUrl?: string | null;
+  kycStatus: "NOT_STARTED" | "PENDING" | "APPROVED" | "REJECTED";
+  referralCode: string;
+  referredById?: string | null;
+  wallet: Wallet;
+  name?: string;
+  username?: string;
+  location?: string;
+  status?: string;
+  dob?: string;
+  avatar?: string;
+}
+export interface Wallet {
+  id: string;
+  userId: string;
+  balance: number;
+  currency: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface AuthState {
-    user: User | null;
-    token: string | null;
-    isAuthenticated: boolean;
-    isLoading: boolean;
-    error: string | null;
-    requiresOtp: boolean;
-    tempEmail: string | null; // For OTP flows
-    referralSource: string | null; // How user heard about us
-    referralCode: string | null; // Referral code if applicable
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+  requiresOtp: boolean;
+  tempEmail: string | null; // For OTP flows
+  referralSource: string | null; // How user heard about us
+  referralCode: string | null; // Referral code if applicable
 }
 
 export interface LoginCredentials {
-    email: string;
-    password: string;
+  email: string;
+  password: string;
 }
 
 export interface RegisterCredentials {
-    email: string;
-    password: string;
-    passwordConfirmation: string;
-    role: string;
-    referralCode?: string;
+  email: string;
+  password: string;
+  passwordConfirmation: string;
+  role: string;
+  referralCode?: string;
 }
 
 export interface OtpVerification {
-    email: string;
-    code: string;
+  email: string;
+  code: string;
 }
 
 export interface ResetPasswordRequest {
-    email: string;
+  email: string;
 }
 
 export interface ResetPasswordConfirm {
-    email: string;
-    otp: string;
-    newPassword: string;
-    newPasswordConfirmation: string;
+  email: string;
+  otp: string;
+  newPassword: string;
+  newPasswordConfirmation: string;
 }
 
 export interface ChangePasswordRequest {
-    currentPassword: string;
-    newPassword: string;
-    newPasswordConfirmation: string;
+  currentPassword: string;
+  newPassword: string;
+  newPasswordConfirmation: string;
 }
 
 export interface GoogleAppleAuth {
-    idToken: string;
-    role: string;
+  idToken: string;
+  role: string;
 }
 
 export interface ApiError {
-    message: string;
-    status?: number;
-    errors?: Record<string, string[]>;
+  message: string;
+  status?: number;
+  errors?: Record<string, string[]>;
 }

@@ -48,14 +48,27 @@ export default function AgentList() {
   //Load agents ONCE
   // ------------------------------------------
   useEffect(() => {
-    fetchAgents(true).catch((err: any) => {
-      Toast.show({
-        text1: "Failed to load agents",
-        type: "customError" as ToastType,
-        text2: err?.response?.data?.message || "Try again.",
+    if (agents.length === 0) {
+      fetchAgents(true).catch((err: any) => {
+        Toast.show({
+          text1: "Failed to load agents",
+          type: "customError" as ToastType,
+          text2: err?.response?.data?.message || "Try again.",
+        });
       });
-    });
-  }, []);
+    }
+  }, [agents.length, fetchAgents]);
+
+  // --- Render logic
+  if (agents.length === 0 && isLoading) {
+    return (
+      <SafeAreaView style={{ flex: 1 }}>
+        <YStack flex={1} alignItems="center" justifyContent="center">
+          <Text>Loading agents...</Text>
+        </YStack>
+      </SafeAreaView>
+    );
+  }
 
   // keep ref updated
   useEffect(() => {
@@ -73,7 +86,7 @@ export default function AgentList() {
   // Swipe handler
   // ------------------------------------------
   const handleSwipe = useCallback(() => {
-    setCardIndex((i) => i + 1);
+    setCardIndex((prev) => prev + 1);
 
     translateX.value = 0;
     translateY.value = 0;
@@ -150,37 +163,36 @@ export default function AgentList() {
     const CardInner = (
       <>
         <Image
-          source={{ uri: agent.avatar }}
+          source={{ uri: agent?.avatar }}
           style={{ width: "100%", height: "100%", position: "absolute" }}
           resizeMode="cover"
         />
 
         <View style={{ backgroundColor: "rgba(0,0,0,0.35)", padding: 20 }}>
           <Text style={{ color: "#fff", fontSize: 28, fontWeight: "800" }}>
-            {agent.userName ||
-              agent.username ||
-              agent.user?.userName ||
-              agent.profile?.userName ||
+            {agent?.userName ||
+              agent?.username ||
+              agent?.user?.userName ||
+              agent?.profile?.userName ||
               "N/A"}
           </Text>
 
           <Text style={{ color: "#fff", fontSize: 16 }}>
-            <Ionicons name="location" size={14} /> {agent.country || "N/A"}{" "}
-            <Ionicons name="calendar" size={14} /> {agent.age || "N/A"} yrs
+            <Ionicons name="location" size={14} /> {agent?.country || "N/A"}{" "}
+            <Ionicons name="calendar" size={14} /> {agent?.age || "N/A"} yrs
           </Text>
         </View>
       </>
     );
- 
-const baseStyle: ViewStyle = {
-  width: SCREEN_WIDTH * 0.9,
-  height: CARD_HEIGHT,
-  borderRadius: 14,
-  overflow: "hidden",
-  backgroundColor: "#fafafa",
-  justifyContent: "flex-end",
-};
 
+    const baseStyle: ViewStyle = {
+      width: SCREEN_WIDTH * 0.9,
+      height: CARD_HEIGHT,
+      borderRadius: 14,
+      overflow: "hidden",
+      backgroundColor: "#fafafa",
+      justifyContent: "flex-end",
+    };
 
     if (isTop) {
       return (
@@ -196,19 +208,6 @@ const baseStyle: ViewStyle = {
     // Non-top cards are static previews
     return <View style={baseStyle}>{CardInner}</View>;
   };
-
-  // ------------------------------------------
-  // Loading / empty & normal state
-  // ------------------------------------------
-  if (isLoading) {
-    return (
-      <SafeAreaView style={{ flex: 1 }}>
-        <YStack flex={1} alignItems="center" justifyContent="center">
-          <Text>Loading Surrogates...</Text>
-        </YStack>
-      </SafeAreaView>
-    );
-  }
 
   if (!agents || agents.length === 0) {
     return (
@@ -265,26 +264,35 @@ const baseStyle: ViewStyle = {
         {renderCard(current, true)}
       </View>
 
-      {/* Buttons */}
-      <XStack padding={20} justifyContent="space-between">
-        <Button
-          flex={1}
-          marginRight={10}
-          backgroundColor="#b2b7be"
-          onPress={handleSwipe}
+      {cardIndex < agents.length && (
+        <XStack
+          justifyContent="space-around"
+          paddingHorizontal={20}
+          paddingTop={20}
         >
-          Skip
-        </Button>
+          <Button
+            flex={1}
+            marginRight={10}
+            backgroundColor={colors.secondry}
+            borderRadius={8}
+            onPress={handleSwipe}
+          >
+            Skip
+          </Button>
+          <Button
+            flex={1}
+            marginLeft={10}
+            backgroundColor={colors.primary}
+            borderRadius={8}
+            onPress={openProfile}
+          >
+            View Profile
+          </Button>
+        </XStack>
+      )}
 
-        <Button
-          flex={1}
-          marginLeft={10}
-          backgroundColor={colors.primary}
-          onPress={openProfile}
-        >
-          View Profile
-        </Button>
-      </XStack>
+      {/* Buttons */}
+      <XStack padding={20} justifyContent="space-between"></XStack>
 
       {/* Filters */}
       <FilterModal

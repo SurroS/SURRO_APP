@@ -216,8 +216,7 @@ export default function PersonalInformationScreen() {
                 setDob={setDob}
                 setMaritalStatus={setMaritalStatus}
                 height={height}
-                weight={weight}
-                // eslint-disable-next-line react/no-children-prop
+                weight={weight} 
                 children={children}
                 setHeight={setHeight}
                 setWeight={setWeight}

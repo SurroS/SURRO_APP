@@ -1,9 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { StyleSheet } from "react-native";
 import { Image, Text, XStack, YStack } from "tamagui";
-import InstagramIcon from "../../assets/images/instagramsvg (1).svg";
-import { useProfile } from "@/hooks/useProfile";
-import { useAuth } from "@/hooks/useAuth";
 
 const texthead = "$4";
 const body = "$3.2";
@@ -11,77 +8,92 @@ const smallGap = "$2";
 const bigGap = "$3";
 const iconSize = 18;
 
-const Contact = () => {
-  const { surrogateProfile } = useProfile()
-  const { user } = useAuth();
+type SocialLinks = {
+  facebook?: string | null;
+  instagram?: string | null;
+  twitter?: string | null;
+  tiktok?: string | null;
+};
 
-  const socials = [
-    {
-      icon: require("../../assets/images/fb-icon.png"),
-      label: "@" + surrogateProfile?.facebookProfile,
-      type: "png",
-    },
-    { icon: InstagramIcon, label: "@" + surrogateProfile?.instagramProfile, type: "svg" },
-  ];
+type ContactProps = {
+  email?: string | null;
+  phoneNumber?: string | null;
+  socials?: SocialLinks;
+};
+
+const SOCIAL_ICONS = {
+  facebook: require("../../assets/images/fb-icon.png"),
+  instagram: require("../../assets/images/instagram-icon.png"),
+  twitter: require("../../assets/images/x_icon.png"),
+  tiktok: require("../../assets/images/tiktok-icon.png"),
+};
+
+const Contact = ({ email, phoneNumber, socials = {} }: ContactProps) => {
+  const entries = Object.entries(socials).filter(([_, value]) => !!value);
+
   return (
     <YStack gap={smallGap} flex={1}>
+      {/* CONTACT */}
       <YStack gap={smallGap}>
         <Text fontSize={texthead} fontWeight="bold" color="black">
           Contact
         </Text>
-        <XStack alignItems="center" justifyContent="space-between">
-          <XStack alignItems="center" flexWrap="wrap" gap={smallGap}>
-            <XStack alignItems="center" gap={smallGap}>
-              <Feather name="phone" size={iconSize} color="#000" />
-              <Text fontSize={body} color="black">
-                {surrogateProfile ? surrogateProfile.phone1 : '237650810984'}
-              </Text>
-            </XStack>
-            <XStack alignItems="center" gap={smallGap}>
-              <Feather name="mail" size={iconSize} color="#000" />
-              <Text fontSize={body} color="black">
-                {user ? user?.email : 'surrogate@gmail.com'}
-              </Text>
-            </XStack>
+
+        <XStack flexWrap="wrap" gap={smallGap}>
+          <XStack alignItems="center" gap={smallGap}>
+            <Feather name="phone" size={iconSize} color="#000" />
+            <Text fontSize={body} color="black">
+              {phoneNumber || "Phone not provided"}
+            </Text>
+          </XStack>
+
+          <XStack alignItems="center" gap={smallGap}>
+            <Feather name="mail" size={iconSize} color="#000" />
+            <Text fontSize={body} color="black">
+              {email || "Email not provided"}
+            </Text>
           </XStack>
         </XStack>
       </YStack>
 
-      <YStack gap={bigGap}>
-        <XStack alignItems="center" justifyContent="space-between">
-          <Text fontSize={texthead} fontWeight="bold" color="black">
-            Socials
+      {/* SOCIALS */}
+{/* SOCIALS */}
+{entries.length > 0 && (
+  <YStack gap={bigGap}>
+    <Text fontSize={texthead} fontWeight="bold" color="black">
+      Socials
+    </Text>
+
+    <YStack gap="$3">
+      {entries.map(([platform, url]) => (
+        <XStack
+          key={platform}
+          alignItems="center"
+          gap="$2"
+          maxWidth="100%"
+        >
+          <Image
+            source={SOCIAL_ICONS[platform as keyof SocialLinks]}
+            width={iconSize}
+            height={iconSize}
+            borderRadius={4}
+          />
+
+          <Text
+            fontSize={body}
+            color="black"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            flex={1}
+          >
+            {url}
           </Text>
         </XStack>
-        <XStack
-          alignItems="center"
-          justifyContent="space-between"
-          gap={smallGap}
-        >
-          {/* social */}
+      ))}
+    </YStack>
+  </YStack>
+)}
 
-          <XStack gap="$4" width={'90%'} flexGrow={1} flexWrap={"wrap"}>
-            {socials.map((item, idx) => (
-              <XStack key={idx} alignItems="center" gap="$2">
-                {item.type === "png" ? (
-                  <Image
-                    source={item.icon}
-                    width={iconSize}
-                    height={iconSize}
-                    borderRadius={4}
-                  />
-                ) : (
-                  <InstagramIcon width={iconSize} height={iconSize} />
-                )}
-                <Text color="$text" fontSize={body}>
-                  {item.label}
-                </Text>
-              </XStack>
-            ))}
-          </XStack>
-
-        </XStack>
-      </YStack>
     </YStack>
   );
 };

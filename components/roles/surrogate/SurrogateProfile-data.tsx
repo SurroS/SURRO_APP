@@ -22,7 +22,7 @@ const ProfileData = () => {
       <Image
         source={
           surrogateProfile?.profilePicture
-            ? { uri: surrogateProfile.profilePicture }
+            ? { uri: surrogateProfile?.profilePicture }
             : require("@/assets/images/femaleAvatar.png")
         }
         width={"45%"}
@@ -35,7 +35,6 @@ const ProfileData = () => {
           <Text color="black" fontSize="$4" fontWeight={"bold"} textWrap="wrap">
             {surrogateProfile ? `${surrogateProfile.userName}` : "User Name"}
           </Text>
-          {/* Add verification status if available */}
         </XStack>
 
         <XStack alignItems="center" gap="$2">
@@ -54,9 +53,16 @@ const ProfileData = () => {
 
         <TouchableOpacity
           onPress={handleStatusPress}
-          style={[styles.statusButton, { backgroundColor: surrogateProfile?.isAvailable ? "#80cdb1ff" : "#b4b4b3ff" }]}
+          style={[
+            styles.statusButton,
+            {
+              backgroundColor: surrogateProfile?.isAvailable
+                ? "#80cdb1ff"
+                : "#b4b4b3ff",
+            },
+          ]}
         >
-          <Text color="black" fontSize="$3" fontWeight={'bold'} >
+          <Text color="black" fontSize="$3" fontWeight={"bold"}>
             {surrogateProfile?.isAvailable ? "Available" : "Not Available"}
           </Text>
         </TouchableOpacity>
@@ -73,6 +79,6 @@ const styles = StyleSheet.create({
     height: "24%",
     flexGrow: 0.5,
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
 });

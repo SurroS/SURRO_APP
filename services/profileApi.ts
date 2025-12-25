@@ -73,7 +73,13 @@ export const updateSurrogateProfile = (d: any) =>
 
 export const getSurrogateProfile = () =>
   makeAuthenticatedProfileRequest("GET", "/surrogates/profile/me");
-
+export const updateMedicalProfile = (data:any) =>
+  makeAuthenticatedProfileRequest("PATCH", "/surrogates/profile/medical");
+export const uploadEndometriumImage = (data:any) =>
+  makeAuthenticatedProfileRequest(
+    "PATCH",
+    "/surrogates/profile/medical/upload-endometrium"
+  );
 // ----------------------------------------------------
 // AGENTS
 // ----------------------------------------------------
@@ -98,6 +104,9 @@ export const getAgentProfile = () =>
 export const createParentProfile = (d: any) =>
   makeAuthenticatedProfileRequest("POST", "/intended-parents/profile", d);
 
+export const updateParentProfile = (d: any) =>
+  makeAuthenticatedProfileRequest("PATCH", "/intended-parents/profile", d);
+
 export const updateParentSurrogateMatch = (d: any) =>
   makeAuthenticatedProfileRequest(
     "PATCH",
@@ -105,11 +114,7 @@ export const updateParentSurrogateMatch = (d: any) =>
     d
   );
 export const fetchParentMatch = (d: any) =>
-  makeAuthenticatedProfileRequest(
-    "GET",
-    "/intended-parents/matches",
-    d
-  );
+  makeAuthenticatedProfileRequest("GET", "/intended-parents/matches", d);
 
 export const saveParentSurrogateMatch = (d: any) =>
   makeAuthenticatedProfileRequest("POST", "/intended-parents/save", d);

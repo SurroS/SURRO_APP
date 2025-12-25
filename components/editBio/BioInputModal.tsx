@@ -1,4 +1,3 @@
-// components/editBio/BioInputModal.tsx
 import React, { useEffect, useRef, useState } from "react";
 import {
   View,
@@ -11,13 +10,19 @@ import {
   Platform,
   Animated,
   EmitterSubscription,
+  ActivityIndicator,
 } from "react-native";
 import { YStack, XStack, Text, Button } from "tamagui";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+
 import colors from "@/hooks/colors";
 import PlatformInput from "./SocialSelector";
-import { SafeAreaView } from "react-native-safe-area-context";
 
-export type Social = { platform: string; handle: string };
+export type Social = {
+  platform: string;
+  handle: string;
+};
 
 export type EditProfileModalProps = {
   visible: boolean;
@@ -26,10 +31,10 @@ export type EditProfileModalProps = {
     username: string;
     about: string;
     socials: Social[];
-  }) => Promise<void> | void;
+  }) => Promise<void>;
   profile?: {
-    username?: string;
-    about?: string;
+    userName?: string;
+    aboutMe?: string;
     socials?: Social[];
   };
   isLoading?: boolean;
@@ -40,21 +45,25 @@ export default function EditProfileModal({
   onClose,
   onSave,
   profile,
-  isLoading,
+  isLoading = false,
 }: EditProfileModalProps) {
-  const [username, setUsername] = useState(profile?.username || "");
-  const [about, setAbout] = useState(profile?.about || "");
-  const [socials, setSocials] = useState<Social[]>(profile?.socials || []);
+  const [username, setUsername] = useState("");
+  const [about, setAbout] = useState("");
+  const [socials, setSocials] = useState<Social[]>([]);
 
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const anim = useRef(new Animated.Value(0)).current;
 
+  /* ---------- Populate from API ---------- */
   useEffect(() => {
-    setUsername(profile?.username || "");
-    setAbout(profile?.about || "");
-    setSocials(profile?.socials || []);
-  }, [profile, visible]);
+    if (!visible) return;
 
+    setUsername(profile?.userName || "");
+    setAbout(profile?.aboutMe || "");
+    setSocials(profile?.socials || []);
+  }, [visible, profile]);
+
+  /* ---------- Keyboard ---------- */
   useEffect(() => {
     let showSub: EmitterSubscription;
     let hideSub: EmitterSubscription;
@@ -62,11 +71,20 @@ export default function EditProfileModal({
     const onShow = (e: any) => {
       const h = e.endCoordinates?.height ?? 0;
       setKeyboardHeight(h);
-      Animated.timing(anim, { toValue: h * 0.5, duration: 200, useNativeDriver: true }).start();
+      Animated.timing(anim, {
+        toValue: h * 0.5,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
     };
+
     const onHide = () => {
       setKeyboardHeight(0);
-      Animated.timing(anim, { toValue: 0, duration: 180, useNativeDriver: true }).start();
+      Animated.timing(anim, {
+        toValue: 0,
+        duration: 180,
+        useNativeDriver: true,
+      }).start();
     };
 
     if (Platform.OS === "ios") {
@@ -76,23 +94,44 @@ export default function EditProfileModal({
       showSub = Keyboard.addListener("keyboardDidShow", onShow);
       hideSub = Keyboard.addListener("keyboardDidHide", onHide);
     }
+
     return () => {
       showSub?.remove();
       hideSub?.remove();
     };
   }, [anim]);
 
+  /* ---------- Add / Update Social ---------- */
   const handleAddSocial = (platform: string, handle: string) => {
-    if (socials.some((s) => s.platform === platform)) return;
-    setSocials((p) => [{ platform, handle }, ...p]);
+    setSocials((prev) => {
+      const exists = prev.find((s) => s.platform === platform);
+      if (exists) {
+        return prev.map((s) =>
+          s.platform === platform ? { platform, handle } : s
+        );
+      }
+      return [...prev, { platform, handle }];
+    });
   };
 
+  /* ---------- Remove Social ---------- */
   const handleRemoveSocial = (platform: string) => {
-    setSocials((p) => p.filter((s) => s.platform !== platform));
+    if (isLoading) return;
+    setSocials((prev) => prev.filter((s) => s.platform !== platform));
   };
 
+  /* ---------- Save ---------- */
   const handleSave = async () => {
-    if (onSave) await onSave({ username, about, socials });
+    if (isLoading) return;
+
+    await onSave({
+      username: username.trim(),
+      about: about.trim(),
+      socials: socials.filter(
+        (s) => s.handle && s.handle.trim().length > 0
+      ),
+    });
+
     onClose();
   };
 
@@ -101,69 +140,120 @@ export default function EditProfileModal({
   return (
     <SafeAreaView style={styles.full}>
       <TouchableWithoutFeedback
+        disabled={isLoading}
         onPress={() => {
           Keyboard.dismiss();
-          onClose();
+          if (!isLoading) onClose();
         }}
       >
         <View style={styles.backdrop} />
       </TouchableWithoutFeedback>
 
-      <Animated.View style={[styles.sheetWrapper, { transform: [{ translateY: anim }] }]} pointerEvents="box-none">
+      <Animated.View
+        style={[styles.sheetWrapper, { transform: [{ translateY: anim }] }]}
+      >
         <View style={styles.sheet}>
-          <XStack justifyContent="space-between" alignItems="center" style={{ marginBottom: 8 }}>
-            <Text fontSize={18} fontWeight="700" color={colors.primary}>Edit Profile</Text>
-            <TouchableOpacity onPress={onClose}>
-              <Text color={colors.primary}>Close</Text>
+          {/* Header */}
+          <XStack justifyContent="space-between" alignItems="center">
+            <Text  color={colors.text} fontSize={18} fontWeight="700">
+              Edit Profile
+            </Text>
+            <TouchableOpacity disabled={isLoading} onPress={onClose}>
+              <Text color={isLoading ? "#999" : colors.primary}>Close</Text>
             </TouchableOpacity>
           </XStack>
 
-          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: Math.max(24, keyboardHeight + 24) }} keyboardShouldPersistTaps="handled">
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{
+              paddingBottom: Math.max(24, keyboardHeight + 24),
+            }}
+          >
             {/* Username */}
-            <YStack marginBottom={12}>
-              <Text fontWeight="600" color="#0E0E55" marginBottom={6} fontSize={14}>Username</Text>
-              <TextInput
-                placeholder="@username, no real names"
+            <YStack marginTop={16}>
+              <Text color={colors.text} fontWeight="600">Username</Text>
+              <TextInput 
                 value={username}
-                placeholderTextColor="gray"
+                editable={!isLoading}
                 onChangeText={setUsername}
                 style={styles.input}
-                returnKeyType="next"
               />
             </YStack>
 
             {/* About */}
-            <YStack marginBottom={12}>
-              <Text fontWeight="600" color="#0E0E55" marginBottom={6} fontSize={14}>About</Text>
+            <YStack marginTop={12}>
+              <Text fontWeight="600">About</Text>
               <TextInput
                 multiline
-                placeholder="Tell us about yourself..."
-                placeholderTextColor="gray"
+                editable={!isLoading}
                 value={about}
-                onChangeText={(text) => { if (text.length <= 300) setAbout(text); }}
+                onChangeText={(t) => t.length <= 300 && setAbout(t)}
                 style={[styles.input, styles.textArea]}
-                textAlignVertical="top"
               />
-              <Text alignSelf="flex-end" fontSize={12} color={about.length < 300 ? colors.primary : colors.danger} marginTop={6}>
+              <Text alignSelf="flex-end" fontSize={12}>
                 {about.length}/300
               </Text>
             </YStack>
 
-            {/* Socials */}
-            <Text fontWeight="600" color="#0E0E55" fontSize={14} marginBottom={8}>Add Socials</Text>
-            <PlatformInput onAdd={handleAddSocial} initialPlatform="Instagram" />
+            {/* Existing Socials */}
+            {socials.length > 0 && (
+              <YStack marginTop={18}>
+                <Text color={colors.text} fontWeight="600" marginBottom={8}>
+                  Your Socials
+                </Text>
 
+                {socials.map((social) => (
+                  <XStack
+                    key={social.platform}
+                    alignItems="center"
+                    justifyContent="space-between"
+                    style={styles.socialRow}
+                  >
+                    <Text color={colors.text}>
+                      {social.platform}: @{social.handle}
+                    </Text>
+
+                    <TouchableOpacity
+                      disabled={isLoading}
+                      onPress={() => handleRemoveSocial(social.platform)}
+                    >
+                      <Ionicons
+                        name="trash-outline"
+                        size={18}
+                        color={isLoading ? "#ccc" : colors.danger}
+                      />
+                    </TouchableOpacity>
+                  </XStack>
+                ))}
+              </YStack>
+            )}
+
+            {/* Add / Update Social */}
+            <YStack marginTop={16}>
+              <Text fontWeight="600" marginBottom={8}>
+                Add Social
+              </Text>
+              <PlatformInput
+                onAdd={handleAddSocial}
+                disabled={isLoading}
+              />
+            </YStack>
+
+            {/* Save */}
             <Button
-              onPress={handleSave}
-              backgroundColor={colors.primary}
-              color="#fff"
-              borderRadius={10}
               height={50}
-              marginTop={18}
+              marginTop={20}
+              borderRadius={10}
+              backgroundColor={colors.primary}
               disabled={isLoading}
               opacity={isLoading ? 0.6 : 1}
+              onPress={handleSave}
             >
-              {isLoading ? "Saving..." : profile ? "Update Profile" : "Create Profile"}
+              {isLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                "Save Changes"
+              )}
             </Button>
           </ScrollView>
         </View>
@@ -173,10 +263,44 @@ export default function EditProfileModal({
 }
 
 const styles = StyleSheet.create({
-  full: { position: "absolute", left: 0, right: 0, top: 0, bottom: 0, zIndex: 999 },
-  backdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.45)" },
-  sheetWrapper: { position: "absolute", left: 0, right: 0, bottom: 0 },
-  sheet: { backgroundColor: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, maxHeight: "97%", minHeight: 220 },
-  input: { borderColor: colors.primary, backgroundColor: "#F8F8FA", borderRadius: 8, paddingHorizontal: 10, height: 44, color: colors.primary },
-  textArea: { height: 120, paddingVertical: 10 },
+  full: {
+    position: "absolute",
+    inset: 0,
+    zIndex: 999,
+  },
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+  },
+  sheetWrapper: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  sheet: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    maxHeight: "97%",
+  },
+  input: {
+    backgroundColor: "#F8F8FA",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    height: 44,
+    color:colors.text
+  },
+  textArea: {
+    height: 120,
+    paddingVertical: 10,
+  },
+  socialRow: {
+    backgroundColor: "#F6F6F8",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 8,
+  },
 });

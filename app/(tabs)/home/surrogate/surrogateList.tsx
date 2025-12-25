@@ -27,27 +27,26 @@ export default function SurrogateList() {
   const { surrogates, fetchSurrogates, isLoading } = useSurrogateStore();
   const { user } = useAuth();
   const { saveParentSurrogate } = useParentProfile();
+
   const [cardIndex, setCardIndex] = useState(0);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [filters, setFilters] = useState<any>([]);
+
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const rotate = useSharedValue(0);
 
-  // Use refs to always get the latest values
   const cardIndexRef = useRef(cardIndex);
-  const filteredListRef = useRef(surrogates);
 
-  // Keep refs updated
+  // Keep ref updated
   useEffect(() => {
     cardIndexRef.current = cardIndex;
-    filteredListRef.current = surrogates;
-  }, [cardIndex, surrogates]);
-  // --- Fetch surrogates on mount
+  }, [cardIndex]);
 
+  // Fetch surrogates if store is empty
   useEffect(() => {
     if (surrogates.length === 0) {
-     fetchSurrogates(true).catch((err: any) => {
+      fetchSurrogates(true).catch((err: any) => {
         Toast.show({
           text1: "Failed to load surrogates",
           type: "customError" as ToastType,
@@ -57,42 +56,20 @@ export default function SurrogateList() {
     }
   }, [surrogates.length, fetchSurrogates]);
 
-  const filteredList = surrogates;
-
+  // Swipe handler
   const handleSwipe = useCallback(() => {
-    const nextIndex = cardIndexRef.current + 1;
-    if (nextIndex < filteredListRef.current.length) {
-      setCardIndex(nextIndex);
-      translateX.value = 0;
-      translateY.value = 0;
-      rotate.value = 0;
-    }
+    setCardIndex((prev) => prev + 1); // increment index like AgentList
+    translateX.value = 0;
+    translateY.value = 0;
+    rotate.value = 0;
   }, []);
 
-  const renderFilterSummary = () => {
-    if (!filters || Object.keys(filters).length === 0) {
-      return "Filter surrogates...";
-    }
-    return Object.entries(filters)
-      .map(([key, value]) => {
-        if (!value) return null; // skip empty / null
-        return `${key}: ${value}`;
-      })
-      .filter(Boolean)
-      .join(" • ");
-  };
-
-  const handleSkip = useCallback(() => {
-    handleSwipe();
-  }, [handleSwipe]);
-
+  // View profile
   const handleViewProfile = useCallback(async () => {
-    const currentCard = filteredListRef.current[cardIndexRef.current];
+    const currentCard = surrogates[cardIndexRef.current];
     if (!currentCard) return;
 
-    const isParent = user?.role?.trim() === "INTENDED_PARENT";
-
-    if (isParent) {
+    if (user?.role?.trim() === "INTENDED_PARENT") {
       try {
         await saveParentSurrogate({ surrogateId: currentCard.id });
       } catch {}
@@ -102,7 +79,7 @@ export default function SurrogateList() {
       pathname: "/(tabs)/home/surrogate/surrogateProfileScreen",
       params: { id: currentCard?.id },
     });
-  }, [user, saveParentSurrogate]);
+  }, [user, saveParentSurrogate, surrogates]);
 
   const resetCardPosition = useCallback(() => {
     translateX.value = withSpring(0);
@@ -110,7 +87,7 @@ export default function SurrogateList() {
     rotate.value = withSpring(0);
   }, []);
 
-  // Recreate pan responder when cardIndex changes to capture latest handlers
+  // PanResponder
   const panResponder = React.useMemo(
     () =>
       PanResponder.create({
@@ -137,6 +114,7 @@ export default function SurrogateList() {
       }),
     [handleSwipe, resetCardPosition]
   );
+
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
       { translateX: translateX.value },
@@ -144,6 +122,16 @@ export default function SurrogateList() {
       { rotate: `${rotate.value}deg` },
     ],
   }));
+
+  const renderFilterSummary = () => {
+    if (!filters || Object.keys(filters).length === 0) {
+      return "Filter surrogates...";
+    }
+    return Object.entries(filters)
+      .map(([key, value]) => (value ? `${key}: ${value}` : null))
+      .filter(Boolean)
+      .join(" • ");
+  };
 
   const renderCardStack = () => {
     if (cardIndex >= surrogates.length) {
@@ -157,8 +145,7 @@ export default function SurrogateList() {
     const currentCard = surrogates[cardIndex];
     const nextCards = surrogates.slice(cardIndex + 1, cardIndex + 3);
 
-    const CardContent = (card: any) => (
-      
+    const CardContent = (card?: any) => (
       <>
         <Image
           source={{ uri: card.avatar }}
@@ -167,13 +154,8 @@ export default function SurrogateList() {
         />
         <View style={{ backgroundColor: "rgba(0,0,0,0.35)", padding: 20 }}>
           <Text style={{ color: "#fff", fontSize: 28, fontWeight: "800" }}>
-            {card.userName ||
-              card.username ||
-              card.user?.userName ||
-              card.profile?.userName ||
-              "N/A"}
+            {card.userName || "N/A"}
           </Text>
-
           <Text style={{ color: "#fff", fontSize: 16 }}>
             <Ionicons card="location" size={14} /> {card.country || "N/A"}{" "}
             <Ionicons name="calendar" size={14} /> {card.age || "N/A"} yrs
@@ -181,11 +163,10 @@ export default function SurrogateList() {
         </View>
       </>
     );
-    
+
     return (
       <>
-        {/* Static preview cards */}
-        {nextCards.map((card, index) => (
+        {nextCards.map((card) => (
           <View
             key={card.id}
             style={{
@@ -196,7 +177,7 @@ export default function SurrogateList() {
               overflow: "hidden",
               backgroundColor: "#fafafa",
               justifyContent: "flex-end",
-              top: (index + 1) * 8,
+              top: 8,
               zIndex: 1,
               elevation: 1,
             }}
@@ -205,7 +186,6 @@ export default function SurrogateList() {
           </View>
         ))}
 
-        {/* ONE interactive card */}
         <Animated.View
           key={currentCard.id}
           style={[
@@ -229,11 +209,12 @@ export default function SurrogateList() {
       </>
     );
   };
-  if (isLoading) {
+
+  if (surrogates.length === 0 && isLoading) {
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <YStack flex={1} alignItems="center" justifyContent="center">
-          <Text>Loading agents...</Text>
+          <Text>Loading surrogates...</Text>
         </YStack>
       </SafeAreaView>
     );
@@ -276,7 +257,7 @@ export default function SurrogateList() {
         {renderCardStack()}
       </View>
 
-      {filteredList[cardIndex] && (
+      {cardIndex < surrogates.length && (
         <XStack
           justifyContent="space-around"
           paddingHorizontal={20}
@@ -285,9 +266,9 @@ export default function SurrogateList() {
           <Button
             flex={1}
             marginRight={10}
-            backgroundColor="#b2b7be"
+            backgroundColor={colors.secondry}
             borderRadius={8}
-            onPress={handleSkip}
+            onPress={handleSwipe}
           >
             Skip
           </Button>
@@ -306,10 +287,7 @@ export default function SurrogateList() {
       <FilterModal
         visible={isFilterVisible}
         onClose={() => setIsFilterVisible(false)}
-        onApply={(filters) => {
-          console.log("Selected filters:", filters);
-          setFilters(filters);
-        }}
+        onApply={(filters) => setFilters(filters)}
       />
     </SafeAreaView>
   );

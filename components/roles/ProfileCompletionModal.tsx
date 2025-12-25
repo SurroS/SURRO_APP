@@ -1,33 +1,38 @@
 import React from "react";
 import { router } from "expo-router";
 import BottomModal from "@/components/modals/BottomModal";
-import { SurrogateProfile } from "@/types/profile";
 import { calculateProfileProgress } from "@/utils/profileHelpers";
 
-interface ProfileCompletionModalProps {
+interface ProfileCompletionModalProps<TProfile = any> {
   visible: boolean;
   onClose: () => void;
-  profile: SurrogateProfile | null;
+  profile: TProfile | null;
+  redirectPath?: string; // Path to navigate when creating/completing profile
+  profileTypeName?: string; // Optional name like "Surrogate", "Agent", "Parent"
 }
 
-export default function ProfileCompletionModal({
+export default function ProfileCompletionModal<TProfile>({
   visible,
   onClose,
   profile,
-}: ProfileCompletionModalProps) {
-  const progress = calculateProfileProgress(profile);
-  const hasProfile = profile !== null;
+  redirectPath,
+  profileTypeName = "Profile",
+}: ProfileCompletionModalProps<TProfile>) {
+  const progress = calculateProfileProgress(profile as any);
+  const hasProfile = !!profile;
 
-  // Determine message based on profile state
-  const title = hasProfile ? "Complete Your Profile" : "Create Your Profile";
+  const title = hasProfile
+    ? `Complete Your ${profileTypeName}`
+    : `Create Your ${profileTypeName}`;
 
   const message = hasProfile
-    ? `Your profile is ${progress}% complete. Please complete your profile to get the most out of the platform.`
-    : "You haven't created a profile yet. Create your profile to get started and connect with others.";
+    ? `Your ${profileTypeName.toLowerCase()} is ${progress}% complete. Please complete it to get the most out of the platform.`
+    : `You haven't created a ${profileTypeName.toLowerCase()} yet. Create one to get started and connect with others.`;
 
+  // Use router.replace to ensure the screen remounts
   const handleCreateProfile = () => {
     onClose();
-    router.push("/(tabs)/settings/profile");
+    router.navigate(redirectPath as any);
   };
 
   return (

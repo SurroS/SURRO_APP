@@ -52,27 +52,49 @@ export interface AgentCertification {
 }
 
 export interface AgentProfile {
-  id: string;
-  name?: string;
-  age: string | number;
+  firstName?: string;
+  lastName?: string;
   userName?: string;
-  fullName?: string;
-  dateOfBirth?: Date;
-  country?: string;
-  isAvailable?: boolean;
+  countryOfOrigin?: string;
+  aboutMe?: string;
+  dateOfBirth?: string;
+  maritalStatus?: string;
+  height?: string;
+  weight?: string;
   profilePicture?: string;
-  avatar?: string;
-
-  about?: string;
+  numberOfChildren?: number;
+  countryOfResidence?: string;
+  stateOfOrigin?: string;
+  address?: string;
+  zipCode?: string;
+  phone1?: string;
+  phone2?: string;
+  emergencyContactPhone?: string;
+  emergencyContactRelation?: string;
+  facebookProfile?: string;
+  instagramProfile?: string;
+  twitterProfile?: string;
+  threadsProfile?: string;
+  isAvailable?: boolean;
+  termsAcceptedAt?: string;
+  lga: string;
+  stateOfResidence: string;
   performance?: AgentPerformance;
   additionalDetails?: AgentAdditionalDetails;
   socials?: AgentSocials;
   services?: AgentServices;
   certifications?: AgentCertification[];
   contactLocked?: boolean;
+  wallet: Wallet;
 }
-
-
+export interface Wallet {
+  id: string;
+  userId: string;
+  balance: number;
+  currency: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 export interface AgentProfileActions {
   setAgentProfile: (profile: AgentProfile) => void;
@@ -85,6 +107,5 @@ export interface AgentProfileActions {
   setLoading: (val: boolean) => void;
   setError: (err: string | null) => void;
 }
-
 
 export type AgentProfileStore = AgentProfileState & AgentProfileActions;

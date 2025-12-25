@@ -1,4 +1,7 @@
+// hooks/useAgentProfile.ts
 import { useAgentProfileStore } from "@/store/profile/agent";
+import { AgentProfile } from "@/store/profile/agent/types";
+import { getAgentProfile } from "@/services/profileApi";
 
 export const useAgentProfile = () => {
   const {
@@ -10,15 +13,28 @@ export const useAgentProfile = () => {
     clearAgentProfile,
   } = useAgentProfileStore();
 
+  /** Fetch agent profile */
+  const fetchAgentProfile = async () => {
+    const res = await getAgentProfile();
+    setAgentProfile(res.data);
+  };
+
+  /** Generic alias for shared UI */
+  const updateProfile = async (changes: Partial<AgentProfile>) => {
+    return updateAgentProfile(changes);
+  };
+
   return {
-    // State
+    // state
     agentProfile,
     isLoading,
     error,
 
-    // Actions
+    // actions
+    fetchAgentProfile ,        
+    updateProfile,       
+    updateAgentProfile, 
     setAgentProfile,
-    updateAgentProfile,
     clearAgentProfile,
   };
 };

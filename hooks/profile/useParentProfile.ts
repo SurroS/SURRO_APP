@@ -1,56 +1,72 @@
 // hooks/useParentProfile.ts
-import { useState, useEffect } from "react";
-import { getParentProfile, createParentProfile, updateParentSurrogateMatch } from "@/services/profileApi";
+import { useState } from "react";
+import {
+  getParentProfile,
+  createParentProfile,
+  updateParentProfile,
+} from "@/services/profileApi";
+
+let cachedProfile: any = null;
 
 export const useParentProfile = () => {
-  const [parentProfile, setParentProfile] = useState<any>(null);
+  const [parentProfile, setParentProfile] = useState<any>(cachedProfile);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // -------------------------
+  // FETCH (CACHED)
+  // -------------------------
   const fetchProfile = async () => {
+    if (cachedProfile) {
+      setParentProfile(cachedProfile);
+      return cachedProfile;
+    }
+
     setIsLoading(true);
     setError(null);
+
     try {
       const res = await getParentProfile();
-      setParentProfile(res.data);
+      cachedProfile = res.data;
+      setParentProfile(cachedProfile);
+      return cachedProfile;
     } catch (err: any) {
-      setError(err.message || "Failed to fetch profile");
+      setError(err?.message || "Failed to fetch profile");
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
+  // -------------------------
+  // CREATE
+  // -------------------------
   const createProfile = async (data: any) => {
     setIsLoading(true);
-    setError(null);
     try {
       const res = await createParentProfile(data);
+      cachedProfile = res.data;
       setParentProfile(res.data);
-    } catch (err: any) {
-      setError(err.message || "Failed to create profile");
-      throw err;
+      return res.data;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const updateProfile = async (data: any) => {
+  // -------------------------
+  // UPDATE (PARTIAL)
+  // -------------------------
+  const updateProfile = async (data: Partial<any>) => {
     setIsLoading(true);
-    setError(null);
     try {
-      const res = await updateParentSurrogateMatch(data);
+      const res = await updateParentProfile(data);
+      cachedProfile = res.data;
       setParentProfile(res.data);
-    } catch (err: any) {
-      setError(err.message || "Failed to update profile");
-      throw err;
+      return res.data;
     } finally {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchProfile();
-  }, []);
 
   return {
     parentProfile,
@@ -59,6 +75,5 @@ export const useParentProfile = () => {
     fetchProfile,
     createProfile,
     updateProfile,
-    setParentProfile,
   };
 };

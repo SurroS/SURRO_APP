@@ -2,9 +2,10 @@ import React from 'react';
 import Entypo from '@expo/vector-icons/Entypo';
 import { LibraryBig, MessageSquare, Settings } from "@tamagui/lucide-icons";
 import { Tabs } from "expo-router";
-import colors from "../../hooks/colors";
+ import colors from "../../hooks/colors"; 
 
 export default function TabsLayout() {
+ 
   return (
     <Tabs
       screenOptions={{

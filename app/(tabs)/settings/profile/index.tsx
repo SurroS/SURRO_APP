@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { YStack, XStack, Text, ScrollView, Button } from "tamagui";
+import { YStack, XStack, Text, ScrollView } from "tamagui";
 import { Alert } from "react-native";
 import { router } from "expo-router";
 import { LogOut } from "@tamagui/lucide-icons";
@@ -8,47 +8,128 @@ import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import * as ImagePicker from "expo-image-picker";
 
+import {
+  surrogateToUIProfile,
+  uiProfileToSurrogate,
+  agentToUIProfile,
+  uiProfileToAgent,
+  parentToUIProfile,
+  uiProfileToParent,
+} from "@/utils/profileAdapter";
+import { logProfileFlow } from "@/utils/profileLoger";
+
 import colors from "@/hooks/colors";
 import { ScreenHeader } from "@/components/auth";
 import EditProfileModal from "@/components/editBio/BioInputModal";
 import { useAuth } from "@/hooks/useAuth";
 
-// Role-specific stores/hooks
-import { useSurrogateStore } from "@/store/surrogates";
-import { useAgentStore, useParentStore } from "@/store/allUsers";
 import { useSurrogateProfile } from "@/hooks/profile/useSurrogateProfile";
 import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
 import { useParentProfile } from "@/hooks/profile/useParentProfile";
 
-// Optional: role-based UI
 import AgentBio from "@/components/roles/agent/AgentBio";
 import ParentBio from "@/components/roles/parent/ParentBio";
 import SurrogateBio from "@/components/roles/surrogate/SurrogateBio";
 
 export default function EditBioView() {
   const [isDanger, setIsDanger] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+
   const { logout, user } = useAuth();
   const Role = user?.role?.trim();
 
-  // Role-specific profile hooks
+  // -------------------------------
+  // Hooks for profile by role
+  // -------------------------------
   const {
-    surrogateProfile: surrogateProfile,
+    surrogateProfile,
+    fetchProfile: fetchSurrogate,
     updateProfile: updateSurrogate,
     createProfile: createSurrogate,
   } = useSurrogateProfile();
+
   const {
-    agentProfile: agentProfile,
+    agentProfile,
+    fetchProfile: fetchAgent,
     updateProfile: updateAgent,
     createProfile: createAgent,
   } = useAgentProfile();
+
   const {
-    parentProfile: parentProfile,
+    parentProfile,
+    fetchProfile: fetchParent,
     updateProfile: updateParent,
     createProfile: createParent,
   } = useParentProfile();
 
+  // -------------------------------
+  // Determine current profile & functions
+  // -------------------------------
+  const currentProfile =
+    Role === "SURROGATE"
+      ? surrogateProfile
+      : Role === "AGENT"
+      ? agentProfile
+      : parentProfile;
+
+  const fetchCurrentProfile =
+    Role === "SURROGATE"
+      ? fetchSurrogate
+      : Role === "AGENT"
+      ? fetchAgent
+      : fetchParent;
+
+  const updateCurrentProfile =
+    Role === "SURROGATE"
+      ? updateSurrogate
+      : Role === "AGENT"
+      ? updateAgent
+      : updateParent;
+
+  const createCurrentProfile =
+    Role === "SURROGATE"
+      ? createSurrogate
+      : Role === "AGENT"
+      ? createAgent
+      : createParent;
+
+  // -------------------------------
+  // Map to UI profile
+  // -------------------------------
+
+  const rawProfile =
+    Role === "SURROGATE"
+      ? surrogateProfile
+      : Role === "AGENT"
+      ? agentProfile
+      : parentProfile;
+
+  const uiProfile: any = rawProfile
+    ? Role === "SURROGATE"
+      ? surrogateToUIProfile(rawProfile)
+      : Role === "AGENT"
+      ? agentToUIProfile(rawProfile)
+      : parentToUIProfile(rawProfile)
+    : null;
+
+  // -------------------------------
+  // Fetch profile once on mount
+  // -------------------------------
+  useEffect(() => {
+    console.log("surrogateProfile from EditBio Screen", surrogateProfile);
+    console.log("RawProfile from [EditBio] Screen", rawProfile);
+    console.log("Role from EditBio Screen", Role);
+    if (!currentProfile) {
+      fetchCurrentProfile();
+    }
+    console.log("CurrentProfile from Adapter", currentProfile);
+  }, [currentProfile, fetchCurrentProfile]);
+
+  // -------------------------------
+  // Logout / Danger zone
+  // -------------------------------
   const handleLogout = () => {
     logout();
     Toast.show({
@@ -85,130 +166,108 @@ export default function EditBioView() {
         );
         return;
       }
-
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"],
+        mediaTypes: ImagePicker.MediaTypeOptions.Images, // correct for your version
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
       });
+
       if (!result.canceled) {
-        setProfileImage(result.assets[0].uri);
+        const uri = result.assets[0].uri;
+        setProfileImage(uri);
+
+        if (!Role) return;
+
+        const mappedData = { profilePicture: uri };
+
+        await updateCurrentProfile(mappedData as any);
         Toast.show({
           text1: "Profile picture updated!",
           type: "customSuccess" as ToastType,
         });
+        fetchCurrentProfile();
       }
     } catch (err) {
       console.error(err);
-      Alert.alert("Error", "Something went wrong while selecting the image.");
+      Alert.alert(
+        "Error",
+        "Something went wrong while updating your profile picture."
+      );
     }
   };
 
-  const handleSaveBio = async (data: {
-    username: string;
-    about: string;
-    socials: any[];
-  }) => {
-    try {
-      if (!Role) return;
+  // -------------------------------
+  // Open modal and ensure profile is ready
+  // -------------------------------
+  const handleOpenModal = async () => {
+    await fetchCurrentProfile(); // ensure latest data
+    setIsModalVisible(true);
+  };
 
-      // Map to role-specific backend fields
-      const mappedData =
-        Role === "SURROGATE"
-          ? {
-              userName: data.username,
-              aboutMe: data.about,
-              facebookProfile: data.socials.find(
-                (s) => s.platform === "Facebook"
-              )?.handle,
-              instagramProfile: data.socials.find(
-                (s) => s.platform === "Instagram"
-              )?.handle,
-              twitterProfile: data.socials.find((s) => s.platform === "Twitter")
-                ?.handle,
-              threadsProfile: data.socials.find((s) => s.platform === "Threads")
-                ?.handle,
-            }
-          : {
-              fullName: data.username,
-              bio: data.about,
-              facebookProfile: data.socials.find(
-                (s) => s.platform === "Facebook"
-              )?.handle,
-              instagramProfile: data.socials.find(
-                (s) => s.platform === "Instagram"
-              )?.handle,
-              twitterProfile: data.socials.find((s) => s.platform === "Twitter")
-                ?.handle,
-              threadsProfile: data.socials.find((s) => s.platform === "Threads")
-                ?.handle,
-            };
+  // -------------------------------
+  // Save bio (create or update)
+  // -------------------------------
+  const handleSaveBio = async (data: typeof uiProfile) => {
+    logProfileFlow("UI_INPUT", data);
+    console.log("profile from Edit bioscreen", uiProfile);
 
-      switch (Role) {
-        case "SURROGATE":
-          surrogateProfile
-            ? await updateSurrogate(mappedData)
-            : await createSurrogate(mappedData);
-          break;
-        case "AGENT":
-          agentProfile
-            ? await updateAgent(mappedData)
-            : await createAgent(mappedData);
-          break;
-        case "INTENDED_PARENT":
-          parentProfile
-            ? await updateParent(mappedData)
-            : await createParent(mappedData);
-          break;
+    switch (Role) {
+      case "SURROGATE": {
+        const payload = uiProfileToSurrogate(data);
+        logProfileFlow("SURROGATE_PAYLOAD", payload);
+        surrogateProfile
+          ? await updateSurrogate(payload as any)
+          : await createSurrogate(payload);
+        break;
       }
 
-      Toast.show({
-        text1: "Profile updated!",
-        type: "customSuccess" as ToastType,
-      });
-    } catch (err: any) {
-      Toast.show({
-        text1: "Failed to save profile",
-        text2: err.message || "Try again",
-        type: "customError" as ToastType,
-      });
+      case "AGENT": {
+        const payload = uiProfileToAgent(data);
+        logProfileFlow("AGENT_PAYLOAD", payload);
+        agentProfile ? await updateAgent(payload) : await createAgent(payload);
+        break;
+      }
+
+      case "INTENDED_PARENT": {
+        const payload = uiProfileToParent(data);
+        logProfileFlow("PARENT_PAYLOAD", payload);
+        parentProfile
+          ? await updateParent(payload)
+          : await createParent(payload);
+        break;
+      }
     }
+
+    // Refresh profile after save
+    fetchCurrentProfile();
   };
 
-  // ----------------------
-  // Render role-specific content (UI stays same)
-  // ----------------------
-  const currentProfile =
-    Role === "SURROGATE"
-      ? surrogateProfile
-      : Role === "AGENT"
-      ? agentProfile
-      : parentProfile;
-
-  const handleEditBio = () => setIsModalVisible(true);
-
+  // -------------------------------
+  // Render role-specific UI
+  // -------------------------------
   const renderRoleContent = () => {
     switch (Role) {
       case "AGENT":
         return (
           <AgentBio
             onChangePicture={handleChangePicture}
-            onEditBio={handleEditBio}
+            onEditBio={handleOpenModal}
           />
         );
       case "INTENDED_PARENT":
         return (
           <ParentBio
             onChangePicture={handleChangePicture}
-            onEditBio={handleEditBio}
+            onEditBio={handleOpenModal}
           />
         );
       case "SURROGATE":
         return (
           <SurrogateBio
+            profileImage={surrogateProfile?.profilePicture}
             onChangePicture={handleChangePicture}
-            onEditBio={handleEditBio}
+            onEditBio={handleOpenModal}
           />
         );
       default:
@@ -220,26 +279,6 @@ export default function EditBioView() {
     }
   };
 
-  // Pass correct profile & handlers to modal
-  const modalProfile =
-    Role === "SURROGATE"
-      ? surrogateProfile
-      : Role === "AGENT"
-      ? agentProfile
-      : parentProfile;
-  const modalUpdate =
-    Role === "SURROGATE"
-      ? updateSurrogate
-      : Role === "AGENT"
-      ? updateAgent
-      : updateParent;
-  const modalCreate =
-    Role === "SURROGATE"
-      ? createSurrogate
-      : Role === "AGENT"
-      ? createAgent
-      : createParent;
-
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#FFF", paddingTop: 20, padding: 20 }}
@@ -250,7 +289,6 @@ export default function EditBioView() {
             title="Profile Information"
             onBackPress={() => router.back()}
           />
-
           {renderRoleContent()}
 
           {/* Danger + Logout */}
@@ -266,6 +304,7 @@ export default function EditBioView() {
                 Log out
               </Text>
             </XStack>
+
             <YStack alignItems="center" marginTop="$2">
               <Text
                 color="#E63946"
@@ -288,22 +327,17 @@ export default function EditBioView() {
           </YStack>
         </YStack>
       </ScrollView>
-      <EditProfileModal
-        visible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
-        onSave={handleSaveBio}
-        profile={{
-          username: currentProfile?.userName || currentProfile?.fullName,
-          about: currentProfile?.aboutMe || currentProfile?.bio,
-          socials: [
-            { platform: "Facebook", handle: currentProfile?.facebookProfile },
-            { platform: "Instagram", handle: currentProfile?.instagramProfile },
-            { platform: "Twitter", handle: currentProfile?.twitterProfile },
-            { platform: "Threads", handle: currentProfile?.threadsProfile },
-          ].filter((s) => s.handle),
-        }}
-        isLoading={false}
-      />
+
+      {/* Edit Profile Modal */}
+      {isModalVisible && (
+        <EditProfileModal
+          isLoading={isLoading}
+          visible={isModalVisible}
+          onClose={() => setIsModalVisible(false)}
+          onSave={handleSaveBio}
+          profile={uiProfile}
+        />
+      )}
     </SafeAreaView>
   );
 }

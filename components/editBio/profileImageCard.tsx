@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
   Platform,
+  Pressable,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Camera, Pen } from "@tamagui/lucide-icons";
@@ -26,57 +27,25 @@ export default function ProfileImageCard({
   onChangePicture,
   imageSrc,
 }: Props) {
-  const [imageUri, setImageUri] = useState<string | null>(null);
-
-  const pickImage = async () => {
-  try {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (permissionResult.status !== "granted") {
-      Alert.alert(
-        "Permission required",
-        "We need access to your gallery to change the profile picture."
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, // correct for your version
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
-
-    if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      setImageUri(uri);
-      onChangePicture?.(uri);
-    }
-  } catch (error) {
-    console.log("Error picking image:", error);
-    Alert.alert("Error", "Something went wrong while selecting the image.");
-  }
-};
-
   return (
     <View style={styles.container}>
       {/* Profile Image */}
-      <View style={styles.imageWrapper}>
-        <Image
-          source={
-            imageUri
-              ? { uri: imageUri }
-              : imageSrc || require("@/assets/images/femaleAvatar.png")
-          }
-          style={styles.profileImage}
-        />
-      </View>
-
+      <Pressable onPress={onChangePicture}>
+        <View style={styles.imageWrapper}>
+          <Image
+            source={
+              imageSrc
+                ? { uri: imageSrc }
+                : require("@/assets/images/femaleAvatar.png")
+            }
+            style={styles.profileImage}
+          />
+        </View>
+      </Pressable>
       {/* Change Picture */}
       <TouchableOpacity
         style={styles.changePic}
-        onPress={pickImage}
+        onPress={onChangePicture}
         accessibilityRole="button"
         accessibilityLabel="Change profile picture"
       >
@@ -91,7 +60,7 @@ export default function ProfileImageCard({
         accessibilityRole="button"
         accessibilityLabel="Edit bio"
       >
-        <Text style={styles.editText}>Edit bio{" "}</Text>
+        <Text style={styles.editText}>Edit bio </Text>
         <Pen size={16} color={colors.text} style={{ marginLeft: 6 }} />
       </TouchableOpacity>
     </View>

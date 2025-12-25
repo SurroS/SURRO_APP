@@ -18,7 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 export default function MedicalHistoryMain() {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF",paddingTop: 20  }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF", paddingTop: 20 }}>
       <View marginLeft={28}>
         <ScreenHeader
           title="Medical details"
@@ -31,6 +31,7 @@ export default function MedicalHistoryMain() {
           <YStack gap="$3" marginTop="$4">
             {/* Medical details */}
             <Card
+              backgroundColor={colors.white}
               bordered
               borderWidth={0.5}
               pressStyle={{ scale: 0.98 }}
@@ -52,6 +53,7 @@ export default function MedicalHistoryMain() {
 
             {/* Medical upload */}
             <Card
+              backgroundColor={colors.white}
               bordered
               borderWidth={0.5}
               pressStyle={{ scale: 0.98 }}

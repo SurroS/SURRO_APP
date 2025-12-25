@@ -1,100 +1,79 @@
 import { ChevronDown } from "@tamagui/lucide-icons";
-import { useEffect } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { ScrollView, StyleSheet, Pressable } from "react-native";
 import Animated, {
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
-import { Accordion, Text, View, XStack, YStack } from "tamagui";
+import { Accordion, Text, XStack, YStack } from "tamagui";
+import { router } from "expo-router";
 
 import About from "../about";
 import Contact from "../contact";
-import ProfileData from "./ParentProfileData";
 import ProgressMeter from "../progressCircle";
 import Referral from "../referral";
 import WalletCard from "../wallet";
 import SurrogatePreview from "../surrogate/SurrogatePreview";
 import AgentPreview from "../agent/AgentPreviewCard";
-import { router } from "expo-router";
-import { getParentProfile } from "@/services/profileApi";
-
-/** Generic error boundary for safe rendering */
-function SafeRender({
-  children,
-  fallback,
-}: {
-  children: React.ReactNode;
-  fallback: React.ReactNode;
-}) {
-  try {
-    return children;
-  } catch (e) {
-    console.error("SafeRender caught an error:", e);
-    return fallback;
-  }
-}
+import ProfileCompletionModal from "../ProfileCompletionModal";
+import { calculateProfileProgress } from "@/utils/profileHelpers";
+import { useParentProfile } from "@/hooks/profile/useParentProfile";
+import ProfileData from "@/components/profileDetails/ProfileData";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function ParentScreen() {
+  const { parentProfile, fetchProfile, isLoading } = useParentProfile();
+  const [showProfileModal, setShowProfileModal] = useState(false);
+
+  const progress = calculateProfileProgress(parentProfile);
+
   useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const profile = await getParentProfile();
-        console.log("parentData", profile);
-      } catch (err) {
-        console.log("unable to fetch parent data", err);
+    if (!isLoading) {
+      const hasProfile = !!parentProfile;
+      const needsCompletion = hasProfile && progress < 100;
+      if (!hasProfile || needsCompletion) {
+        setShowProfileModal(true);
       }
-    };
+    }
+  }, [parentProfile, progress, isLoading]);
 
-    loadProfile();
-  }, []);
-
-  const ViewSurrogates = () => {
+  const ViewSurrogates = () =>
     router.push("/(tabs)/home/surrogate/surrogateList");
-  };
-
-  const ViewAgents = () => {
-    router.push("/(tabs)/home/agent/agentsListScreen");
-  };
+  const ViewAgents = () => router.push("/(tabs)/home/agent/agentsListScreen");
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      nestedScrollEnabled
-      showsVerticalScrollIndicator={false}
-    >
-      <YStack flex={1} gap="$3">
-        {/* Profile */}
-        <SafeRender fallback={<Text>Loading profile...</Text>}>
-          <ProfileData />
-        </SafeRender>
+    <>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
+        <YStack flex={1} gap="$3">
+          <ProfileData
+            name={parentProfile?.firstName}
+            avatarUrl={parentProfile?.profilePicture}
+            dateOfBirth={parentProfile.dateOfBirth}
+          />
 
-        {/* Accordion Section */}
-        <Accordion
-          type="single"
-          collapsible
-          borderTopStartRadius={10}
-          borderTopEndRadius={10}
-          overflow="hidden"
-        >
-          <Accordion.Item value="profile-info">
-            <AccordionTriggerWithChevron title="Profile Information" />
-            <Accordion.Content backgroundColor="white" padding="$3">
-              <YStack gap="$3">
-                <SafeRender fallback={<Text>Loading about info...</Text>}>
+          <Accordion
+            type="single"
+            collapsible
+            borderTopStartRadius={10}
+            borderTopEndRadius={10}
+            overflow="hidden"
+          >
+            <Accordion.Item value="profile-info">
+              <AccordionTriggerWithChevron title="Profile Information" />
+              <Accordion.Content backgroundColor="white" padding="$3">
+                <YStack gap="$3">
                   <About />
-                </SafeRender>
-
-                <SafeRender fallback={<Text>Loading contact info...</Text>}>
                   <Contact />
-                </SafeRender>
-              </YStack>
-            </Accordion.Content>
-          </Accordion.Item>
-        </Accordion>
+                </YStack>
+              </Accordion.Content>
+            </Accordion.Item>
+          </Accordion>
 
-        {/* Horizontal scroll */}
-        <ScrollView horizontal nestedScrollEnabled style={{ height: 210 }}>
-          <SafeRender fallback={<Text>Loading previews...</Text>}>
+          {/* Horizontal previews */}
+          <ScrollView horizontal style={{ height: 210 }}>
             <Pressable onPress={ViewSurrogates} style={{ marginRight: 5 }}>
               <SurrogatePreview
                 style={{ height: 200, padding: 2, width: 150 }}
@@ -102,41 +81,40 @@ export default function ParentScreen() {
             </Pressable>
 
             <Pressable onPress={ViewAgents} style={{ marginRight: 5 }}>
-              <AgentPreview
-                style={{ height: 200, padding: 2, width: 150 }}
-              />
+              <AgentPreview style={{ height: 200, padding: 2, width: 150 }} />
             </Pressable>
-          </SafeRender>
-        </ScrollView>
+          </ScrollView>
 
-        {/* Floating Cards */}
-        <XStack
-          flexWrap="wrap"
-          justifyContent="flex-end"
-          alignContent="flex-start"
-          gap={10}
-        >
-          <YStack width={"48%"} gap={10}>
-            <SafeRender fallback={<Text>Loading wallet...</Text>}>
+          {/* Floating Cards */}
+          <XStack
+            flexWrap="wrap"
+            justifyContent="flex-end"
+            alignContent="flex-start"
+            gap={10}
+          >
+            <YStack width={"48%"} gap={10}>
               <WalletCard style={{ width: "100%", height: 100 }} />
-            </SafeRender>
-          </YStack>
+              <ProgressMeter
+                progress={progress}
+                style={{ width: "100%", height: 210 }}
+              />
+            </YStack>
 
-          <YStack width={"48%"} gap={10}>
-            <SafeRender fallback={<Text>Loading referral...</Text>}>
+            <YStack width={"48%"} gap={10}>
               <Referral style={{ width: "100%", height: 160 }} />
-            </SafeRender>
-          </YStack>
+            </YStack>
+          </XStack>
+        </YStack>
+      </ScrollView>
 
-          <SafeRender fallback={<Text>Loading progress...</Text>}>
-            <ProgressMeter
-              progress={0}
-              style={{ width: "100%", height: 210 }}
-            />
-          </SafeRender>
-        </XStack>
-      </YStack>
-    </ScrollView>
+      <ProfileCompletionModal
+        visible={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        profile={parentProfile}
+        profileTypeName="Parent"
+        redirectPath="/(tabs)/settings/profile"
+      />
+    </>
   );
 }
 
@@ -159,16 +137,17 @@ function AccordionTriggerWithChevron({ title }: { title: string }) {
         }));
 
         return (
-          <XStack alignItems="center" justifyContent="space-between" width="100%">
-            <XStack alignItems="center" gap="$11">
-              <Text color="white" fontWeight="700" fontSize="$5">
-                {title}
-              </Text>
-
-              <Animated.View style={animatedStyle}>
-                <ChevronDown color="white" size={25} />
-              </Animated.View>
-            </XStack>
+          <XStack
+            alignItems="center"
+            justifyContent="space-between"
+            width="100%"
+          >
+            <Text color="white" fontWeight="700" fontSize="$5">
+              {title}
+            </Text>
+            <Animated.View style={animatedStyle}>
+              <ChevronDown color="white" size={25} />
+            </Animated.View>
           </XStack>
         );
       }}
@@ -177,7 +156,5 @@ function AccordionTriggerWithChevron({ title }: { title: string }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    paddingBottom: 40,
-  },
+  container: { paddingBottom: 40 },
 });

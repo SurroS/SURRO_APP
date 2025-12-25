@@ -1,6 +1,4 @@
-// hooks/useSurrogateProfile.ts
-import { useState, useEffect } from "react";
-import { useSurrogateStore } from "@/store/allUsers";
+import { useState } from "react";
 import {
   getSurrogateProfile,
   createSurrogateProfile,
@@ -8,65 +6,84 @@ import {
 } from "@/services/profileApi";
 import { SurrogateProfileUpdate } from "@/types/profile";
 
+let cachedProfile: any = null;
+
+type SurrogateUpdatePayload = Partial<SurrogateProfileUpdate>;
+
 export const useSurrogateProfile = () => {
-  const [surrogateProfile, setSurrogateProfile] = useState<any>(null);
+  const [surrogateProfile, setSurrogateProfile] = useState<any>(cachedProfile);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // -------------------------
+  // FETCH PROFILE (CACHED)
+  // -------------------------
   const fetchProfile = async () => {
+    if (cachedProfile) {
+      setSurrogateProfile(cachedProfile);
+      return cachedProfile;
+    }
+
     setIsLoading(true);
     setError(null);
+
     try {
       const res = await getSurrogateProfile();
-      setSurrogateProfile(res.data);
+      cachedProfile = res.data.profile;
+      setSurrogateProfile(cachedProfile);
+      return cachedProfile;
     } catch (err: any) {
-      setError(err.message || "Failed to fetch profile");
+      setError(err?.message || "Failed to fetch profile");
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
-  
-
+  // -------------------------
+  // CREATE
+  // -------------------------
   const createProfile = async (data: any) => {
     setIsLoading(true);
-    setError(null);
     try {
       const res = await createSurrogateProfile(data);
+      cachedProfile = res.data;
       setSurrogateProfile(res.data);
-    } catch (err: any) {
-      setError(err.message || "Failed to create profile");
-      throw err;
+      return res.data;
     } finally {
       setIsLoading(false);
     }
   };
-
-  const updateProfile = async (data: SurrogateProfileUpdate) => {
+  // -------------------------
+  // UPDATE PROFILE (PATCH)
+  // -------------------------
+  const updateProfile = async (data: SurrogateUpdatePayload) => {
     setIsLoading(true);
-    setError(null);
     try {
       const res = await updateSurrogateProfile(data);
+      cachedProfile = res.data;
       setSurrogateProfile(res.data);
-    } catch (err: any) {
-      setError(err.message || "Failed to update profile");
-      throw err;
+      return res.data;
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+  // -------------------------
+  // TOGGLE AVAILABILITY (SAFE)
+  // -------------------------
+  const toggleAvailability = async (next: boolean) => {
+    if (!cachedProfile?.id) return;
+    await updateProfile({ isAvailable: next });
+  };
 
   return {
     surrogateProfile,
+    createProfile,
     isLoading,
     error,
     fetchProfile,
-    createProfile,
     updateProfile,
-    setSurrogateProfile,
+    toggleAvailability,
   };
 };

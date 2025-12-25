@@ -9,34 +9,53 @@ import NumberInputSelect from "@/components/NumberInputSelect";
 import { useProfile } from "@/hooks/useProfile";
 
 export default function MedicalDetailsStep1() {
-  const { surrogateProfile, medicalProfile, fetchProfile } = useProfile();
+  const { surrogateProfile, medicalProfile, fetchProfile, isLoading } =
+    useProfile();
+
   const [genotype, setGenotype] = useState("");
   const [bloodGroup, setBloodGroup] = useState("");
   const [pregnant, setPregnant] = useState("");
   const [children, setChildren] = useState(0);
   const [caesarean, setCaesarean] = useState("");
   const [numberOfCs, setNumberOfCs] = useState(0);
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
-  const medical = surrogateProfile?.medical || medicalProfile;
+  const medical = surrogateProfile?.medicalProfile || medicalProfile;
 
   useEffect(() => {
     if (!medical && !surrogateProfile) {
-      fetchProfile();
+      console.log("[MedicalDetailsStep1] Fetching profile from backend...");
+      fetchProfile().finally(() => setProfileLoaded(true));
+    } else {
+      setProfileLoaded(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (medical) {
+      console.log(
+        "[MedicalDetailsStep1] Loaded medical profile from backend:",
+        medical
+      );
       setGenotype(medical.genotype || "");
       setBloodGroup(medical.bloodGroup || "");
       setPregnant(medical.pregnancyExperience ? "Yes" : "No");
       setChildren(medical.numberofChildren || 0);
       setCaesarean(medical.ceasareanSection ? "Yes" : "No");
+      setNumberOfCs(medical.numberOfcs || 0);
     }
   }, [medical]);
 
   const handleContinue = () => {
+    console.log("[MedicalDetailsStep1] Continue pressed with values:", {
+      genotype,
+      bloodGroup,
+      pregnant,
+      children,
+      caesarean,
+      numberOfCs,
+    });
+
     router.push({
       pathname: "/settings/medical/medical-two",
       params: {
@@ -45,11 +64,13 @@ export default function MedicalDetailsStep1() {
         pregnancyExperience: (pregnant === "Yes").toString(),
         numberofChildren: children.toString(),
         ceasareanSection: (caesarean === "Yes").toString(),
+        numberOfCs: numberOfCs.toString(),
       },
     });
   };
 
   const handleContinueLater = () => {
+    console.log("[MedicalDetailsStep1] Continue Later pressed");
     router.push("/settings/medical");
   };
 
@@ -59,6 +80,16 @@ export default function MedicalDetailsStep1() {
     pregnant &&
     (pregnant === "No" ||
       (children > 0 && caesarean && (caesarean === "No" || numberOfCs > 0)));
+
+  if (!profileLoaded || isLoading) {
+    return (
+      <SafeAreaView
+        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+      >
+        <Button>Loading...</Button>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF", paddingTop: 20 }}>
@@ -101,7 +132,7 @@ export default function MedicalDetailsStep1() {
                 />
 
                 <DropdownField
-                  label="Have you ever had a caesarean session (cs)"
+                  label="Have you ever had a caesarean section (CS)"
                   value={caesarean}
                   options={["Yes", "No"]}
                   onChange={setCaesarean}
@@ -109,7 +140,7 @@ export default function MedicalDetailsStep1() {
 
                 {caesarean === "Yes" && (
                   <NumberInputSelect
-                    label="How many C-sections (cs) have you had?"
+                    label="How many C-sections (CS) have you had?"
                     value={numberOfCs}
                     onChange={setNumberOfCs}
                   />

@@ -1,12 +1,45 @@
-export interface ParentProfile {
+export interface Wallet {
   id: string;
-  fullName:string
-  userName: string;
+  userId: string;
+  balance: number;
+  currency: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ParentProfile {
+  firstName?: string;
+  lastName?: string;
+  userName?: string;
+  countryOfOrigin?: string;
+  dateOfBirth?: string;
+  maritalStatus?: string;
+  height?: string;
+  weight?: string;
   profilePicture?: string;
+  numberOfChildren?: number;
   countryOfResidence?: string;
+  stateOfOrigin?: string;
+  address?: string;
+  zipCode?: string;
+  phone1?: string;
+  phone2?: string;
+  lga: string;
+  emergencyContactPhone?: string;
+  stateOfResidence: string;
+  emergencyContactRelation?: string;
+  facebookProfile?: string;
+  instagramProfile?: string;
+  twitterProfile?: string;
+  threadsProfile?: string;
+  isAvailable?: boolean;
+  termsAcceptedAt?: string;
+  id: string;
+  fullName: string;
   yearsOfTrying?: number;
-  about?: string;
+  aboutMe?: string;
   languagesSpoken?: string[];
+  wallet?: Wallet;
 }
 
 export interface ParentProfileState {
