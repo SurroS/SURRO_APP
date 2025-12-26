@@ -4,6 +4,8 @@ export interface Wallet {
   userId: string;
   balance: number;
   currency: string;
+  credit: string;
+  debit: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -28,14 +30,15 @@ export interface SurrogateProfile {
   stateOfOrigin: string | null;
   address: string | null;
   zipCode: string | null;
-  phone1: string | null;
-  phone2: string | null;
-  emergencyContactPhone: string | null;
+  phone1: string | null | undefined;
+  phone2: string | null | undefined;
+  emergencyContactPhone: string | null | undefined;
   emergencyContactRelation: string | null;
   facebookProfile: string | null;
   instagramProfile: string | null;
   twitterProfile: string | null;
   threadsProfile: string | null;
+  ticktock: string;
   isAvailable: boolean;
   termsAcceptedAt: string | null;
   isSubmitted?: boolean;
@@ -45,9 +48,15 @@ export interface SurrogateProfile {
   createdAt?: string;
   updatedAt?: string;
   medical?: MedicalProfile;
-  wallet?: Wallet; // <-- updated type
+  wallet?: Wallet;
   lga: string;
   medicalProfile?: MedicalProfile;
+  hasBeenSurrogate: boolean;
+  previousPregnancyType: string | null;
+  compensationAmount: number;
+  compensationNegotiable: boolean;
+  experienceNotes: string;
+  enjoymentNotes: string;
 }
 
 export interface SurrogateProfileUpdate {
@@ -63,21 +72,29 @@ export interface SurrogateProfileUpdate {
   profilePicture?: string;
   numberOfChildren?: number;
   countryOfResidence?: string;
+  stateOfResidence?: string;
   stateOfOrigin?: string;
   address?: string;
   zipCode?: string;
-  phone1?: string;
-  phone2?: string;
+  phone1?: string | null | undefined;
+  phone2?: string | null | undefined;
+  emergencyContactPhone?: string | null | undefined;
   lga: string;
-  emergencyContactPhone?: string;
   emergencyContactRelation?: string;
   facebookProfile?: string;
   instagramProfile?: string;
   twitterProfile?: string;
   threadsProfile?: string;
+  ticktock: string;
   isAvailable?: boolean;
   termsAcceptedAt?: string;
   wallet?: Wallet; // <-- updated type
+  hasBeenSurrogate: boolean;
+  previousPregnancyType: string | null;
+  compensationAmount: number;
+  compensationNegotiable: boolean;
+  experienceNotes: string;
+  enjoymentNotes: string;
 }
 
 export interface MedicalProfile {
@@ -94,6 +111,8 @@ export interface MedicalProfile {
   pregnancyComplicationsDetails: string;
   endometriumUploadUrl: string | null;
   medications: string;
+  miscariageExperience: boolean;
+  numberofMiscariages: number | string;
   surgeries: string;
   allergies: string;
   createdAt?: string;
@@ -101,17 +120,18 @@ export interface MedicalProfile {
 }
 
 export interface MedicalProfileUpdate {
+  surrogateProfileId?: string;
   genotype: string;
-  numberOfcs: string | number;
   bloodGroup: string;
   pregnancyExperience: boolean;
   numberofChildren: number;
   ceasareanSection: boolean;
   disabilities: string;
+  numberOfcs: number;
   chronicIllnessDetails: string;
   pregnancyComplicationsDetails: string;
   endometriumUploadUrl: string | null;
   medications: string;
-  surgeries: string;
-  allergies: string;
+  miscariageExperience: boolean;
+  numberofMiscariages: number | string;
 }

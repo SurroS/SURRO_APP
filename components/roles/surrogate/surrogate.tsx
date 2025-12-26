@@ -25,7 +25,7 @@ export default function SurrogateScreen() {
   // Calculate profile progress
   const progress = calculateProfileProgress(surrogateProfile);
 
-  // Show modal if no profile or progress < 70%
+  // Show modal if no profile or progress < 100%
   useEffect(() => {
     console.log("[Home] surrogateprofile", surrogateProfile);
     if (!isLoading) {
@@ -48,10 +48,16 @@ export default function SurrogateScreen() {
           <ProfileData
             name={
               surrogateProfile?.userName ||
-              `${surrogateProfile?.firstName ?? ""} ${surrogateProfile?.lastName ?? ""}`.trim()
+              `${surrogateProfile?.firstName ?? ""} ${
+                surrogateProfile?.lastName ?? ""
+              }`.trim()
             }
-            avatarUrl={surrogateProfile?.profilePicture || surrogateProfile?.avatar}
-            location={surrogateProfile?.countryOfResidence || surrogateProfile?.country}
+            avatarUrl={
+              surrogateProfile?.profilePicture || surrogateProfile?.avatar
+            }
+            location={
+              surrogateProfile?.countryOfResidence || surrogateProfile?.country
+            }
             dateOfBirth={surrogateProfile?.dateOfBirth?.split("T")[0]}
             isAvailable={surrogateProfile?.isAvailable}
             onToggleAvailability={toggleAvailability}
@@ -86,7 +92,9 @@ export default function SurrogateScreen() {
           </Accordion>
 
           <Pressable
-            onPress={() => router.push("/(tabs)/home/surrogateGuestView")}
+            onPress={() =>
+              router.push("/(tabs)/home/surrogate/surrogateGuestView")
+            }
           >
             <Text
               color="black"

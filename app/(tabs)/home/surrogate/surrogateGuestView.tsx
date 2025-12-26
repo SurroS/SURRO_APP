@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function GuessViewScreen() {
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{flex:1}}>
       <GuestView />
     </SafeAreaView>
   );

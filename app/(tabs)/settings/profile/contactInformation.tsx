@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TextInput, Text, ActivityIndicator } from "react-native";
+import { TextInput, ActivityIndicator } from "react-native";
 import { YStack, XStack, Button, Label, ScrollView } from "tamagui";
 import CountryFlag from "react-native-country-flag";
 import { ScreenHeader } from "@/components/auth";
@@ -8,7 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Dropdown from "@/components/DropDown";
 import TextInputField from "@/components/TextInputField";
 import { getAllCountries } from "@/utils/countries";
-import { getStatesByCountry, getLgaByState } from "@/utils/states";
+import { getStatesByCountry } from "@/utils/states";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { useAuth } from "@/hooks/useAuth";
@@ -18,7 +18,7 @@ import { useAgentProfile } from "@/hooks/useAgentProfile";
 
 export default function ContactInformationScreen() {
   const { user } = useAuth();
-  const Role = user?.role?.trim();
+  const Role = user?.role?.trim() ?? "";
 
   const {
     surrogateProfile,
@@ -45,27 +45,36 @@ export default function ContactInformationScreen() {
   const [statesList, setStatesList] = useState<string[]>([]);
   const [lgaList, setLgaList] = useState<string[]>([]);
 
-  const [country, setCountry] = useState<any>(null);
-  const [state, setState] = useState<string | null>(null);
-  const [lga, setLga] = useState<string | null>(null);
-  const [street, setStreet] = useState("");
-  const [zip, setZip] = useState("");
-  const [phone1, setPhone1] = useState("");
-  const [phone2, setPhone2] = useState("");
-  const [emergency, setEmergency] = useState("");
-  const [relationship, setRelationship] = useState("");
+  const [country, setCountry] = useState<any | null>(null);
+  const [state, setState] = useState<string>("");
+  const [lga, setLga] = useState<string>("");
+  const [street, setStreet] = useState<string>("");
+  const [zip, setZip] = useState<string>("");
+  const [phone1, setPhone1] = useState<string>("");
+  const [phone2, setPhone2] = useState<string>("");
+  const [emergency, setEmergency] = useState<string>("");
+  const [relationship, setRelationship] = useState<string>("");
 
-  // Fetch countries and profile
   useEffect(() => {
     (async () => {
       const data = await getAllCountries();
       setCountries(data);
     })();
 
+    if (!Role) return;
+
     if (Role === "SURROGATE" && !surrogateProfile) fetchProfile();
     else if (Role === "INTENDED_PARENT" && !parentProfile) fetchParentProfile();
     else if (Role === "AGENT" && !agentProfile) fetchAgentProfile();
-  }, []);
+  }, [Role]);
+
+  // Strip dial code safely and always return string
+  const stripDialCode = (phone?: string | null): string => {
+    if (!phone || !country?.dialCode) return "";
+    return phone.startsWith(country.dialCode)
+      ? phone.slice(country.dialCode.length)
+      : phone;
+  };
 
   // Populate form based on role
   useEffect(() => {
@@ -78,48 +87,42 @@ export default function ContactInformationScreen() {
         ? agentProfile
         : null;
 
-    console.log("[contact], profile", profile);
+    if (!profile || countries.length === 0) return;
 
-    if (profile && countries.length > 0) {
-      setPhone1(profile?.phone1 || "");
-      setPhone2(profile?.phone2 || "");
-      setEmergency(profile?.emergencyContactPhone || "");
-      setRelationship(profile?.emergencyContactRelation || "");
-      setStreet(profile?.address || "");
-      setZip(profile?.zipCode || "");
-      setState(profile?.stateOfOrigin || "");
-      setState(profile?.stateOfResidence || "");
-      setLga(profile?.lga || "");
+    setPhone1(stripDialCode(profile?.phone1 ?? ""));
+    setPhone2(stripDialCode(profile?.phone2 ?? ""));
+    setEmergency(stripDialCode(profile?.emergencyContactPhone ?? ""));
+    setRelationship(profile?.emergencyContactRelation ?? "");
+    setStreet(profile?.address ?? "");
+    setZip(profile?.zipCode ?? "");
+    setState(profile?.stateOfOrigin ?? "");
+    setLga(profile?.lga ?? "");
 
-      const countryField =
-        Role === "SURROGATE"
-          ? profile?.countryOfResidence
-          : Role === "INTENDED_PARENT"
-          ? profile?.countryOfResidence
-          : Role === "AGENT"
-          ? profile?.countryOfResidence
-          : null;
-
-      if (countryField) {
-        const foundCountry = countries.find((c) => c.name === countryField);
-        if (foundCountry) {
-          setCountry(foundCountry);
-          getStatesByCountry(foundCountry.name).then(setStatesList);
-        }
+    const countryField = profile?.countryOfResidence;
+    if (countryField) {
+      const foundCountry = countries.find((c) => c.name === countryField);
+      if (foundCountry) {
+        setCountry(foundCountry);
+        getStatesByCountry(foundCountry.name).then(setStatesList);
       }
     }
-  }, [surrogateProfile, parentProfile, agentProfile, countries, Role]);
+  }, [
+    surrogateProfile,
+    parentProfile,
+    agentProfile,
+    countries,
+    Role,
+    country?.dialCode,
+  ]);
 
   const handleSelectCountry = async (selected: any) => {
     setCountry(selected);
-    setState(null);
-    setLga(null);
+    setState("");
+    setLga("");
     setStatesList([]);
     setLgaList([]);
-    if (selected?.name) {
-      const states = await getStatesByCountry(selected.name);
-      setStatesList(states);
-    }
+    const states = await getStatesByCountry(selected.name);
+    setStatesList(states);
   };
 
   const handleSave = async () => {
@@ -140,29 +143,31 @@ export default function ContactInformationScreen() {
       return;
     }
 
-    const fullPhone1 = country?.dialCode
+    const fullPhone1 = country.dialCode
       ? `${country.dialCode}${phone1}`
       : phone1;
-    const fullPhone2 =
-      phone2 && country?.dialCode ? `${country.dialCode}${phone2}` : phone2;
-    const fullEmergency = country?.dialCode
+    const fullPhone2 = phone2
+      ? country.dialCode
+        ? `${country.dialCode}${phone2}`
+        : phone2
+      : undefined;
+    const fullEmergency = country.dialCode
       ? `${country.dialCode}${emergency}`
       : emergency;
 
+    const profileData = {
+      countryOfResidence: country.name,
+      stateOfOrigin: state,
+      lga,
+      address: street,
+      zipCode: zip,
+      phone1: fullPhone1,
+      phone2: fullPhone2,
+      emergencyContactPhone: fullEmergency,
+      emergencyContactRelation: relationship,
+    };
+
     try {
-      const profileData = {
-        countryOfResidence: country.name,
-        stateOfOrigin: state,
-        lga,
-        address: street,
-        zipCode: zip,
-        phone1: fullPhone1,
-        phone2: fullPhone2 || undefined,
-        emergencyContactPhone: fullEmergency,
-        emergencyContactRelation: relationship,
-      };
-      console.log("[contactInfo] payload:", profileData);
-      console.log("[contactInfo] Role:", Role);
       if (Role === "SURROGATE") await updateProfile(profileData);
       else if (Role === "INTENDED_PARENT")
         await updateParentProfile(profileData);
@@ -198,7 +203,7 @@ export default function ContactInformationScreen() {
           <Dropdown
             label="Country of residence"
             placeholder="Select a country"
-            value={country?.name || ""}
+            value={country?.name ?? ""}
             options={countries}
             onSelect={handleSelectCountry}
           />
@@ -206,27 +211,24 @@ export default function ContactInformationScreen() {
           <TextInputField
             label="State"
             placeholder="Enter your current state"
-            value={state || ""}
+            value={state}
             onChangeText={setState}
           />
-
           <TextInputField
             label="Local Government Area"
             placeholder="Enter your current LGA"
-            value={lga || ""}
+            value={lga}
             onChangeText={setLga}
           />
-
           <TextInputField
             label="Street address"
             placeholder="Street your current address"
             value={street}
             onChangeText={setStreet}
           />
-
           <TextInputField
             label="Zip code"
-            placeholder="enter your current Zip code"
+            placeholder="Enter your current Zip code"
             value={zip}
             onChangeText={setZip}
           />
@@ -254,7 +256,7 @@ export default function ContactInformationScreen() {
                   borderColor="#E6E6E6"
                 >
                   <CountryFlag
-                    isoCode={country?.iso2?.toLowerCase() || "ng"}
+                    isoCode={country?.iso2?.toLowerCase() ?? "ng"}
                     size={18}
                   />
                   <TextInput
@@ -281,7 +283,7 @@ export default function ContactInformationScreen() {
           <Dropdown
             label="Relationship with emergency contact"
             placeholder="Select relationship"
-            value={relationship || ""}
+            value={relationship}
             options={["Spouse", "Parent", "Sibling", "Friend"]}
             onSelect={setRelationship}
           />

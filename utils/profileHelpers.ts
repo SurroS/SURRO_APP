@@ -2,82 +2,180 @@ import { SurrogateProfile } from "@/types/profile";
 import { AgentProfile } from "@/store/profile/agent/types";
 import { ParentProfile } from "@/store/profile/parent/types";
 
+type AnyProfile = SurrogateProfile | AgentProfile | ParentProfile;
+
 /**
- * Calculates the profile completion percentage for surrogate, agent, or parent profiles
- * @param profile - The profile object (SurrogateProfile | AgentProfile | ParentProfile)
- * @returns A number between 0 and 100 representing completion percentage
+ * Utility: checks if a value is meaningfully filled
+ */
+const isFilled = (value: any): boolean => {
+  if (Array.isArray(value)) return value.length > 0;
+  return value !== null && value !== undefined && value !== "";
+};
+
+/**
+ * Utility: checks if at least one field in a group is filled
+ */
+const isAnyFilled = (profile: AnyProfile, fields: string[]): boolean =>
+  fields.some((f) => isFilled(profile[f as keyof AnyProfile]));
+
+/**
+ * Calculates profile completion with weighted + grouped logic
  */
 export const calculateProfileProgress = (
-  profile: SurrogateProfile | AgentProfile | ParentProfile | null
+  profile: AnyProfile | null
 ): number => {
   if (!profile) return 0;
 
-  // Define fields for each profile type
-  let fields: string[] = [];
+  let score = 0;
+  let maxScore = 0;
 
-  if ("firstName" in profile || "lastName" in profile) {
-    // Surrogate profile
-    fields = [
-      "firstName",
-      "lastName",
-      "userName",
-      "countryOfOrigin",
-      "aboutMe",
-      "dateOfBirth",
-      "maritalStatus",
-      "height",
-      "weight",
-      "profilePicture",
-      "numberOfChildren",
-      "countryOfResidence",
-      "stateOfOrigin",
-      "address",
-      "zipCode",
-      "phone1",
-      "phone2",
-      "emergencyContactPhone",
-      "emergencyContactRelation",
-      "facebookProfile",
-      "instagramProfile",
-      "twitterProfile",
-      "threadsProfile",
-    ];
-  } else if ("performance" in profile || "services" in profile) {
-    // Agent profile
-    fields = [
-      "name",
-      "userName",
-      "fullName",
-      "age",
-      "dateOfBirth",
-      "country",
-      "profilePicture",
-      "avatar",
-      "about",
-      "performance",
-      "additionalDetails",
-      "socials",
-      "services",
-      "certifications",
-    ];
-  } else if ("yearsOfTrying" in profile || "fullName" in profile) {
-    // Parent profile
-    fields = [
-      "fullName",
-      "userName",
-      "profilePicture",
-      "countryOfResidence",
-      "about",
-      "languagesSpoken",
-      "yearsOfTrying",
-    ];
+  /**
+   * Helper to add weighted fields
+   */
+  const applyFields = (
+    fields: string[],
+    weight: number
+  ) => {
+    maxScore += weight;
+    const filledCount = fields.filter((f) =>
+      isFilled(profile[f as keyof AnyProfile])
+    ).length;
+
+    if (filledCount === fields.length) {
+      score += weight;
+    } else {
+      // Partial credit
+      score += (filledCount / fields.length) * weight;
+    }
+  };
+
+  /**
+   * Helper for grouped optionals (e.g socials)
+   */
+  const applyGroup = (
+    fields: string[],
+    weight: number
+  ) => {
+    maxScore += weight;
+    if (isAnyFilled(profile, fields)) {
+      score += weight;
+    }
+  };
+
+  // ------------------------------------------------
+  // SURROGATE PROFILE
+  // ------------------------------------------------
+  if ("hasBeenSurrogate" in profile) {
+    // Core identity & contact (50%)
+    applyFields(
+      [
+        "firstName",
+        "lastName",
+        "userName",
+        "dateOfBirth",
+        "countryOfResidence",
+        "stateOfResidence",
+        "phone1",
+        "profilePicture",
+      ],
+      50
+    );
+
+    // Medical & experience (25%)
+    applyFields(
+      [
+        "hasBeenSurrogate",
+        "compensationAmount",
+        "compensationNegotiable",
+        "medical",
+      ],
+      25
+    );
+
+    // Optional enrichments (15%)
+    applyFields(
+      [
+        "aboutMe",
+        "height",
+        "weight",
+        "numberOfChildren",
+        "maritalStatus",
+      ],
+      15
+    );
+
+    // Socials (any one counts) (10%)
+    applyGroup(
+      [
+        "facebookProfile",
+        "instagramProfile",
+        "twitterProfile",
+        "threadsProfile",
+        "ticktok",
+      ],
+      10
+    );
   }
 
-  const completedFields = fields.filter((field) => {
-    const value = profile[field as keyof typeof profile];
-    if (Array.isArray(value)) return value.length > 0;
-    return value !== null && value !== undefined && value !== "";
-  });
+  // ------------------------------------------------
+  // AGENT PROFILE
+  // ------------------------------------------------
+  else if ("services" in profile) {
+    // Core professional info (60%)
+    applyFields(
+      [
+        "name",
+        "userName",
+        "fullName",
+        "profilePicture",
+        "country",
+        "about",
+      ],
+      60
+    );
 
-  return Math.round((completedFields.length / fields.length) * 100);
+    // Services & credibility (25%)
+    applyFields(
+      ["services", "certifications", "performance"],
+      25
+    );
+
+    // Social presence (any) (15%)
+    applyGroup(
+      ["socials"],
+      15
+    );
+  }
+
+  // ------------------------------------------------
+  // PARENT PROFILE
+  // ------------------------------------------------
+  else {
+    // Core info (70%)
+    applyFields(
+      [
+        "fullName",
+        "userName",
+        "profilePicture",
+        "countryOfResidence",
+      ],
+      70
+    );
+
+    // Contextual depth (20%)
+    applyFields(
+      ["about", "yearsOfTrying", "languagesSpoken"],
+      20
+    );
+
+    // Optional social presence (10%)
+    applyGroup(
+      ["facebookProfile", "instagramProfile"],
+      10
+    );
+  }
+
+  // Normalize and cap
+  const percentage = Math.round((score / maxScore) * 100);
+  return Math.min(100, Math.max(0, percentage));
 };

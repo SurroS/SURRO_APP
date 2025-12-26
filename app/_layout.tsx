@@ -8,8 +8,19 @@ import ToastManager from "toastify-react-native";
 import config from "../tamagui.config";
 import toastConfig from "@/components/toastConfig";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useEffect } from "react";
+import { initSystemNotifications } from "@/store/notifications/notificationService";
+import { checkInactivity } from "@/store/notifications/inactivityService";
+import { useAppActivity } from "@/hooks/useAppActivity";
 
 export default function RootLayout() {
+  useAppActivity();
+
+  useEffect(() => {
+    initSystemNotifications();
+    checkInactivity();
+  }, []);
+
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),

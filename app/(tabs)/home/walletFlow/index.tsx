@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { TouchableOpacity, StyleSheet } from "react-native";
 import { Text, YStack, XStack, ScrollView, View } from "tamagui";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,6 +7,10 @@ import { router } from "expo-router";
 
 import colors from "@/hooks/colors";
 import { useAuth } from "@/hooks/useAuth";
+import { useSurrogateProfile } from "@/hooks/profile/useSurrogateProfile";
+import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
+import { useParentProfile } from "@/hooks/profile/useParentProfile";
+
 import RecentActivitiesScreen from "@/components/wallet/RecentActivity";
 import {
   allMockTransactions,
@@ -17,22 +21,31 @@ import { PrimaryButton } from "@/components/auth";
 
 const WalletScreen = () => {
   const { user } = useAuth();
+  const role = user?.role;
+
+  const { surrogateProfile } = useSurrogateProfile();
+  const { agentProfile } = useAgentProfile();
+  const { parentProfile } = useParentProfile();
 
   const [isHidden, setIsHidden] = useState(false);
-  const [currentScreen, setCurrentScreen] = useState(
-    SCREENS.WALLET_SUMMARY
-  );
+  const [currentScreen, setCurrentScreen] = useState(SCREENS.WALLET_SUMMARY);
 
-  const totalBalance = Number(user?.wallet ?? 0);
-  const currencyCode = "USD";
+  const wallet = useMemo(() => {
+    if (role === "SURROGATE") return surrogateProfile?.wallet;
+    if (role === "AGENT") return agentProfile?.wallet;
+    if (role === "INTENDED_PARENT") return parentProfile?.wallet;
+    return null;
+  }, [role, surrogateProfile, agentProfile, parentProfile]);
+
+  const totalBalance = Number(wallet?.balance ?? 0);
+  const currencyCode = wallet?.currency ?? "USD";
 
   const displayBalance = isHidden
     ? "******"
-    : `$${totalBalance.toFixed(2)}`;
+    : `${currencyCode} ${totalBalance.toFixed(2)}`;
 
   const recentTransactions = allMockTransactions.slice(0, 5);
 
-  /* ---------- Screen routing ---------- */
   if (currentScreen === SCREENS.RECENT_ACTIVITIES) {
     return (
       <RecentActivitiesScreen
@@ -61,12 +74,12 @@ const WalletScreen = () => {
       >
         {/* Balance */}
         <YStack alignItems="center" marginBottom={40}>
-          <Text fontSize={16} fontWeight="500" color={colors.balanceText}>
+          <Text fontSize={20} fontWeight="600" color={colors.balanceText}>
             {currencyCode} Wallet
           </Text>
 
           <XStack alignItems="center" marginTop={8}>
-            <Text fontSize={16} color={colors.secondaryGray} marginRight={6}>
+            <Text fontSize={18} color={colors.secondaryGray} marginRight={6}>
               Total Balance
             </Text>
             <TouchableOpacity onPress={() => setIsHidden(!isHidden)}>
@@ -79,7 +92,7 @@ const WalletScreen = () => {
           </XStack>
 
           <Text
-            fontSize={48}
+            fontSize={33}
             fontWeight="bold"
             color={colors.balanceText}
             marginTop={6}
@@ -92,16 +105,12 @@ const WalletScreen = () => {
             <ActionButton
               label="Top up"
               icon="add"
-              onPress={() =>
-                router.push("/home/walletFlow/paymentMethod")
-              }
+              onPress={() => router.push("/home/walletFlow/paymentMethod")}
             />
             <ActionButton
               label="Withdraw"
               icon="remove"
-              onPress={() =>
-                router.push("/home/walletFlow/withdrawal")
-              }
+              onPress={() => router.push("/home/walletFlow/withdrawal")}
             />
           </XStack>
         </YStack>
@@ -131,9 +140,7 @@ const WalletScreen = () => {
 
           <PrimaryButton
             title="See all"
-            onPress={() =>
-              setCurrentScreen(SCREENS.RECENT_ACTIVITIES)
-            }
+            onPress={() => setCurrentScreen(SCREENS.RECENT_ACTIVITIES)}
           />
         </View>
 
@@ -143,7 +150,6 @@ const WalletScreen = () => {
   );
 };
 
-/* ---------- Small reusable button ---------- */
 const ActionButton = ({
   label,
   icon,
@@ -181,8 +187,8 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   actionButton: {
-    width: 60,
-    height: 60,
+    width: 50,
+    height: 50,
     borderRadius: 30,
     alignItems: "center",
     justifyContent: "center",

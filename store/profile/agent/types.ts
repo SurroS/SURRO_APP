@@ -52,6 +52,7 @@ export interface AgentCertification {
 }
 
 export interface AgentProfile {
+  id: string;
   firstName?: string;
   lastName?: string;
   userName?: string;
@@ -67,9 +68,9 @@ export interface AgentProfile {
   stateOfOrigin?: string;
   address?: string;
   zipCode?: string;
-  phone1?: string;
-  phone2?: string;
-  emergencyContactPhone?: string;
+  phone1: string | null | undefined;
+  phone2: string | null | undefined;
+  emergencyContactPhone: string | null | undefined;
   emergencyContactRelation?: string;
   facebookProfile?: string;
   instagramProfile?: string;

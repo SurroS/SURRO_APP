@@ -29,21 +29,6 @@ interface Conversation {
     role?: string;
   }[];
 }
-
-// 👇 fallback conversations (UI-safe)
-const FALLBACK_CONVERSATIONS: Conversation[] = [
-  {
-    id: "fallback-1",
-    lastMessage: { content: "Welcome to chat 👋" },
-    participants: [{ id: "u1", name: "Support Team" }],
-  },
-  {
-    id: "fallback-2",
-    lastMessage: { content: "This is a sample conversation" },
-    participants: [{ id: "u2", name: "Demo User" }],
-  },
-];
-
 export default function ChatListScreen() {
   const router = useRouter();
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -66,13 +51,9 @@ export default function ChatListScreen() {
 
         if (Array.isArray(result) && result.length > 0) {
           setConversations(result);
-        } else {
-          console.warn("⚠ Empty chat list, using fallback");
-          setConversations(FALLBACK_CONVERSATIONS);
         }
       } catch (err) {
-        console.warn("❌ Chat list failed, using fallback", err);
-        setConversations(FALLBACK_CONVERSATIONS);
+        console.warn("❌ Chat list failed something went wrong", err);
       } finally {
         if (active) setIsLoading(false);
       }
@@ -98,7 +79,7 @@ export default function ChatListScreen() {
         }
       >
         <XStack alignItems="center">
-          <Avatar  size={60}>
+          <Avatar size={60}>
             {other?.avatarUrl ? (
               <Avatar.Image src={other.avatarUrl} />
             ) : (
@@ -108,8 +89,8 @@ export default function ChatListScreen() {
                   source={defaultAvatar}
                   style={{
                     width: 50,
-                    height: 50, 
-                    borderRadius:10,
+                    height: 50,
+                    borderRadius: 10,
                     alignSelf: "center",
                   }}
                 />

@@ -205,6 +205,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center", 
     marginHorizontal: 6,
-    paddingTop:15
+    paddingTop:15,
+    paddingHorizontal:15
   },
 });

@@ -10,9 +10,6 @@ import {
 const API_BASE =
   process.env.EXPO_PUBLIC_API_URL || "https://dev.surrosantara.space/api/v1";
 
-/**
- * Fetch wallet balance for a specific user
- */
 export const getWalletBalance = async (
   userId: UserId,
   token?: string | null

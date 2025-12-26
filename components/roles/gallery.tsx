@@ -61,12 +61,13 @@ const Gallery = ({ style }: { style?: any }) => {
         </XStack>
 
         {/* Image Stack */}
+        {/* Image Stack */}
         <YStack
           alignItems="center"
           justifyContent="center"
           flex={1}
           width="100%"
-          height="100%"
+          height={200} // optional fixed height for consistency
           position="relative"
         >
           {displayImages.map((img, index) => (
@@ -74,12 +75,12 @@ const Gallery = ({ style }: { style?: any }) => {
               key={index}
               source={typeof img === "string" ? { uri: img } : img}
               style={{
-                width: "100%",
-                height: "100%",
+                width: "80%", // scale down to 80%
+                height: "80%",
                 borderRadius: 10,
                 position: "absolute",
-                top: 0,
-                left: index * 12,
+
+                left: `${index * 9}%`, // optional offset for stacking
                 zIndex: displayImages.length - index,
                 borderWidth: 2,
                 borderColor: "white",
@@ -88,27 +89,11 @@ const Gallery = ({ style }: { style?: any }) => {
                 shadowOffset: { width: 0, height: 2 },
                 shadowRadius: 3,
                 backgroundColor: "#f5f5f5",
+                transform: [{ rotate: "-10deg" }], // rotate image
               }}
               resizeMode="cover"
             />
           ))}
-
-          {/* Button overlay */}
-          <Button
-            size="$2"
-            position="absolute"
-            bottom={-10}
-            right={10}
-            zIndex={10000}
-            iconAfter={ChevronRight}
-            variant="outlined"
-            borderColor="#0E0E55"
-            borderRadius="$5"
-            color="#0E0E55"
-            disabled={isLoading}
-          >
-            <Text color="#0E0E55">{validImages.length}</Text>
-          </Button>
         </YStack>
       </Card>
     </Pressable>

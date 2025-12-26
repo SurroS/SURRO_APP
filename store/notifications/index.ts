@@ -1,46 +1,15 @@
 import { create } from "zustand";
-
-/* ---------------------------------- */
-/* Types */
-/* ---------------------------------- */
-
-export type NotificationType =
-  | "GENERAL"
-  | "PROFILE_SETUP"
-  | "PROFILE_VIEWS"
-  | "PAYMENT"
-  | "REFERRAL"
-  | "SURROGATE_BOOST"
-  | "KYC"
-  | "PROFILE_BOOST";
-
-export type Notification = {
-  id: string;
-  title: string;
-  body: string;
-  type: NotificationType;
-  role?: "SURROGATE" | "INTENDED_PARENT" | "AGENT" | "ALL";
-  read: boolean;
-  createdAt: number;
-};
-
-/* ---------------------------------- */
-/* Helpers */
-/* ---------------------------------- */
+import { AppNotification } from "./types";
 
 const generateId = () =>
   `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
-/* ---------------------------------- */
-/* Store */
-/* ---------------------------------- */
-
 type NotificationStore = {
-  notifications: Notification[];
+  notifications: AppNotification[];
   selected: string[];
 
   addLocal: (
-    n: Omit<Notification, "id" | "read" | "createdAt">
+    n: Omit<AppNotification, "id" | "read" | "createdAt" | "source">
   ) => void;
 
   markRead: (id: string) => void;
@@ -56,8 +25,6 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
   notifications: [],
   selected: [],
 
-  /* ---------- CRUD ---------- */
-
   addLocal: (n) =>
     set((state) => ({
       notifications: [
@@ -65,6 +32,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
           ...n,
           id: generateId(),
           read: false,
+          source: "LOCAL",
           createdAt: Date.now(),
         },
         ...state.notifications,
@@ -84,8 +52,6 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
       selected: state.selected.filter((s) => s !== id),
     })),
 
-  /* ---------- Selection ---------- */
-
   selectNotification: (id) =>
     set((state) =>
       state.selected.includes(id)
@@ -98,10 +64,9 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
       selected: state.selected.filter((s) => s !== id),
     })),
 
-  selectAll: () =>
-    set(() => ({
-      selected: get().notifications.map((n) => n.id),
-    })),
+  selectAll: () => ({
+    selected: get().notifications.map((n) => n.id),
+  }),
 
-  clearSelection: () => set({ selected: [] }),
+  clearSelection: () => ({ selected: [] }),
 }));

@@ -1,13 +1,19 @@
-// components/guess/HeaderBar.tsx
+// components/guest/HeaderBar.tsx
 import React from "react";
-import { XStack, YStack } from "tamagui";
+import { XStack, YStack, Text, Avatar } from "tamagui";
 import { useRouter } from "expo-router";
 import { Bell } from "@tamagui/lucide-icons";
+import { useProfile } from "@/hooks/useProfile";
 
 const ICON_SIZE = 24;
 
-const HeaderBar: React.FC = () => {
-  const router = useRouter();
+const HeaderBar: React.FC = (surrogateProfile: any) => {
+  const displayName = surrogateProfile?.firstName || "Guest";
+  const initials = displayName
+    .split(" ")
+    .map((n: string) => n[0])
+    .join("")
+    .toUpperCase();
 
   return (
     <XStack
@@ -16,16 +22,10 @@ const HeaderBar: React.FC = () => {
       paddingTop="$md"
       paddingHorizontal="$md"
     >
-
-      <YStack />
-
-      {/* Right side: bell icon */}
-      
-      <Bell
-        size={ICON_SIZE}
-        color="#000"
-        onPress={() => router.push("/notifications")}
-      />
+      {/* Left side: avatar or initials */}
+      <YStack alignItems="center" justifyContent="center">
+   
+      </YStack>
     </XStack>
   );
 };

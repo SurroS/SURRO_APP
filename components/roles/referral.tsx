@@ -9,7 +9,6 @@ const Referral = ({ style }: { style?: any }) => {
   const { user } = useAuth();
 
   const handleInvite = () => {
-    // 👇 Navigate to your invite screen
     router.push("/home/inviteScreen");
   };
 
@@ -25,13 +24,19 @@ const Referral = ({ style }: { style?: any }) => {
       {/* Header */}
       <XStack alignItems="center" gap="$2" marginBottom="$2">
         <Gift color="#0E0E55" size={18} />
-        <Text fontSize="$3.2" fontWeight="600" color="#0E0E55" padding={2} textWrap="wrap">
-          Invite your friends
+        <Text
+          fontSize="$3.2"
+          fontWeight="600"
+          color="#0E0E55"
+          padding={2}
+          textWrap="wrap"
+        >
+          Invite friends
         </Text>
       </XStack>
 
       {/* Content */}
-      <YStack flex={1} justifyContent="center" alignItems="flex-start" gap="$3">
+      <YStack flex={1} justifyContent="center" alignItems="center" gap="$3">
         <Text color="#333" fontSize="$3.2" lineHeight={18}>
           and get rewarded
         </Text>
@@ -75,6 +80,7 @@ const styles = StyleSheet.create({
     elevation: 3,
     shadowOpacity: 0.15,
     shadowRadius: 3,
-    justifyContent: "space-between",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

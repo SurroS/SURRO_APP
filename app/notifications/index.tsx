@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { ScrollView, Modal } from "react-native";
 import { YStack, XStack, Text, Button, View } from "tamagui";
-import { useNotificationStore, Notification } from "@/store/notifications";
+import { AppNotification } from "@/store/notifications/types";
+import { useNotificationStore } from "@/store/notifications";
 import NotificationItem from "@/components/notifications/NotificationItem";
 import colors from "@/hooks/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -21,9 +22,9 @@ const NotificationsScreen = () => {
   const clearSelection = useNotificationStore((s) => s.clearSelection);
 
   const [viewingNotification, setViewingNotification] =
-    useState<Notification | null>(null);
+    useState<AppNotification | null>(null);
 
-  const handlePress = (n: Notification) => {
+  const handlePress = (n: AppNotification) => {
     if (selected.length > 0) {
       selected.includes(n.id)
         ? deselectNotification(n.id)
@@ -34,7 +35,7 @@ const NotificationsScreen = () => {
     }
   };
 
-  const handleLongPress = (n: Notification) => {
+  const handleLongPress = (n: AppNotification) => {
     if (!selected.includes(n.id)) selectNotification(n.id);
   };
 
@@ -48,15 +49,23 @@ const NotificationsScreen = () => {
         {/* Notification List */}
         <ScrollView showsVerticalScrollIndicator={false}>
           <YStack gap="$2" paddingBottom="$8">
-            {notifications.map((n) => (
-              <NotificationItem
-                key={n.id}
-                item={n}
-                selected={selected.includes(n.id)}
-                onPress={() => handlePress(n)}
-                onLongPress={() => handleLongPress(n)}
-              />
-            ))}
+            {notifications.length === 0 ? (
+              <YStack alignItems="center" marginTop={40}>
+                <Text color="#777" fontSize={14}>
+                  No notifications yet
+                </Text>
+              </YStack>
+            ) : (
+              notifications.map((n) => (
+                <NotificationItem
+                  key={n.id}
+                  item={n}
+                  selected={selected.includes(n.id)}
+                  onPress={() => handlePress(n)}
+                  onLongPress={() => handleLongPress(n)}
+                />
+              ))
+            )}
           </YStack>
         </ScrollView>
 
@@ -89,8 +98,7 @@ const NotificationsScreen = () => {
         )}
       </YStack>
 
-      {/* Custom modal for full notification (scrollable) */}
-      <Modal visible={!viewingNotification} transparent animationType="fade">
+      <Modal visible={!!viewingNotification} transparent animationType="fade">
         <YStack
           flex={1}
           backgroundColor="rgba(0,0,0,0.5)"
@@ -112,10 +120,12 @@ const NotificationsScreen = () => {
               <Text
                 fontSize={14}
                 lineHeight={22}
+                alignSelf="center"
                 color="#333"
+                fontWeight={600}
                 marginBottom={20}
               >
-                {viewingNotification?.body || "No details provided."}
+                {viewingNotification?.body || "No Notifications at the moment."}
               </Text>
             </ScrollView>
             <Button

@@ -1,6 +1,7 @@
 export interface User {
   id: string;
   email: string;
+  token: string | null;
   password?: string; // Only present in API responses, not in frontend state
   role: "INTENDED_PARENT" | "SURROGATE" | "AGENT";
   isVerified: boolean;

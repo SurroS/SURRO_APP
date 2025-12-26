@@ -12,10 +12,9 @@ interface SurrogateBioProps {
   onEditBio: () => void;
 }
 
-export default function SurrogateBio(props:SurrogateBioProps) {
-
+export default function SurrogateBio(props: SurrogateBioProps) {
   return (
-    <YStack gap="$3"  width="100%">
+    <YStack gap="$3" width="100%">
       <RoleCommonProfile {...props} />
       {/* Agent-specific info */}
       <InfoRowCard
@@ -23,6 +22,12 @@ export default function SurrogateBio(props:SurrogateBioProps) {
         subtitle="Tell us about your health"
         icon={History}
         onPress={() => router.navigate("/settings/medical")}
+      />
+      <InfoRowCard
+        title="Surrogacy Experience"
+        subtitle="Tell us about your experience"
+        icon={History}
+        onPress={() => router.navigate("/(tabs)/settings/profile/experienceForm")}
       />
     </YStack>
   );

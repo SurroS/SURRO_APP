@@ -15,7 +15,7 @@ export default function profileLayout() {
       <Stack.Screen
         name="experienceForm"
         options={{
-          headerTitle: "ExperienceForm",
+          headerTitle: "Surrogacy ExperienceForm",
           headerTitleStyle: { fontWeight: "bold" },
           headerShown: false,
         }}
@@ -23,7 +23,7 @@ export default function profileLayout() {
       <Stack.Screen
         name="experienceIntro"
         options={{
-          headerTitle: "ExperienceIntro",
+          headerTitle: "Surrogacy ExperienceIntro",
           headerTitleStyle: { fontWeight: "bold" },
           headerShown: false,
         }}

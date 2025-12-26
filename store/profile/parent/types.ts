@@ -22,10 +22,10 @@ export interface ParentProfile {
   stateOfOrigin?: string;
   address?: string;
   zipCode?: string;
-  phone1?: string;
-  phone2?: string;
   lga: string;
-  emergencyContactPhone?: string;
+  phone1: string | null | undefined;
+  phone2: string | null | undefined;
+  emergencyContactPhone: string | null | undefined;
   stateOfResidence: string;
   emergencyContactRelation?: string;
   facebookProfile?: string;

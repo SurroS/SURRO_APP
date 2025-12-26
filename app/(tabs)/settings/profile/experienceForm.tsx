@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { StyleSheet, TextInput } from "react-native";
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  TextInput,
+  ActivityIndicator,
+} from "react-native";
 import { YStack, XStack, Text, Button } from "tamagui";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BottomModal from "@/components/modals/BottomModal";
 import colors from "@/hooks/colors";
 import { router } from "expo-router";
-import { ActivityIndicator } from "react-native";
+import { useSurrogateProfile } from "@/hooks/profile/useSurrogateProfile";
 
 export interface Question {
   id: number;
@@ -14,12 +18,10 @@ export interface Question {
   options?: string[];
 }
 
+/* ---------------- QUESTIONS ---------------- */
+
 const questionsForNo: Question[] = [
-  {
-    id: 1,
-    text: "Have you ever been a surrogate?",
-    type: "yesno",
-  },
+  { id: 1, text: "Have you ever been a surrogate?", type: "yesno" },
   {
     id: 2,
     text: "How much will you want to be compensated for this process?",
@@ -33,17 +35,13 @@ const questionsForNo: Question[] = [
   },
   {
     id: 5,
-    text: "Anything else you'd like to share about your past surrogacy journey?",
+    text: "Anything else you'd like to share?",
     type: "text",
   },
 ];
 
 const questionsForYes: Question[] = [
-  {
-    id: 1,
-    text: "Have you ever been a surrogate?",
-    type: "yesno",
-  },
+  { id: 1, text: "Have you ever been a surrogate?", type: "yesno" },
   {
     id: 2,
     text: "Did you carry single or multiple babies?",
@@ -52,7 +50,7 @@ const questionsForYes: Question[] = [
   },
   {
     id: 3,
-    text: "Anything else you'd like to share about your past surrogacy journey?",
+    text: "Anything else you'd like to share?",
     type: "text",
   },
   {
@@ -62,7 +60,7 @@ const questionsForYes: Question[] = [
   },
   {
     id: 5,
-    text: "How much will you want to be compensated for this process?",
+    text: "How much will you want to be compensated?",
     type: "number",
   },
   {
@@ -73,121 +71,130 @@ const questionsForYes: Question[] = [
   },
 ];
 
+/* ---------------- COMPONENT ---------------- */
+
 export default function ExperienceForm() {
+  const { updateProfile } = useSurrogateProfile();
+
   const [answers, setAnswers] = useState<Record<number, string>>({});
-  const [questions, setQuestions] = useState<Question[]>([questionsForNo[0]]); // start only with the first question
+  const [questions, setQuestions] = useState<Question[]>([questionsForNo[0]]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [loading, setLoading] = useState<boolean>(false);
 
   const currentQuestion = questions[currentIndex];
+
+  /* ---------------- ANSWER HANDLING ---------------- */
 
   const handleAnswerChange = (value: string) => {
     setAnswers((prev) => ({ ...prev, [currentQuestion.id]: value }));
 
-    // If the first question (ID 1) is being answered, update question set
     if (currentQuestion.id === 1) {
       if (value.toLowerCase() === "yes") {
         setQuestions(questionsForYes);
       } else {
         setQuestions(questionsForNo);
       }
-      // After setting, move to the next question automatically
       setTimeout(() => setCurrentIndex(1), 100);
     }
   };
 
   const handleNext = () => {
-    if (currentIndex + 1 < questions.length) {
-      setCurrentIndex((prev) => prev + 1);
-    } else {
-      setShowSuccessModal(true);
+    if (currentIndex < questions.length - 1) {
+      setCurrentIndex((i) => i + 1);
     }
   };
 
   const handlePrevious = () => {
     if (currentIndex > 0) {
-      setCurrentIndex((prev) => prev - 1);
+      setCurrentIndex((i) => i - 1);
     }
   };
 
+  /* ---------------- SUBMIT ---------------- */
+
   const handleSubmit = async () => {
     setLoading(true);
+
     try {
-      // simulate upload
+      const payload = {
+        hasBeenSurrogate: answers[1]?.toLowerCase() === "yes",
+        previousPregnancyType: answers[2] || null,
+        compensationAmount: answers[5]
+          ? Number(answers[5])
+          : Number(answers[2]),
+        compensationNegotiable:
+          (answers[3] || answers[6])?.toLowerCase() === "yes",
+        experienceNotes: answers[3] || answers[5] || "",
+        enjoymentNotes: answers[4] || "",
+      };
+
+      await updateProfile(payload);
+
       setShowSuccessModal(true);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      router.push("/settings/kyc/");
-    } catch (error) {
-      console.error("Error uploading ID:", error);
+
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        router.push("/settings/kyc/");
+      }, 1500);
+    } catch (err) {
+      console.error("Failed to update surrogate profile", err);
     } finally {
-      setShowSuccessModal(false);
       setLoading(false);
     }
   };
+
+  /* ---------------- UI ---------------- */
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <YStack style={styles.container}>
         <Text style={styles.questionText}>{currentQuestion.text}</Text>
 
-        {/* Text Input */}
+        {/* TEXT */}
         {currentQuestion.type === "text" && (
           <TextInput
             style={styles.textInput}
-            placeholder="Type your answer..."
             multiline
             value={answers[currentQuestion.id] || ""}
             onChangeText={handleAnswerChange}
           />
         )}
 
-        {/* Number Input */}
+        {/* NUMBER */}
         {currentQuestion.type === "number" && (
           <TextInput
             style={styles.textInput}
-            placeholder="Enter amount"
             keyboardType="numeric"
             value={answers[currentQuestion.id] || ""}
             onChangeText={handleAnswerChange}
           />
         )}
 
-        {/* Yes / No Buttons */}
+        {/* YES / NO */}
         {currentQuestion.type === "yesno" && (
           <XStack gap="$4" marginTop="$10">
-            <Button
-              style={{
-                borderColor: colors.primary,
-                border: 1,
-                backgroundColor: colors.gray,
-                color: colors.black,
-              }}
-              onPress={() => handleAnswerChange("Yes")}
-            >
-              Yes
-            </Button>
-            <Button
-              style={{
-                borderColor: colors.primary,
-                border: 1,
-                backgroundColor: colors.gray,
-                color: colors.black,
-              }}
-              onPress={() => handleAnswerChange("No")}
-            >
-              No
-            </Button>
+            {["Yes", "No"].map((opt) => (
+              <Button
+                key={opt}
+                backgroundColor={colors.gray}
+                borderColor={colors.primary}
+                borderWidth={1}
+                onPress={() => handleAnswerChange(opt)}
+              >
+                {opt}
+              </Button>
+            ))}
           </XStack>
         )}
 
-        {/* Select Buttons */}
+        {/* SELECT */}
         {currentQuestion.type === "select" && currentQuestion.options && (
           <XStack gap="$4" marginTop="$10" flexWrap="wrap">
             {currentQuestion.options.map((opt) => (
               <Button
                 key={opt}
-                style={{ backgroundColor: colors.gray }}
+                backgroundColor={colors.gray}
                 onPress={() => {
                   handleAnswerChange(opt);
                   handleNext();
@@ -199,39 +206,28 @@ export default function ExperienceForm() {
           </XStack>
         )}
 
-        {/* Navigation */}
-
+        {/* NAVIGATION */}
         {currentQuestion.id !== 1 && (
-          <XStack gap="$10" marginTop="$12">
+          <XStack gap="$8" marginTop="$12">
             {currentIndex > 0 && (
-              <Button
-                style={{ backgroundColor: colors.primary }}
-                onPress={handlePrevious}
-              >
+              <Button backgroundColor={colors.primary} onPress={handlePrevious}>
                 Previous
               </Button>
             )}
 
             {currentIndex === questions.length - 1 ? (
-              <Button
-                style={{ backgroundColor: colors.primary }}
-                onPress={handleSubmit}
-              >
+              <Button backgroundColor={colors.primary} onPress={handleSubmit}>
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={[styles.actionText, { color: "#fff" }]}>
+                  <Text color="#fff" fontWeight="700">
                     Confirm & Continue
                   </Text>
                 )}
               </Button>
-            ) : !answers[currentQuestion.id] ? (
-              ""
             ) : (
               <Button
-                style={{
-                  backgroundColor: colors.primary,
-                }}
+                backgroundColor={colors.primary}
                 onPress={handleNext}
                 disabled={!answers[currentQuestion.id]}
               >
@@ -243,13 +239,15 @@ export default function ExperienceForm() {
 
         <BottomModal
           visible={showSuccessModal}
-          success={true}
-          title="Thank you! Your responses have been recorded."
+          success
+          title="Thank you! Your responses have been saved."
         />
       </YStack>
     </SafeAreaView>
   );
 }
+
+/* ---------------- STYLES ---------------- */
 
 const styles = StyleSheet.create({
   container: {
@@ -260,10 +258,10 @@ const styles = StyleSheet.create({
   },
   questionText: {
     fontSize: 20,
-    color: "black",
     fontWeight: "600",
     marginBottom: 20,
     textAlign: "center",
+    color: "#000",
   },
   textInput: {
     width: "100%",
@@ -272,11 +270,6 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 8,
     padding: 10,
-    fontSize: 16,
     backgroundColor: "#fff",
-  },
-  actionText: {
-    fontSize: 16,
-    fontWeight: "700",
   },
 });

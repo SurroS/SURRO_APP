@@ -16,17 +16,17 @@ export async function createConversation(
   otherUserId: string
 ): Promise<Conversation> {
   try {
-    console.log("➡ Creating conversation with:", otherUserId);
+    console.log(" Creating conversation with:", otherUserId);
 
     const body: CreateConversationRequest = { otherUserId };
 
     const res = await api.post("/chat/conversation", body);
 
-    console.log("✔ Conversation created:", res.data);
+    console.log(" Conversation created:", res.data);
     return res.data as Conversation;
   } catch (err) {
     const info = explainAxiosError(err);
-    console.error("❌ Create conversation failed:", info);
+    console.error("Create conversation failed:", info);
     throw info;
   }
 }
@@ -38,16 +38,16 @@ export async function fetchMessages(
   conversationId: string
 ): Promise<Message[]> {
   try {
-    console.log("➡ Fetching messages for conversation:", conversationId);
+    console.log(" Fetching messages for conversation:", conversationId);
 
-    const res = await api.get(`/chat/messages/${conversationId}`);
+    const res = await api.get(`/chat`);
 
     console.log("conversationId:", conversationId);
-    console.log("✔ Messages fetched:", res.data);
+    console.log(" Messages fetched:", res.data);
     return res.data as Message[];
   } catch (err) {
     const info = explainAxiosError(err);
-    console.error("❌ Fetch messages failed:", info);
+    console.error(" Fetch messages failed:", info);
     throw info;
   }
 }
@@ -57,23 +57,21 @@ export async function fetchMessages(
  */
 export async function GetAllChat() {
   try {
-    console.log("➡ Fetching chat library...");
+    console.log(" Fetching chat library...");
 
     const res = await api.get("/chat");
 
-    console.log("✔ Chat library fetched:", res.data);
+    console.log(" Chat library fetched:", res.data);
 
     // normalize return
     return res.data?.data ?? [];
   } catch (error) {
     const info = explainAxiosError(error);
-    console.error("❌ Failed to fetch chat library", info);
+    console.error(" Failed to fetch chat library", info);
     return [];
   }
 }
-/**
- * Send a message in a conversation
- */
+
 export async function sendMessage(
   conversationId: string,
   content: string,
@@ -90,11 +88,11 @@ export async function sendMessage(
 
     const res = await api.post("/chat/message", body);
 
-    console.log("✔ Message sent:", res.data);
+    console.log(" Message sent:", res.data);
     return res.data.data as Message;
   } catch (err) {
     const info = explainAxiosError(err);
-    console.error("❌ Send message failed:", info);
+    console.error(" Send message failed:", info);
     throw info;
   }
 }

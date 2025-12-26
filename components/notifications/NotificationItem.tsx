@@ -1,7 +1,8 @@
 import React from "react";
 import { TouchableOpacity } from "react-native";
 import { XStack, YStack, Text, Image } from "tamagui";
-import { Notification } from "@/store/notifications";
+import { AppNotification } from "@/store/notifications/types";
+
 import colors from "@/hooks/colors";
 
 // Icons
@@ -11,17 +12,18 @@ import profileSetupIcon from "@/assets/images/profile-setup-icon.png";
 import profileView from "@/assets/images/profile-view.png";
 
 type Props = {
-  item?: Notification;
+  item?: AppNotification;
   selected?: boolean;
   onPress?: () => void;
   onLongPress?: () => void;
 };
 
-const iconByType: Partial<Record<Notification["type"], any>> = {
+const iconByType: Partial<Record<AppNotification["type"], any>> = {
   GENERAL: messageIcon,
   PROFILE_SETUP: profileSetupIcon,
   PROFILE_VIEWS: profileView,
   PROFILE_BOOST: profileSetup2,
+  INACTIVITY: messageIcon, // keep it neutral
 };
 
 const FONT = {
@@ -29,7 +31,10 @@ const FONT = {
 };
 
 const formatTime = (timestamp: number) =>
-  new Date(timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  new Date(timestamp).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
 const NotificationItem = ({ item, selected, onPress, onLongPress }: Props) => {
   if (!item) return null;
@@ -37,24 +42,39 @@ const NotificationItem = ({ item, selected, onPress, onLongPress }: Props) => {
   const icon = iconByType[item.type] ?? messageIcon;
 
   return (
-    <TouchableOpacity onPress={onPress} onLongPress={onLongPress} activeOpacity={0.7}>
+    <TouchableOpacity
+      onPress={onPress}
+      onLongPress={onLongPress}
+      activeOpacity={0.7}
+    >
       <YStack
         backgroundColor={selected ? "#dde6ff" : "#fff"}
         borderRadius={10}
         borderWidth={0.5}
         borderColor={colors.gray}
       >
-        <XStack alignItems="center" justifyContent="space-between" paddingVertical="$3" paddingHorizontal="$4">
+        <XStack
+          alignItems="center"
+          justifyContent="space-between"
+          paddingVertical="$3"
+          paddingHorizontal="$4"
+        >
           <XStack alignItems="center" gap="$3" flex={1}>
             <Image source={icon} width={22} height={22} resizeMode="contain" />
             <Text
-              fontWeight="600"
               fontSize={FONT.title.fontSize}
               lineHeight={FONT.title.lineHeight}
               color="#212121"
+              fontWeight={item.read ? "500" : "800"}
+
             >
               {item.title}
             </Text>
+            {item.source === "SYSTEM" && (
+              <Text fontSize={12} color="#888">
+                System
+              </Text>
+            )}
           </XStack>
 
           <XStack alignItems="center" gap={5}>
