@@ -19,7 +19,10 @@ import { ScreenHeader } from "../../components/navigation/ScreenHeader";
 import { SocialButton } from "../../components/auth/SocialButton";
 import { useSignupForm } from "../../hooks/auth/useSignupForm";
 
-import { GoogleSignin, statusCodes } from "@react-native-google-signin/google-signin";
+import {
+  GoogleSignin,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 
 // Configure Google Sign-In
 GoogleSignin.configure({
@@ -62,8 +65,7 @@ export default function SignupScreen() {
         type: "customSuccess" as ToastType,
         text2: "Welcome!",
       });
-
-      router.replace("/onboarding/learn-surrogacy-journey");
+      router.push("/onboarding/how-did-you-hear");
     } catch (error: any) {
       console.error("Google Sign-In error:", error);
 

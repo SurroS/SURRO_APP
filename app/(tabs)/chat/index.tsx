@@ -16,7 +16,7 @@ import { secureGet } from "@/utils/storage";
 import { GetAllChat } from "@/services/chatApi";
 import { Image } from "react-native";
 
-// 👇 local fallback avatar
+// local fallback avatar
 import defaultAvatar from "@/assets/images/agentImage.png";
 
 interface Conversation {
@@ -53,7 +53,7 @@ export default function ChatListScreen() {
           setConversations(result);
         }
       } catch (err) {
-        console.warn("❌ Chat list failed something went wrong", err);
+        console.warn(" Chat list failed something went wrong", err);
       } finally {
         if (active) setIsLoading(false);
       }

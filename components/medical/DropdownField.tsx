@@ -1,14 +1,19 @@
 import React from "react";
 import { YStack, Text } from "tamagui";
 
-type DrawerFieldProps = {
+type DropdownFieldProps<T extends string> = {
   label: string;
-  value: string;
-  options: string[];
-  onChange: (value: string) => void;
+  value: T;
+  options: readonly T[];
+  onChange: (value: T) => void;
 };
 
-const DrawerField = ({ label, value, options, onChange }: DrawerFieldProps) => {
+const DrawerField = <T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+}: DropdownFieldProps<T>) => {
   return (
     <YStack
       borderWidth={1}

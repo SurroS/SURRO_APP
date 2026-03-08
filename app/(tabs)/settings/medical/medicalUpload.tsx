@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView, ActivityIndicator, Image } from "react-native";
 import { YStack, Button, Text, View } from "tamagui";
-import { router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 import { ScreenHeader } from "@/components/auth";
 import colors from "@/hooks/colors";
 import UploadCard from "@/components/medical/uploadCard";
@@ -11,39 +11,43 @@ import { ToastType } from "toastify-react-native/utils/interfaces";
 import { useProfile } from "@/hooks/useProfile";
 import { uploadEndometriumImage as uploadEndometriumImageApi } from "@/services/profileApi";
 
+// Define a proper type for file uploads
+type FileObject = {
+  uri: string;
+  name?: string;
+  type?: string;
+  mimeType?: string;
+};
+
 export default function MedicalUpload() {
-  const params = useLocalSearchParams<Record<string, string>>();
-  const {
-    surrogateProfile,
-    medicalProfile,
-    updateMedicalProfile,
-    fetchProfile,
-    isLoading,
-  } = useProfile();
+  const { surrogateProfile, medicalProfile, updateMedicalProfile, fetchProfile, isLoading } =
+    useProfile();
   const medical = surrogateProfile?.medical || medicalProfile;
 
-  const [medicalReport, setMedicalReport] = useState<any>(null);
+  const [medicalReport, setMedicalReport] = useState<FileObject | null>(null);
   const [uploading, setUploading] = useState(false);
 
+  // Fetch profile if not loaded
   useEffect(() => {
     if (!medical && !surrogateProfile) {
       console.log("[MedicalUpload] Fetching profile from backend...");
       fetchProfile();
     }
-  }, []);
+  }, [medical, surrogateProfile, fetchProfile]);
 
+  // Prefill endometrium image from backend
   useEffect(() => {
     if (medical?.endometriumUploadUrl && !medicalReport) {
-      console.log(
-        "[MedicalUpload] Loaded endometrium image from backend:",
-        medical.endometriumUploadUrl
-      );
+      console.log("[MedicalUpload] Loaded endometrium image from backend:", medical.endometriumUploadUrl);
       setMedicalReport({ uri: medical.endometriumUploadUrl });
     }
-  }, [medical]);
+  }, [medical, medicalReport]);
 
-  const handleUpload = async (file: any) => {
+  // Upload handler
+  const handleUpload = async (file: FileObject) => {
+    // Set local preview immediately
     setMedicalReport(file);
+
     try {
       setUploading(true);
       console.log("[MedicalUpload] Uploading file to backend...", file);
@@ -56,27 +60,28 @@ export default function MedicalUpload() {
       } as any);
 
       const uploadResponse = await uploadEndometriumImageApi(formData);
-      const endometriumUploadUrl =
+
+      const backendUrl =
         uploadResponse.data?.medicalProfile?.endometriumUploadUrl ||
-        uploadResponse.data?.endometriumUploadUrl ||
-        "";
+        uploadResponse.data?.endometriumUploadUrl;
 
-      console.log(
-        "[MedicalUpload] Upload response from backend:",
-        uploadResponse.data
-      );
+      if (!backendUrl) throw new Error("Upload failed: no URL returned");
 
-      await updateMedicalProfile({ endometriumUploadUrl });
+      console.log("[MedicalUpload] Upload response from backend:", uploadResponse.data);
+
+      // Update profile with backend URL
+      await updateMedicalProfile({ endometriumUploadUrl: backendUrl });
+
+      // Merge local preview with backend URL for instant display
+      setMedicalReport({ uri: backendUrl });
 
       Toast.show({
         text1: "Endometrium image uploaded successfully",
         type: "customSuccess" as ToastType,
       });
     } catch (error: any) {
-      console.error(
-        "[MedicalUpload] Failed to upload endometrium image",
-        error
-      );
+      console.error("[MedicalUpload] Failed to upload endometrium image", error);
+
       Toast.show({
         text1: "Upload failed",
         text2: error?.response?.data?.message || "Please try again later",
@@ -87,7 +92,7 @@ export default function MedicalUpload() {
     }
   };
 
-  const handleContinueLater = async () => {
+  const handleContinueLater = () => {
     console.log("[MedicalUpload] Continue Later pressed");
     router.push("/settings/medical/medicalHistorySummary");
   };
@@ -95,10 +100,7 @@ export default function MedicalUpload() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF", paddingTop: 20 }}>
       <View marginLeft={28}>
-        <ScreenHeader
-          title="Medical upload"
-          onBackPress={() => router.back()}
-        />
+        <ScreenHeader title="Medical Upload" onBackPress={() => router.back()} />
       </View>
 
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -111,12 +113,13 @@ export default function MedicalUpload() {
             <YStack gap="$2" alignItems="center">
               <Image
                 source={{ uri: medicalReport.uri }}
-                style={{ width: 200, height: 200, borderRadius: 10 }}
+                style={{ width: "100%", maxWidth: 300, aspectRatio: 1, borderRadius: 10 }}
               />
               <Button
                 backgroundColor={colors.gray}
                 color={colors.primary}
                 onPress={() => setMedicalReport(null)}
+                disabled={uploading}
               >
                 Change Image
               </Button>
@@ -135,15 +138,9 @@ export default function MedicalUpload() {
               color="#FFF"
               disabled={isLoading || uploading}
               opacity={isLoading || uploading ? 0.7 : 1}
-              onPress={() =>
-                router.push("/settings/medical/medicalHistorySummary")
-              }
+              onPress={() => router.push("/settings/medical/medicalHistorySummary")}
             >
-              {isLoading || uploading ? (
-                <ActivityIndicator color="#FFF" />
-              ) : (
-                "Continue"
-              )}
+              {isLoading || uploading ? <ActivityIndicator color="#FFF" /> : "Continue"}
             </Button>
 
             <Button

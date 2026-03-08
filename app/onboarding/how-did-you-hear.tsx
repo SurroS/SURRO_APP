@@ -224,7 +224,8 @@ export default function HowDidYouHear() {
                       }
                     }
                     // Navigate to editBio screen
-                    router.push("/(auth)/signup");
+                     router.push("/onboarding/how-did-you-hear");
+                    
                   }}
                 >
                   <Text color="#0E0E55" fontWeight="600">

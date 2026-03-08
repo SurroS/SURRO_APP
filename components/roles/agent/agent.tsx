@@ -13,7 +13,7 @@ import SurrogatePreview from "../surrogate/SurrogatePreview";
 import { router } from "expo-router";
 import ProfileCompletionModal from "../ProfileCompletionModal";
 import { calculateProfileProgress } from "@/utils/profileHelpers";
-import { useAgentProfile } from "@/hooks/useAgentProfile";
+import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
 import ProfileData from "@/components/profileDetails/ProfileData";
 
 /** Safe render wrapper */
@@ -44,14 +44,7 @@ export default function AgentHomeScreen() {
       }
     }
   }, [agentProfile, progress, isLoading]);
-
-  // Navigation
-  const ViewParents = () => {
-    router.push({
-      pathname: "/(tabs)/home/parent/parentsListScreen",
-    });
-  };
-
+ 
   const ViewSurrogate = () => {
     router.push({
       pathname: "/(tabs)/home/surrogate/surrogateList",
@@ -76,7 +69,7 @@ export default function AgentHomeScreen() {
               onToggleAvailability={async (next) => {
                 await updateProfile({ isAvailable: next });
               }}
-            />  
+            />
           </SafeRender>
 
           {/* PROFILE INFO ACCORDION */}
@@ -110,15 +103,6 @@ export default function AgentHomeScreen() {
                 <SurrogatePreview
                   style={{ height: 200, padding: 2, width: 150 }}
                 />
-              </Pressable>
-
-              <Pressable onPress={ViewParents} style={{ marginRight: 5 }}>
-                {/* You can add a ParentPreview component here */}
-                <Text
-                  style={{ width: 150, textAlign: "center", marginTop: 90 }}
-                >
-                  View Parents
-                </Text>
               </Pressable>
             </SafeRender>
           </ScrollView>

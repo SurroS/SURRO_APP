@@ -1,5 +1,6 @@
 export interface User {
   id: string;
+  userId: string;
   email: string;
   token: string | null;
   password?: string; // Only present in API responses, not in frontend state
@@ -35,6 +36,7 @@ export interface Wallet {
 
 export interface AuthState {
   user: User | null;
+  userId: string;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;

@@ -44,8 +44,7 @@ export default function RoleSelection() {
     });
     console.log("Role from role", selectedRole);
     console.log("User from role", user);
-    // Navigate to "how did you hear" page
-    router.push("/onboarding/how-did-you-hear");
+    router.push("/(auth)/login");
   };
 
   return (

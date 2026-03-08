@@ -12,81 +12,81 @@ export default function MedicalDetailsStep1() {
   const { surrogateProfile, medicalProfile, fetchProfile, isLoading } =
     useProfile();
 
+  const medical = surrogateProfile?.medical || medicalProfile;
+
   const [genotype, setGenotype] = useState("");
   const [bloodGroup, setBloodGroup] = useState("");
-  const [pregnant, setPregnant] = useState("");
-  const [children, setChildren] = useState(0);
-  const [caesarean, setCaesarean] = useState("");
+  const [pregnancyExperience, setPregnancyExperience] = useState<
+    "Yes" | "No" | ""
+  >("");
+  const [numberOfChildren, setNumberOfChildren] = useState(0);
+  const [ceasareanSection, setCeasareanSection] = useState<"Yes" | "No" | "">(
+    ""
+  );
   const [numberOfCs, setNumberOfCs] = useState(0);
   const [profileLoaded, setProfileLoaded] = useState(false);
 
-  const medical = surrogateProfile?.medicalProfile || medicalProfile;
-
+  /** Fetch profile once */
   useEffect(() => {
     if (!medical && !surrogateProfile) {
-      console.log("[MedicalDetailsStep1] Fetching profile from backend...");
       fetchProfile().finally(() => setProfileLoaded(true));
     } else {
       setProfileLoaded(true);
     }
   }, []);
 
+  /** Hydrate from backend */
   useEffect(() => {
-    if (medical) {
-      console.log(
-        "[MedicalDetailsStep1] Loaded medical profile from backend:",
-        medical
-      );
-      setGenotype(medical.genotype || "");
-      setBloodGroup(medical.bloodGroup || "");
-      setPregnant(medical.pregnancyExperience ? "Yes" : "No");
-      setChildren(medical.numberofChildren || 0);
-      setCaesarean(medical.ceasareanSection ? "Yes" : "No");
-      setNumberOfCs(medical.numberOfcs || 0);
-    }
+    if (!medical) return;
+
+    setGenotype(medical.genotype ?? "");
+    setBloodGroup(medical.bloodGroup ?? "");
+    setPregnancyExperience(
+      medical.pregnancyExperience ? "Yes" : "No"
+    );
+    setNumberOfChildren(medical.numberOfChildren ?? 0);
+    setCeasareanSection(
+      medical.ceasareanSection ? "Yes" : "No"
+    );
+    setNumberOfCs(medical.numberOfCs ?? 0);
   }, [medical]);
 
-  const handleContinue = () => {
-    console.log("[MedicalDetailsStep1] Continue pressed with values:", {
-      genotype,
-      bloodGroup,
-      pregnant,
-      children,
-      caesarean,
-      numberOfCs,
-    });
+  /** Form validity — no nonsense allowed */
+  const isFormValid =
+    genotype &&
+    bloodGroup &&
+    pregnancyExperience &&
+    (pregnancyExperience === "No" ||
+      (numberOfChildren > 0 &&
+        ceasareanSection &&
+        (ceasareanSection === "No" || numberOfCs > 0)));
 
+  const handleContinue = () => {
     router.push({
       pathname: "/settings/medical/medical-two",
       params: {
         genotype,
         bloodGroup,
-        pregnancyExperience: (pregnant === "Yes").toString(),
-        numberofChildren: children.toString(),
-        ceasareanSection: (caesarean === "Yes").toString(),
+        pregnancyExperience:
+          pregnancyExperience === "Yes" ? "true" : "false",
+        numberOfChildren: numberOfChildren.toString(),
+        ceasareanSection:
+          ceasareanSection === "Yes" ? "true" : "false",
         numberOfCs: numberOfCs.toString(),
       },
     });
   };
 
   const handleContinueLater = () => {
-    console.log("[MedicalDetailsStep1] Continue Later pressed");
     router.push("/settings/medical");
   };
-
-  const isFormValid =
-    genotype &&
-    bloodGroup &&
-    pregnant &&
-    (pregnant === "No" ||
-      (children > 0 && caesarean && (caesarean === "No" || numberOfCs > 0)));
 
   if (!profileLoaded || isLoading) {
     return (
       <SafeAreaView
         style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
       >
-        <Button>Loading...</Button>
+        <Button>Loading…</Button>
       </SafeAreaView>
     );
   }
@@ -99,6 +99,7 @@ export default function MedicalDetailsStep1() {
           onBackPress={() => router.back()}
         />
       </View>
+
       <ScrollView contentContainerStyle={{ flexGrow: 1, padding: "$3" }}>
         <YStack padding="$4" gap="$4">
           <YStack gap="$4" marginTop="$4">
@@ -117,28 +118,28 @@ export default function MedicalDetailsStep1() {
             />
 
             <DropdownField
-              label="Have you ever been pregnant"
-              value={pregnant}
+              label="Have you ever been pregnant?"
+              value={pregnancyExperience}
               options={["Yes", "No"]}
-              onChange={setPregnant}
+              onChange={setPregnancyExperience}
             />
 
-            {pregnant === "Yes" && (
+            {pregnancyExperience === "Yes" && (
               <>
                 <NumberInputSelect
-                  label="How many children do you have"
-                  value={children}
-                  onChange={setChildren}
+                  label="How many children do you have?"
+                  value={numberOfChildren}
+                  onChange={setNumberOfChildren}
                 />
 
                 <DropdownField
-                  label="Have you ever had a caesarean section (CS)"
-                  value={caesarean}
+                  label="Have you ever had a caesarean section (CS)?"
+                  value={ceasareanSection}
                   options={["Yes", "No"]}
-                  onChange={setCaesarean}
+                  onChange={setCeasareanSection}
                 />
 
-                {caesarean === "Yes" && (
+                {ceasareanSection === "Yes" && (
                   <NumberInputSelect
                     label="How many C-sections (CS) have you had?"
                     value={numberOfCs}

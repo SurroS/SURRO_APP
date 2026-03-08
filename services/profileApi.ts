@@ -96,7 +96,7 @@ export const updateAgentProfile = (d: any) =>
   makeAuthenticatedProfileRequest("PATCH", "/agents/profile", d);
 
 export const getAgentProfile = () =>
-  makeAuthenticatedProfileRequest("GET", "/agents/profile/me");
+  makeAuthenticatedProfileRequest("GET", "/agents/profile");
 
 // ----------------------------------------------------
 // PARENTS

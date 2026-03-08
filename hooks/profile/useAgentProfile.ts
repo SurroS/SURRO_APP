@@ -4,13 +4,18 @@ import {
   getAgentProfile,
   createAgentProfile,
   updateAgentProfile,
+   
 } from "@/services/profileApi";
+import { useAuth } from "../useAuth";
 
 export const useAgentProfile = () => {
+  const { user } = useAuth();
   const [agentProfile, setAgentProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const userId = user?.id;
+  console.log("user:", user);
+  console.log("userID:", userId);
   // -------------------------
   // FETCH PROFILE
   // -------------------------
@@ -23,15 +28,13 @@ export const useAgentProfile = () => {
       const res = await getAgentProfile();
       console.log("[AgentProfile] Fetch success:", res?.data);
       setAgentProfile(res.data);
+      console.log("response data", res.data);
     } catch (err: any) {
-      console.error(
-        "[AgentProfile] Fetch failed:",
-        err?.response?.data || err
-      );
+      console.log("user id from", userId);
+      console.error("[AgentProfile] Fetch failed:", err?.response?.data || err);
+
       setError(
-        err?.response?.data?.message ||
-          err.message ||
-          "Failed to fetch profile"
+        err?.response?.data?.message || err.message || "Failed to fetch profile"
       );
     } finally {
       setIsLoading(false);
@@ -98,7 +101,6 @@ export const useAgentProfile = () => {
       console.log("[AgentProfile] Update done");
     }
   };
-
 
   return {
     agentProfile,

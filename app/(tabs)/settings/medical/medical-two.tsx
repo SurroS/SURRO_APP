@@ -13,6 +13,9 @@ import NumberInputSelect from "@/components/NumberInputSelect";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { useProfile } from "@/hooks/useProfile";
+import { MedicalProfile } from "@/types/profile";
+
+type YesNo = "" | "Yes" | "No";
 
 export default function MedicalDetailsStep2() {
   const {
@@ -22,81 +25,59 @@ export default function MedicalDetailsStep2() {
     updateMedicalProfile,
     isLoading,
   } = useProfile();
-  const medical = medicalProfile || surrogateProfile?.medical;
 
-  const [hasChronicIllness, setHasChronicIllness] = useState("");
+  const medical: MedicalProfile | undefined =
+    medicalProfile || surrogateProfile?.medical;
+
+  const [hasChronicIllness, setHasChronicIllness] = useState<YesNo>("");
   const [chronicIllnesses, setChronicIllnesses] = useState<string[]>([]);
   const [otherChronicIllness, setOtherChronicIllness] = useState("");
 
-  const [hadMiscarriage, setHadMiscarriage] = useState("");
-  const [numberOfMiscarriages, setNumberOfMiscarriages] = useState(0);
+  const [hadMiscarriage, setHadMiscarriage] = useState<YesNo>("");
+  const [numberOfMiscarriages, setNumberOfMiscarriages] = useState<number>(0);
 
   useEffect(() => {
     if (!surrogateProfile) {
-      console.log("[MedicalDetailsStep2] Fetching profile from backend...");
       fetchProfile();
     }
   }, []);
 
-  // Prefill from backend
+  /**
+   * Prefill strictly from MedicalProfile
+   */
   useEffect(() => {
     if (!medical) return;
 
-    console.log(
-      "[MedicalDetailsStep2] Loaded medical profile from backend:",
-      medical
-    );
-
     // Chronic illness
-    if (
-      medical.chronicIllnessDetails &&
-      medical.chronicIllnessDetails !== "None"
-    ) {
-      setHasChronicIllness("Yes");
-
-      const parts = medical.chronicIllnessDetails.split(", ");
-      const known = parts.filter((p) => p !== "Other");
-      setChronicIllnesses(known);
-
-      const other = parts.find((p) => !known.includes(p));
-      if (other) setOtherChronicIllness(other);
-    } else {
-      setHasChronicIllness("No");
-    }
+    setHasChronicIllness(medical.hasChronicIllness ? "Yes" : "No");
+    setChronicIllnesses(medical.chronicIllnesses ?? []);
+    setOtherChronicIllness(medical.otherChronicIllness ?? "");
 
     // Miscarriage
-    if (medical.pregnancyComplicationsDetails?.includes("Miscarriage")) {
-      setHadMiscarriage("Yes");
-      const match = medical.pregnancyComplicationsDetails.match(/(\d+)/);
-      if (match) setNumberOfMiscarriages(Number(match[1]));
-    } else {
-      setHadMiscarriage("No");
-    }
+    setHadMiscarriage(medical.hadMiscarriage ? "Yes" : "No");
+    setNumberOfMiscarriages(medical.numberOfMiscarriages ?? 0);
   }, [medical]);
 
   const handleContinue = async () => {
-    const chronicIllnessDetails =
-      hasChronicIllness === "Yes"
-        ? [...chronicIllnesses, otherChronicIllness].filter(Boolean).join(", ")
-        : "None";
+    const payload: Partial<MedicalProfile> = {
+      hasChronicIllness: hasChronicIllness === "Yes",
+      chronicIllnesses:
+        hasChronicIllness === "Yes" ? chronicIllnesses : [],
+      otherChronicIllness:
+        hasChronicIllness === "Yes" ? otherChronicIllness : undefined,
 
-    const pregnancyComplicationsDetails =
-      hadMiscarriage === "Yes"
-        ? `Miscarriages: ${numberOfMiscarriages}`
-        : "None";
+      hadMiscarriage: hadMiscarriage === "Yes",
+      numberOfMiscarriages:
+        hadMiscarriage === "Yes" ? numberOfMiscarriages : 0,
 
-    console.log("[MedicalDetailsStep2] Saving medical details to backend...", {
-      chronicIllnessDetails,
-      pregnancyComplicationsDetails,
-    });
+      pregnancyComplicationsDetails:
+        hadMiscarriage === "Yes"
+          ? `Miscarriages: ${numberOfMiscarriages}`
+          : "None",
+    };
 
     try {
-      await updateMedicalProfile({
-        chronicIllnessDetails,
-        pregnancyComplicationsDetails,
-      });
-
-      console.log("[MedicalDetailsStep2] Medical details saved successfully");
+      await updateMedicalProfile(payload);
 
       Toast.show({
         text1: "Medical details saved",
@@ -105,11 +86,6 @@ export default function MedicalDetailsStep2() {
 
       router.push("/settings/medical/medicalUpload");
     } catch (error: any) {
-      console.error(
-        "[MedicalDetailsStep2] Failed to save medical details",
-        error
-      );
-
       Toast.show({
         text1: "Failed to save medical details",
         text2: error?.response?.data?.message || "Please try again later",
@@ -119,7 +95,6 @@ export default function MedicalDetailsStep2() {
   };
 
   const handleContinueLater = () => {
-    console.log("[MedicalDetailsStep2] Continue Later pressed");
     router.push("/settings/medical");
   };
 
@@ -134,16 +109,14 @@ export default function MedicalDetailsStep2() {
     "Kidney Disease",
     "Ulcer",
     "Other",
-  ];
+  ] as string[];
 
   const showOtherChronic =
     hasChronicIllness === "Yes" && chronicIllnesses.includes("Other");
 
   return (
     <KeyboardAvoidingWrapper>
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: "#FFF", paddingTop: 20 }}
-      >
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF", paddingTop: 20 }}>
         <View marginLeft={28}>
           <ScreenHeader
             title="Medical details"

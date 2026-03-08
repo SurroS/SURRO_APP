@@ -13,7 +13,7 @@ export interface Wallet {
 // Profile Types
 export interface SurrogateProfile {
   id?: string;
-  userId?: string;
+  userId?: string; 
   firstName: string | null;
   lastName: string | null;
   userName: string;
@@ -50,7 +50,6 @@ export interface SurrogateProfile {
   medical?: MedicalProfile;
   wallet?: Wallet;
   lga: string;
-  medicalProfile?: MedicalProfile;
   hasBeenSurrogate: boolean;
   previousPregnancyType: string | null;
   compensationAmount: number;
@@ -74,6 +73,7 @@ export interface SurrogateProfileUpdate {
   countryOfResidence?: string;
   stateOfResidence?: string;
   stateOfOrigin?: string;
+  medical: MedicalProfile;
   address?: string;
   zipCode?: string;
   phone1?: string | null | undefined;
@@ -88,7 +88,7 @@ export interface SurrogateProfileUpdate {
   ticktock: string;
   isAvailable?: boolean;
   termsAcceptedAt?: string;
-  wallet?: Wallet; // <-- updated type
+  wallet?: Wallet;
   hasBeenSurrogate: boolean;
   previousPregnancyType: string | null;
   compensationAmount: number;
@@ -100,38 +100,78 @@ export interface SurrogateProfileUpdate {
 export interface MedicalProfile {
   id?: string;
   surrogateProfileId?: string;
-  genotype: string;
-  bloodGroup: string;
-  pregnancyExperience: boolean;
-  numberofChildren: number;
-  ceasareanSection: boolean;
-  disabilities: string;
-  numberOfcs: number;
-  chronicIllnessDetails: string;
-  pregnancyComplicationsDetails: string;
-  endometriumUploadUrl: string | null;
-  medications: string;
-  miscariageExperience: boolean;
-  numberofMiscariages: number | string;
-  surgeries: string;
-  allergies: string;
-  createdAt?: string;
-  updatedAt?: string;
+  genotype?: string;
+  bloodGroup?: string; 
+  pregnancyExperience?: boolean;
+  hasChildren?:boolean;
+  numberOfChildren?: number; 
+  ceasareanSection?: boolean;
+  numberOfCs?: number; 
+  hadMiscarriage?: boolean;
+  numberOfMiscarriages?: number; 
+  hasChronicIllness?: boolean;
+  chronicIllnesses?: string[];
+  otherChronicIllness?: string; 
+  hasAllergies?: boolean;
+  allergies?: string[]; 
+  takesMedication?: boolean;
+  medications?: string[]; 
+  hadSurgery?: boolean;
+  surgeries?: string[]; 
+  hasDisability?: boolean;
+  disabilities?: string[]; 
+  pregnancyComplicationsDetails?: string; 
+  endometriumUploadUrl?: string;
 }
 
 export interface MedicalProfileUpdate {
-  surrogateProfileId?: string;
-  genotype: string;
-  bloodGroup: string;
-  pregnancyExperience: boolean;
-  numberofChildren: number;
-  ceasareanSection: boolean;
-  disabilities: string;
-  numberOfcs: number;
+  genotype?: string;
+  bloodGroup?: string; 
+  pregnancyExperience?: boolean;
+  hasChildren?:boolean;
+  numberOfChildren?: number; 
+  ceasareanSection?: boolean;
+  numberOfCs?: number; 
+  hadMiscarriage?: boolean;
+  numberOfMiscarriages?: number; 
+  hasChronicIllness?: boolean;
+  chronicIllnesses?: string[];
+  otherChronicIllness?: string; 
+  hasAllergies?: boolean;
+  allergies?: string[]; 
+  takesMedication?: boolean;
+  medications?: string[]; 
+  hadSurgery?: boolean;
+  surgeries?: string[]; 
+  hasDisability?: boolean;
+  disabilities?: string[]; 
+  pregnancyComplicationsDetails?: string; 
+  endometriumUploadUrl?: string;
+}
+export type YesNo = "yes" | "no";
+
+export interface MedicalFormState {
+  genotype?: string;
+  bloodGroup?: string;
+  pregnancyExperience?: boolean;
+  hasChildren?:boolean;
+  numberofChildren?: number;
+  ceasareanSection?: boolean;
+  numberOfCs?: number;
+  hasAllergies?: boolean;
+  allergies?: string;
+  hasChronicIllness?: boolean;
+  chronicIllnesses?: string[];
+  otherChronicIllness?: string;
   chronicIllnessDetails: string;
   pregnancyComplicationsDetails: string;
-  endometriumUploadUrl: string | null;
-  medications: string;
-  miscariageExperience: boolean;
-  numberofMiscariages: number | string;
+  takesMedication?: boolean;
+  medications?: string;
+  hadSurgery?: boolean;
+  surgeries?: string;
+  hasDisability?: boolean;
+  disabilities?: string;
+  hadMiscarriage?: boolean;
+  numberOfMiscarriages?: number;
+  endometriumUploadUrl?: string;
 }
