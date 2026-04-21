@@ -62,10 +62,10 @@ export default function GettingMatchedScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <YStack gap="$4">
-          <Text style={{ color: colors.text }} fontSize="$4" fontWeight="800">
+          <Text color={colors.text} fontSize="$4" fontWeight="800">
             Getting Matched
           </Text>
-          <Text style={{ color: colors.text, marginLeft: 8 }} fontSize="$3">
+          <Text color={colors.text} marginLeft={"$2"} fontSize="$3">
             SurroSantara helps you connect with the right people through a
             secure and guided matching process. Every match is based on
             compatibility, preferences, and mutual choice.
@@ -99,7 +99,9 @@ export default function GettingMatchedScreen() {
           {/* Intended Parents */}
           <Section
             title="Intended Parents"
-            icon={<Ionicons name="heart-outline" size={20}   color={colors.white} />}
+            icon={
+              <Ionicons name="heart-outline" size={20} color={colors.white} />
+            }
           >
             <Text>
               Tell us your preferences—what matters most to you in a surrogate,
@@ -124,7 +126,9 @@ export default function GettingMatchedScreen() {
           {/* Agents */}
           <Section
             title="Agents"
-            icon={<Ionicons name="people-outline" size={20}  color={colors.white} />}
+            icon={
+              <Ionicons name="people-outline" size={20} color={colors.white} />
+            }
           >
             <Text>
               Set up your profile to reflect your expertise and the type of
@@ -148,7 +152,13 @@ export default function GettingMatchedScreen() {
           {/* After Match */}
           <Section
             title="After a Match"
-            icon={<Ionicons name="checkmark-done-outline" size={20}  color={colors.white} />}
+            icon={
+              <Ionicons
+                name="checkmark-done-outline"
+                size={20}
+                color={colors.white}
+              />
+            }
           >
             <Text>• Conversations deepen</Text>
             <Text>• Expectations are aligned</Text>
@@ -159,38 +169,45 @@ export default function GettingMatchedScreen() {
             <Text>SurroSantara stays with you throughout the process.</Text>
           </Section>
 
-          <PrimaryButton title={getButtonText()} onPress={handlePrimaryAction} />
+          <PrimaryButton
+            title={getButtonText()}
+            onPress={handlePrimaryAction}
+          />
         </YStack>
       </ScrollView>
 
       <BottomModal visible={showModal} onClose={() => setShowModal(false)}>
-        
         <YStack gap="$4" padding="$4" alignItems="center">
-          <Text style={{ color: colors.text }} fontSize="$5" fontWeight="700" textAlign="center">
-            {role === "INTENDED_PARENT" 
-              ? "Find Your Match" 
+          <Text
+            color={colors.text}
+            fontSize="$5"
+            fontWeight="700"
+            textAlign="center"
+          >
+            {role === "INTENDED_PARENT"
+              ? "Find Your Match"
               : role === "AGENT"
-              ? "Find Clients" 
-              : "What’s Next?"}
+                ? "Find Clients"
+                : "What’s Next?"}
           </Text>
-          
+
           <Text fontSize="$3" style={{ color: colors.text }} textAlign="center">
-            {role === "SURROGATE" 
-              ? "Complete your profile to get matched with intended parents. If already completed, you can skip."
+            {role === "SURROGATE"
+              ? "Complete your profile to get matched with intended parents. "
               : role === "AGENT"
-              ? "Complete your profile to get matched with intended parents. If already completed, you can skip."
-              : "Complete your profile or browse to find matches"}
+                ? "Complete your profile to get matched with intended parents. "
+                : "Complete your profile or browse to find matches"}
           </Text>
 
           <PrimaryButton
             title="Complete My Profile"
             onPress={() => {
               setShowModal(false);
-              router.push("/profile");
+              router.replace("/profile");
             }}
           />
 
-          <Text style={{ color: colors.text }} fontSize="$2" textAlign="center">
+          <Text color={colors.text} fontSize={12} textAlign="center">
             Skip if you have already completed your profile
           </Text>
 
@@ -227,12 +244,12 @@ export default function GettingMatchedScreen() {
           <Button
             onPress={() => {
               setShowModal(false);
-              router.push("/(tabs)/home");
+              router.replace("/(tabs)/home");
             }}
             backgroundColor="transparent"
             borderWidth={0}
           >
-            <Text style={{ color: colors.primary }}>Skip</Text>
+            <Text color={colors.primary}>Skip</Text>
           </Button>
         </YStack>
       </BottomModal>
