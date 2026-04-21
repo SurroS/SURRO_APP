@@ -4,9 +4,9 @@ import { YStack, XStack, Text, Button, View } from "tamagui";
 import { AppNotification } from "@/store/notifications/types";
 import { useNotificationStore } from "@/store/notifications";
 import NotificationItem from "@/components/notifications/NotificationItem";
-import colors from "@/hooks/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScreenHeader } from "@/components/auth";
+import colors from "@/hooks/colors";
 import { router } from "expo-router";
 
 const NotificationsScreen = () => {
@@ -16,7 +16,7 @@ const NotificationsScreen = () => {
   const deleteNotification = useNotificationStore((s) => s.deleteNotification);
   const selectNotification = useNotificationStore((s) => s.selectNotification);
   const deselectNotification = useNotificationStore(
-    (s) => s.deselectNotification
+    (s) => s.deselectNotification,
   );
   const selectAll = useNotificationStore((s) => s.selectAll);
   const clearSelection = useNotificationStore((s) => s.clearSelection);
@@ -40,7 +40,7 @@ const NotificationsScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
       <View margin={20}>
         <ScreenHeader title="Notifications" onBackPress={() => router.back()} />
       </View>
@@ -72,12 +72,12 @@ const NotificationsScreen = () => {
         {/* Selection Actions */}
         {selected.length > 0 && (
           <XStack justifyContent="space-around" marginBottom={10}>
-            <Button backgroundColor={colors.primary} onPress={selectAll}>
+            <Button backgroundColor="#0E0E55" onPress={selectAll}>
               Select All
             </Button>
 
             <Button
-              backgroundColor={colors.primary}
+              backgroundColor="#0E0E55"
               onPress={() => {
                 selected.forEach((id) => markRead(id));
                 clearSelection();

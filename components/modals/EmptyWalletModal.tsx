@@ -22,6 +22,8 @@ export default function EmptyWalletModal({ visible, onClose, onTopUp }: Props) {
       transparent
       animationType="slide"
       onRequestClose={onClose}
+      presentationStyle="overFullScreen"
+      statusBarTranslucent
     >
       <View style={styles.overlay}>
         <Pressable style={{ flex: 1 }} onPress={onClose} />
@@ -58,6 +60,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     backgroundColor: "#fff",
     padding: 25,
+    paddingBottom: 34,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     alignItems: "center",

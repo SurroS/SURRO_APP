@@ -1,18 +1,21 @@
 import { useSignupForm } from "@/hooks/auth";
 import { useAuth } from "@/hooks/useAuth";
-import { GoogleSignin, statusCodes } from "@react-native-google-signin/google-signin";
+import {
+  GoogleSignin,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { ScrollView, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
-import { InputField } from "../../components/auth/InputField";
-import { OrDivider } from "../../components/auth/OrDivider";
-import { PrimaryButton } from "../../components/auth/PrimaryButton";
-import { ScreenHeader } from "../../components/navigation/ScreenHeader";
-import { SocialButton } from "../../components/auth/SocialButton";
-import { useLoginForm } from "../../hooks/auth/useLoginForm";
+import { InputField } from "@/components/auth/InputField";
+import { OrDivider } from "@/components/auth/OrDivider";
+import { PrimaryButton } from "@/components/auth/PrimaryButton";
+import { ScreenHeader } from "@/components/navigation/ScreenHeader";
+import { SocialButton } from "@/components/auth/SocialButton";
+import { useLoginForm } from "@/hooks/auth/useLoginForm";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -28,7 +31,10 @@ export default function LoginScreen() {
   const router = useRouter();
   const { formData, errors, updateField, validateForm } = useLoginForm();
   const { signupFormData } = useSignupForm();
-  const { login, googleLogin, isLoading } = useAuth();
+  const { login, googleLogin, devLogin, isLoading } = useAuth();
+
+  const DEV_AUTH_EMAIL = "dev@surro.local";
+  const DEV_AUTH_PASSWORD = "DevSurro123!";
 
   // Handle Google Sign-In
   const handleGoogleSignin = async () => {
@@ -48,7 +54,6 @@ export default function LoginScreen() {
       console.log("ID Token:", idToken);
       console.log("User Info:", userInfo.user);
 
-     
       await googleLogin({
         idToken,
         role: signupFormData?.role,
@@ -96,8 +101,18 @@ export default function LoginScreen() {
   // Regular email/password login
   const handleLogin = async () => {
     if (!validateForm()) return;
+
     try {
-      await login(formData);
+      if (
+        __DEV__ &&
+        formData.email === DEV_AUTH_EMAIL &&
+        formData.password === DEV_AUTH_PASSWORD
+      ) {
+        await devLogin();
+      } else {
+        await login(formData);
+      }
+
       Toast.show({
         text1: "Logged in successfully",
         type: "customSuccess" as ToastType,

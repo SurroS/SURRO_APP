@@ -36,7 +36,7 @@ export default function MedicalHistoryMain() {
               borderWidth={0.5}
               pressStyle={{ scale: 0.98 }}
               padding="$4"
-              onPress={() => router.push("/settings/medical/medical-one")}
+              onPress={() => router.push("/medical/medical-one")}
             >
               <XStack alignItems="center" gap="$3">
                 <ClipboardList size={28} color={colors.primary} />
@@ -58,7 +58,7 @@ export default function MedicalHistoryMain() {
               borderWidth={0.5}
               pressStyle={{ scale: 0.98 }}
               padding="$4"
-              onPress={() => router.push("/settings/medical/medicalUpload")}
+              onPress={() => router.push("/medical/medicalUpload")}
             >
               <XStack alignItems="center" gap="$3">
                 <FileUp size={28} color={colors.primary} />

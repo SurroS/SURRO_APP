@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
   ScrollView,
+  RefreshControl,
 } from "react-native";
 import { YStack, XStack, Text } from "tamagui";
 import {
@@ -32,7 +33,7 @@ const helpTopics: HelpTopic[] = [
     id: "get-started",
     title: "Get started",
     icon: <MaterialCommunityIcons name="flag" size={22} color="#1E1E80" />,
-    route: "/help/get-started",
+    route: "/help/getStarted",
   },
   {
     id: "payments",
@@ -44,7 +45,7 @@ const helpTopics: HelpTopic[] = [
         color="#1E1E80"
       />
     ),
-    route: "/help/payments",
+    route: "/help/payment",
   },
   {
     id: "getting-matched",
@@ -56,7 +57,7 @@ const helpTopics: HelpTopic[] = [
         color="#1E1E80"
       />
     ),
-    route: "/help/getting-matched",
+    route: "/help/gettingmatched",
   },
 ];
 
@@ -64,23 +65,37 @@ const popularArticles: ArticleItem[] = [
   {
     id: "article1",
     title: "Getting the best representative as  a\n surrogate",
-    route: "/help/articles/representative",
+    route: "/help/getStarted",
   },
   {
     id: "article2",
     title: "My experience as a surrogate",
-    route: "/help/articles/experience",
+    route: "/help/gettingmatched",
   },
 ];
 
 export default function HelpCentreScreen(): React.ReactElement {
   const router = useRouter();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 1000);
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
       <ScreenHeader title={"Help center"} onBackPress={() => router.back()} />
-      <ScrollView>
-        <XStack style={styles.searchContainer}>
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#0E0E55"]}
+          />
+        }
+      >
+        {/* <XStack style={styles.searchContainer}>
           <Ionicons
             name="search"
             size={18}
@@ -92,7 +107,7 @@ export default function HelpCentreScreen(): React.ReactElement {
             placeholder="Search help centre"
             placeholderTextColor="#999"
           />
-        </XStack>
+        </XStack> */}
 
         {/* Help Topics */}
         <YStack marginTop={25}>
@@ -149,7 +164,7 @@ export default function HelpCentreScreen(): React.ReactElement {
           <Text style={styles.contactText}>
             You can chat with a customer care representative
           </Text>
-          <TouchableOpacity style={styles.mailButton} activeOpacity={0.8} onPress={()=>router.push("/chat/supportChat")}> 
+          <TouchableOpacity style={styles.mailButton} activeOpacity={0.8} onPress={()=>router.push("/(tabs)/chat/supportChat")}> 
             <Text style={styles.mailButtonText}>Customer Service</Text>
           </TouchableOpacity>
         </YStack>

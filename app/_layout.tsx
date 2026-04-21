@@ -5,7 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { TamaguiProvider } from "tamagui";
 import ToastManager from "toastify-react-native";
-import config from "../tamagui.config";
+import config from "@/tamagui.config";
 import toastConfig from "@/components/toastConfig";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useEffect } from "react";

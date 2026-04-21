@@ -1,5 +1,5 @@
 // store/profile/parents/listTypes.ts
-import { ParentProfile } from "../profile/parent/types";
+import { ParentProfile } from "@/store/profile/parent/types";
 
 export interface ParentListStore {
   parents: ParentProfile[];

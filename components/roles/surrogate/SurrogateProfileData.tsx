@@ -3,7 +3,7 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { Image, Text, XStack, YStack } from "tamagui";
 
-const ProfileData = () => {
+const SurrogateProfileDataView = () => {
   const { surrogateProfile, updateProfile } = useProfile();
 
   const handleStatusPress = async () => {
@@ -71,7 +71,7 @@ const ProfileData = () => {
   );
 };
 
-export default ProfileData;
+export default SurrogateProfileDataView;
 
 const styles = StyleSheet.create({
   statusButton: {

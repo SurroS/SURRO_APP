@@ -1,5 +1,5 @@
 // services/walletApi.ts
-import axios from "axios";
+import { authenticatedGet, authenticatedPost } from "./httpClient";
 import {
   WalletTransactionPayload,
   WalletTransactionResponse,
@@ -7,26 +7,15 @@ import {
   UserId,
 } from "@/types/walletTypes";
 
-const API_BASE =
-  process.env.EXPO_PUBLIC_API_URL || "https://dev.surrosantara.space/api/v1";
-
 export const getWalletBalance = async (
   userId: UserId,
-  token?: string | null
+  token?: string | null,
 ): Promise<{ balance: number; currency: string }> => {
-  const response = await axios.get<WalletBalanceResponse>(
-    `${API_BASE}/wallet/balance/${userId}`,
-    {
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-    }
-  );
+  const response = await authenticatedGet(`/wallet/balance/${userId}`);
 
   return {
-    balance: response.data.data.balance,
-    currency: response.data.data.currency,
+    balance: response.data.balance,
+    currency: response.data.currency,
   };
 };
 
@@ -35,20 +24,11 @@ export const getWalletBalance = async (
  */
 export const performWalletTransaction = async (
   payload: WalletTransactionPayload,
-  token?: string | null
+  token?: string | null,
 ): Promise<WalletTransactionResponse["data"]> => {
-  const response = await axios.post<WalletTransactionResponse>(
-    `${API_BASE}/wallet/transaction`,
-    payload,
-    {
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-    }
-  );
+  const response = await authenticatedPost("/wallet/transaction", payload);
 
-  return response.data.data;
+  return response.data;
 };
 
 /**
@@ -58,7 +38,7 @@ export const fundWallet = async (
   userId: UserId,
   amount: number,
   token?: string | null,
-  extra?: { description?: string; currency?: string }
+  extra?: { description?: string; currency?: string },
 ): Promise<{ balance: number }> => {
   const payload: WalletTransactionPayload = {
     userId,
@@ -79,7 +59,7 @@ export const debitWallet = async (
   userId: UserId,
   amount: number,
   token?: string | null,
-  extra?: { description?: string; currency?: string }
+  extra?: { description?: string; currency?: string },
 ): Promise<{ balance: number }> => {
   const payload: WalletTransactionPayload = {
     userId,

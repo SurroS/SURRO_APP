@@ -43,6 +43,8 @@ export default function ProgressStepsModal({
       animationType="slide"
       transparent
       onRequestClose={onClose}
+      presentationStyle="overFullScreen"
+      statusBarTranslucent
     >
       {/* Dim background */}
       <Pressable style={styles.overlay} onPress={onClose} />
@@ -102,6 +104,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     paddingHorizontal: 20,
     paddingVertical: 24,
+    paddingBottom: 34,
     position: "absolute",
     bottom: 0,
     left: 0,

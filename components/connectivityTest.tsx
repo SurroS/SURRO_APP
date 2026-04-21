@@ -1,5 +1,6 @@
 // ConnectivityTest.tsx
-import api from "@/services/api"; // <-- your axios instance
+import axios from "axios";
+import authApi from "@/services/authApi";
 import React, { useEffect } from "react";
 import { Text, View } from "react-native";
 
@@ -9,28 +10,27 @@ const ConnectivityTest = () => {
   useEffect(() => {
     const test = async () => {
       try {
-        // Change to an endpoint you know exists
-        const res = await api.post("/auth/register", {
-          email: "emizlife014@gmail.com",
-          password: "1234678",
-          referralCode: "", 
-          role: "AGENT"
+        // Test signup endpoint (this will fail with existing email, but tests connectivity)
+        const res = await authApi.signup({
+          email: "test@example.com",
+          password: "testpassword123",
+          role: "AGENT",
         });
 
-        setMessage("✅ API reachable, response: " + JSON.stringify(res.data));
-      } catch (err: any) {
-        if (err.response) {
-          // The server responded with a status code (like 401)
-          setMessage(
-            `✅ API reachable, but error response: ${err.response.status} ${err.response.data?.message}`
-          );
-        } else if (err.request) {
-          console.log(err.request)
-          // The request was made but no response received
-          setMessage("❌ No response from server: " + err.message);
+        setMessage("✅ API reachable, response: " + JSON.stringify(res));
+      } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+          if (error.response) {
+            setMessage(
+              `✅ API reachable, but error response: ${error.response.status} ${error.response.data?.message || "Validation error"}`,
+            );
+          } else if (error.request) {
+            setMessage("❌ No response from server: " + error.message);
+          } else {
+            setMessage("❌ Error: " + error.message);
+          }
         } else {
-          // Something else happened
-          setMessage("❌ Error: " + err.message);
+          setMessage("❌ Unexpected error: " + String(error));
         }
       }
     };

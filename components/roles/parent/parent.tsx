@@ -8,14 +8,14 @@ import Animated, {
 import { Accordion, Text, XStack, YStack } from "tamagui";
 import { router } from "expo-router";
 
-import About from "../about";
-import Contact from "../contact";
-import ProgressMeter from "../progressCircle";
-import Referral from "../referral";
-import WalletCard from "../wallet";
-import SurrogatePreview from "../surrogate/SurrogatePreview";
-import AgentPreview from "../agent/AgentPreviewCard";
-import ProfileCompletionModal from "../ProfileCompletionModal";
+import About from "@/components/roles/about";
+import Contact from "@/components/roles/contact";
+import ProgressMeter from "@/components/roles/progressCircle";
+import Referral from "@/components/roles/referral";
+import WalletCard from "@/components/roles/wallet";
+import SurrogatePreview from "@/components/roles/surrogate/SurrogatePreview";
+import AgentPreview from "@/components/roles/agent/AgentPreviewCard";
+import ProfileCompletionModal from "@/components/roles/ProfileCompletionModal";
 import { calculateProfileProgress } from "@/utils/profileHelpers";
 import { useParentProfile } from "@/hooks/profile/useParentProfile";
 import ProfileData from "@/components/profileDetails/ProfileData";
@@ -112,7 +112,7 @@ export default function ParentScreen() {
         onClose={() => setShowProfileModal(false)}
         profile={parentProfile}
         profileTypeName="Parent"
-        redirectPath="/(tabs)/settings/profile"
+        redirectPath="/profile"
       />
     </>
   );

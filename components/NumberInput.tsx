@@ -36,7 +36,7 @@ export default function NumberInput({
 const styles = StyleSheet.create({
   label: {
     marginBottom: 6,
-    color: colors.text,
+    color: "$color",
     fontWeight: "500",
   },
   input: {

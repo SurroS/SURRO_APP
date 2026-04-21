@@ -1,7 +1,11 @@
-
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
-import { Dimensions, FlatList, ViewToken } from "react-native";
+import {
+  Dimensions,
+  FlatList,
+  ViewToken,
+  ImageSourcePropType,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Image, Text, XStack, YStack } from "tamagui";
 
@@ -16,12 +20,11 @@ const TEXT_CONTAINER_WIDTH = SCREEN_WIDTH * 0.9;
 const BUTTON_WIDTH = SCREEN_WIDTH * 0.9;
 const BUTTON_HEIGHT = SCREEN_HEIGHT * 0.07;
 
-const img1 = require("../../assets/images/image1.png")
-const img2 = require("../../assets/images/image2.png") 
-const img3 = require("../../assets/images/image2.png") 
-const img4 = require("../../assets/images/image2.png")
-const img5 = require("../../assets/images/profile-icon.png")  
-
+const img1 = require("../../assets/images/image1.png");
+const img2 = require("../../assets/images/image2.png");
+const img3 = require("../../assets/images/image2.png");
+const img4 = require("../../assets/images/image2.png");
+const img5 = require("../../assets/images/profile-icon.png");
 
 export const ImageCard = ({
   image1,
@@ -30,42 +33,31 @@ export const ImageCard = ({
   height = CARD_HEIGHT_DEFAULT,
   marginRight = CARD_SPACING,
 }: {
-  image1: any;
-  image2:any;
+  image1: ImageSourcePropType;
+  image2: ImageSourcePropType;
   width?: number;
   height?: number;
   marginRight?: number;
 }) => (
+  <YStack justifyContent="center" alignItems="center" width={width}>
+    <XStack width={"90%"} height={"70%"} alignItems="center" paddingRight={50}>
+      <Image
+        width={"60%"}
+        height={"85%"}
+        borderRadius={10}
+        rotate="-10 deg"
+        source={image1}
+      />
+      <Image
+        width={"60%"}
+        height={"85%"}
+        borderRadius={10}
+        marginRight={"$20"}
+        rotate="10 deg"
+        source={image2}
+      />
+    </XStack>
 
- <YStack     
-    justifyContent="center"
-      alignItems="center"
-      width={width}>
- 
-              <XStack
-         width={'90%'}
-          height={"70%"}
-          alignItems="center"  
-          paddingRight={50} 
-        >
-          <Image
-            width={"60%"}
-            height={"85%"}
-            borderRadius={10}
-            rotate="-10 deg"
-            source={image1}
-          />
-          <Image
-            width={"60%"}
-            height={"85%"}
-            borderRadius={10}
-            marginRight={"$20"}
-            rotate="10 deg"
-            source={image2}
-          />
-        </XStack>
-
-    
     <YStack
       width={TEXT_CONTAINER_WIDTH}
       alignSelf="center"
@@ -94,6 +86,5 @@ export const ImageCard = ({
         need it.
       </Text>
     </YStack>
-
- </YStack>
+  </YStack>
 );

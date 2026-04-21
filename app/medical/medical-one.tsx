@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { YStack, Button, ScrollView, View } from "tamagui";
+import { RefreshControl } from "react-native";
 import { router } from "expo-router";
 import { ScreenHeader } from "@/components/auth";
 import colors from "@/hooks/colors";
@@ -25,31 +26,58 @@ export default function MedicalDetailsStep1() {
   );
   const [numberOfCs, setNumberOfCs] = useState(0);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetchProfile(true);
+    } catch (e) {
+      console.error("Refresh failed", e);
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
 
   /** Fetch profile once */
   useEffect(() => {
-    if (!medical && !surrogateProfile) {
+    if (!surrogateProfile) {
       fetchProfile().finally(() => setProfileLoaded(true));
     } else {
       setProfileLoaded(true);
     }
-  }, []);
+  }, [surrogateProfile, fetchProfile]);
 
   /** Hydrate from backend */
   useEffect(() => {
-    if (!medical) return;
+    if (!surrogateProfile && !medical) return;
 
-    setGenotype(medical.genotype ?? "");
-    setBloodGroup(medical.bloodGroup ?? "");
-    setPregnancyExperience(
-      medical.pregnancyExperience ? "Yes" : "No"
-    );
-    setNumberOfChildren(medical.numberOfChildren ?? 0);
-    setCeasareanSection(
-      medical.ceasareanSection ? "Yes" : "No"
-    );
-    setNumberOfCs(medical.numberOfCs ?? 0);
-  }, [medical]);
+    // Check both medical object and root surrogateProfile for genotype/bloodGroup
+    const genotypeValue = 
+      medical?.genotype || 
+      surrogateProfile?.genotype || 
+      surrogateProfile?.genotypeValue || 
+      "";
+    const bloodGroupValue = 
+      medical?.bloodGroup || 
+      surrogateProfile?.bloodGroup || 
+      surrogateProfile?.bloodType || 
+      "";
+
+    if (genotypeValue) setGenotype(genotypeValue);
+    if (bloodGroupValue) setBloodGroup(bloodGroupValue);
+    
+    if (surrogateProfile) {
+      setPregnancyExperience(
+        surrogateProfile.pregnancyExperience ? "Yes" : "No"
+      );
+      setNumberOfChildren(surrogateProfile.numberofChildren || surrogateProfile.numberOfChildren || 0);
+      setCeasareanSection(
+        surrogateProfile.ceasareanSection ? "Yes" : "No"
+      );
+      setNumberOfCs(surrogateProfile.numberOfCs || surrogateProfile.numberOfcs || 0);
+    }
+  }, [medical, surrogateProfile]);
 
   /** Form validity — no nonsense allowed */
   const isFormValid =
@@ -63,7 +91,7 @@ export default function MedicalDetailsStep1() {
 
   const handleContinue = () => {
     router.push({
-      pathname: "/settings/medical/medical-two",
+      pathname: "/medical/medical-two",
       params: {
         genotype,
         bloodGroup,
@@ -78,7 +106,7 @@ export default function MedicalDetailsStep1() {
   };
 
   const handleContinueLater = () => {
-    router.push("/settings/medical");
+    router.push("/medical");
   };
 
   if (!profileLoaded || isLoading) {
@@ -100,7 +128,16 @@ export default function MedicalDetailsStep1() {
         />
       </View>
 
-      <ScrollView contentContainerStyle={{ flexGrow: 1, padding: "$3" }}>
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#0E0E55"]}
+          />
+        }
+        contentContainerStyle={{ flexGrow: 1, padding: "$3" }}
+      >
         <YStack padding="$4" gap="$4">
           <YStack gap="$4" marginTop="$4">
             <DropdownField

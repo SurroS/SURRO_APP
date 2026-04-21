@@ -1,9 +1,9 @@
-import { useAgentProfile } from "@/hooks/useAgentProfile";
+import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { Image, Text, XStack, YStack } from "tamagui";
 
-const ProfileData = () => {
+const AgentProfileDataView = () => {
   const { agentProfile, updateAgentProfile } = useAgentProfile();
 
   const handleStatusPress = async () => {
@@ -54,9 +54,16 @@ const ProfileData = () => {
 
         <TouchableOpacity
           onPress={handleStatusPress}
-          style={[styles.statusButton, { backgroundColor: agentProfile?.isAvailable ? "#80cdb1ff" : "#b4b4b3ff" }]}
+          style={[
+            styles.statusButton,
+            {
+              backgroundColor: agentProfile?.isAvailable
+                ? "#80cdb1ff"
+                : "#b4b4b3ff",
+            },
+          ]}
         >
-          <Text color="black" fontSize="$3" fontWeight={'bold'} >
+          <Text color="black" fontSize="$3" fontWeight={"bold"}>
             {agentProfile?.isAvailable ? "Available" : "Not Available"}
           </Text>
         </TouchableOpacity>
@@ -65,7 +72,7 @@ const ProfileData = () => {
   );
 };
 
-export default ProfileData;
+export default AgentProfileDataView;
 
 const styles = StyleSheet.create({
   statusButton: {
@@ -73,6 +80,6 @@ const styles = StyleSheet.create({
     height: "24%",
     flexGrow: 0.5,
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
 });

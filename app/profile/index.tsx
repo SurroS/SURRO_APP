@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { YStack, XStack, Text, ScrollView } from "tamagui";
-import { Alert } from "react-native";
+import { RefreshControl } from "react-native";
 import { router } from "expo-router";
 import { LogOut } from "@tamagui/lucide-icons";
 import { Toast } from "toastify-react-native";
@@ -26,6 +26,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSurrogateProfile } from "@/hooks/profile/useSurrogateProfile";
 import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
 import { useParentProfile } from "@/hooks/profile/useParentProfile";
+import { uploadAvatar } from "@/services/profileApi";
 
 import AgentBio from "@/components/roles/agent/AgentBio";
 import ParentBio from "@/components/roles/parent/ParentBio";
@@ -36,6 +37,7 @@ export default function EditBioView() {
   const [isLoading, setIsLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const { logout, user } = useAuth();
   const Role = user?.role?.trim();
@@ -67,6 +69,17 @@ export default function EditBioView() {
   // -------------------------------
   // Determine current profile & functions
   // -------------------------------
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetchCurrentProfile(true);
+    } catch (e) {
+      console.error("Refresh failed", e);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [Role]);
+
   const currentProfile =
     Role === "SURROGATE"
       ? surrogateProfile
@@ -141,18 +154,11 @@ export default function EditBioView() {
   };
 
   const handleDeleteAccount = () => {
-    Alert.alert(
-      "DANGER",
-      "Are you sure you want to delete your account? This process is not reversible.",
-      [
-        {
-          text: "OK",
-          onPress: () => console.log("Account deleted"),
-          style: "destructive",
-        },
-        { text: "Cancel", style: "cancel" },
-      ]
-    );
+    Toast.show({
+      text1: "Contact support to delete account",
+      text2: "This action requires support team assistance",
+      type: "customError" as ToastType,
+    });
   };
 
   const handleChangePicture = async () => {
@@ -160,14 +166,15 @@ export default function EditBioView() {
       const permission =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (permission.status !== "granted") {
-        Alert.alert(
-          "Permission needed",
-          "We need access to your photo gallery to update your profile picture."
-        );
+        Toast.show({
+          text1: "Permission needed",
+          text2: "We need access to your photo gallery",
+          type: "customError" as ToastType,
+        });
         return;
       }
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images, // correct for your version
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
@@ -177,23 +184,34 @@ export default function EditBioView() {
         const uri = result.assets[0].uri;
         setProfileImage(uri);
 
-        if (!Role) return;
+        const formData = new FormData();
+        formData.append("file", {
+          uri,
+          type: "image/jpeg",
+          name: "avatar.jpg",
+        } as any);
 
-        const mappedData = { profilePicture: uri };
+        setIsLoading(true);
+        const avatarRes = await uploadAvatar(formData);
+        const avatarUrl = avatarRes?.data?.url || avatarRes?.url;
+        if (avatarUrl) {
+          await updateCurrentProfile({ profilePicture: avatarUrl });
+        }
+        await fetchCurrentProfile(true);
+        setIsLoading(false);
 
-        await updateCurrentProfile(mappedData as any);
         Toast.show({
           text1: "Profile picture updated!",
           type: "customSuccess" as ToastType,
         });
-        fetchCurrentProfile();
       }
     } catch (err) {
       console.error(err);
-      Alert.alert(
-        "Error",
-        "Something went wrong while updating your profile picture."
-      );
+      Toast.show({
+        text1: "Error",
+        text2: "Something went wrong while updating your profile picture.",
+        type: "customError" as ToastType,
+      });
     }
   };
 
@@ -251,6 +269,7 @@ export default function EditBioView() {
       case "AGENT":
         return (
           <AgentBio
+            profileImage={agentProfile?.profilePicture ? { uri: agentProfile.profilePicture } : undefined}
             onChangePicture={handleChangePicture}
             onEditBio={handleOpenModal}
           />
@@ -258,6 +277,7 @@ export default function EditBioView() {
       case "INTENDED_PARENT":
         return (
           <ParentBio
+            profileImage={parentProfile?.profilePicture ? { uri: parentProfile.profilePicture } : undefined}
             onChangePicture={handleChangePicture}
             onEditBio={handleOpenModal}
           />
@@ -265,10 +285,11 @@ export default function EditBioView() {
       case "SURROGATE":
         return (
           <SurrogateBio
-            profileImage={surrogateProfile?.profilePicture}
+            profileImage={surrogateProfile?.profilePicture ? { uri: surrogateProfile.profilePicture } : undefined}
             onChangePicture={handleChangePicture}
             onEditBio={handleOpenModal}
           />
+          
         );
       default:
         return (
@@ -283,7 +304,16 @@ export default function EditBioView() {
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#FFF", paddingTop: 20, padding: 20 }}
     >
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#0E0E55"]}
+          />
+        }
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
         <YStack gap="$6" alignItems="center">
           <ScreenHeader
             title="Profile Information"

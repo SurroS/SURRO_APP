@@ -30,12 +30,12 @@ export default function ProfileImageCard({
   return (
     <View style={styles.container}>
       {/* Profile Image */}
-      <Pressable onPress={onChangePicture}>
+      <Pressable onPress={() => onChangePicture?.()}>
         <View style={styles.imageWrapper}>
           <Image
             source={
               imageSrc
-                ? { uri: imageSrc }
+                ? imageSrc
                 : require("@/assets/images/femaleAvatar.png")
             }
             style={styles.profileImage}
@@ -45,7 +45,7 @@ export default function ProfileImageCard({
       {/* Change Picture */}
       <TouchableOpacity
         style={styles.changePic}
-        onPress={onChangePicture}
+        onPress={() => onChangePicture?.()}
         accessibilityRole="button"
         accessibilityLabel="Change profile picture"
       >
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
   },
   changeText: {
     textDecorationLine: "underline",
-    color: colors.text,
+    color: "$color",
     fontSize: 14,
   },
   editBtn: {
@@ -114,6 +114,6 @@ const styles = StyleSheet.create({
   editText: {
     fontSize: 14,
     fontWeight: "500",
-    color: colors.text,
+    color: "$color",
   },
 });

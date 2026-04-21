@@ -2,7 +2,7 @@
 import React from "react";
 import { YStack } from "tamagui";
 import RoleCommonProfile from "@/components/editBio/RoleCommonProfile";
-import InfoRowCard from "@/components/editBio/infoRowCard";
+import InfoRowCard from "@/components/editBio/InfoRowCard";
 import { router } from "expo-router";
 import { History } from "@tamagui/lucide-icons";
 
@@ -21,13 +21,15 @@ export default function SurrogateBio(props: SurrogateBioProps) {
         title="Medical history"
         subtitle="Tell us about your health"
         icon={History}
-        onPress={() => router.navigate("/settings/medical")}
+        onPress={() => router.navigate("/medical")}
       />
       <InfoRowCard
         title="Surrogacy Experience"
         subtitle="Tell us about your experience"
         icon={History}
-        onPress={() => router.navigate("/(tabs)/settings/profile/experienceForm")}
+        onPress={() =>
+          router.navigate("/profile/experienceForm")
+        }
       />
     </YStack>
   );

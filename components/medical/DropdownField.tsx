@@ -1,5 +1,6 @@
 import React from "react";
 import { YStack, Text } from "tamagui";
+import colors from "@/hooks/colors";
 
 type DropdownFieldProps<T extends string> = {
   label: string;
@@ -23,7 +24,7 @@ const DrawerField = <T extends string>({
       backgroundColor="#FAFAFA"
       gap="$2"
     >
-      <Text fontWeight="700" fontSize={15} color="#333">
+      <Text fontWeight="700" fontSize={15} style={{ color: colors.text }}>
         {label}
       </Text>
 
@@ -32,7 +33,7 @@ const DrawerField = <T extends string>({
           <YStack
             key={opt}
             borderWidth={1}
-            borderColor={value === opt ? "#007AFF" : "#E5E5E5"}
+            borderColor={value === opt ? colors.primary : "#E5E5E5"}
             borderRadius="$3"
             paddingVertical="$2"
             paddingHorizontal="$3"
@@ -40,7 +41,7 @@ const DrawerField = <T extends string>({
             onPress={() => onChange(opt)}
           >
             <Text
-              color={value === opt ? "#007AFF" : "#333"}
+              style={{ color: value === opt ? colors.primary : colors.text }}
               fontWeight={value === opt ? "600" : "400"}
             >
               {opt}

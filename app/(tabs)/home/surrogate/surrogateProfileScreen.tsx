@@ -27,6 +27,7 @@ import { fallbackSurrogates } from "@/store/surrogates/actions";
 import { useAuthStore } from "@/store/auth";
 import { useWalletStore } from "@/store/wallet/walletStore";
 import { SURROGATE_TRANSACTIONS } from "@/types/surrogateTransactionTypes";
+import { SurrogateProfile } from "@/types/profile";
 
 export default function SurrogateProfileScreen() {
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -41,9 +42,9 @@ export default function SurrogateProfileScreen() {
   const params = useLocalSearchParams();
   const surrogateId = typeof params?.id === "string" ? params.id : null;
 
-  const [surrogate, setSurrogate] = useState<any>(null);
+  const [surrogate, setSurrogate] = useState<SurrogateProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const wallet = surrogate?.wallet;
+  const wallet = surrogate?.wallet?.balance ?? 0;
   const transaction = SURROGATE_TRANSACTIONS.PROFILE_BOOST;
 
   // Load backend profile
@@ -57,58 +58,125 @@ export default function SurrogateProfileScreen() {
   }, [user]);
 
   const handleChat = () => {
-  if (!surrogate?.userId) {
-    Toast.show({
-      text1: "Chat unavailable",
-      text2: "This profile cannot be messaged yet",
-      type: "customError" as ToastType,
-    });
-    return;
-  }
-
-  router.push({
-    pathname: "/(tabs)/chat/conversation",
-    params: {
-      otherUserId: surrogate.userId,
-    },
-  });
-};
-
-
-const loadSurrogate = async () => {
-  if (!surrogateId) {
-    console.warn("⚠ No surrogate ID provided");
-    setSurrogate(null);
-    setLoading(false);
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    const { data } = await getSurrogateById(surrogateId);
-
-    if (data?.profile) {
-      setSurrogate(data.profile);
-    } else {
-      const fallback = fallbackSurrogates.find(
-        (s:any) => s.id === surrogateId
-      );
-      setSurrogate(fallback ?? null);
+    if (!surrogate?.user?.id) {
+      Toast.show({
+        text1: "Chat unavailable",
+        text2: "This profile cannot be messaged yet",
+        type: "customError" as ToastType,
+      });
+      return;
     }
-  } catch (error) {
-    console.log("Surrogate fetch error:", error);
 
-    const fallback = fallbackSurrogates.find(
-      (s:any) => s.id === surrogateId
-    );
+    router.push({
+      pathname: "/(tabs)/chat/conversation",
+      params: {
+        otherUserId: surrogate.user.id,
+      },
+    });
+  };
 
-    setSurrogate(fallback ?? null);
-  } finally {
-    setLoading(false);
-  }
-};
+  const loadSurrogate = async () => {
+    if (!surrogateId) {
+      console.warn("⚠ No surrogate ID provided");
+      setSurrogate(null);
+      setLoading(false);
+      return;
+    }
 
+    try {
+      setLoading(true);
+
+      const response = await getSurrogateById(surrogateId);
+      console.log("Surrogate API response:", response);
+
+      if (response.data?.profile) {
+        setSurrogate(response.data.profile);
+      } else {
+        console.warn("No profile data in response, using fallback");
+        // Create a minimal SurrogateProfile from fallback data
+        const fallback = fallbackSurrogates.find(
+          (s: any) => s.id === surrogateId,
+        );
+        if (fallback) {
+          setSurrogate({
+            id: fallback.id,
+            userName: fallback.name || "Unknown",
+            firstName: fallback.name?.split(" ")[0] || null,
+            lastName: fallback.name?.split(" ").slice(1).join(" ") || null,
+            aboutMe: "Profile not fully set up yet",
+            isAvailable: true,
+            numberOfChildren: 0,
+            countryOfResidence: fallback.country || null,
+            stateOfResidence: fallback.state || null,
+            lga: null,
+            address: null,
+            zipCode: null,
+            phone1: null,
+            phone2: null,
+            emergencyContactPhone: null,
+            emergencyContactRelation: null,
+            facebookProfile: null,
+            instagramProfile: null,
+            twitterProfile: null,
+            tiktokProfile: null,
+            termsAcceptedAt: null,
+            countryOfOrigin: null,
+            dateOfBirth: null,
+            maritalStatus: null,
+            height: null,
+            weight: null,
+            profilePicture: null,
+            stateOfOrigin: null,
+          });
+        } else {
+          setSurrogate(null);
+        }
+      }
+    } catch (error) {
+      console.log("Surrogate fetch error:", error);
+
+      // Create a minimal SurrogateProfile from fallback data
+      const fallback = fallbackSurrogates.find(
+        (s: any) => s.id === surrogateId,
+      );
+      if (fallback) {
+        setSurrogate({
+          id: fallback.id,
+          userName: fallback.name || "Unknown",
+          firstName: fallback.name?.split(" ")[0] || null,
+          lastName: fallback.name?.split(" ").slice(1).join(" ") || null,
+          aboutMe: "Profile not fully set up yet",
+          isAvailable: true,
+          numberOfChildren: 0,
+          countryOfResidence: fallback.country || null,
+          stateOfResidence: fallback.state || null,
+          lga: null,
+          address: null,
+          zipCode: null,
+          phone1: null,
+          phone2: null,
+          emergencyContactPhone: null,
+          emergencyContactRelation: null,
+          facebookProfile: null,
+          instagramProfile: null,
+          twitterProfile: null,
+          tiktokProfile: null,
+          termsAcceptedAt: null,
+          countryOfOrigin: null,
+          dateOfBirth: null,
+          maritalStatus: null,
+          height: null,
+          weight: null,
+          profilePicture: null,
+          stateOfOrigin: null,
+        });
+      } else {
+        setSurrogate(null);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handlePayment = () => {
     if (wallet < transaction.amount) {
@@ -129,8 +197,8 @@ const loadSurrogate = async () => {
   const HandleUseAgent = () =>
     router.push("/(tabs)/home/agent/agentsListScreen");
 
-  const profileImages = surrogate?.gallery?.length
-    ? surrogate.gallery
+  const profileImages = surrogate?.profilePicture
+    ? [surrogate.profilePicture]
     : [
         "https://picsum.photos/600/600",
         "https://picsum.photos/700/700",
@@ -150,12 +218,12 @@ const loadSurrogate = async () => {
     username: surrogate?.userName ?? "unknown",
     location:
       surrogate?.countryOfResidence ?? surrogate?.countryOfOrigin ?? "Unknown",
-    age: surrogate?.age ?? "N/A",
+    age: surrogate?.age ?? 0,
     maritalStatus: surrogate?.maritalStatus ?? "Not specified",
     height: surrogate?.height ? `${surrogate.height} cm` : "N/A",
     weight: surrogate?.weight ? `${surrogate.weight} kg` : "N/A",
-    compensation: surrogate?.expectedCompensation ?? 0,
-    isNegotiable: surrogate?.isNegotiable ?? false,
+    compensation: 0,
+    isNegotiable: false,
   };
 
   const aboutContent = surrogate?.aboutMe ?? "No description available";
@@ -165,26 +233,23 @@ const loadSurrogate = async () => {
     bloodGroup: surrogate?.medical?.bloodGroup ?? "N/A",
     pregnant: surrogate?.medical?.pregnancyExperience === true ? "Yes" : "No",
     children:
-      surrogate?.medical?.numberofChildren ??
-      surrogate?.numberOfChildren ??
-      "0",
+      surrogate?.medical?.numberofChildren ?? surrogate?.numberOfChildren ?? 0,
     caesarean: surrogate?.medical?.ceasareanSection === true ? "Yes" : "No",
-    numberOfCs: surrogate?.medical?.numberOfCs ?? 0,
-    hasAllergies: surrogate?.medical?.hasAllergies === true ? "Yes" : "No",
-    allergies: surrogate?.medical?.allergies ?? "None",
+    numberOfCs: 0, // Not in current backend response
+    hasAllergies: "N/A", // Not in current backend response
+    allergies: "None", // Not in current backend response
     hasChronicIllness: surrogate?.medical?.chronicIllnessDetails ? "Yes" : "No",
-    takesMedication:
-      surrogate?.medical?.takesMedication === true ? "Yes" : "No",
-    hadSurgery: surrogate?.medical?.hadSurgery ? "Yes" : "No",
-    hasDisability: surrogate?.medical?.hasDisability ? "Yes" : "No",
-    hadMiscarriage: surrogate?.medical?.hadMiscarriage ? "Yes" : "No",
-    numberOfMiscarriages: surrogate?.medical?.numberOfMiscarriages ?? 0,
+    takesMedication: "N/A", // Not in current backend response
+    hadSurgery: "N/A", // Not in current backend response
+    hasDisability: "N/A", // Not in current backend response
+    hadMiscarriage: "N/A", // Not in current backend response
+    numberOfMiscarriages: 0, // Not in current backend response
     medicalReport: surrogate?.medical?.endometriumUploadUrl,
   };
 
   const contactData = {
     country: surrogate?.countryOfResidence ?? "N/A",
-    state: surrogate?.stateOfOrigin ?? "N/A",
+    state: surrogate?.stateOfResidence ?? "N/A",
     lGA: surrogate?.lga ?? "N/A",
     street: surrogate?.address ?? "N/A",
     zip: surrogate?.zipCode ?? "N/A",
@@ -193,31 +258,37 @@ const loadSurrogate = async () => {
     emergency: surrogate?.emergencyContactPhone ?? "N/A",
     relationship: surrogate?.emergencyContactRelation ?? "N/A",
     social: {
-      Facebook: surrogate?.facebookProfile ?? null,
-      Instagram: surrogate?.instagramProfile ?? null,
-      Twitter: surrogate?.twitterProfile ?? null,
-      Threads: surrogate?.threadsProfile ?? null,
+      Facebook: surrogate?.facebookProfile || undefined,
+      Instagram: surrogate?.instagramProfile || undefined,
+      Twitter: surrogate?.twitterProfile || undefined,
+      TikTok: surrogate?.tiktokProfile || undefined,
     },
   };
 
   const experienceData = [
     {
       question: "Have you ever been a surrogate?",
-      answer: surrogate?.hasSurrogacyExperience ? "Yes" : "No",
+      answer: "Not available",
     },
     {
       question: "How much compensation do you want?",
-      answer: surrogate?.expectedCompensation
-        ? `₦${surrogate?.expectedCompensation}`
-        : "Not specified",
+      answer: "Not available",
     },
     {
       question: "Is this amount negotiable?",
-      answer: surrogate?.isNegotiable ? "Yes" : "No",
+      answer: "Not available",
     },
     {
-      question: "Anything else you’d like to share?",
-      answer: surrogate?.notes ?? "No additional notes",
+      question: "Previous pregnancy type?",
+      answer: "Not available",
+    },
+    {
+      question: "Experience notes?",
+      answer: "Not available",
+    },
+    {
+      question: "What did you enjoy?",
+      answer: "Not available",
     },
   ];
 

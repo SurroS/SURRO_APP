@@ -4,15 +4,15 @@ import { ChevronDown } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
 import Animated from "react-native-reanimated";
 import { Accordion, Text, XStack, YStack } from "tamagui";
-import About from "../about";
-import Contact from "../contact";
-import Gallery from "../gallery";
-import ProgressMeter from "../progressCircle";
-import Referral from "../referral";
-import WalletCard from "../wallet";
+import About from "@/components/roles/about";
+import Contact from "@/components/roles/contact";
+import Gallery from "@/components/roles/gallery";
+import ProgressMeter from "@/components/roles/progressCircle";
+import Referral from "@/components/roles/referral";
+import WalletCard from "@/components/roles/wallet";
 import { useSurrogateProfile } from "@/hooks/profile/useSurrogateProfile";
 import { calculateProfileProgress } from "@/utils/profileHelpers";
-import ProfileCompletionModal from "../ProfileCompletionModal";
+import ProfileCompletionModal from "@/components/roles/ProfileCompletionModal";
 import ProfileData from "@/components/profileDetails/ProfileData";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -52,12 +52,8 @@ export default function SurrogateScreen() {
                 surrogateProfile?.lastName ?? ""
               }`.trim()
             }
-            avatarUrl={
-              surrogateProfile?.profilePicture || surrogateProfile?.avatar
-            }
-            location={
-              surrogateProfile?.countryOfResidence || surrogateProfile?.country
-            }
+            avatarUrl={surrogateProfile?.profilePicture}
+            location={surrogateProfile?.countryOfResidence}
             dateOfBirth={surrogateProfile?.dateOfBirth?.split("T")[0]}
             isAvailable={surrogateProfile?.isAvailable}
             onToggleAvailability={toggleAvailability}
@@ -133,7 +129,7 @@ export default function SurrogateScreen() {
           visible={showProfileModal}
           onClose={() => setShowProfileModal(false)}
           profile={surrogateProfile}
-          redirectPath="/(tabs)/settings/profile"
+          redirectPath="/profile"
         />
       </ScrollView>
     </>

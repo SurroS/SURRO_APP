@@ -94,7 +94,7 @@ export default function MedicalUpload() {
 
   const handleContinueLater = () => {
     console.log("[MedicalUpload] Continue Later pressed");
-    router.push("/settings/medical/medicalHistorySummary");
+    router.push("/medical/medicalHistorySummary");
   };
 
   return (
@@ -138,7 +138,7 @@ export default function MedicalUpload() {
               color="#FFF"
               disabled={isLoading || uploading}
               opacity={isLoading || uploading ? 0.7 : 1}
-              onPress={() => router.push("/settings/medical/medicalHistorySummary")}
+              onPress={() => router.push("/medical/medicalHistorySummary")}
             >
               {isLoading || uploading ? <ActivityIndicator color="#FFF" /> : "Continue"}
             </Button>

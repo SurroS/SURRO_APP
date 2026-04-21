@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView } from "react-native";
+import { ScrollView, RefreshControl } from "react-native";
 import { YStack, Button, View } from "tamagui";
 import { router } from "expo-router";
 import { ScreenHeader } from "@/components/auth";
@@ -35,6 +35,18 @@ export default function MedicalDetailsStep2() {
 
   const [hadMiscarriage, setHadMiscarriage] = useState<YesNo>("");
   const [numberOfMiscarriages, setNumberOfMiscarriages] = useState<number>(0);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetchProfile(true);
+    } catch (e) {
+      console.error("Refresh failed", e);
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!surrogateProfile) {
@@ -84,7 +96,7 @@ export default function MedicalDetailsStep2() {
         type: "customSuccess" as ToastType,
       });
 
-      router.push("/settings/medical/medicalUpload");
+      router.push("/medical/medicalUpload");
     } catch (error: any) {
       Toast.show({
         text1: "Failed to save medical details",
@@ -95,7 +107,7 @@ export default function MedicalDetailsStep2() {
   };
 
   const handleContinueLater = () => {
-    router.push("/settings/medical");
+    router.push("/medical");
   };
 
   const chronicIllnessOptions = [
@@ -124,7 +136,16 @@ export default function MedicalDetailsStep2() {
           />
         </View>
 
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["#0E0E55"]}
+            />
+          }
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
           <YStack padding="$4" gap="$5">
             <DropdownField
               label="Do you have any chronic illnesses?"

@@ -16,6 +16,8 @@ export default function PaymentModal({ visible, onClose, children, maxHeight }: 
       animationType="slide"
       transparent
       onRequestClose={onClose}
+      presentationStyle="overFullScreen"
+      statusBarTranslucent
     >
       <TouchableOpacity
         style={styles.overlay}
@@ -39,6 +41,7 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: "#fff",
     padding: 20,
+    paddingBottom: 34,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
   },

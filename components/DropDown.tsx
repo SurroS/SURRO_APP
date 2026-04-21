@@ -13,14 +13,22 @@ import { YStack, Label } from "tamagui";
 import colors from "@/hooks/colors";
 import { Check } from "@tamagui/lucide-icons";
 
+interface DropdownOption {
+  label: string;
+  value: string;
+  flag?: string;
+  dialCode?: string;
+  [key: string]: any;
+}
+
 interface DropdownProps {
   label?: string;
   placeholder: string;
-  value: any;
-  options: any[];
-  onSelect: (item: any) => void;
+  value: string | string[] | null;
+  options: Array<DropdownOption | string>;
+  onSelect: (item: string | string[]) => void;
   multiple?: boolean;
-  displayKey?: string; // Defaults: item.name || item
+  displayKey?: string; // Defaults: item.label || item.name || item
 }
 
 const Dropdown = ({
@@ -35,33 +43,32 @@ const Dropdown = ({
   const [visible, setVisible] = useState(false);
   const [search, setSearch] = useState("");
 
-  const getLabel = (item: any) => {
+  const getLabel = (item: DropdownOption | string) => {
     if (typeof item === "string") return item;
-    if (displayKey && item[displayKey]) return item[displayKey];
-    return item.name || item;
+    if (displayKey && item[displayKey]) return String(item[displayKey]);
+    return item.label || item.name || String(item);
   };
 
   const filteredOptions = options.filter((item) =>
-    getLabel(item).toLowerCase().includes(search.toLowerCase())
+    getLabel(item).toLowerCase().includes(search.toLowerCase()),
   );
 
-  const isSelected = (item: any) => {
+  const isSelected = (item: DropdownOption | string) => {
     if (!multiple) return getLabel(item) === value;
     return Array.isArray(value) && value.includes(getLabel(item));
   };
 
-  const handleSelect = (item: any) => {
+  const handleSelect = (item: DropdownOption | string) => {
+    const label = getLabel(item);
+
     if (!multiple) {
-      onSelect(item);
+      onSelect(label);
       setVisible(false);
       return;
     }
 
-    // MULTI SELECT
-    const label = getLabel(item);
-
     if (Array.isArray(value) && value.includes(label)) {
-      onSelect(value.filter((v: any) => v !== label));
+      onSelect(value.filter((v: string) => v !== label));
     } else {
       onSelect([...(value || []), label]);
     }
@@ -69,10 +76,11 @@ const Dropdown = ({
 
   const renderValue = () => {
     if (multiple) {
-      if (!value || value.length === 0) return placeholder;
-      return value.join(", ");
+      if (!value || (Array.isArray(value) && value.length === 0))
+        return placeholder;
+      return Array.isArray(value) ? value.join(", ") : String(value);
     }
-    return value || placeholder;
+    return typeof value === "string" && value.length > 0 ? value : placeholder;
   };
 
   return (
@@ -97,7 +105,7 @@ const Dropdown = ({
       >
         <Text
           style={{
-            color: value ? colors.text : "#9B9B9B",
+            color: value ? "$color" : "#9B9B9B",
             fontSize: 16,
           }}
         >
@@ -106,7 +114,7 @@ const Dropdown = ({
       </Pressable>
 
       {/* Modal */}
-      <Modal visible={visible} transparent animationType="fade">
+      <Modal visible={visible} transparent animationType="fade" presentationStyle="overFullScreen" statusBarTranslucent>
         <TouchableWithoutFeedback onPress={() => setVisible(false)}>
           <View
             style={{
@@ -141,7 +149,7 @@ const Dropdown = ({
                     height: 45,
                     marginBottom: 12,
                     fontSize: 16,
-                    color: colors.text,
+                    color: "$color",
                   }}
                 />
 
@@ -152,6 +160,7 @@ const Dropdown = ({
                   keyboardShouldPersistTaps="handled"
                   renderItem={({ item }) => {
                     const label = getLabel(item);
+                    const isObject = typeof item !== "string";
 
                     return (
                       <Pressable
@@ -165,8 +174,10 @@ const Dropdown = ({
                           borderBottomColor: "#f0f0f0",
                         }}
                       >
-                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                          {item.flag && (
+                        <View
+                          style={{ flexDirection: "row", alignItems: "center" }}
+                        >
+                          {isObject && item.flag && (
                             <Image
                               source={{ uri: item.flag }}
                               style={{
@@ -177,9 +188,11 @@ const Dropdown = ({
                               }}
                             />
                           )}
-                          <Text style={{ fontSize: 16, color: colors.text }}>
+                          <Text style={{ fontSize: 16, color: "$color" }}>
                             {label}
-                            {item.dialCode ? ` (${item.dialCode})` : ""}
+                            {isObject && item.dialCode
+                              ? ` (${item.dialCode})`
+                              : ""}
                           </Text>
                         </View>
 

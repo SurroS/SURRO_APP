@@ -11,7 +11,7 @@ export default function ExperienceIntro() {
   const router = useRouter();
 
   const goToQuestions = () => {
-    router.navigate("/settings/profile/experienceForm");
+    router.navigate("/profile/experienceForm");
   };
   return (
     <SafeAreaView

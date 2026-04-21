@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 import { Image, Text, XStack, YStack } from "tamagui";
 import { useParentProfileStore } from "@/store/profile/parent";
 
-const ProfileData = () => {
+const ParentProfileDataView = () => {
   const { parentProfile, updateParentProfile } = useParentProfileStore();
 
   return (
@@ -52,7 +52,7 @@ const ProfileData = () => {
   );
 };
 
-export default ProfileData;
+export default ParentProfileDataView;
 
 const styles = StyleSheet.create({
   statusButton: {

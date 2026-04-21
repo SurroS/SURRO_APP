@@ -1,8 +1,8 @@
 // components/editBio/RoleCommonProfile.tsx
 import React from "react";
 import { YStack } from "tamagui";
-import ProfileImageCard from "./profileImageCard";
-import InfoRowCard from "./infoRowCard";
+import ProfileImageCard from "./ProfileImageCard";
+import InfoRowCard from "./InfoRowCard";
 import { User, Contact } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
 
@@ -18,7 +18,7 @@ export default function RoleCommonProfile({
   onEditBio,
 }: RoleCommonProfileProps) {
   return (
-    <YStack width="100%"  marginTop="$6">
+    <YStack width="100%" marginTop="$6">
       <ProfileImageCard
         imageSrc={profileImage}
         onChangePicture={onChangePicture}
@@ -30,13 +30,15 @@ export default function RoleCommonProfile({
           title="Personal details"
           subtitle="Tell us more about yourself"
           icon={User}
-          onPress={() => router.navigate("/settings/profile/personalDetails")}
+          onPress={() => router.navigate("/profile/personalDetails")}
         />
         <InfoRowCard
           title="Contact information"
           subtitle="How can we reach you?"
           icon={Contact}
-          onPress={() => router.navigate("/settings/profile/contactInformation")}
+          onPress={() =>
+            router.navigate("/profile/contactInformation")
+          }
         />
       </YStack>
     </YStack>

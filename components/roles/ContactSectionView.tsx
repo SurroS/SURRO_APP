@@ -9,6 +9,8 @@ import {
 } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import { Ionicons } from "@expo/vector-icons";
+import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 
 interface SocialLink {
   Facebook?: string;
@@ -52,17 +54,26 @@ export default function ContactSection({ data, containerStyle }: Props) {
       .filter(Boolean)
       .join(", ");
     if (!phones) {
-      Alert.alert("No contact info to copy");
+      Toast.show({
+        text1: "No contact info",
+        type: "customWarning" as ToastType,
+      });
       return;
     }
     await Clipboard.setStringAsync(phones);
-    Alert.alert("Contact copied", phones);
+    Toast.show({
+      text1: "Contact copied",
+      type: "customSuccess" as ToastType,
+    });
   };
 
   const handleQuickDial = () => {
     const numbers = [data.phone1, data.phone2, data.emergency].filter(Boolean);
     if (numbers.length === 0) {
-      Alert.alert("No phone number available");
+      Toast.show({
+        text1: "No phone number",
+        type: "customWarning" as ToastType,
+      });
       return;
     }
 
@@ -71,7 +82,7 @@ export default function ContactSection({ data, containerStyle }: Props) {
       return;
     }
 
-    // Multiple numbers → let user pick
+    // Multiple numbers → use Alert for user interaction
     Alert.alert(
       "Select Number to Call",
       "Choose which number to dial",

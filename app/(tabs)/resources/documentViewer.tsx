@@ -4,7 +4,6 @@ import { WebView } from "react-native-webview";
 import { useLocalSearchParams, router } from "expo-router";
 import { ScreenHeader } from "@/components/auth";
 import { Text, View, YStack } from "tamagui";
-import colors from "@/hooks/colors";
 
 export default function PdfViewer() {
   const { url, title } = useLocalSearchParams();
@@ -26,7 +25,7 @@ export default function PdfViewer() {
     >
       <YStack marginLeft={20}>
         <ScreenHeader title={"Article"} onBackPress={() => router.back()} />
-        <Text color={colors.text} fontWeight={"400"}>
+        <Text color="#1E1E1E" fontWeight={"400"}>
           {String(title)}
         </Text>
       </YStack>

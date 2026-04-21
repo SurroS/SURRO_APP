@@ -3,14 +3,14 @@ export const PARENT_TRANSACTIONS = {
     id: "get_surrogate",
     title: "Get a Surrogate",
     description: "Pay to access a surrogate profile and unlock full contact details.",
-    amount: 50000,
+    amount: 75000,
     type: "profile_access",
   },
     GET_AGENT: {
     id: "get_agent",
     title: "Get a Surrogate",
     description: "Pay to access a agent profile and unlock full contact details.",
-    amount: 30000,
+    amount: 40000,
     type: "profile_access",
   },
 };

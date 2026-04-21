@@ -19,7 +19,7 @@ export const createParentProfileSlice: StateCreator<ParentProfileStore> = (set, 
     set({ isLoading: true, error: null });
     try {
       const res = await getParentProfile();
-      set({ parentProfile: res.data.data, isLoading: false });
+      set({ parentProfile: res, isLoading: false });
     } catch (err: any) {
       set({ error: err.message, isLoading: false });
     }
@@ -29,7 +29,7 @@ export const createParentProfileSlice: StateCreator<ParentProfileStore> = (set, 
     set({ isLoading: true, error: null });
     try {
       const res = await createParentProfileApi(data);
-      set({ parentProfile: res.data.data, isLoading: false });
+      set({ parentProfile: res, isLoading: false });
     } catch (err: any) {
       set({ error: err.message, isLoading: false });
     }
@@ -39,7 +39,7 @@ export const createParentProfileSlice: StateCreator<ParentProfileStore> = (set, 
     set({ isLoading: true, error: null });
     try {
       const res = await updateParentProfileApi(data);
-      set({ parentProfile: res.data.data, isLoading: false });
+      set({ parentProfile: res, isLoading: false });
     } catch (err: any) {
       set({ error: err.message, isLoading: false });
     }
@@ -50,7 +50,7 @@ export const createParentProfileSlice: StateCreator<ParentProfileStore> = (set, 
     try {
       const res = await saveParentSurrogateApi(surrogateData);
       set({ isLoading: false });
-      return res.data;
+      return res;
     } catch (err: any) {
       set({ error: err.message, isLoading: false });
       throw err;
@@ -62,7 +62,7 @@ export const createParentProfileSlice: StateCreator<ParentProfileStore> = (set, 
     try {
       const res = await updateParentMatchPreferenceApi(preferenceData);
       set({ isLoading: false });
-      return res.data;
+      return res;
     } catch (err: any) {
       set({ error: err.message, isLoading: false });
       throw err;

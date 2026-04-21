@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 10,
     height: 44,
-    color:colors.text
+    color: "$color"
   },
   textArea: {
     height: 120,

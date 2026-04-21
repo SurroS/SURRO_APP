@@ -1,12 +1,11 @@
 // app/onboarding/screen2.tsx
 
-import colors from "@/hooks/colors";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
+import colors from "@/hooks/colors";
 import { Dimensions, FlatList, ViewToken } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Image, Text, XStack, YStack } from "tamagui";
-
 
 // Screen dimensions
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -32,7 +31,7 @@ const SLIDES = [
     img1: img1,
     img2: img2,
     header: "Full control over who you connect with",
-    message: `  Review profiles, set preferences, and decide who you feel comfortable connecting with. Every match is built on choice, 
+    message: `  Review profiles, set preferences, and decide who you feel comfortable connecting with. Every match is built on choice,
     trust, and mutual agreement.`,
   },
   {
@@ -40,7 +39,7 @@ const SLIDES = [
     img1: img3,
     img2: img4,
     header: "Helpful resources and guidance anytime",
-    message: `     Whether you're just starting out or already on your journey, we 
+    message: `     Whether you're just starting out or already on your journey, we
     provide you with educational resources you'll always have access to whenever you need it.`,
   },
 ];
@@ -51,7 +50,7 @@ const ImageCard = ({
   img2,
   header,
   message,
-  width = CARD_WIDTH_DEFAULT, 
+  width = CARD_WIDTH_DEFAULT,
 }: {
   img1: any;
   img2: any;
@@ -81,7 +80,7 @@ const ImageCard = ({
     </XStack>
 
     <YStack
-      width={TEXT_CONTAINER_WIDTH -5}
+      width={TEXT_CONTAINER_WIDTH - 5}
       alignSelf="center"
       marginRight="$4"
       gap="$4"
@@ -93,16 +92,11 @@ const ImageCard = ({
         fontSize={SCREEN_WIDTH * 0.05}
         fontWeight="bold"
         textAlign="center"
-        color={colors.primary}
+        color="#0E0E55"
       >
         {header}
       </Text>
-      <Text
-        fontSize={"$3"}
-        fontWeight="500"
-        textAlign="center" 
-        color="#737373"
-      >
+      <Text fontSize={"$3"} fontWeight="500" textAlign="center" color="#737373">
         {message}
       </Text>
     </YStack>
@@ -118,7 +112,7 @@ export default function Screen2() {
       if (viewableItems.length > 0) {
         setActiveIndex(viewableItems[0].index ?? 0);
       }
-    }
+    },
   ).current;
 
   return (
@@ -129,8 +123,8 @@ export default function Screen2() {
         justifyContent: "center",
         alignItems: "center",
       }}
-    > 
-      <YStack flex={1} backgroundColor={colors.white} paddingHorizontal="$4">
+    >
+      <YStack flex={1} backgroundColor="#FFFFFF" paddingHorizontal="$4">
         {/* Header */}
         <YStack alignItems="center" paddingTop="$4">
           <Image
@@ -138,9 +132,9 @@ export default function Screen2() {
             width={SCREEN_WIDTH * 0.19}
             height={SCREEN_WIDTH * 0.19}
           />
-          <Text fontSize={22} fontWeight="800" color={colors.primary}>
+          <Text fontSize={22} fontWeight="800" color="#0E0E55">
             SURRO
-          </Text> 
+          </Text>
         </YStack>
 
         {/* Image Carousel */}
@@ -170,14 +164,21 @@ export default function Screen2() {
         />
 
         {/* Indicator Dots */}
-        <XStack justifyContent="center" alignItems="center" gap="$2" marginTop="$3">
+        <XStack
+          justifyContent="center"
+          alignItems="center"
+          gap="$2"
+          marginTop="$3"
+        >
           {SLIDES.map((_, index) => (
             <YStack
               key={index}
               width={index === activeIndex ? 20 : 8}
               height={8}
               borderRadius={20}
-              backgroundColor={index === activeIndex ? colors.primary : colors.secondry}
+              backgroundColor={
+                index === activeIndex ? colors.primary : colors.secondry
+              }
             />
           ))}
         </XStack>
@@ -192,7 +193,12 @@ export default function Screen2() {
           marginVertical="$6"
           onPress={() => router.push("/onboarding/role-selection")}
         >
-          <Text color='#ffffff' fontWeight="600" fontSize={20} textAlign="center">
+          <Text
+            color="#ffffff"
+            fontWeight="600"
+            fontSize={20}
+            textAlign="center"
+          >
             Get started
           </Text>
         </Button>

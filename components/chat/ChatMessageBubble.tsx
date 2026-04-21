@@ -1,8 +1,8 @@
 // components/chat/ChatMessageBubble.tsx
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import colors from "@/hooks/colors";
 import type { Message } from "@/types/chat";
+import colors from "@/hooks/colors";
 
 interface Props {
   message: Message;
@@ -19,18 +19,12 @@ export default function ChatMessageBubble({ message, isMine, onRetry }: Props) {
   return (
     <View style={[styles.row, isMine ? styles.mine : styles.their]}>
       <View
-        style={[
-          styles.bubble,
-          isMine ? styles.myBubble : styles.theirBubble,
-        ]}
+        style={[styles.bubble, isMine ? styles.myBubble : styles.theirBubble]}
       >
         {/* TEXT */}
         {message.content ? (
           <Text
-            style={[
-              styles.text,
-              isMine ? styles.myText : styles.theirText,
-            ]}
+            style={[styles.text, isMine ? styles.myText : styles.theirText]}
           >
             {message.content}
           </Text>
@@ -82,7 +76,7 @@ const styles = StyleSheet.create({
   },
 
   myBubble: {
-    backgroundColor: colors.primary,
+    backgroundColor: "#0E0E55",
   },
 
   theirBubble: {

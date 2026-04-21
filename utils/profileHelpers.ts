@@ -22,7 +22,7 @@ const isAnyFilled = (profile: AnyProfile, fields: string[]): boolean =>
  * Calculates profile completion with weighted + grouped logic
  */
 export const calculateProfileProgress = (
-  profile: AnyProfile | null
+  profile: AnyProfile | null,
 ): number => {
   if (!profile) return 0;
 
@@ -32,13 +32,10 @@ export const calculateProfileProgress = (
   /**
    * Helper to add weighted fields
    */
-  const applyFields = (
-    fields: string[],
-    weight: number
-  ) => {
+  const applyFields = (fields: string[], weight: number) => {
     maxScore += weight;
     const filledCount = fields.filter((f) =>
-      isFilled(profile[f as keyof AnyProfile])
+      isFilled(profile[f as keyof AnyProfile]),
     ).length;
 
     if (filledCount === fields.length) {
@@ -52,10 +49,7 @@ export const calculateProfileProgress = (
   /**
    * Helper for grouped optionals (e.g socials)
    */
-  const applyGroup = (
-    fields: string[],
-    weight: number
-  ) => {
+  const applyGroup = (fields: string[], weight: number) => {
     maxScore += weight;
     if (isAnyFilled(profile, fields)) {
       score += weight;
@@ -78,30 +72,24 @@ export const calculateProfileProgress = (
         "phone1",
         "profilePicture",
       ],
-      50
+      50,
     );
 
     // Medical & experience (25%)
     applyFields(
       [
-        "hasBeenSurrogate",
-        "compensationAmount",
-        "compensationNegotiable",
+        // "hasBeenSurrogate",
+        // "compensationAmount",
+        // "compensationNegotiable",
         "medical",
       ],
-      25
+      25,
     );
 
     // Optional enrichments (15%)
     applyFields(
-      [
-        "aboutMe",
-        "height",
-        "weight",
-        "numberOfChildren",
-        "maritalStatus",
-      ],
-      15
+      ["aboutMe", "height", "weight", "numberOfChildren", "maritalStatus"],
+      15,
     );
 
     // Socials (any one counts) (10%)
@@ -113,7 +101,7 @@ export const calculateProfileProgress = (
         "threadsProfile",
         "ticktok",
       ],
-      10
+      10,
     );
   }
 
@@ -123,28 +111,15 @@ export const calculateProfileProgress = (
   else if ("services" in profile) {
     // Core professional info (60%)
     applyFields(
-      [
-        "name",
-        "userName",
-        "fullName",
-        "profilePicture",
-        "country",
-        "about",
-      ],
-      60
+      ["name", "userName", "fullName", "profilePicture", "country", "about"],
+      60,
     );
 
     // Services & credibility (25%)
-    applyFields(
-      ["services", "certifications", "performance"],
-      25
-    );
+    applyFields(["services", "certifications", "performance"], 25);
 
     // Social presence (any) (15%)
-    applyGroup(
-      ["socials"],
-      15
-    );
+    applyGroup(["socials"], 15);
   }
 
   // ------------------------------------------------
@@ -153,26 +128,15 @@ export const calculateProfileProgress = (
   else {
     // Core info (70%)
     applyFields(
-      [
-        "fullName",
-        "userName",
-        "profilePicture",
-        "countryOfResidence",
-      ],
-      70
+      ["fullName", "userName", "profilePicture", "countryOfResidence"],
+      70,
     );
 
     // Contextual depth (20%)
-    applyFields(
-      ["about", "yearsOfTrying", "languagesSpoken"],
-      20
-    );
+    applyFields(["about", "yearsOfTrying", "languagesSpoken"], 20);
 
     // Optional social presence (10%)
-    applyGroup(
-      ["facebookProfile", "instagramProfile"],
-      10
-    );
+    applyGroup(["facebookProfile", "instagramProfile"], 10);
   }
 
   // Normalize and cap

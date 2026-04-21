@@ -13,8 +13,8 @@ import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { useParentProfile } from "@/hooks/useParent";
-import { useAgentProfile } from "@/hooks/useAgentProfile";
+import { useParentProfile } from "@/hooks/profile/useParentProfile";
+import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
 
 export default function ContactInformationScreen() {
   const { user } = useAuth();
@@ -179,7 +179,7 @@ export default function ContactInformationScreen() {
         text2: "Your contact details have been saved",
       });
 
-      router.push("/settings/medical");
+      router.push("/medical");
     } catch (error: any) {
       Toast.show({
         text1: "Update Failed",

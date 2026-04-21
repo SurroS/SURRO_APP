@@ -66,7 +66,7 @@ export default function KYCPicturePreview() {
       setTimeout(() => {
         setIsModalVisible(false);
         router.push({
-          pathname: "/settings/kyc/face-scan-rules",
+          pathname: "/kyc/face-scan-rules",
           params: { idFrontUri: frontUri },
         });
       }, 2000);

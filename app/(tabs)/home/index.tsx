@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Pressable, View, StyleSheet } from "react-native";
+import { Pressable, View, StyleSheet, ScrollView, RefreshControl } from "react-native";
 import { Text, YStack, Spinner } from "tamagui";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -14,8 +14,6 @@ import { useNotificationStore } from "@/store/notifications";
 import { useSurrogateProfile } from "@/hooks/profile/useSurrogateProfile";
 import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
 import { useParentProfile } from "@/hooks/profile/useParentProfile";
-
-import colors from "@/hooks/colors";
 
 export default function HomeIndex() {
   const router = useRouter();
@@ -31,6 +29,24 @@ export default function HomeIndex() {
 
   const notifications = useNotificationStore((s) => s.notifications);
   const unreadCount = notifications.filter((n) => !n.read).length;
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      if (role === "SURROGATE") {
+        await fetchSurrogate(true);
+      } else if (role === "AGENT") {
+        await fetchAgent();
+      } else if (role === "INTENDED_PARENT") {
+        await fetchParent(true);
+      }
+    } catch (e) {
+      console.error("Refresh failed", e);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [role, fetchSurrogate, fetchAgent, fetchParent]);
 
   useEffect(() => {
     const hydrate = async () => {
@@ -65,8 +81,8 @@ export default function HomeIndex() {
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <YStack flex={1} justifyContent="center" alignItems="center" gap="$3">
-          <Spinner size="large" color={colors.primary} />
-          <Text color={colors.text} fontWeight="600">
+          <Spinner size="large" color="#0E0E55" />
+          <Text color="#1E1E1E" fontWeight="600">
             Loading your dashboard…
           </Text>
         </YStack>
@@ -75,11 +91,14 @@ export default function HomeIndex() {
   }
 
   return (
-    <YStack flex={1} padding="$4">
-      <SafeAreaView>
+    <YStack style={{ flex: 1, backgroundColor: "#FFFFFF" }} padding="$4">
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "#FFFFFF" }}
+        edges={["top", "left", "right"]}
+      >
         <Pressable
           onPress={() => router.push("/notifications")}
-          style={{ alignItems: "flex-end" }}
+          style={{ paddingBottom: 8 }}
         >
           <MaterialCommunityIcons name="bell-outline" size={24} color="black" />
           {unreadCount > 0 && (
@@ -89,9 +108,21 @@ export default function HomeIndex() {
           )}
         </Pressable>
 
-        {role === "SURROGATE" && surrogateProfile && <SurrogateScreen />}
-        {role === "AGENT" && agentProfile && <AgentScreen />}
-        {role === "INTENDED_PARENT" && parentProfile && <ParentScreen />}
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["#0E0E55"]}
+            />
+          }
+          showsVerticalScrollIndicator={false}
+        >
+
+          {role === "SURROGATE" && surrogateProfile && <SurrogateScreen />}
+          {role === "AGENT" && agentProfile && <AgentScreen />}
+          {role === "INTENDED_PARENT" && parentProfile && <ParentScreen />}
+        </ScrollView>
       </SafeAreaView>
     </YStack>
   );

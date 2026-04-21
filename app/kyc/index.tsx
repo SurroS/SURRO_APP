@@ -23,7 +23,7 @@ export default function KYCStartScreen() {
         <YStack gap="$3" marginTop="$4">
           <TouchableOpacity
             style={styles.optionCard}
-            onPress={() => router.push("/settings/kyc/select")}
+            onPress={() => router.push("/kyc/select")}
           >
             <XStack alignItems="center" gap="$3">
               <FileText color={colors.primary} size={20} />
@@ -39,7 +39,7 @@ export default function KYCStartScreen() {
 
           <TouchableOpacity
             style={styles.optionCard}
-            onPress={() => router.push("/settings/kyc/face-scan-rules")}
+            onPress={() => router.push("/kyc/face-scan-rules")}
           >
             <XStack alignItems="center" gap="$3">
               <Camera color={colors.primary} size={20} />

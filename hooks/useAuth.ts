@@ -22,6 +22,7 @@ export const useAuth = () => {
     changePassword,
     googleLogin,
     appleLogin,
+    devLogin,
     logout,
     clearError,
     setUser,
@@ -29,10 +30,12 @@ export const useAuth = () => {
     clearTempEmail,
     setReferralInfo,
     clearReferralInfo,
+    selectedRole,
+    setSelectedRole,
   } = useAuthStore();
 
   return {
-     hasHydrated,
+    hasHydrated,
     setHasHydrated,
     user,
     token,
@@ -52,6 +55,7 @@ export const useAuth = () => {
     changePassword,
     googleLogin,
     appleLogin,
+    devLogin,
     logout,
     clearError,
     setUser,
@@ -59,5 +63,7 @@ export const useAuth = () => {
     clearTempEmail,
     setReferralInfo,
     clearReferralInfo,
+    selectedRole,
+    setSelectedRole,
   };
 };

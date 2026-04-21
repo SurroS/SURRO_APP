@@ -1,4 +1,3 @@
-import colors from "@/hooks/colors";
 import React, { ReactNode } from "react";
 import { SafeAreaView } from "react-native";
 import { ScrollView, YStack } from "tamagui";
@@ -16,8 +15,8 @@ export default function ScreenContentWrapper({ children }: Props) {
       >
         <YStack
           flex={1}
-          padding="$4"            // ✅ valid Tamagui token (not inside RN style)
-          backgroundColor={colors.white} 
+          padding="$4" // ✅ valid Tamagui token (not inside RN style)
+          backgroundColor="$background"
           space="$4"
         >
           {children}

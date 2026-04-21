@@ -1,5 +1,4 @@
 // components/Button.tsx
-import colors from "@/hooks/colors";
 import React from "react";
 import { Button as TButton, Text } from "tamagui";
 
@@ -18,7 +17,7 @@ export default function Button({ title, onPress, variant = "primary" }: Props) {
       padding="$3"
       pressStyle={{ opacity: 0.8 }}
     >
-      <Text color={colors.white} fontWeight="600">
+      <Text color="$white" fontWeight="600">
         {title}
       </Text>
     </TButton>

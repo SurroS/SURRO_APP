@@ -4,36 +4,19 @@ export interface Surrogate {
   id: string;
   name: string;
   userName: string;
-  wallet: any;
+  nickname?: string;
   avatar?: string;
+  image: string;
   age: string;
-  country: string;
-  height?: string;
-  weight?: string;
-  firstName: string;
-  lastName: string;
-  countryOfOrigin: string;
-  aboutMe: string;
-  dateOfBirth: string;
-  maritalStatus: string;
-  profilePicture: string;
-  children: string | number;
-  countryOfResidence: string;
+  country?: string;
   stateOfResidence: string;
   lga: string;
-  stateOfOrigin: string;
-  address: string;
-  zipCode: string;
-  phone1: string|number;
-  phone2: string|number;
-  emergencyContactPhone: string|number;
-  emergencyContactRelation: string;
-  facebookProfile: string;
-  instagramProfile: string;
-  twitterProfile: string;
-  threadsProfile: string;
-  isAvailable: boolean;
-  termsAcceptedAt: string;
+  firstName: string;
+  lastName: string;
+  contactPhone: string | number;
+  contactEmail: string;
+  bio: string;
+  experienceLevel: string;
 }
 
 // --- Surrogate List State ---

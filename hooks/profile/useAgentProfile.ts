@@ -4,9 +4,8 @@ import {
   getAgentProfile,
   createAgentProfile,
   updateAgentProfile,
-   
 } from "@/services/profileApi";
-import { useAuth } from "../useAuth";
+import { useAuth } from "@/hooks/useAuth";
 
 export const useAgentProfile = () => {
   const { user } = useAuth();
@@ -26,16 +25,24 @@ export const useAgentProfile = () => {
 
     try {
       const res = await getAgentProfile();
-      console.log("[AgentProfile] Fetch success:", res?.data);
-      setAgentProfile(res.data);
-      console.log("response data", res.data);
+      console.log("[AgentProfile] Fetch success:", res);
+      setAgentProfile(res?.profile || res);
+      console.log("response data", res);
     } catch (err: any) {
       console.log("user id from", userId);
       console.error("[AgentProfile] Fetch failed:", err?.response?.data || err);
 
-      setError(
-        err?.response?.data?.message || err.message || "Failed to fetch profile"
-      );
+      // If profile not found (404), set to null - profile doesn't exist yet
+      if (err?.response?.status === 404) {
+        setAgentProfile(null);
+        setError(null);
+      } else {
+        setError(
+          err?.response?.data?.message ||
+            err.message ||
+            "Failed to fetch profile",
+        );
+      }
     } finally {
       setIsLoading(false);
       console.log("[AgentProfile] Fetch done");
@@ -52,18 +59,18 @@ export const useAgentProfile = () => {
 
     try {
       const res = await createAgentProfile(data);
-      console.log("[AgentProfile] Create success:", res?.data);
-      setAgentProfile(res.data);
-      return res.data;
+      console.log("[AgentProfile] Create success:", res);
+      setAgentProfile(res?.profile || res);
+      return res;
     } catch (err: any) {
       console.error(
         "[AgentProfile] Create failed:",
-        err?.response?.data || err
+        err?.response?.data || err,
       );
       setError(
         err?.response?.data?.message ||
           err.message ||
-          "Failed to create profile"
+          "Failed to create profile",
       );
       throw err;
     } finally {
@@ -82,18 +89,18 @@ export const useAgentProfile = () => {
 
     try {
       const res = await updateAgentProfile(data);
-      console.log("[AgentProfile] Update success:", res?.data);
-      setAgentProfile(res.data);
-      return res.data;
+      console.log("[AgentProfile] Update success:", res);
+      setAgentProfile(res?.profile || res);
+      return res;
     } catch (err: any) {
       console.error(
         "[AgentProfile] Update failed:",
-        err?.response?.data || err
+        err?.response?.data || err,
       );
       setError(
         err?.response?.data?.message ||
           err.message ||
-          "Failed to update profile"
+          "Failed to update profile",
       );
       throw err;
     } finally {
@@ -107,8 +114,10 @@ export const useAgentProfile = () => {
     isLoading,
     error,
     fetchProfile,
+    fetchAgentProfile: fetchProfile,
     createProfile,
     updateProfile,
+    updateAgentProfile,
     setAgentProfile,
   };
 };

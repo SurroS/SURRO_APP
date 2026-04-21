@@ -13,11 +13,11 @@ import FilterModal from "@/components/modals/filterBottomModal";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScreenHeader } from "@/components/auth";
 import { router } from "expo-router";
-import colors from "@/hooks/colors";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { useAuth } from "@/hooks/useAuth";
-import { useParentProfile } from "@/hooks/useParent";
+import { useParentProfile } from "@/hooks/profile/useParentProfile";
+import colors from "@/hooks/colors";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const CARD_HEIGHT = SCREEN_HEIGHT * 0.55;
@@ -105,14 +105,14 @@ export default function SurrogateList() {
             const direction =
               gestureState.dx > 0 ? SCREEN_WIDTH : -SCREEN_WIDTH;
             translateX.value = withSpring(direction, {}, () =>
-              runOnJS(handleSwipe)()
+              runOnJS(handleSwipe)(),
             );
           } else {
             resetCardPosition();
           }
         },
       }),
-    [handleSwipe, resetCardPosition]
+    [handleSwipe, resetCardPosition],
   );
 
   const animatedStyle = useAnimatedStyle(() => ({

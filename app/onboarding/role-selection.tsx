@@ -29,10 +29,13 @@ type RoleKey = (typeof ROLE_ITEMS)[number]["key"];
 export default function RoleSelection() {
   const router = useRouter();
   const [selectedRole, setSelectedRole] = useState<RoleKey | null>(null);
-  const { setUser, user } = useAuth();
+  const { setUser, setSelectedRole: setAuthSelectedRole, user } = useAuth();
 
   const onNext = () => {
     if (!selectedRole) return;
+
+    // Set the selected role in auth store
+    setAuthSelectedRole(selectedRole);
 
     // Create a temporary user object with the selected role
     setUser({
@@ -48,7 +51,7 @@ export default function RoleSelection() {
   };
 
   return (
-    <YStack flex={1} padding="$4" marginTop="$5" backgroundColor={colors.white}>
+    <YStack flex={1} padding="$4" marginTop="$5" backgroundColor="#FFFFFF">
       {/* Header */}
       <Text
         fontSize={22}

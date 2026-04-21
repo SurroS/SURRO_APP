@@ -1,12 +1,13 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import Storage from "../middleware/persist";
+import Storage from "@/store/middleware/persist";
 import { createAuthSlice } from "./actions";
 import { AuthStore } from "./types";
 import { AuthState, User } from "@/types/auth";
 
 const initialState: AuthState = {
   user: null,
+  userId: "",
   token: null,
   isAuthenticated: false,
   isLoading: false,
@@ -62,6 +63,6 @@ export const useAuthStore = create<FullAuthStore>()(
           else state?.setHasHydrated(true);
         };
       },
-    }
-  )
+    },
+  ),
 );

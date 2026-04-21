@@ -14,9 +14,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/hooks/useAuth";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
-import { PrimaryButton } from "../../components/auth/PrimaryButton";
-import { ScreenHeader } from "../../components/navigation/ScreenHeader";
-import { useOtpForm } from "../../hooks/auth/useOtpForm";
+import { PrimaryButton } from "@/components/auth/PrimaryButton";
+import { ScreenHeader } from "@/components/navigation/ScreenHeader";
+import { useOtpForm } from "@/hooks/auth/useOtpForm";
 
 export default function OTPScreen() {
   const router = useRouter();

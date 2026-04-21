@@ -13,7 +13,7 @@ export default function KycFaceScanScreen() {
   
   const handleTakePicture = () => {
     router.push({
-      pathname: "/settings/kyc/face-scan",
+      pathname: "/kyc/face-scan",
       params: { idFrontUri },
     });
   };

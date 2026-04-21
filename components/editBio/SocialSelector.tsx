@@ -18,8 +18,18 @@ type Platform = {
 };
 
 const PLATFORMS: Platform[] = [
-  { key: "Instagram", icon: "logo-instagram", color: "#E1306C", label: "Instagram" },
-  { key: "Facebook", icon: "logo-facebook", color: "#1877F2", label: "Facebook" },
+  {
+    key: "Instagram",
+    icon: "logo-instagram",
+    color: "#E1306C",
+    label: "Instagram",
+  },
+  {
+    key: "Facebook",
+    icon: "logo-facebook",
+    color: "#1877F2",
+    label: "Facebook",
+  },
   { key: "X", icon: "logo-twitter", color: "#000000", label: "X" },
   { key: "TikTok", icon: "logo-tiktok", color: "#000000", label: "TikTok" },
 ];
@@ -27,6 +37,7 @@ const PLATFORMS: Platform[] = [
 type PlatformInputProps = {
   onAdd?: (platform: string, handle: string) => void;
   initialPlatform?: string;
+  disabled?: boolean;
 };
 
 export default function PlatformInput({
@@ -34,7 +45,7 @@ export default function PlatformInput({
   initialPlatform = "Instagram",
 }: PlatformInputProps) {
   const [selected, setSelected] = useState<Platform>(
-    PLATFORMS.find((p) => p.key === initialPlatform) || PLATFORMS[0]
+    PLATFORMS.find((p) => p.key === initialPlatform) || PLATFORMS[0],
   );
   const [text, setText] = useState("");
   const [list, setList] = useState<{ platform: string; handle: string }[]>([]);
@@ -254,7 +265,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    zIndex: 1000, 
+    zIndex: 1000,
   },
   platformRow: {
     paddingVertical: 8,

@@ -1,14 +1,14 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import colors from '@/hooks/colors';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import colors from "@/hooks/colors";
 
 interface TransactionItemProps {
   title: string;
   date: string;
   amount: number;
   type: any;
-  gateway?: 'STRIPE' | 'PAYSTACK' | 'FLUTTERWAVE' | 'INTERSWITCH'; 
+  gateway?: "STRIPE" | "PAYSTACK" | "FLUTTERWAVE" | "INTERSWITCH";
   iconName?: string; // optional manual icon override
 }
 
@@ -20,27 +20,25 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
   gateway,
   iconName,
 }) => {
-    
   // this Choose default icon based on gateway or transaction type
   const getIcon = (): string => {
     if (iconName) return iconName;
 
     switch (gateway) {
-      case 'STRIPE':
-        return 'card-outline';
-      case 'PAYSTACK':
-        return 'wallet-outline';
-      case 'FLUTTERWAVE':
-        return 'cash-outline';
-      case 'INTERSWITCH':
-        return 'swap-horizontal-outline';
+      case "STRIPE":
+        return "card-outline";
+      case "PAYSTACK":
+        return "wallet-outline";
+      case "FLUTTERWAVE":
+        return "cash-outline";
+      case "INTERSWITCH":
+        return "swap-horizontal-outline";
       default:
-        return type === 'credit' ? 'arrow-down-circle' : 'arrow-up-circle';
+        return type === "credit" ? "arrow-down-circle" : "arrow-up-circle";
     }
   };
 
-  const iconColor =
-    type === 'credit' ? colors.success : colors.danger;
+  const iconColor = type === "credit" ? "#22C55E" : "#EF4444";
 
   return (
     <View style={styles.container}>
@@ -56,13 +54,8 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
         <Text style={styles.date}>{date}</Text>
       </View>
 
-      <Text
-        style={[
-          styles.amount,
-          { color: iconColor },
-        ]}
-      >
-        {type === 'credit' ? '+' : '-'}₦{amount.toLocaleString()}
+      <Text style={[styles.amount, { color: iconColor }]}>
+        {type === "credit" ? "+" : "-"}₦{amount.toLocaleString()}
       </Text>
     </View>
   );
@@ -70,9 +63,9 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: 10,
   },
   textContainer: {
@@ -80,7 +73,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: colors.text,
   },
   date: {
@@ -89,7 +82,7 @@ const styles = StyleSheet.create({
   },
   amount: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 });
 

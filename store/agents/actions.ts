@@ -1,6 +1,6 @@
 // store/profile/agents/listSlice.ts
 import { StateCreator } from "zustand";
-import { AgentProfile } from "../profile/agent/types";
+import { AgentProfile } from "@/store/profile/agent/types";
 import { getAllAgents, getUsersByRole } from "@/services/profileApi";
 
 const fallbackAgent: AgentProfile[] = [
@@ -8,22 +8,55 @@ const fallbackAgent: AgentProfile[] = [
     id: "1",
     userName: "Jane Doe",
     avatar: require("@/assets/images/agentImage.png"),
-    age: "20",
-    country: "Nigeria",
+    dateOfBirth: "2004-01-01",
+    countryOfResidence: "Nigeria",
+    stateOfResidence: "Lagos",
+    lga: "Lagos Island",
+    phone1: "+234123456789",
+    phone2: null,
+    emergencyContactPhone: null,
+    wallet: {
+      id: "w1",
+      userId: "1",
+      balance: 0,
+      currency: "NGN",
+    },
   },
   {
     id: "2",
     userName: "Mary Ann",
     avatar: require("@/assets/images/image3.jpg"),
-    age: "20",
-    country: "Nigeria",
+    dateOfBirth: "2004-01-01",
+    countryOfResidence: "Nigeria",
+    stateOfResidence: "Lagos",
+    lga: "Lagos Island",
+    phone1: "+234123456789",
+    phone2: null,
+    emergencyContactPhone: null,
+    wallet: {
+      id: "w2",
+      userId: "2",
+      balance: 0,
+      currency: "NGN",
+    },
   },
   {
     id: "3",
     userName: "Tina Joe",
     avatar: require("@/assets/images/agentImage.png"),
-    age: "20",
-    country: "Nigeria",
+    dateOfBirth: "2004-01-01",
+    countryOfResidence: "Nigeria",
+    stateOfResidence: "Lagos",
+    lga: "Lagos Island",
+    phone1: "+234123456789",
+    phone2: null,
+    emergencyContactPhone: null,
+    wallet: {
+      id: "w3",
+      userId: "3",
+      balance: 0,
+      currency: "NGN",
+    },
   },
 ];
 
@@ -54,11 +87,11 @@ export const createAgentListSlice: StateCreator<
 
       const res = await getAllAgents();
 
-      let Agents: AgentProfile[] = res?.data ||[]; 
-   
+      let Agents: AgentProfile[] = res?.data || [];
+
       console.log(
         "single agent array",
-        Agents.map((agent, index) => agent.id)
+        Agents.map((agent, index) => agent.id),
       );
 
       if (Array.isArray(Agents) && Agents.length > 0) {

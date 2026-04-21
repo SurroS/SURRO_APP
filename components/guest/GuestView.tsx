@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { ScrollView } from "react-native";
 import { YStack, Text, Separator } from "tamagui";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Contact from "../roles/contact";
+import Contact from "@/components/roles/contact";
 
 // Components
 import HeaderBar from "@/components/guest/HeaderBar";
@@ -15,10 +15,12 @@ import { useAuth } from "@/hooks/useAuth";
 
 // Hooks
 import { useSurrogateProfile } from "@/hooks/profile/useSurrogateProfile";
+import { useGallery } from "@/hooks/useGallery";
 
 export default function SurrogateGuestView() {
   const { user } = useAuth();
   const { surrogateProfile, fetchProfile, isLoading } = useSurrogateProfile();
+  const { images: galleryImages } = useGallery();
 
   useEffect(() => {
     if (!surrogateProfile) {
@@ -75,7 +77,7 @@ export default function SurrogateGuestView() {
               Gallery
             </Text>
 
-            <GallerySection images={surrogateProfile?.gallery} />
+            <GallerySection images={galleryImages} />
           </YStack>
           {/* Optional Bottom Padding */}
           <YStack height={40} />

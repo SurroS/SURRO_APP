@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { SendHorizontal } from "@tamagui/lucide-icons";
-import colors from "@/hooks/colors";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -23,7 +22,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
       <TextInput
         style={styles.input}
         placeholder="Type a message..."
-        placeholderTextColor={colors.text}
+        placeholderTextColor="#666666"
         multiline
         value={text}
         onChangeText={setText}

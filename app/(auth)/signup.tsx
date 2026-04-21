@@ -12,12 +12,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
-import { InputField } from "../../components/auth/InputField";
-import { OrDivider } from "../../components/auth/OrDivider";
-import { PrimaryButton } from "../../components/auth/PrimaryButton";
-import { ScreenHeader } from "../../components/navigation/ScreenHeader";
-import { SocialButton } from "../../components/auth/SocialButton";
-import { useSignupForm } from "../../hooks/auth/useSignupForm";
+import { InputField } from "@/components/auth/InputField";
+import { OrDivider } from "@/components/auth/OrDivider";
+import { PrimaryButton } from "@/components/auth/PrimaryButton";
+import { ScreenHeader } from "@/components/navigation/ScreenHeader";
+import { SocialButton } from "@/components/auth/SocialButton";
+import { useSignupForm } from "@/hooks/auth/useSignupForm";
 
 import {
   GoogleSignin,

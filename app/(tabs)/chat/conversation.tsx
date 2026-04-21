@@ -8,8 +8,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
-import ChatInput from "@/components/chat/chatInput";
-import colors from "@/hooks/colors";
+import ChatInput from "@/components/chat/ChatInput";
 import { useAuthStore } from "@/store/auth";
 import {
   fetchMessages,
@@ -27,7 +26,7 @@ const normalizeMessage = (msg: any, fallbackId?: string): Message => ({
   id:
     typeof msg?.id === "string"
       ? msg.id
-      : fallbackId ?? `temp-${Date.now()}-${Math.random()}`,
+      : (fallbackId ?? `temp-${Date.now()}-${Math.random()}`),
   conversationId: msg?.conversationId,
   content: msg?.content ?? "",
   attachmentUrl: msg?.attachmentUrl ?? null,
@@ -108,7 +107,7 @@ export default function ChatBoxScreen() {
 
     if (status === "READ") {
       text = "✔✔";
-      color = colors.primary; // blue
+      color = "#0E0E55"; // blue
     }
 
     return <RNText style={[styles.ticks, { color }]}>{text}</RNText>;
@@ -136,27 +135,25 @@ export default function ChatBoxScreen() {
     setMessages((prev) => [optimistic, ...prev]);
 
     try {
-      const sentRaw = await sendMessage(conversationId, text.trim());
-
-      const sent = sentRaw?.content || sentRaw;
+      const sent = await sendMessage(conversationId, text.trim());
 
       setMessages((prev) =>
         prev.map((m) =>
           m.id === tempId
             ? {
                 ...m,
-                id: sent?.id ?? tempId,
-                createdAt: sent?.createdAt ?? m.createdAt,
-                status: sent?.status ?? "SENT",
+                id: sent.id ?? tempId,
+                createdAt: sent.createdAt ?? m.createdAt,
+                status: sent.status ?? "SENT",
               }
-            : m
-        )
+            : m,
+        ),
       );
     } catch (err) {
       console.error("Send message failed:", err);
 
       setMessages((prev) =>
-        prev.map((m) => (m.id === tempId ? { ...m, failed: true } : m))
+        prev.map((m) => (m.id === tempId ? { ...m, failed: true } : m)),
       );
     }
   };
@@ -184,7 +181,7 @@ export default function ChatBoxScreen() {
               {item.content}
             </RNText>
           )}
- 
+
           <RNText style={styles.time}>
             {new Date(item.createdAt).toLocaleTimeString([], {
               hour: "2-digit",
@@ -208,7 +205,7 @@ export default function ChatBoxScreen() {
     return (
       <KeyboardAvoidingWrapper>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
+          <ActivityIndicator size="large" color="#0E0E55" />
         </View>
       </KeyboardAvoidingWrapper>
     );

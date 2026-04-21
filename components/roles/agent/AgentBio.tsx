@@ -1,7 +1,7 @@
 import React from "react";
 import { YStack, Text } from "tamagui";
 import RoleCommonProfile from "@/components/editBio/RoleCommonProfile";
-import InfoRowCard from "@/components/editBio/infoRowCard";
+import InfoRowCard from "@/components/editBio/InfoRowCard";
 import { Briefcase, MapPin, Globe, ListChecks } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
 
@@ -34,18 +34,19 @@ export default function AgentBio({
         onEditBio={onEditBio}
       />
 
-       
       {/* EXPERIENCE */}
-       
+
       <InfoRowCard
         title="Experience"
         subtitle={experience || "Tell us about your experience"}
         icon={Briefcase}
-        onPress={() => router.push("/(tabs)/settings/profile/AgentExperienceSection")}
+        onPress={() =>
+          router.push("/profile/AgentExperienceSection")
+        }
       />
- 
+
       {/* SPECIALIZATIONS */}
-    
+
       <InfoRowCard
         title="Specializations"
         subtitle={
@@ -54,32 +55,40 @@ export default function AgentBio({
             : "What do you specialize in?"
         }
         icon={ListChecks}
-        onPress={() =>router.push("/(tabs)/settings/profile/AgentSpecializationSection")}
+        onPress={() =>
+          router.push("/profile/AgentSpecializationSection")
+        }
       />
 
-    
       {/* COVERAGE AREAS */}
-   
+
       <InfoRowCard
         title="Coverage Areas"
         subtitle={
-          coverage?.length ? coverage.join(", ") : "How far can you go on a job?"
+          coverage?.length
+            ? coverage.join(", ")
+            : "How far can you go on a job?"
         }
         icon={MapPin}
-        onPress={() => router.push("/(tabs)/settings/profile/AgentCoverageSection")}
+        onPress={() =>
+          router.push("/profile/AgentCoverageSection")
+        }
       />
 
-     
       {/* LANGUAGES */}
-      
+
       <InfoRowCard
         title="Languages Spoken"
         subtitle={
-          languages?.length ? languages.join(", ") : "What languages do you speak?"
+          languages?.length
+            ? languages.join(", ")
+            : "What languages do you speak?"
         }
         icon={Globe}
-        onPress={() => router.push("/(tabs)/settings/profile/AgentLanguagesSection")}
-      /> 
+        onPress={() =>
+          router.push("/profile/AgentLanguagesSection")
+        }
+      />
     </YStack>
   );
 }

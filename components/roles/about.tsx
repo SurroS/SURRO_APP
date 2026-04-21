@@ -19,7 +19,7 @@ const About = ({ aboutMe }: AboutProps) => {
           About
         </Text>
 
-        <Pressable onPress={() => router.push("/settings/profile")}>
+        <Pressable onPress={() => router.push("/profile")}>
           <Feather name="edit-2" size={15} color="black" />
         </Pressable>
       </XStack>

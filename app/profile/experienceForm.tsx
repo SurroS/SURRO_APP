@@ -100,8 +100,15 @@ export default function ExperienceForm() {
   };
 
   const handleNext = () => {
-    if (currentIndex < questions.length - 1) {
-      setCurrentIndex((i) => i + 1);
+    // For text inputs, require some input unless it's the "anything else" optional question
+    const isOptionalNotes = currentQuestion.id === 3 || currentQuestion.id === 5;
+    const hasInput = answers[currentQuestion.id]?.trim().length > 0;
+    
+    // Allow next if: has input OR it's optional notes OR not a text field
+    if (isOptionalNotes || hasInput || currentQuestion.type === "yesno" || currentQuestion.type === "select" || currentQuestion.type === "number") {
+      if (currentIndex < questions.length - 1) {
+        setCurrentIndex((i) => i + 1);
+      }
     }
   };
 
@@ -117,25 +124,31 @@ export default function ExperienceForm() {
     setLoading(true);
 
     try {
-      const payload = {
-        hasBeenSurrogate: answers[1]?.toLowerCase() === "yes",
-        previousPregnancyType: answers[2] || null,
-        compensationAmount: answers[5]
-          ? Number(answers[5])
-          : Number(answers[2]),
-        compensationNegotiable:
-          (answers[3] || answers[6])?.toLowerCase() === "yes",
-        experienceNotes: answers[3] || answers[5] || "",
-        enjoymentNotes: answers[4] || "",
-      };
+      const isFirstTime = answers[1]?.toLowerCase() === "yes" ? false : true;
+      
+      // Build payload based on first-time or experienced
+      const payload: any = {};
+      
+      if (isFirstTime) {
+        payload.compensationAmount = answers[2] ? Number(answers[2]) : undefined;
+        payload.compensationNegotiable = answers[3]?.toLowerCase() === "yes";
+        payload.experienceNotes = answers[5] || "";
+      } else {
+        payload.previousPregnancyType = answers[2] || "";
+        payload.compensationAmount = answers[5] ? Number(answers[5]) : undefined;
+        payload.compensationNegotiable = answers[6]?.toLowerCase() === "yes";
+        payload.experienceNotes = answers[3] || "";
+        payload.enjoymentNotes = answers[4] || "";
+      }
 
+      console.log("Submitting payload:", JSON.stringify(payload, null, 2));
       await updateProfile(payload);
 
       setShowSuccessModal(true);
 
       setTimeout(() => {
         setShowSuccessModal(false);
-        router.push("/settings/kyc/");
+        router.push("/kyc");
       }, 1500);
     } catch (err) {
       console.error("Failed to update surrogate profile", err);
@@ -156,6 +169,8 @@ export default function ExperienceForm() {
           <TextInput
             style={styles.textInput}
             multiline
+            placeholder={currentQuestion.id === 3 || currentQuestion.id === 5 ? "Share your thoughts (optional)" : "Type your answer here..."}
+            placeholderTextColor="#999"
             value={answers[currentQuestion.id] || ""}
             onChangeText={handleAnswerChange}
           />
@@ -166,6 +181,8 @@ export default function ExperienceForm() {
           <TextInput
             style={styles.textInput}
             keyboardType="numeric"
+            placeholder="Enter amount in Naira"
+            placeholderTextColor="#999"
             value={answers[currentQuestion.id] || ""}
             onChangeText={handleAnswerChange}
           />
@@ -229,7 +246,12 @@ export default function ExperienceForm() {
               <Button
                 backgroundColor={colors.primary}
                 onPress={handleNext}
-                disabled={!answers[currentQuestion.id]}
+                disabled={
+                  // For optional notes (id 3 or 5), allow next even when empty
+                  (currentQuestion.id === 3 || currentQuestion.id === 5) 
+                    ? false 
+                    : !answers[currentQuestion.id]
+                }
               >
                 Next
               </Button>

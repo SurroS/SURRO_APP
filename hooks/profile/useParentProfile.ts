@@ -4,6 +4,8 @@ import {
   getParentProfile,
   createParentProfile,
   updateParentProfile,
+  saveParentSurrogateMatch,
+  updateParentMatchPreference,
 } from "@/services/profileApi";
 
 let cachedProfile: any = null;
@@ -16,8 +18,8 @@ export const useParentProfile = () => {
   // -------------------------
   // FETCH (CACHED)
   // -------------------------
-  const fetchProfile = async () => {
-    if (cachedProfile) {
+  const fetchProfile = async (forceRefresh = false) => {
+    if (cachedProfile && !forceRefresh) {
       setParentProfile(cachedProfile);
       return cachedProfile;
     }
@@ -27,7 +29,7 @@ export const useParentProfile = () => {
 
     try {
       const res = await getParentProfile();
-      cachedProfile = res.data;
+      cachedProfile = res?.profile || res;
       setParentProfile(cachedProfile);
       return cachedProfile;
     } catch (err: any) {
@@ -42,12 +44,13 @@ export const useParentProfile = () => {
   // CREATE
   // -------------------------
   const createProfile = async (data: any) => {
+    cachedProfile = null;
     setIsLoading(true);
     try {
       const res = await createParentProfile(data);
-      cachedProfile = res.data;
-      setParentProfile(res.data);
-      return res.data;
+      cachedProfile = res?.profile || res;
+      setParentProfile(res?.profile || res);
+      return res;
     } finally {
       setIsLoading(false);
     }
@@ -57,12 +60,36 @@ export const useParentProfile = () => {
   // UPDATE (PARTIAL)
   // -------------------------
   const updateProfile = async (data: Partial<any>) => {
+    cachedProfile = null;
     setIsLoading(true);
     try {
       const res = await updateParentProfile(data);
-      cachedProfile = res.data;
-      setParentProfile(res.data);
-      return res.data;
+      cachedProfile = res?.profile || res;
+      setParentProfile(res?.profile || res);
+      return res;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // -------------------------
+  // SAVE SURROGATE MATCH
+  // -------------------------
+  const saveParentSurrogate = async (surrogateData: any) => {
+    setIsLoading(true);
+    try {
+      const res = await saveParentSurrogateMatch(surrogateData);
+      return res;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateMatchPreference = async (preferenceData: any) => {
+    setIsLoading(true);
+    try {
+      const res = await updateParentMatchPreference(preferenceData);
+      return res;
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +100,11 @@ export const useParentProfile = () => {
     isLoading,
     error,
     fetchProfile,
+    fetchParentProfile: fetchProfile,
     createProfile,
     updateProfile,
+    updateParentProfile: updateProfile,
+    saveParentSurrogate,
+    updateMatchPreference,
   };
 };

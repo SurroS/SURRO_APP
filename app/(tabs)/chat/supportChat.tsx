@@ -1,13 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  FlatList,
-  TextInput,
-  TouchableOpacity,
-  Keyboard,
-} from "react-native";
+import { FlatList, TextInput, TouchableOpacity, Keyboard } from "react-native";
 import { YStack, XStack, Text } from "tamagui";
 import { Ionicons } from "@expo/vector-icons";
-import colors from "@/hooks/colors";
 import { secureGet, secureSet } from "@/utils/storage";
 import TypingIndicator from "@/components/chat/TypingIndicator";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -132,17 +126,13 @@ export default function SupportChatScreen() {
             renderItem={({ item }) => (
               <YStack
                 alignSelf={item.from === "user" ? "flex-end" : "flex-start"}
-                backgroundColor={
-                  item.from === "user" ? colors.primary : "#f2f2f2"
-                }
+                backgroundColor={item.from === "user" ? "#0E0E55" : "#f2f2f2"}
                 borderRadius={16}
                 padding={10}
                 marginVertical={4}
                 maxWidth="80%"
               >
-                <Text
-                  color={item.from === "user" ? colors.white : colors.primary}
-                >
+                <Text color={item.from === "user" ? "#FFFFFF" : "#0E0E55"}>
                   {item.text}
                 </Text>
 
@@ -153,14 +143,14 @@ export default function SupportChatScreen() {
                         key={idx}
                         onPress={() => handleSuggestionPress(suggestion)}
                         style={{
-                          backgroundColor: colors.primary,
+                          backgroundColor: "#0E0E55",
                           borderRadius: 20,
                           paddingVertical: 6,
                           paddingHorizontal: 14,
                           marginTop: 6,
                         }}
                       >
-                        <Text color={colors.white} fontSize={13}>
+                        <Text color="#FFFFFF" fontSize={13}>
                           {suggestion}
                         </Text>
                       </TouchableOpacity>
@@ -207,7 +197,7 @@ export default function SupportChatScreen() {
               }}
             />
             <TouchableOpacity onPress={() => sendMessage(input)}>
-              <Ionicons name="send" size={24} color={colors.primary} />
+              <Ionicons name="send" size={24} color="#0E0E55" />
             </TouchableOpacity>
           </XStack>
         </YStack>

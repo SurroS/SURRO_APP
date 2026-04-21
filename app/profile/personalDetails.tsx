@@ -13,8 +13,8 @@ import { router } from "expo-router";
 import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { useParentProfile } from "@/hooks/useParent";
-import { useAgentProfile } from "@/hooks/useAgentProfile";
+import { useParentProfile } from "@/hooks/profile/useParentProfile";
+import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
 
 export default function PersonalInformationScreen() {
   const Role = useAuth().user?.role?.trim();
@@ -181,7 +181,7 @@ export default function PersonalInformationScreen() {
         text2: "Your personal details have been saved",
       });
 
-      router.push("/settings/profile/contactInformation");
+      router.push("/profile/contactInformation");
     } catch (error: any) {
       Toast.show({
         text1: "Update Failed",

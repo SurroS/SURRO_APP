@@ -51,7 +51,7 @@ export const createProfileSlice: StateCreator<ProfileStore> = (set, get) => ({
       set({ isLoading: true, error: null });
 
       const response = await createSurrogateProfile(profileData);
-      const { profile } = response.data;
+      const profile = response?.data?.profile || response?.data || response;
 
       set({
         surrogateProfile: profile,
@@ -72,7 +72,7 @@ export const createProfileSlice: StateCreator<ProfileStore> = (set, get) => ({
       set({ isLoading: true, error: null });
 
       const response = await updateSurrogateProfile(profileData);
-      const { profile } = response.data;
+      const profile = response?.data?.profile || response?.data || response;
       console.log("Profile from actions :", profile);
 
       set({
@@ -95,7 +95,7 @@ export const createProfileSlice: StateCreator<ProfileStore> = (set, get) => ({
       set({ isLoading: true, error: null });
 
       const response = await getSurrogateProfile();
-      const { profile } = response.data;
+      const profile = response?.profile || response;
       const medicalProfile = profile?.medical || null;
 
       set({
@@ -131,7 +131,7 @@ export const createProfileSlice: StateCreator<ProfileStore> = (set, get) => ({
       set({ isLoading: true, error: null });
 
       const response = await updateMedicalProfile(medicalData);
-      const { medicalProfile } = response.data;
+      const medicalProfile = response;
 
       set({
         medicalProfile: medicalProfile,
@@ -153,7 +153,7 @@ export const createProfileSlice: StateCreator<ProfileStore> = (set, get) => ({
       set({ isLoading: true, error: null });
 
       const response = await uploadEndometriumImage(imageData);
-      const { medicalProfile } = response.data;
+      const medicalProfile = response;
 
       set({
         medicalProfile: medicalProfile,

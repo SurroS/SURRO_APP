@@ -10,7 +10,7 @@ import {
 import { Button, YStack, XStack } from "tamagui";
 import { getAllCountries } from "@/utils/countries";
 import { useAuth } from "@/hooks/useAuth";
-import { useParentProfile } from "@/hooks/useParent";
+import { useParentProfile } from "@/hooks/profile/useParentProfile";
 
 type FilterOptions = {
   country?: string;
@@ -39,7 +39,7 @@ export default function FilterModal({
   onApply,
 }: FilterModalProps) {
   const { user } = useAuth();
-  const { updateParentMatchPreference } = useParentProfile();
+  const { updateMatchPreference } = useParentProfile();
   const [countries, setCountries] = useState<{ name: string }[]>([]);
   const [loadingCountries, setLoadingCountries] = useState<boolean>(true);
 
@@ -65,7 +65,9 @@ export default function FilterModal({
 
   const togglePregnancy = (option: string) => {
     setSelectedPregnancy((prev) =>
-      prev.includes(option) ? prev.filter((p) => p !== option) : [...prev, option]
+      prev.includes(option)
+        ? prev.filter((p) => p !== option)
+        : [...prev, option],
     );
   };
 
@@ -88,7 +90,7 @@ export default function FilterModal({
     const isParent = user?.role?.trim() === "INTENDED_PARENT";
     if (isParent) {
       try {
-        await updateParentMatchPreference(filterOptions);
+        await updateMatchPreference(filterOptions);
       } catch (error: any) {
         // Silently fail - don't block filter application if save fails
         console.log("Failed to save match preferences:", error?.message);
@@ -107,6 +109,8 @@ export default function FilterModal({
       transparent={true}
       animationType="slide"
       onRequestClose={onClose}
+      presentationStyle="overFullScreen"
+      statusBarTranslucent
     >
       <TouchableOpacity
         style={{
@@ -123,6 +127,7 @@ export default function FilterModal({
           right: 0,
           bottom: 0,
           height: "60%",
+          paddingBottom: 34,
           backgroundColor: "#FFFFFF",
           borderTopLeftRadius: 14,
           borderTopRightRadius: 14,
@@ -180,7 +185,7 @@ export default function FilterModal({
                 onPress={() => {
                   // cycle through countries for simplicity; in real app, render Picker
                   const currentIndex = countries.findIndex(
-                    (c) => c.name === selectedCountry
+                    (c) => c.name === selectedCountry,
                   );
                   const nextIndex = (currentIndex + 1) % countries.length;
                   setSelectedCountry(countries[nextIndex].name);
@@ -210,9 +215,7 @@ export default function FilterModal({
                 return (
                   <TouchableOpacity
                     key={opt}
-                    onPress={() =>
-                      setSelectedReligion(active ? null : opt)
-                    }
+                    onPress={() => setSelectedReligion(active ? null : opt)}
                     style={{
                       paddingHorizontal: 12,
                       paddingVertical: 8,

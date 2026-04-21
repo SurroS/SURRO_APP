@@ -32,7 +32,7 @@ export default function KYCUploadScreen() {
         if (idType === "passport") {
           // Passport only has one side
           router.push({
-            pathname: "/settings/kyc/preview",
+pathname: "/kyc/preview",
             params: { idType, frontUri: photo.uri },
           });
         } else {
@@ -41,7 +41,7 @@ export default function KYCUploadScreen() {
       } else {
         setCapturedBack(photo.uri);
         router.push({
-          pathname: "/settings/kyc/preview",
+          pathname: "/kyc/preview",
           params: { idType, frontUri: capturedFront || "", backUri: photo.uri },
         });
       }

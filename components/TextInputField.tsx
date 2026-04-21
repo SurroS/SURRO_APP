@@ -1,19 +1,25 @@
 import React from "react";
 import { YStack, Text } from "tamagui";
 import { TextInput } from "react-native";
-import colors from "@/hooks/colors";
+import  colors from "@/hooks/colors";
 
 type Props = {
   label?: string;
   placeholder?: string;
   value: string;
   onChangeText: (val: string) => void;
-  multiline?:boolean
+  multiline?: boolean;
 };
 
-const TextInputField = ({ label, placeholder, value, onChangeText, multiline }: Props) => (
+const TextInputField = ({
+  label,
+  placeholder,
+  value,
+  onChangeText,
+  multiline,
+}: Props) => (
   <YStack gap="$2">
-    <Text fontWeight="600"fontSize={15} color={colors.text}>
+    <Text fontWeight="600" fontSize={15} color={colors.text}>
       {label}
     </Text>
     <TextInput
@@ -21,13 +27,12 @@ const TextInputField = ({ label, placeholder, value, onChangeText, multiline }: 
         borderColor: "#E6E6E6",
         borderWidth: 1,
         borderRadius: 5,
-        color:colors.text, 
-        padding:15,
-        
+        color: "#1E1E1E",
+        padding: 15,
       }}
       multiline={multiline}
       placeholder={placeholder}
-      placeholderTextColor={"gray"}
+      placeholderTextColor="#999999"
       value={value}
       onChangeText={onChangeText}
     />

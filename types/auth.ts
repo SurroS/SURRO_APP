@@ -16,6 +16,10 @@ export interface User {
   profilePictureUrl?: string | null;
   kycStatus: "NOT_STARTED" | "PENDING" | "APPROVED" | "REJECTED";
   referralCode: string;
+  referral?: {
+    notRedeemed?: string[];
+    redeemed?: string[];
+  };
   referredById?: string | null;
   wallet: Wallet;
   name?: string;
@@ -80,6 +84,15 @@ export interface ChangePasswordRequest {
   currentPassword: string;
   newPassword: string;
   newPasswordConfirmation: string;
+}
+
+export interface GoogleAuth {
+  idToken: string;
+  role?: string;
+}
+
+export interface AppleAuth {
+  identityToken: string;
 }
 
 export interface GoogleAppleAuth {

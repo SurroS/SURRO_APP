@@ -4,22 +4,23 @@ import {
   createSurrogateProfile,
   updateSurrogateProfile,
 } from "@/services/profileApi";
-import { SurrogateProfileUpdate } from "@/types/profile";
+import { SurrogateProfile, SurrogateProfileUpdate } from "@/types/profile";
 
-let cachedProfile: any = null;
+let cachedProfile: SurrogateProfile | null = null;
 
 type SurrogateUpdatePayload = Partial<SurrogateProfileUpdate>;
 
 export const useSurrogateProfile = () => {
-  const [surrogateProfile, setSurrogateProfile] = useState<any>(cachedProfile);
+  const [surrogateProfile, setSurrogateProfile] =
+    useState<SurrogateProfile | null>(cachedProfile);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // -------------------------
   // FETCH PROFILE (CACHED)
   // -------------------------
-  const fetchProfile = async () => {
-    if (cachedProfile) {
+  const fetchProfile = async (forceRefresh = false) => {
+    if (cachedProfile && !forceRefresh) {
       setSurrogateProfile(cachedProfile);
       return cachedProfile;
     }
@@ -29,7 +30,7 @@ export const useSurrogateProfile = () => {
 
     try {
       const res = await getSurrogateProfile();
-      cachedProfile = res.data.profile;
+      cachedProfile = res?.profile || res;
       setSurrogateProfile(cachedProfile);
       return cachedProfile;
     } catch (err: any) {
@@ -43,13 +44,14 @@ export const useSurrogateProfile = () => {
   // -------------------------
   // CREATE
   // -------------------------
-  const createProfile = async (data: any) => {
+  const createProfile = async (data: SurrogateProfileUpdate) => {
+    cachedProfile = null;
     setIsLoading(true);
     try {
       const res = await createSurrogateProfile(data);
-      cachedProfile = res.data;
-      setSurrogateProfile(res.data);
-      return res.data;
+      cachedProfile = res?.profile || res;
+      setSurrogateProfile(cachedProfile);
+      return cachedProfile;
     } finally {
       setIsLoading(false);
     }
@@ -58,12 +60,13 @@ export const useSurrogateProfile = () => {
   // UPDATE PROFILE (PATCH)
   // -------------------------
   const updateProfile = async (data: SurrogateUpdatePayload) => {
+    cachedProfile = null;
     setIsLoading(true);
     try {
       const res = await updateSurrogateProfile(data);
-      cachedProfile = res.data;
-      setSurrogateProfile(res.data);
-      return res.data;
+      cachedProfile = res?.profile || res;
+      setSurrogateProfile(cachedProfile);
+      return cachedProfile;
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +86,9 @@ export const useSurrogateProfile = () => {
     isLoading,
     error,
     fetchProfile,
+    fetchSurrogateProfile: fetchProfile,
     updateProfile,
+    updateSurrogateProfile: updateProfile,
     toggleAvailability,
   };
 };

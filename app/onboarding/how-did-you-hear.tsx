@@ -6,7 +6,6 @@ import { TextInput, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Card, Input, Text, XStack, YStack, ScrollView } from "tamagui";
 import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
-import colors from "@/hooks/colors";
 
 const SourceOption = ({ item, isSelected, onPress }: any) => (
   <Pressable
@@ -143,9 +142,9 @@ export default function HowDidYouHear() {
 
   return (
     <KeyboardAvoidingWrapper>
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#F9F9FB" }}>
         <ScrollView>
-          <YStack flex={1} padding={16} >
+          <YStack flex={1} padding={16}>
             <Text
               fontSize={23}
               lineHeight={32}
@@ -161,7 +160,7 @@ export default function HowDidYouHear() {
               width="100%"
               maxWidth={500}
               alignSelf="center"
-              backgroundColor={colors.background}
+              backgroundColor="#F9F9FB"
               padding={12}
               borderRadius={12}
             >
@@ -224,8 +223,7 @@ export default function HowDidYouHear() {
                       }
                     }
                     // Navigate to editBio screen
-                     router.push("/onboarding/how-did-you-hear");
-                    
+                    router.push("/onboarding/how-did-you-hear");
                   }}
                 >
                   <Text color="#0E0E55" fontWeight="600">

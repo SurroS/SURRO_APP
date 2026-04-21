@@ -31,7 +31,7 @@ interface BottomModalProps {
   orientation?: "row" | "column";
   onClose?: () => void;
   success?: boolean;
-  description?: string;
+  children?: React.ReactNode;
 }
 
 export default function BottomModal({
@@ -44,8 +44,8 @@ export default function BottomModal({
   buttons = [],
   orientation = "row",
   onClose,
-  description,
   success = false,
+  children,
 }: BottomModalProps) {
   const slideAnim = useRef(new Animated.Value(height)).current;
   const scaleAnim = useRef(new Animated.Value(0)).current;
@@ -89,6 +89,7 @@ export default function BottomModal({
       animationType="fade"
       onRequestClose={onClose}
       presentationStyle="overFullScreen"
+      statusBarTranslucent
     >
       <View style={styles.overlay}>
         <Animated.View
@@ -141,14 +142,15 @@ export default function BottomModal({
                 >
                   {b.label}
                 </Text>
-                <Text
-                  style={{ color: b.textColor || "#fff", fontWeight: "600" }}
-                >
-                  {description}
-                </Text>
               </TouchableOpacity>
             ))}
           </View>
+
+          {children && (
+            <View>
+              {children}
+            </View>
+          )}
         </Animated.View>
       </View>
     </Modal>
@@ -160,12 +162,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.4)",
     justifyContent: "flex-end",
+    zIndex: 1000,
   },
   modalCard: {
     backgroundColor: "#fff",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 24,
+    paddingBottom: 34,
     alignItems: "center",
   },
   successWrap: {
@@ -205,7 +209,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center", 
     marginHorizontal: 6,
-    paddingTop:15,
-    paddingHorizontal:15
+    paddingVertical:15, 
   },
 });

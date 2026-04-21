@@ -11,7 +11,6 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import HelpServiceButton from "@/components/HelpServiceButton";
-import colors from "@/hooks/colors";
 import { secureGet } from "@/utils/storage";
 import { GetAllChat } from "@/services/chatApi";
 import { Image } from "react-native";
@@ -99,39 +98,30 @@ export default function ChatListScreen() {
           </Avatar>
 
           <YStack marginLeft={12} width="75%">
-            <Text fontSize={16} fontWeight="700" color={colors.primary}>
+            <Text fontSize={16} fontWeight="700" color="#0E0E55">
               {other?.name || "Unknown User"}
             </Text>
 
-            <Text fontSize={13} color={colors.secondaryGray} numberOfLines={1}>
+            <Text fontSize={13} color="#444444" numberOfLines={1}>
               {item.lastMessage?.content || "No messages yet"}
             </Text>
           </YStack>
 
-          <Ionicons
-            name="chevron-forward"
-            size={20}
-            color={colors.HEADER_ICON_GRAY}
-          />
+          <Ionicons name="chevron-forward" size={20} color="#666666" />
         </XStack>
       </TouchableOpacity>
     );
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
       <YStack flex={1} paddingHorizontal={20} paddingTop={20}>
-        <Text
-          fontSize={20}
-          fontWeight="700"
-          color={colors.primary}
-          marginBottom={15}
-        >
+        <Text fontSize={20} fontWeight="700" color="#0E0E55" marginBottom={15}>
           Messages
         </Text>
 
         {isLoading ? (
-          <ActivityIndicator size="large" color={colors.primary} />
+          <ActivityIndicator size="large" color="#0E0E55" />
         ) : (
           <FlatList
             data={conversations}
@@ -140,7 +130,7 @@ export default function ChatListScreen() {
             contentContainerStyle={{ paddingBottom: 80 }}
             ListEmptyComponent={
               <View style={{ alignItems: "center", marginTop: 50 }}>
-                <Text color={colors.secondaryGray}>No conversations yet</Text>
+                <Text color="#444444">No conversations yet</Text>
               </View>
             }
           />

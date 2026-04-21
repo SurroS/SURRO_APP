@@ -1,19 +1,10 @@
 // Wallet Type
-export interface Wallet {
-  id: string;
-  userId: string;
-  balance: number;
-  currency: string;
-  credit: string;
-  debit: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+import { Wallet } from "./auth";
 
 // Profile Types
 export interface SurrogateProfile {
   id?: string;
-  userId?: string; 
+  userId?: string;
   firstName: string | null;
   lastName: string | null;
   userName: string;
@@ -26,19 +17,19 @@ export interface SurrogateProfile {
   profilePicture: string | null;
   numberOfChildren: number | null;
   countryOfResidence: string | null;
-  stateOfResidence: string;
+  stateOfResidence: string | null;
   stateOfOrigin: string | null;
+  lga: string | null;
   address: string | null;
   zipCode: string | null;
-  phone1: string | null | undefined;
-  phone2: string | null | undefined;
-  emergencyContactPhone: string | null | undefined;
+  phone1: string | null;
+  phone2: string | null;
+  emergencyContactPhone: string | null;
   emergencyContactRelation: string | null;
   facebookProfile: string | null;
   instagramProfile: string | null;
   twitterProfile: string | null;
-  threadsProfile: string | null;
-  ticktock: string;
+  tiktokProfile: string | null;
   isAvailable: boolean;
   termsAcceptedAt: string | null;
   isSubmitted?: boolean;
@@ -47,15 +38,27 @@ export interface SurrogateProfile {
   approvedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
+  user?: {
+    id: string;
+    email: string;
+    password?: string;
+    role: string;
+    isVerified: boolean;
+    isApproved: boolean;
+    createdAt: string;
+    updatedAt: string;
+    isOnline: boolean;
+    lastSeen: string;
+    googleId?: string | null;
+    appleId?: string | null;
+    profilePictureUrl?: string | null;
+    kycStatus: string;
+    referralCode: string;
+    referredById?: string | null;
+  };
+  age?: number;
   medical?: MedicalProfile;
   wallet?: Wallet;
-  lga: string;
-  hasBeenSurrogate: boolean;
-  previousPregnancyType: string | null;
-  compensationAmount: number;
-  compensationNegotiable: boolean;
-  experienceNotes: string;
-  enjoymentNotes: string;
 }
 
 export interface SurrogateProfileUpdate {
@@ -73,79 +76,59 @@ export interface SurrogateProfileUpdate {
   countryOfResidence?: string;
   stateOfResidence?: string;
   stateOfOrigin?: string;
-  medical: MedicalProfile;
+  lga?: string;
   address?: string;
   zipCode?: string;
-  phone1?: string | null | undefined;
-  phone2?: string | null | undefined;
-  emergencyContactPhone?: string | null | undefined;
-  lga: string;
+  phone1?: string | null;
+  phone2?: string | null;
+  emergencyContactPhone?: string | null;
   emergencyContactRelation?: string;
   facebookProfile?: string;
   instagramProfile?: string;
   twitterProfile?: string;
-  threadsProfile?: string;
-  ticktock: string;
+  tiktokProfile?: string;
   isAvailable?: boolean;
   termsAcceptedAt?: string;
-  wallet?: Wallet;
-  hasBeenSurrogate: boolean;
-  previousPregnancyType: string | null;
-  compensationAmount: number;
-  compensationNegotiable: boolean;
-  experienceNotes: string;
-  enjoymentNotes: string;
+  medical?: MedicalProfile;
 }
 
 export interface MedicalProfile {
   id?: string;
   surrogateProfileId?: string;
   genotype?: string;
-  bloodGroup?: string; 
+  bloodGroup?: string;
   pregnancyExperience?: boolean;
-  hasChildren?:boolean;
-  numberOfChildren?: number; 
+  numberofChildren?: number; // Note: backend has typo "numberofChildren"
   ceasareanSection?: boolean;
-  numberOfCs?: number; 
-  hadMiscarriage?: boolean;
-  numberOfMiscarriages?: number; 
-  hasChronicIllness?: boolean;
-  chronicIllnesses?: string[];
-  otherChronicIllness?: string; 
-  hasAllergies?: boolean;
-  allergies?: string[]; 
-  takesMedication?: boolean;
-  medications?: string[]; 
-  hadSurgery?: boolean;
-  surgeries?: string[]; 
-  hasDisability?: boolean;
-  disabilities?: string[]; 
-  pregnancyComplicationsDetails?: string; 
+  chronicIllnessDetails?: string;
+  pregnancyComplicationsDetails?: string;
   endometriumUploadUrl?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface MedicalProfileUpdate {
   genotype?: string;
-  bloodGroup?: string; 
+  bloodGroup?: string;
   pregnancyExperience?: boolean;
-  hasChildren?:boolean;
-  numberOfChildren?: number; 
+  hasChildren?: boolean;
+  numberOfChildren?: number;
   ceasareanSection?: boolean;
-  numberOfCs?: number; 
+  numberOfCs?: number;
   hadMiscarriage?: boolean;
-  numberOfMiscarriages?: number; 
+  numberOfMiscarriages?: number;
   hasChronicIllness?: boolean;
   chronicIllnesses?: string[];
-  otherChronicIllness?: string; 
+  otherChronicIllness?: string;
   hasAllergies?: boolean;
-  allergies?: string[]; 
+  allergies?: string[];
   takesMedication?: boolean;
-  medications?: string[]; 
+  medications?: string[];
   hadSurgery?: boolean;
-  surgeries?: string[]; 
+  surgeries?: string[];
   hasDisability?: boolean;
-  disabilities?: string[]; 
-  pregnancyComplicationsDetails?: string; 
+  disabilities?: string[];
+  pregnancyComplicationsDetails?: string;
   endometriumUploadUrl?: string;
 }
 export type YesNo = "yes" | "no";
@@ -154,7 +137,7 @@ export interface MedicalFormState {
   genotype?: string;
   bloodGroup?: string;
   pregnancyExperience?: boolean;
-  hasChildren?:boolean;
+  hasChildren?: boolean;
   numberofChildren?: number;
   ceasareanSection?: boolean;
   numberOfCs?: number;

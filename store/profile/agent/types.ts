@@ -86,6 +86,7 @@ export interface AgentProfile {
   services?: AgentServices;
   certifications?: AgentCertification[];
   contactLocked?: boolean;
+  avatar?: string;
   wallet: Wallet;
 }
 export interface Wallet {

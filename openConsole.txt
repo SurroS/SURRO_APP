@@ -1,0 +1,17 @@
+{
+  "message": "Medical record updated",
+  "medical": {
+    "id": "5e05e38a-7c39-4c5c-98e9-a00c629626fe",
+    "surrogateProfileId": "20332135-3486-4702-aa0d-26b6dbacca99",
+    "genotype": "AA",
+    "bloodGroup": "A+",
+    "pregnancyExperience": null,
+    "numberofChildren": null,
+    "ceasareanSection": null,
+    "chronicIllnessDetails": null,
+    "pregnancyComplicationsDetails": null,
+    "endometriumUploadUrl": null,
+    "createdAt": "2025-11-12T21:05:34.352Z",
+    "updatedAt": "2026-04-19T21:58:51.775Z"
+  }
+}

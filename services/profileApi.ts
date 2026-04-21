@@ -1,134 +1,122 @@
-import { secureGet } from "@/utils/storage";
-import axios from "axios";
-
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8081";
-
-const profileApi = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+import {
+  authenticatedGet,
+  authenticatedPost,
+  authenticatedPut,
+  authenticatedPatch,
+  authenticatedDelete,
+} from "./httpClient";
+import httpClient from "./httpClient";
 
 // ----------------------------------------------------
-// AUTH WRAPPER
-// ----------------------------------------------------
-export const makeAuthenticatedProfileRequest = async (
-  method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE",
-  endpoint: string,
-  data?: any
-) => {
-  const token = await secureGet("auth_token");
-
-  if (!token) {
-    throw new Error("Authentication token missing.");
-  }
-
-  const config = {
-    headers: { Authorization: `Bearer ${token}` },
-  };
-
-  switch (method) {
-    case "GET":
-      return profileApi.get(endpoint, config);
-    case "POST":
-      return profileApi.post(endpoint, data, config);
-    case "PATCH":
-      return profileApi.patch(endpoint, data, config);
-    case "PUT":
-      return profileApi.put(endpoint, data, config);
-    case "DELETE":
-      return profileApi.delete(endpoint, config);
-  }
-};
-
-// ----------------------------------------------------
-// LEGACY ROLE ENDPOINT (KEEP, but DO NOT USE for UI)
+//   ROLE ENDPOINT (KEEP, but DO NOT USE for UI)
 // ----------------------------------------------------
 export type UserRole = "SURROGATE" | "INTENDED_PARENT" | "AGENT";
 
 export const getUsersByRole = (role: UserRole) =>
-  makeAuthenticatedProfileRequest("GET", `/users/by-role/${role}`);
+  authenticatedGet(`/users/by-role/${role}`);
 
 // ----------------------------------------------------
 // GENERIC USER
 // ----------------------------------------------------
 export const getUserById = (userId: string) =>
-  makeAuthenticatedProfileRequest("GET", `/users/${userId}`);
+  authenticatedGet(`/users/${userId}`);
 
 // ----------------------------------------------------
 // SURROGATES
 // ----------------------------------------------------
-export const getAllSurrogates = () =>
-  makeAuthenticatedProfileRequest("GET", "/surrogates");
+export const getAllSurrogates = () => authenticatedGet("/surrogates");
 
 export const getSurrogateById = (id: string) =>
-  makeAuthenticatedProfileRequest("GET", `/surrogates/${id}`);
+  authenticatedGet(`/surrogates/${id}`);
 
-export const createSurrogateProfile = (d: any) =>
-  makeAuthenticatedProfileRequest("POST", "/surrogates/profile", d);
+export const createSurrogateProfile = (data: any) =>
+  authenticatedPost("/surrogates/profile", data);
 
-export const updateSurrogateProfile = (d: any) =>
-  makeAuthenticatedProfileRequest("PATCH", "/surrogates/profile", d);
+export const updateSurrogateProfile = (data: any) =>
+  authenticatedPatch("/surrogates/profile", data);
 
 export const getSurrogateProfile = () =>
-  makeAuthenticatedProfileRequest("GET", "/surrogates/profile/me");
-export const updateMedicalProfile = (data:any) =>
-  makeAuthenticatedProfileRequest("PATCH", "/surrogates/profile/medical");
-export const uploadEndometriumImage = (data:any) =>
-  makeAuthenticatedProfileRequest(
-    "PATCH",
-    "/surrogates/profile/medical/upload-endometrium"
-  );
+  authenticatedGet("/surrogates/profile/me");
+
+export const updateMedicalProfile = (data: any) =>
+  authenticatedPatch("/surrogates/profile/medical", data);
+
+export const uploadEndometriumImage = (data: any) =>
+  authenticatedPut("/surrogates/profile/medical/upload-endometrium", data);
+
+// ----------------------------------------------------
+// AVATAR UPLOAD
+// ----------------------------------------------------
+export const uploadAvatar = async (data: any) => {
+  const response = await httpClient.post("/profiles/avatar", data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response;
+};
+
 // ----------------------------------------------------
 // AGENTS
 // ----------------------------------------------------
-export const getAllAgents = () =>
-  makeAuthenticatedProfileRequest("GET", `/agents`);
+export const getAllAgents = () => authenticatedGet(`/agents`);
 
-export const getAgentById = (id: string) =>
-  makeAuthenticatedProfileRequest("GET", `/agents/${id}`);
+export const getAgentById = (id: string) => authenticatedGet(`/agents/${id}`);
 
-export const createAgentProfile = (d: any) =>
-  makeAuthenticatedProfileRequest("POST", "/agents/profile", d);
+export const createAgentProfile = (data: any) =>
+  authenticatedPost("/agents/profile", data);
 
-export const updateAgentProfile = (d: any) =>
-  makeAuthenticatedProfileRequest("PATCH", "/agents/profile", d);
+export const updateAgentProfile = (data: any) =>
+  authenticatedPatch("/agents/profile", data);
 
-export const getAgentProfile = () =>
-  makeAuthenticatedProfileRequest("GET", "/agents/profile");
+export const getAgentProfile = () => authenticatedGet("/agents/profile/me");
 
 // ----------------------------------------------------
 // PARENTS
 // ----------------------------------------------------
-export const createParentProfile = (d: any) =>
-  makeAuthenticatedProfileRequest("POST", "/intended-parents/profile", d);
+export const createParentProfile = (data: any) =>
+  authenticatedPost("/intended-parents/profile", data);
 
-export const updateParentProfile = (d: any) =>
-  makeAuthenticatedProfileRequest("PATCH", "/intended-parents/profile", d);
+export const updateParentProfile = (data: any) =>
+  authenticatedPatch("/intended-parents/profile", data);
 
-export const updateParentSurrogateMatch = (d: any) =>
-  makeAuthenticatedProfileRequest(
-    "PATCH",
-    "/intended-parents/match-preferences",
-    d
-  );
-export const fetchParentMatch = (d: any) =>
-  makeAuthenticatedProfileRequest("GET", "/intended-parents/matches", d);
+export const updateParentSurrogateMatch = (data: any) =>
+  authenticatedPut("/intended-parents/match-preferences", data);
 
-export const saveParentSurrogateMatch = (d: any) =>
-  makeAuthenticatedProfileRequest("POST", "/intended-parents/save", d);
-export const GetsavedParentSurrogateMatch = (d: any) =>
-  makeAuthenticatedProfileRequest("GET", "/intended-parents/saved", d);
+export const fetchParentMatch = (data: any) =>
+  authenticatedGet("/intended-parents/matches", { params: data });
 
-export const updateParentMatchPreference = (d: any) =>
-  makeAuthenticatedProfileRequest(
-    "POST",
-    "/intended-parents/match-preferences",
-    d
-  );
+export const saveParentSurrogateMatch = (data: any) =>
+  authenticatedPost("/intended-parents/save", data);
+
+export const GetsavedParentSurrogateMatch = (data: any) =>
+  authenticatedGet("/intended-parents/saved", { params: data });
+
+export const updateParentMatchPreference = (data: any) =>
+  authenticatedPost("/intended-parents/match-preferences", data);
 
 export const getParentProfile = () =>
-  makeAuthenticatedProfileRequest("GET", "/intended-parents/profile/me");
+  authenticatedGet("/intended-parents/profile/me");
 
-export default profileApi;
+// Legacy wrapper for backward compatibility (remove after updating all usages)
+export const makeAuthenticatedProfileRequest = async (
+  method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE",
+  endpoint: string,
+  data?: any,
+) => {
+  console.warn(
+    "[profileApi] makeAuthenticatedProfileRequest is deprecated. Use authenticatedGet/Post/Put/Delete directly.",
+  );
+
+  switch (method) {
+    case "GET":
+      return authenticatedGet(endpoint, data ? { params: data } : undefined);
+    case "POST":
+      return authenticatedPost(endpoint, data);
+    case "PATCH":
+    case "PUT":
+      return authenticatedPut(endpoint, data);
+    case "DELETE":
+      return authenticatedDelete(endpoint);
+  }
+};

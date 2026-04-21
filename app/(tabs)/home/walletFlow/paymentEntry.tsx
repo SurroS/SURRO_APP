@@ -15,7 +15,7 @@ interface PaymentInitPayload {
   amount: number;
   gateway: PaymentGateway | "AUTO";
   channel: PaymentMode | "card";
-  //     location: string;
+  location: string;
 }
 
 interface PaymentInitResponse {
@@ -27,7 +27,7 @@ interface PaymentInitResponse {
   };
 }
 
-export default function PaymentEntryScreen(): JSX.Element {
+export default function PaymentEntryScreen() {
   const { pushWebViewScreen } = useTypedRouter();
   const params = useLocalSearchParams<Record<string, string>>();
   const { token } = useAuth();
@@ -39,50 +39,48 @@ export default function PaymentEntryScreen(): JSX.Element {
   const [amount, setAmount] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
-
   const handleProceed = async (): Promise<void> => {
-  const numericAmount = parseFloat(amount);
+    const numericAmount = parseFloat(amount);
 
-  if (isNaN(numericAmount) || numericAmount <= 0) {
-          Toast.show({
-            text1: "Invalid amount. Please enter a valid number.",
-            type: "customError" as ToastType,
-            text2: "please enter a value not less 1",
-          });
-    return;
-  }
-
-  setLoading(true);
-  try {
-    const payload: PaymentInitPayload = {
-      amount: numericAmount,
-      gateway,
-      channel: mode, 
-    };
-
-    const response = await initiatePaymentFrontend(payload, token);
-
-    console.log("Response =", response);
-
- 
-    const authorizationUrl = response?.data?.authorization_url;
-
-    if (!authorizationUrl) {
-      throw new Error("Invalid payment initialization response.");
+    if (isNaN(numericAmount) || numericAmount <= 0) {
+      Toast.show({
+        text1: "Invalid amount. Please enter a valid number.",
+        type: "customError" as ToastType,
+        text2: "please enter a value not less 1",
+      });
+      return;
     }
 
-    pushWebViewScreen(authorizationUrl, gateway, mode);
-  } catch (err: any) {
-    console.error("Payment init error:", err);
-    Toast.error(
-      err?.response?.data?.message ||
-        "Payment error. Failed to initiate payment."
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+    setLoading(true);
+    try {
+      const payload: PaymentInitPayload = {
+        amount: numericAmount,
+        gateway,
+        channel: mode,
+        location: "MOBILE_APP",
+      };
 
+      const response = await initiatePaymentFrontend(payload, token);
+
+      console.log("Response =", response);
+
+      const authorizationUrl = response?.data?.authorization_url;
+
+      if (!authorizationUrl) {
+        throw new Error("Invalid payment initialization response.");
+      }
+
+      pushWebViewScreen(authorizationUrl, gateway, mode);
+    } catch (err: any) {
+      console.error("Payment init error:", err);
+      Toast.error(
+        err?.response?.data?.message ||
+          "Payment error. Failed to initiate payment.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -145,9 +143,9 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 20,
     backgroundColor: colors.primary,
-    borderRadius: 12, 
+    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
   },
-  buttonText: { color: colors.white, fontWeight: "700", fontSize: 16, },
+  buttonText: { color: colors.white, fontWeight: "700", fontSize: 16 },
 });

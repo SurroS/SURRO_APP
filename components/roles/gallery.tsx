@@ -35,7 +35,7 @@ const Gallery = ({ style }: { style?: any }) => {
 
   const handleNavigate = () => {
     router.push({
-      pathname: "/(tabs)/home/galleryAction",
+      pathname: "/gallery",
       params: {
         images: JSON.stringify(validImages.map((img) => img.url)),
       },

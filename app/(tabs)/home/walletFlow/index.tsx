@@ -15,7 +15,7 @@ import RecentActivitiesScreen from "@/components/wallet/RecentActivity";
 import {
   allMockTransactions,
   SCREENS,
-} from "@/components/wallet/dummyTransactonData";
+} from "@/components/wallet/DummyTransactionData";
 import TransactionItem from "@/components/wallet/TransactonItem";
 import { PrimaryButton } from "@/components/auth";
 

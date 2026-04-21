@@ -4,14 +4,14 @@ import { ScrollView, StyleSheet, Pressable } from "react-native";
 import Animated from "react-native-reanimated";
 import { Accordion, Text, XStack, YStack } from "tamagui";
 
-import About from "../about";
-import Contact from "../contact";
-import ProgressMeter from "../progressCircle";
-import Referral from "../referral";
-import WalletCard from "../wallet";
-import SurrogatePreview from "../surrogate/SurrogatePreview";
+import About from "@/components/roles/about";
+import Contact from "@/components/roles/contact";
+import ProgressMeter from "@/components/roles/progressCircle";
+import Referral from "@/components/roles/referral";
+import WalletCard from "@/components/roles/wallet";
+import SurrogatePreview from "@/components/roles/surrogate/SurrogatePreview";
 import { router } from "expo-router";
-import ProfileCompletionModal from "../ProfileCompletionModal";
+import ProfileCompletionModal from "@/components/roles/ProfileCompletionModal";
 import { calculateProfileProgress } from "@/utils/profileHelpers";
 import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
 import ProfileData from "@/components/profileDetails/ProfileData";
@@ -44,7 +44,7 @@ export default function AgentHomeScreen() {
       }
     }
   }, [agentProfile, progress, isLoading]);
- 
+
   const ViewSurrogate = () => {
     router.push({
       pathname: "/(tabs)/home/surrogate/surrogateList",
@@ -142,7 +142,7 @@ export default function AgentHomeScreen() {
         onClose={() => setShowProfileModal(false)}
         profile={agentProfile}
         profileTypeName="Agent"
-        redirectPath="/(tabs)/settings/profile"
+        redirectPath="/profile"
       />
     </>
   );
