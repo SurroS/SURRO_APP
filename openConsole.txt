@@ -1,17 +1,406 @@
-{
-  "message": "Medical record updated",
-  "medical": {
-    "id": "5e05e38a-7c39-4c5c-98e9-a00c629626fe",
-    "surrogateProfileId": "20332135-3486-4702-aa0d-26b6dbacca99",
-    "genotype": "AA",
-    "bloodGroup": "A+",
-    "pregnancyExperience": null,
-    "numberofChildren": null,
-    "ceasareanSection": null,
-    "chronicIllnessDetails": null,
-    "pregnancyComplicationsDetails": null,
-    "endometriumUploadUrl": null,
-    "createdAt": "2025-11-12T21:05:34.352Z",
-    "updatedAt": "2026-04-19T21:58:51.775Z"
-  }
-}
+======================================================================
+ SURRO APP — CODE CLEANUP, ERRORS, TODOs & BACKEND STATUS
+======================================================================
+Generated: May 28, 2026
+======================================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ 1. CRITICAL ERRORS & BUGS (Must Fix)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[A] app/index.tsx:13-17 — Role mapping dead code
+    The role mapping (INTENDED-PARENT, AGENT, SURROGATE) is defined
+    but the router always redirects to "/(tabs)/home" regardless of
+    role. The `path` variable on line 31 is computed but never used.
+
+[B] services/chatApi.ts:38 — `fetchMessages` fetches wrong endpoint
+    `authenticatedGet('/chat')` instead of `/chat/${conversationId}`.
+    The `conversationId` param is passed but NOT used in the URL.
+
+[C] app/(tabs)/chat/conversation.tsx:69 — Same bug as [B]
+    Calls `fetchMessages(convo.id)` which goes to `/chat` not `/chat/${id}`.
+
+[D] app/(tabs)/home/agent/agentsProfileScreen.tsx:46 — `wallet` is undefined on init
+    `const wallet = agent?.wallet;` but accessed on line 99 before agent loads.
+    Line 99: `if (wallet < transaction.amount)` will crash when wallet is undefined.
+
+[E] app/(tabs)/home/walletFlow/paymentEntry.tsx:36
+    `params.gateway.toLocaleUpperCase()` crashes if gateway is undefined.
+    No null check on params before calling .toLocaleUpperCase().
+
+[F] app/(tabs)/home/walletFlow/addBankAccount.tsx:49 — Typo in Toast type
+    `type: "customSError"` should be `type: "customError"`.
+
+[G] app/security.tsx:10 — Overlapping KeyboardAvoidingWrapper and SafeAreaView
+    KeyboardAvoidingWrapper already contains SafeAreaView but security.tsx
+    wraps a SafeAreaView inside it AND has another SafeAreaView inside.
+
+[H] app/(tabs)/home/surrogate/surrogateList.tsx:160
+    `<Ionicons card="location" size={14} />` — `card` is not a valid prop.
+    Should be `name="location"`.
+
+[I] app/(auth)/forgot-password.tsx:17 — `resetPassword` destructured but never meaningfully used
+    Line 17: `const { forgotPassword, isLoading, resetPassword} = useAuth();`
+    `resetPassword` is used on the reset-password screen, not here. The
+    catch block (line 33) shows a success message instead of an error message.
+
+[J] app/(tabs)/home/walletFlow/withdrawal.tsx:82
+    `justifyContent:"center", alignItems:'center'` applied to the container
+    which causes layout issues with ScreenHeader alignment.
+
+[K] app/(tabs)/home/walletFlow/paymentMethod.tsx:1-61 — Entire block is commented out
+    61 lines of dead code left as a comment. Should be removed.
+
+[L] app/(tabs)/home/walletFlow/paymentWebView.tsx:34-36
+    Routes to "paymentSuccess" and "paymentFailed" screens that DON'T EXIST.
+    These will cause navigation errors.
+
+[M] app/(tabs)/home/galleryAction.tsx:252
+    The header rendering is broken: when selectionMode is true, it renders
+    a RNText with ScreenHeader inside, when false it renders nothing.
+    ScreenHeader inside RNText's children is not valid.
+
+[N] app/(auth)/_layout.tsx:12 — `reset-password` screen not registered
+    The reset-password.tsx file exists but is NOT listed in the Stack.Screen
+    names in _layout.tsx. Only login, signup, otp, forgot-password are listed.
+
+[O] app/(tabs)/home/_layout.tsx:16 — `agent` route commented out
+    Line 16: `{/* <Stack.Screen name="agent" /> */}` — The agent sub-routes
+    (agentsListScreen, agentsProfileScreen) have their own layout but the
+    parent layout doesn't register them. Navigation may break.
+
+[P] store/notifications/notificationService.ts:17-23
+    `Notifications.setNotificationHandler` is called every time, but the
+    Expo docs recommend calling it only once at app root. This may cause
+    handler conflicts.
+
+[Q] app/(auth)/signup.tsx:26-33 — GoogleSignin.configure() called in component body
+    `GoogleSignin.configure()` is called at module level (line 28) and again
+    in login.tsx (line 24). This overwrites configuration. Should be called
+    once in a useEffect or app startup.
+
+[R] app/(tabs)/home/inviteScreen.tsx:138 — Wrong Toast on redeem success
+    Line 143: `text1: "Unable to Redeem at this time"` shown even on success.
+    The success message is in text2 but title says "Unable to Redeem".
+
+[S] services/walletApi.tsx — `fundWallet` and `debitWallet` accept optional token
+    but the token is never used in the function body (only passed via interceptor).
+
+[T] store/profile/agent/types.ts — `phone1: string | null | undefined` in AgentProfile
+    This is inconsistent with other profile types. Should be `string | null`.
+
+[U] app/(tabs)/home/surrogate/surrogateProfileScreen.tsx:397-408
+    ChatMethodModal is imported but used as a regular modal with children.
+    The component expects `visible` and `onClose` props AND renders children,
+    but the implementation may not support children + buttons properly.
+
+[V] app/(tabs)/home/agent/agentsProfileScreen.tsx:249
+    PaymentModal is used with children but the component's interface is unclear.
+    `PaymentModal` is imported from `@/components/payment`.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ 2. NOT CONNECTED TO BACKEND (MOCK/STUB DATA)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[A] Wallet System (MOCK)
+    - hooks/payment/useBankAccounts.ts: Full mock — setTimeout + hardcoded data.
+      No real API call for bank accounts.
+    - app/(tabs)/home/walletFlow/index.tsx: Uses `allMockTransactions` from
+      components/wallet/DummyTransactionData. No real transaction history API.
+    - Wallet balance is fetched but debit/credit operations are not
+      fully wired to actual payment gateway callbacks.
+
+[B] Bank Account Management (NOT CONNECTED)
+    - useBankAccounts.fetchAccounts() uses setTimeout mock.
+    - useBankAccounts.addAccount() uses setTimeout mock.
+    - No real API endpoint exists in services/ for bank account CRUD.
+
+[C] Support Chat (LOCAL ONLY — NO BACKEND)
+    - app/(tabs)/chat/supportChat.tsx: Fully local chatbot simulation.
+      No API calls. Messages stored in SecureStore, not synced.
+    - Uses hardcoded bot replies with setTimeout, no real backend integration.
+
+[D] Notifications (HYBRID — MOSTLY LOCAL)
+    - store/notifications/index.ts: Local notification store only.
+      No websocket or polling for server-side notifications.
+    - constants/notifications.ts: Hardcoded mock notification data.
+    - utils/notificationTriggers.ts: Uses local store only.
+
+[E] Referral System (MOCK)
+    - app/(tabs)/home/inviteScreen.tsx:164: `handleRedeemToWallet` calls
+      `fundWallet` but the success state is fake. Comments say
+      "currently fake state updates here" and "mark referrals as redeemed
+      in backend" — this is NOT implemented.
+
+[F] Parent Profile List (NOT IMPLEMENTED)
+    - store/parents/actions.ts: `fetchParents` and `fetchParentsbyId`
+      have TODO comments and empty try blocks. API calls are commented out.
+
+[G] Agent Filters (STUB)
+    - app/(tabs)/home/agent/agentsListScreen.tsx:301:
+      `<FilterModal ... onApply={() => {}} />` — onApply does nothing.
+    - app/(tabs)/home/surrogate/surrogateList.tsx:290:
+      FilterModal onApply is connected but the actual filtering is not
+      implemented in the store.
+
+[H] WebSocket / Real-time Chat (NOT CONNECTED)
+    - lib/socket.ts: Socket.io client is defined but NEVER used anywhere.
+      No components import or use `connectSocket()` or `getSocket()`.
+      Chat uses REST API polling instead of WebSockets.
+
+[I] EAS / Google Services (CONFIGURED BUT NOT IN USE)
+    - Apple Sign-In: `expo-apple-authentication` is in package.json
+      and `appleLogin` action exists in auth store, but there's no
+      UI component or button to trigger Apple sign-in.
+    - Google Sign-In: Configured with client IDs but no actual
+      Google backend endpoint verification for the idToken.
+
+[J] Payment Flow — WebView Callback (STUB)
+    - app/(tabs)/home/walletFlow/paymentWebView.tsx: Navigation state
+      change handler checks for "payment-success" and "payment-failure"
+      in URL, but these screens don't exist. No actual payment
+      verification or post-payment logic.
+
+[K] Fallback Data for Agents & Surrogates (SHOULD BE REMOVED)
+    - store/agents/actions.ts: `fallbackAgent` hardcoded array used
+      when API returns empty. This masks real API issues.
+    - store/surrogates/actions.ts: `fallbackSurrogates` in the listing.
+
+[L] Medical History Experience Questions (NOT WIRED TO BACKEND)
+    - constants/ExperienceQuestions.tsx: Questions exist but are not
+      connected to any API endpoint in profileApi.ts.
+
+[M] Avatar Upload (NOT FULLY WIRED)
+    - services/profileApi.ts:46: `uploadAvatar` exists but is only
+      a POST to /profiles/avatar. No profile screen calls this.
+
+[N] Surrogate Guest View (STUB)
+    - app/(tabs)/home/surrogate/surrogateGuestView.tsx: Renders
+      GuestView component which likely contains mock data.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ 3. CODE QUALITY & CLEANUP ISSUES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[A] EXCESSIVE console.log STATEMENTS (50+ across codebase)
+    Many development/debugging console.log calls throughout:
+    - app/(auth)/login.tsx:54-56 (Google login debug)
+    - app/(auth)/signup.tsx:53-55 (Google signup debug)
+    - app/(auth)/forgot-password.tsx:27-29 (debug logs)
+    - app/(auth)/otp.tsx:40,54-55
+    - app/(tabs)/chat/conversation.tsx (multiple)
+    - services/api.ts:18,25
+    - services/chatApi.ts (multiple)
+    - services/httpClient.ts:28
+    - store/auth/actions.ts (multiple)
+    - store/gallery/actions.ts (multiple)
+    - hooks/profile/useAgentProfile.ts (multiple)
+    - And many more...
+
+[B] DUPLICATED FILES
+    - app/gallery.tsx AND app/(tabs)/home/galleryAction.tsx:
+      Both are gallery screens with nearly identical code.
+      galleryAction.tsx has more features (error state, BackHandler).
+      One should be removed.
+    - utils/apiErrorHandler.ts AND utils/apiErrors.ts:
+      Both export `explainAxiosError` with different implementations.
+      apiErrorHandler.ts is more comprehensive.
+
+[C] UNUSED IMPORTS
+    - app/(auth)/forgot-password.tsx:12 — `useResetPasswordForm` imported
+      but never used.
+    - app/(tabs)/home/surrogate/surrogateProfileScreen.tsx:27 —
+      `useWalletStore` imported but only `balance` and `debit` used.
+      `debit` is destructured but never called.
+    - services/api.ts: Created but services/httpClient.ts is the main client.
+      api.ts duplicates the interceptor logic.
+    - types/react-native-vector-icons.d.ts — Icon type declared but
+      react-native-vector-icons/Feather is never imported anywhere.
+
+[D] DUPLICATE SERVICE FILE — api.ts vs httpClient.ts
+    - services/api.ts: Has its own Axios instance with Bearer token
+      from useAuthStore.getState()
+    - services/httpClient.ts: Another Axios instance with token from
+      secureGet("auth_token")
+    - This causes confusion: some API calls use `api`, others use `httpClient`.
+    - galleryApi.ts imports both `authenticatedGet` from httpClient AND
+      `default as httpClient` from httpClient.
+
+[E] HARDCODED VALUES
+    - app/(tabs)/home/agent/agentsProfileScreen.tsx:250,253 —
+      "N50,000" hardcoded instead of using AGENT_TRANSACTIONS constant.
+    - app/(tabs)/home/surrogate/surrogateProfileScreen.tsx:386,389 —
+      "N50,000" hardcoded instead of using SURROGATE_TRANSACTIONS constant.
+    - app/(auth)/login.tsx:37-38 — DEV credentials hardcoded.
+
+[F] STYLE INCONSISTENCIES
+    - Mix of StyleSheet.create (React Native), Tamagui styled props,
+      and inline style objects throughout the codebase.
+    - Colors hardcoded as hex strings (#0E0E55, #BB2D21, etc.)
+      instead of using the colors.ts constants.
+
+[G] TYPE ISSUES
+    - Widespread use of `any` types (agentsProfileScreen.tsx, surrogateProfileScreen.tsx,
+      useAgentProfile.ts, etc.) instead of proper type definitions.
+    - AGENT_TRANSACTIONS and SURROGATE_TRANSACTIONS are `const` objects
+      but used as if they have a `.amount` property at runtime (they do, but
+      it's not type-safe).
+
+[H] UNUSED STORE FILES
+    - store/profile/agent/index.ts — persists agent profile but the app
+      uses hooks/profile/useAgentProfile.ts which has its own state.
+    - store/profile/parent/index.ts — same pattern duplication.
+
+[I] index.js + App.js EXPOSURE
+    - index.js references `import App from './App'` but there is NO App.tsx
+      file. This file is dead code since the app uses expo-router entry.
+
+[J] DEPRECATED FUNCTION WRAPPERS
+    - services/authApi.ts:43-57 — `makeAuthenticatedAuthRequest` and
+      `authedRequest` marked as deprecated but still exported.
+    - services/galleryApi.ts — `makeAuthenticatedGalleryRequest` deprecated.
+    - services/kycApi.ts — `makeAuthenticatedKYCRequest` deprecated.
+    - services/profileApi.ts — `makeAuthenticatedProfileRequest` deprecated.
+
+[K] PERSIST MIDDLEWARE — store/middleware/persist.ts AND utils/storage.ts
+    Both implement the same dev vs production storage logic. Storage.ts
+    is used by most utilities while persist.ts is used by Zustand persist.
+    Should be unified.
+
+[L] UNUSED DEPENDENCIES in package.json
+    - "install": "^0.13.0" — This is likely a mistake, `install` is not
+      a real package (it's a no-op package).
+    - "react-native-otp-input" — Not found in package.json but
+      "react-otp-input" is. Verify which one is actually used.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ 4. TODOs & FEATURES TO IMPLEMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[P1] MUST DO — CRITICAL PATH
+─────────────────────────────────────────────
+[ ] Fix fetchMessages to use correct endpoint: `/chat/${conversationId}`
+[ ] Fix wallet null check in agentsProfileScreen.tsx:99
+[ ] Fix paymentEntry.tsx:36 null-safety on params.gateway
+[ ] Add reset-password screen to (auth)/_layout.tsx Stack
+[ ] Register agent route in (tabs)/home/_layout.tsx
+[ ] Fix galleryAction.tsx:252 broken header rendering
+[ ] Create paymentSuccess.tsx and paymentFailed.tsx screens
+[ ] Fix addBankAccount.tsx:49 toast type typo
+[ ] Fix surrogateList.tsx:160 Ionicons `card` → `name` prop
+[ ] Fix forgot-password.tsx success/error message swap
+[ ] Remove duplicate app/gallery.tsx or app/(tabs)/home/galleryAction.tsx
+
+[P2] SHOULD DO — IMPORTANT
+─────────────────────────────────────────────
+[ ] Clean up console.log statements across all files
+[ ] Remove deprecated API wrapper functions
+[ ] Unify utils/apiErrorHandler.ts and utils/apiErrors.ts
+[ ] Connect bank account APIs to real backend endpoints
+[ ] Connect support chat to real backend/socket
+[ ] Implement real-time chat via lib/socket.ts
+[ ] Implement parent profile list APIs
+[ ] Implement agent/surrogate filtering logic
+[ ] Add Apple Sign-In button UI
+[ ] Implement real referral redemption flow
+[ ] Add server-side notification polling/websocket
+[ ] Remove fallback mock data (agents, surrogates)
+[ ] Replace hardcoded "N50,000" with transaction constants
+
+[P3] NICE TO HAVE — CODE QUALITY
+─────────────────────────────────────────────
+[ ] Replace `any` types with proper interfaces
+[ ] Standardize styling approach (prefer Tamagui)
+[ ] Unify storage implementations (persist.ts + storage.ts)
+[ ] Add proper error boundaries
+[ ] Add loading skeletons for all list screens
+[ ] Implement proper offline support with queue
+[ ] Add proper form validation library (Zod already installed)
+[ ] Remove dead commented-out code
+[ ] Delete index.js if App.tsx doesn't exist
+[ ] Remove unused dependencies from package.json
+[ ] Add proper TypeScript strictness rules
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ 5. ARCHITECTURE OBSERVATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[A] STORE ARCHITECTURE
+    - Zustand stores are split across store/ directory with separate
+      actions.ts, index.ts, types.ts per store.
+    - BUT hooks/profile/useAgentProfile.ts, useSurrogateProfile.ts,
+      useParentProfile.ts each maintain their OWN state (not using stores).
+      This creates 2 sources of truth for profile data.
+    - Recommendation: Either use store/ OR use hooks/, not both.
+
+[B] SERVICE LAYER
+    - Two Axios instances (api.ts and httpClient.ts) causing confusion.
+    - httpClient.ts is more complete (interceptors, error handling).
+    - Recommendation: Delete api.ts, keep httpClient.ts.
+
+[C] ROUTING STRUCTURE
+    - app/ uses expo-router file-based routing.
+    - app/(tabs)/home/ is overcrowded: home, gallery, invite, walletFlow,
+      agent, surrogate all nested under "home".
+    - Consider flattening: app/wallet/, app/gallery/, app/invite/ at top level.
+
+[D] COMPONENT ORGANIZATION
+    - components/ directory is flat with 30+ entries. Some subdirectories
+      exist (auth/, chat/, medical/, modals/, navigation/, etc.) but many
+      components are at the root level.
+    - Consider grouping by domain (wallet/, payment/, profile/) more
+      consistently.
+
+[E] API ENDPOINT BASE URL
+    - .env: https://surroserver-production.up.railway.app/api/v1 (active)
+    - eas.json dev/preview/prod: https://dev.surrosantara.space/api/v1
+    - Inconsistency: local dev uses railway, EAS builds use different URL.
+    - Recommendation: Use environment variable consistently.
+
+[F] NEW ARCHITECTURE (Fabric)
+    - app.json:15 — `"newArchEnabled": true`
+    - eas.json: Both iOS and Android have newArchEnabled: true
+    - This means the app uses React Native Fabric (new architecture).
+    - Ensure all native modules are compatible.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ 6. DUPLICATED / DEAD FILES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FILE                          | STATUS        | NOTES
+──────────────────────────────┼───────────────┼──────────────────────────
+app/gallery.tsx               | DUPLICATE     | Same as galleryAction.tsx
+services/api.ts               | DUPLICATE     | Same role as httpClient.ts
+utils/apiErrorHandler.ts      | DUPLICATE     | Same as apiErrors.ts
+utils/apiErrors.ts            | DUPLICATE     | Same as apiErrorHandler.ts
+components/wallet/            | MAYBE DEAD    | Check DummyTransactionData usage
+index.js                      | DEAD          | No App.tsx exists
+x_logo.svg.svg                | DEAD          | Double extension
+helpers/                      | EMPTY         | Empty directory
+scripts/reset-project.js      | DEAD          | Bootstrap only
+app/(tabs)/home/walletFlow/   └ paymentSuccess.tsx | MISSING | Referenced but doesn't exist
+app/(tabs)/home/walletFlow/   └ paymentFailed.tsx  | MISSING | Referenced but doesn't exist
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ 7. SECURITY CONCERNS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[A] .env file contains EXPO_TOKEN=zOAoSneAj... — This is a sensitive
+    credential that should NOT be committed to git.
+
+[B] Google client IDs are hardcoded in app.json and eas.json.
+    These should be in .env only.
+
+[C] DEV credentials hardcoded in login.tsx:37-38 and store/auth/actions.ts:30-35.
+    This is a potential security issue if deployed with dev paths accessible.
+
+[D] SecureStore fallback to AsyncStorage in dev mode (utils/storage.ts:19-21).
+    In development mode, auth tokens are stored in plaintext AsyncStorage,
+    which is not encrypted.
+
+[E] EXPO_PUBLIC_API_URL in .env is the production URL, but eas.json also
+    uses production URL for the dev build. Dev should use a different URL.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ END OF REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

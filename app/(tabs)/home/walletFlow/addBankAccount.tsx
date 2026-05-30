@@ -7,6 +7,7 @@ import colors from "@/hooks/colors";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { useBankAccounts } from "@/hooks/payment/useBankAccounts";
+import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 
 export default function AddBankAccountScreen() {
   const router = useRouter();
@@ -52,8 +53,9 @@ export default function AddBankAccountScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <YStack padding="$4" gap="$3" justifyContent="center">
+    <KeyboardAvoidingWrapper>
+      <SafeAreaView style={styles.container}>
+        <YStack padding="$4" gap="$3" justifyContent="center">
         <Text style={styles.header}>Connect your bank account</Text>
         <Text style={styles.subHeader}>
           This is where your withdrawals will be deposited
@@ -128,8 +130,9 @@ export default function AddBankAccountScreen() {
         >
           {isSubmitting ? "Saving..." : "Continue"}
         </Button>
-      </YStack>
-    </SafeAreaView>
+        </YStack>
+      </SafeAreaView>
+    </KeyboardAvoidingWrapper>
   );
 }
 

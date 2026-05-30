@@ -14,6 +14,7 @@ import {
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScreenHeader } from "@/components/auth";
+import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 
 interface HelpTopic {
   id: string;
@@ -84,9 +85,10 @@ export default function HelpCentreScreen(): React.ReactElement {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScreenHeader title={"Help center"} onBackPress={() => router.back()} />
-      <ScrollView
+    <KeyboardAvoidingWrapper>
+      <SafeAreaView style={styles.container}>
+        <ScreenHeader title={"Help center"} onBackPress={() => router.back()} />
+        <ScrollView
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -168,8 +170,9 @@ export default function HelpCentreScreen(): React.ReactElement {
             <Text style={styles.mailButtonText}>Customer Service</Text>
           </TouchableOpacity>
         </YStack>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </KeyboardAvoidingWrapper>
   );
 }
 

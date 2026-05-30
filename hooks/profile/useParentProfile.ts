@@ -1,4 +1,3 @@
-// hooks/useParentProfile.ts
 import { useState } from "react";
 import {
   getParentProfile,
@@ -20,6 +19,7 @@ export const useParentProfile = () => {
   // -------------------------
   const fetchProfile = async (forceRefresh = false) => {
     if (cachedProfile && !forceRefresh) {
+      console.log("[ParentProfile] Using cached profile");
       setParentProfile(cachedProfile);
       return cachedProfile;
     }
@@ -28,12 +28,17 @@ export const useParentProfile = () => {
     setError(null);
 
     try {
+      console.log("[ParentProfile] Fetching profile from API...");
       const res = await getParentProfile();
+      console.log("[ParentProfile] API response:", JSON.stringify(res).slice(0, 400));
       cachedProfile = res?.profile || res;
       setParentProfile(cachedProfile);
+      console.log("[ParentProfile] Profile loaded:", cachedProfile ? "YES" : "NO");
       return cachedProfile;
     } catch (err: any) {
-      setError(err?.message || "Failed to fetch profile");
+      const msg = err?.message || "Failed to fetch profile";
+      console.error("[ParentProfile] Fetch error:", msg);
+      setError(msg);
       throw err;
     } finally {
       setIsLoading(false);
@@ -46,8 +51,10 @@ export const useParentProfile = () => {
   const createProfile = async (data: any) => {
     cachedProfile = null;
     setIsLoading(true);
+    console.log("[ParentProfile] Creating profile...");
     try {
       const res = await createParentProfile(data);
+      console.log("[ParentProfile] Create success:", JSON.stringify(res).slice(0, 200));
       cachedProfile = res?.profile || res;
       setParentProfile(res?.profile || res);
       return res;
@@ -62,8 +69,10 @@ export const useParentProfile = () => {
   const updateProfile = async (data: Partial<any>) => {
     cachedProfile = null;
     setIsLoading(true);
+    console.log("[ParentProfile] Updating profile...");
     try {
       const res = await updateParentProfile(data);
+      console.log("[ParentProfile] Update success:", JSON.stringify(res).slice(0, 200));
       cachedProfile = res?.profile || res;
       setParentProfile(res?.profile || res);
       return res;

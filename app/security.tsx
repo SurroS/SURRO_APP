@@ -7,6 +7,7 @@ import colors from "@/hooks/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScreenHeader } from "@/components/navigation/ScreenHeader";
 import { router } from "expo-router";
+import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 
@@ -45,12 +46,13 @@ export default function ChangePasswordScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScreenHeader
-        title="Privacy and security"
-        onBackPress={() => router.back()}
-      />
-      <YStack>
+    <KeyboardAvoidingWrapper>
+      <SafeAreaView style={styles.container}>
+        <ScreenHeader
+          title="Privacy and security"
+          onBackPress={() => router.back()}
+        />
+        <YStack>
         <Text style={styles.label}>Current Password</Text>
         <TextInput
           secureTextEntry
@@ -89,8 +91,9 @@ export default function ChangePasswordScreen() {
           onPress={handleSubmit}
           loading={isLoading}
         />
-      </YStack>
-    </SafeAreaView>
+        </YStack>
+      </SafeAreaView>
+    </KeyboardAvoidingWrapper>
   );
 }
 

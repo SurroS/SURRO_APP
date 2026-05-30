@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView, RefreshControl } from "react-native";
+import { ScrollView, RefreshControl, Pressable, Text } from "react-native";
 import { YStack, Button, View } from "tamagui";
 import { router } from "expo-router";
 import { ScreenHeader } from "@/components/auth";
@@ -137,6 +137,7 @@ export default function MedicalDetailsStep2() {
         </View>
 
         <ScrollView
+          nestedScrollEnabled
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -144,7 +145,6 @@ export default function MedicalDetailsStep2() {
               colors={["#0E0E55"]}
             />
           }
-          contentContainerStyle={{ flexGrow: 1 }}
         >
           <YStack padding="$4" gap="$5">
             <DropdownField
@@ -200,13 +200,11 @@ export default function MedicalDetailsStep2() {
                 Continue
               </Button>
 
-              <Button
-                backgroundColor={colors.gray}
-                color="#FFF"
-                onPress={handleContinueLater}
-              >
-                Continue Later
-              </Button>
+              <Pressable onPress={handleContinueLater} style={{ alignSelf: "center", paddingVertical: 12 }}>
+                <Text style={{ color: colors.primary, textDecorationLine: "underline", fontSize: 14 }}>
+                  Continue Later
+                </Text>
+              </Pressable>
             </YStack>
           </YStack>
         </ScrollView>

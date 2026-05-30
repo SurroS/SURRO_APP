@@ -65,7 +65,7 @@ export default function SignupScreen() {
         type: "customSuccess" as ToastType,
         text2: "Welcome!",
       });
-      router.push("/onboarding/how-did-you-hear");
+      router.replace("/(tabs)/home");
     } catch (error: any) {
       console.error("Google Sign-In error:", error);
 

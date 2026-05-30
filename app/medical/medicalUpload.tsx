@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView, ActivityIndicator, Image } from "react-native";
+import { ScrollView, ActivityIndicator, Image, Pressable } from "react-native";
 import { YStack, Button, Text, View } from "tamagui";
 import { router } from "expo-router";
 import { ScreenHeader } from "@/components/auth";
@@ -143,14 +143,15 @@ export default function MedicalUpload() {
               {isLoading || uploading ? <ActivityIndicator color="#FFF" /> : "Continue"}
             </Button>
 
-            <Button
-              backgroundColor="#E9F3FF"
-              color={colors.primary}
-              disabled={isLoading || uploading}
+            <Pressable
               onPress={handleContinueLater}
+              disabled={isLoading || uploading}
+              style={{ alignSelf: "center", paddingVertical: 12 }}
             >
-              Continue Later
-            </Button>
+              <Text style={{ color: colors.primary, textDecorationLine: "underline", fontSize: 14 }}>
+                Continue Later
+              </Text>
+            </Pressable>
           </YStack>
         </YStack>
       </ScrollView>

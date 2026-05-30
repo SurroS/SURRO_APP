@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { YStack, Button, ScrollView, View } from "tamagui";
-import { RefreshControl } from "react-native";
+import { RefreshControl, Pressable, Text } from "react-native";
 import { router } from "expo-router";
 import { ScreenHeader } from "@/components/auth";
 import colors from "@/hooks/colors";
@@ -85,7 +85,7 @@ export default function MedicalDetailsStep1() {
     bloodGroup &&
     pregnancyExperience &&
     (pregnancyExperience === "No" ||
-      (numberOfChildren > 0 &&
+      (numberOfChildren >= 0 &&
         ceasareanSection &&
         (ceasareanSection === "No" || numberOfCs > 0)));
 
@@ -198,13 +198,11 @@ export default function MedicalDetailsStep1() {
               Continue
             </Button>
 
-            <Button
-              backgroundColor={colors.gray}
-              color="#FFF"
-              onPress={handleContinueLater}
-            >
-              Continue Later
-            </Button>
+            <Pressable onPress={handleContinueLater} style={{ alignSelf: "center", paddingVertical: 12 }}>
+              <Text style={{ color: colors.primary, textDecorationLine: "underline", fontSize: 14 }}>
+                Continue Later
+              </Text>
+            </Pressable>
           </YStack>
         </YStack>
       </ScrollView>

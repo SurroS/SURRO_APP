@@ -7,6 +7,7 @@ import ResourceCard from "@/components/resources/ResourceCard";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import HelpServiceButton from "@/components/HelpServiceButton";
+import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 
 export default function ResourceCentre() {
   const [tab, setTab] = useState("general");
@@ -77,13 +78,14 @@ export default function ResourceCentre() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF", paddingTop: 20 }}>
-      <View marginLeft={28}>
-        <ScreenHeader
-          title="Resource centre"
-          onBackPress={() => router.back()}
-        />
-      </View>
+    <KeyboardAvoidingWrapper>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF", paddingTop: 20 }}>
+        <View marginLeft={28}>
+          <ScreenHeader
+            title="Resource centre"
+            onBackPress={() => router.back()}
+          />
+        </View>
 
       {/* Search bar */}
       <XStack
@@ -154,8 +156,8 @@ export default function ResourceCentre() {
             No resources found.
           </Text>
         )}
-      </ScrollView>
-      {/* Floating Customer Support Button */}
+        </ScrollView>
+        {/* Floating Customer Support Button */}
       <HelpServiceButton />
       {/* Filter modal */}
       {filterVisible && (
@@ -258,7 +260,8 @@ export default function ResourceCentre() {
             </XStack>
           </View>
         </>
-      )}
-    </SafeAreaView>
+        )}
+      </SafeAreaView>
+    </KeyboardAvoidingWrapper>
   );
 }

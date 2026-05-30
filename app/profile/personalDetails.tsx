@@ -34,6 +34,7 @@ export default function PersonalInformationScreen() {
   const {
     agentProfile,
     updateAgentProfile,
+    fetchAgentProfile,
     isLoading: agentLoading,
   } = useAgentProfile();
 
@@ -45,6 +46,11 @@ export default function PersonalInformationScreen() {
   const [country, setCountry] = useState<any>(null);
   const [dob, setDob] = useState("");
   const [maritalStatus, setMaritalStatus] = useState("");
+
+  const handleSetCountry = (name: string) => {
+    const found = countries.find((c) => c.name === name || c.label === name);
+    if (found) setCountry(found);
+  };
 
   // SURROGATE ONLY
   const [height, setHeight] = useState("");
@@ -61,6 +67,8 @@ export default function PersonalInformationScreen() {
       fetchProfile();
     } else if (Role === "INTENDED_PARENT" && !parentProfile) {
       fetchParentProfile();
+    } else if (Role === "AGENT" && !agentProfile) {
+      fetchAgentProfile();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -212,7 +220,7 @@ export default function PersonalInformationScreen() {
                 maritalStatus={maritalStatus}
                 countries={countries}
                 setFirstName={setFirstName}
-                setCountry={setCountry}
+                setCountry={handleSetCountry}
                 setDob={setDob}
                 setMaritalStatus={setMaritalStatus}
                 height={height}
@@ -231,7 +239,7 @@ export default function PersonalInformationScreen() {
                 maritalStatus={maritalStatus}
                 countries={countries}
                 setFirstName={setFirstName}
-                setCountry={setCountry}
+                setCountry={handleSetCountry}
                 setDob={setDob}
                 setMaritalStatus={setMaritalStatus}
               />
@@ -244,7 +252,7 @@ export default function PersonalInformationScreen() {
                 maritalStatus={maritalStatus}
                 countries={countries}
                 setFirstName={setFirstName}
-                setCountry={setCountry}
+                setCountry={handleSetCountry}
                 setDob={setDob}
                 setMaritalStatus={setMaritalStatus}
               />

@@ -1,9 +1,22 @@
 import React from "react";
+import { ActivityIndicator, View, StyleSheet } from "react-native";
 import Entypo from "@expo/vector-icons/Entypo";
 import { LibraryBig, MessageSquare, Settings } from "@tamagui/lucide-icons";
 import { Tabs } from "expo-router";
+import { useAuthStore } from "@/store/auth";
 
 export default function TabsLayout() {
+  const forceLogout = useAuthStore((s) => s.forceLogout);
+
+  // ---- Full-screen blocker on 401 force logout ----
+  if (forceLogout) {
+    return (
+      <View style={styles.blocker}>
+        <ActivityIndicator size="large" color="#0E0E55" />
+      </View>
+    );
+  }
+
   return (
     <Tabs
       screenOptions={{
@@ -69,3 +82,12 @@ export default function TabsLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  blocker: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+  },
+});

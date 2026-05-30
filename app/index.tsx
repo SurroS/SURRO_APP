@@ -7,7 +7,7 @@ export default function Index() {
   const router = useRouter();
 
   // Get store values including hydration state
-  const { isAuthenticated, user, isLoading, hasHydrated } = useAuthStore();
+  const { isAuthenticated, user, isLoading, hasHydrated, hasSeenOnboarding } = useAuthStore();
 
   // Role mapping to app routes
   const roleMapping = {
@@ -35,8 +35,8 @@ export default function Index() {
         }
       }
 
-      // If not authenticated or role unknown → onboarding
-      router.replace("/onboarding/screen1");
+      // If not authenticated or role unknown → screen1 (first time) or login
+      router.replace(hasSeenOnboarding ? "/(auth)/login" : "/onboarding/screen1");
     }
   }, [hasHydrated, isAuthenticated, user?.role, isLoading]);
 

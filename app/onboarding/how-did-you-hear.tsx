@@ -10,46 +10,46 @@ import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 const SourceOption = ({ item, isSelected, onPress }: any) => (
   <Pressable
     onPress={onPress}
-    style={{ marginBottom: 16 }}
+    style={{ marginBottom: 8 }}
     accessibilityRole="radio"
     accessibilityState={{ selected: isSelected }}
   >
     <XStack
       alignItems="center"
       justifyContent="space-between"
-      paddingVertical={14}
-      paddingHorizontal={14}
+      paddingVertical={10}
+      paddingHorizontal={10}
       borderRadius={8}
       borderWidth={1}
       borderColor={isSelected ? "#0E0E55" : "#E6E6E6"}
       backgroundColor={isSelected ? "#F4F7FF" : "white"}
     >
-      <XStack alignItems="center" gap={12}>
+      <XStack alignItems="center" gap={8}>
         <YStack
-          width={40}
-          height={40}
-          borderRadius={8}
+          width={25}
+          height={25}
+          borderRadius={6}
           justifyContent="center"
           alignItems="center"
           backgroundColor={item.bg}
         >
           {item.icon ? (
-            <Ionicons name={item.icon as any} size={24} color={item.fg} />
+            <Ionicons name={item.icon as any} size={14} color={item.fg} />
           ) : (
-            <Text color={item.fg} fontWeight="700">
+            <Text color={item.fg} fontWeight="700" fontSize={12}>
               R
             </Text>
           )}
         </YStack>
-        <Text fontSize={16} color="#212121">
+        <Text fontSize={14} color="#212121">
           {item.label}
         </Text>
       </XStack>
 
       <YStack
-        width={20}
-        height={20}
-        borderRadius={10}
+        width={18}
+        height={18}
+        borderRadius={9}
         borderWidth={2}
         borderColor={isSelected ? "#0E0E55" : "#CFCFCF"}
         justifyContent="center"
@@ -58,9 +58,9 @@ const SourceOption = ({ item, isSelected, onPress }: any) => (
       >
         {isSelected && (
           <YStack
-            width={10}
-            height={10}
-            borderRadius={5}
+            width={8}
+            height={8}
+            borderRadius={4}
             backgroundColor="white"
           />
         )}
@@ -85,7 +85,7 @@ export default function HowDidYouHear() {
         setReferralInfo(selectedSource);
       }
     }
-    router.push("/(auth)/signup");
+    router.push("/onboarding/role-selection");
   };
 
   const sources = [
@@ -209,12 +209,8 @@ export default function HowDidYouHear() {
                     Next
                   </Text>
                 </Button>
-                <Button
-                  height={55}
-                  borderRadius={8}
-                  backgroundColor="#E6E6E6"
+                <Pressable
                   onPress={async () => {
-                    // Set referral info to complete onboarding step
                     if (selectedSource) {
                       if (selectedSource === "Referral" && referralCode) {
                         setReferralInfo(selectedSource, referralCode);
@@ -222,14 +218,13 @@ export default function HowDidYouHear() {
                         setReferralInfo(selectedSource);
                       }
                     }
-                    // Navigate to editBio screen
-                    router.push("/onboarding/how-did-you-hear");
+                    router.push("/onboarding/role-selection");
                   }}
                 >
-                  <Text color="#0E0E55" fontWeight="600">
+                  <Text style={{ color: "#0E0E55", fontWeight: "600", textAlign: "center", paddingVertical: 16, textDecorationLine: "underline" }}>
                     Skip
                   </Text>
-                </Button>
+                </Pressable>
               </YStack>
             </Card>
           </YStack>

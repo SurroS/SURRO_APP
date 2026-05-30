@@ -17,6 +17,7 @@ import { ToastType } from "toastify-react-native/utils/interfaces";
 import { PrimaryButton } from "@/components/auth/PrimaryButton";
 import { ScreenHeader } from "@/components/navigation/ScreenHeader";
 import { useOtpForm } from "@/hooks/auth/useOtpForm";
+import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 
 export default function OTPScreen() {
   const router = useRouter();
@@ -90,8 +91,9 @@ export default function OTPScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
+    <KeyboardAvoidingWrapper>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.container}>
         <ScreenHeader title="Enter OTP" onBackPress={() => router.back()} />
 
         <Image
@@ -136,8 +138,9 @@ export default function OTPScreen() {
             <Text style={styles.resendLink}>Resend</Text>
           </Text>
         </TouchableOpacity>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </KeyboardAvoidingWrapper>
   );
 }
 

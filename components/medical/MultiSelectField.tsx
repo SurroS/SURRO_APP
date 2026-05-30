@@ -1,5 +1,6 @@
 import React from "react";
-import { YStack, Text, XStack, Button } from "tamagui";
+import { Pressable } from "react-native";
+import { YStack, Text, XStack } from "tamagui";
 
 type Props = {
   label: string;
@@ -23,16 +24,23 @@ const MultiSelectField = ({ label, options, selected, onChange }: Props) => {
       <YStack gap="$2">
         {options.map((option) => (
           <XStack key={option} gap="$2" alignItems="center">
-            <Button
+            <Pressable
               onPress={() => toggleOption(option)}
-              backgroundColor={selected.includes(option) ? "#4A90E2" : "#EEE"}
-              color={selected.includes(option) ? "#FFF" : "#000"}
-              borderRadius="$6"
-              size="$3"
-              fontSize={13}
+              style={({ pressed }) => ({
+                backgroundColor: selected.includes(option) ? "#4A90E2" : "#EEE",
+                borderRadius: 24,
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                opacity: pressed ? 0.8 : 1,
+              })}
             >
-              {option}
-            </Button>
+              <Text
+                color={selected.includes(option) ? "#FFF" : "#000"}
+                fontSize={13}
+              >
+                {option}
+              </Text>
+            </Pressable>
           </XStack>
         ))}
       </YStack>

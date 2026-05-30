@@ -10,6 +10,7 @@ import BottomModal from "@/components/modals/BottomModal";
 import colors from "@/hooks/colors";
 import { router } from "expo-router";
 import { useSurrogateProfile } from "@/hooks/profile/useSurrogateProfile";
+import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 
 export interface Question {
   id: number;
@@ -160,8 +161,9 @@ export default function ExperienceForm() {
   /* ---------------- UI ---------------- */
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-      <YStack style={styles.container}>
+    <KeyboardAvoidingWrapper>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+        <YStack style={styles.container}>
         <Text style={styles.questionText}>{currentQuestion.text}</Text>
 
         {/* TEXT */}
@@ -264,8 +266,9 @@ export default function ExperienceForm() {
           success
           title="Thank you! Your responses have been saved."
         />
-      </YStack>
-    </SafeAreaView>
+        </YStack>
+      </SafeAreaView>
+    </KeyboardAvoidingWrapper>
   );
 }
 

@@ -7,6 +7,7 @@ import { Toast } from "toastify-react-native";
 import colors from "@/hooks/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ToastType } from "toastify-react-native/utils/interfaces";
+import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 
 export default function AgentLanguageSection() {
   const [languages, setLanguages] = useState<string[]>([]);
@@ -91,10 +92,11 @@ export default function AgentLanguageSection() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, padding: 20 }}>
-      <ScreenHeader title="Languages" onBackPress={() => router.back()} />
+    <KeyboardAvoidingWrapper>
+      <SafeAreaView style={{ flex: 1, padding: 20 }}>
+        <ScreenHeader title="Languages" onBackPress={() => router.back()} />
 
-      <ScrollView>
+        <ScrollView>
         <YStack gap="$4">
           <Text fontWeight="600" fontSize={15} color={colors.text}>
             Languages Spoken
@@ -200,7 +202,8 @@ export default function AgentLanguageSection() {
             Save
           </Button>
         </YStack>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </KeyboardAvoidingWrapper>
   );
 }

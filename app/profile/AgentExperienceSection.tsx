@@ -4,6 +4,7 @@ import { YStack, Button, ScrollView } from "tamagui";
 import { ScreenHeader } from "@/components/auth";
 import TextInputField from "@/components/TextInputField";
 import { router } from "expo-router";
+import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 import { Toast } from "toastify-react-native";
 
 export default function AgentExperienceSection() {
@@ -25,10 +26,11 @@ export default function AgentExperienceSection() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, padding: 20 }}>
-      <ScreenHeader title="Experience" onBackPress={() => router.back()} />
+    <KeyboardAvoidingWrapper>
+      <SafeAreaView style={{ flex: 1, padding: 20 }}>
+        <ScreenHeader title="Experience" onBackPress={() => router.back()} />
 
-      <ScrollView>
+        <ScrollView>
         <YStack gap="$4">
           <TextInputField
             label="Years of experience"
@@ -56,7 +58,8 @@ export default function AgentExperienceSection() {
             Save
           </Button>
         </YStack>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </KeyboardAvoidingWrapper>
   );
 }

@@ -429,6 +429,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
 
     set({
       user: null,
+      userId: "",
       token: null,
       isAuthenticated: false,
       isLoading: false,
@@ -438,6 +439,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
       referralCode: null,
       error: null,
     });
+
   },
 
   clearError: () => set({ error: null }),

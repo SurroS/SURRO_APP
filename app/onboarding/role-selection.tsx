@@ -47,7 +47,7 @@ export default function RoleSelection() {
     });
     console.log("Role from role", selectedRole);
     console.log("User from role", user);
-    router.push("/(auth)/login");
+    router.push("/(auth)/signup");
   };
 
   return (
@@ -80,8 +80,8 @@ export default function RoleSelection() {
               alignItems="center"
               justifyContent="space-between"
             >
-              <XStack alignItems="center" gap={12} style={{ flex: 1 }}>
-                <Image source={item.image} />
+              <XStack alignItems="center" gap={8} style={{ flex: 1 }}>
+                <Image source={item.image} width={25} height={25} />
                 <Text
                   fontSize={16}
                   fontWeight="500"
@@ -93,9 +93,9 @@ export default function RoleSelection() {
               </XStack>
 
               <YStack
-                width={24}
-                height={24}
-                borderRadius={12}
+                width={18}
+                height={18}
+                borderRadius={9}
                 justifyContent="center"
                 alignItems="center"
                 borderWidth={2}
@@ -106,9 +106,9 @@ export default function RoleSelection() {
               >
                 {selectedRole === item.key && (
                   <YStack
-                    width={12}
-                    height={12}
-                    borderRadius={6}
+                    width={8}
+                    height={8}
+                    borderRadius={4}
                     backgroundColor={colors.primary}
                   />
                 )}
@@ -146,8 +146,8 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   card: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "#E9E9E9",

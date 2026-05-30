@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { useResetPasswordForm } from "@/hooks/auth";
+import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
@@ -43,8 +44,9 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
+    <KeyboardAvoidingWrapper>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.container}>
         <ScreenHeader
           title="Forgot Password"
           style={{ size: "$4" }}
@@ -72,8 +74,9 @@ export default function ForgotPasswordScreen() {
           onPress={handleForgotPassword}
           loading={isLoading}
         />
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </KeyboardAvoidingWrapper>
   );
 }
 

@@ -8,7 +8,7 @@ import DateInput from "@/components/DateInput";
 
 interface SharedPersonalFieldsProps {
   fullName?: string;
-  country?: string;
+  country?: any;
   dob?: string;
   maritalStatus?: string;
   countries?: Array<{ label: string; value: string }>;
@@ -29,6 +29,7 @@ export default function SharedPersonalFields({
   setDob = () => {},
   setMaritalStatus = () => {},
 }: SharedPersonalFieldsProps) {
+  const countryName = typeof country === "object" && country ? country.name || country.label || "" : country;
   return (
     <YStack gap="$4">
       <TextInputField
@@ -41,7 +42,7 @@ export default function SharedPersonalFields({
       <Dropdown
         label="Country of origin"
         placeholder="Select a country"
-        value={country}
+        value={countryName}
         options={countries}
         onSelect={(item) => setCountry(String(item))}
       />

@@ -23,6 +23,10 @@ interface HydrationState {
   setHasHydrated: (value: boolean) => void;
   selectedRole: string | null;
   setSelectedRole: (role: string) => void;
+  hasSeenOnboarding: boolean;
+  setHasSeenOnboarding: (value: boolean) => void;
+  forceLogout: boolean;
+  setForceLogout: (value: boolean) => void;
 }
 
 type FullAuthStore = AuthStore & HydrationState;
@@ -46,6 +50,14 @@ export const useAuthStore = create<FullAuthStore>()(
           set({ user: { ...user, role } });
         }
       },
+
+      // Onboarding
+      hasSeenOnboarding: false,
+      setHasSeenOnboarding: (value: boolean) => set({ hasSeenOnboarding: value }),
+
+      // Force logout flag — set on 401 to block UI until redirect
+      forceLogout: false,
+      setForceLogout: (value: boolean) => set({ forceLogout: value }),
     }),
     {
       name: "auth-storage",
@@ -55,6 +67,7 @@ export const useAuthStore = create<FullAuthStore>()(
         token: state.token,
         isAuthenticated: state.isAuthenticated,
         selectedRole: state.selectedRole,
+        hasSeenOnboarding: state.hasSeenOnboarding,
       }),
       onRehydrateStorage: () => {
         console.log("🌀 Rehydration starting...");

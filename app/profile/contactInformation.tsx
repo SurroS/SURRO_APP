@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useParentProfile } from "@/hooks/profile/useParentProfile";
 import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
+import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 
 export default function ContactInformationScreen() {
   const { user } = useAuth();
@@ -116,12 +117,16 @@ export default function ContactInformationScreen() {
   ]);
 
   const handleSelectCountry = async (selected: any) => {
-    setCountry(selected);
+    const selectedCountry = typeof selected === "string"
+      ? countries.find((c) => c.name === selected || c.label === selected)
+      : selected;
+    if (!selectedCountry) return;
+    setCountry(selectedCountry);
     setState("");
     setLga("");
     setStatesList([]);
     setLgaList([]);
-    const states = await getStatesByCountry(selected.name);
+    const states = await getStatesByCountry(selectedCountry.name);
     setStatesList(states);
   };
 
@@ -192,14 +197,15 @@ export default function ContactInformationScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, padding: 20, backgroundColor: "#fff" }}>
-      <ScreenHeader
-        title="Contact Information"
-        onBackPress={() => router.back()}
-      />
+    <KeyboardAvoidingWrapper>
+      <SafeAreaView style={{ flex: 1, padding: 20, backgroundColor: "#fff" }}>
+        <ScreenHeader
+          title="Contact Information"
+          onBackPress={() => router.back()}
+        />
 
-      <ScrollView style={{ flex: 1 }}>
-        <YStack gap="$4">
+        <ScrollView style={{ flex: 1 }}>
+          <YStack gap="$4">
           <Dropdown
             label="Country of residence"
             placeholder="Select a country"
@@ -299,8 +305,9 @@ export default function ContactInformationScreen() {
           >
             {isLoading ? <ActivityIndicator color="white" /> : "Save"}
           </Button>
-        </YStack>
-      </ScrollView>
-    </SafeAreaView>
+          </YStack>
+        </ScrollView>
+      </SafeAreaView>
+    </KeyboardAvoidingWrapper>
   );
 }

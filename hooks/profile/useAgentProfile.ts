@@ -1,47 +1,39 @@
-// hooks/useAgentProfile.ts
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   getAgentProfile,
   createAgentProfile,
   updateAgentProfile,
 } from "@/services/profileApi";
-import { useAuth } from "@/hooks/useAuth";
 
 export const useAgentProfile = () => {
-  const { user } = useAuth();
   const [agentProfile, setAgentProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const userId = user?.id;
-  console.log("user:", user);
-  console.log("userID:", userId);
+
   // -------------------------
   // FETCH PROFILE
   // -------------------------
   const fetchProfile = async () => {
-    console.log("[AgentProfile] Fetching profile...");
+    console.log("[AgentProfile] Fetching profile from API...");
     setIsLoading(true);
     setError(null);
 
     try {
       const res = await getAgentProfile();
-      console.log("[AgentProfile] Fetch success:", res);
-      setAgentProfile(res?.profile || res);
-      console.log("response data", res);
+      console.log("[AgentProfile] API response:", JSON.stringify(res).slice(0, 400));
+      const profile = res?.profile || res;
+      setAgentProfile(profile);
+      console.log("[AgentProfile] Profile loaded:", profile ? "YES" : "NO");
+      return profile;
     } catch (err: any) {
-      console.log("user id from", userId);
-      console.error("[AgentProfile] Fetch failed:", err?.response?.data || err);
+      const serverMsg = err?.response?.data?.message || err.message;
+      console.error("[AgentProfile] Fetch error:", serverMsg);
 
-      // If profile not found (404), set to null - profile doesn't exist yet
       if (err?.response?.status === 404) {
         setAgentProfile(null);
         setError(null);
       } else {
-        setError(
-          err?.response?.data?.message ||
-            err.message ||
-            "Failed to fetch profile",
-        );
+        setError(serverMsg || "Failed to fetch profile");
       }
     } finally {
       setIsLoading(false);
@@ -53,29 +45,22 @@ export const useAgentProfile = () => {
   // CREATE PROFILE
   // -------------------------
   const createProfile = async (data: any) => {
-    console.log("[AgentProfile] Creating profile with data:", data);
+    console.log("[AgentProfile] Creating profile...");
     setIsLoading(true);
     setError(null);
 
     try {
       const res = await createAgentProfile(data);
-      console.log("[AgentProfile] Create success:", res);
+      console.log("[AgentProfile] Create success:", JSON.stringify(res).slice(0, 200));
       setAgentProfile(res?.profile || res);
       return res;
     } catch (err: any) {
-      console.error(
-        "[AgentProfile] Create failed:",
-        err?.response?.data || err,
-      );
-      setError(
-        err?.response?.data?.message ||
-          err.message ||
-          "Failed to create profile",
-      );
+      const serverMsg = err?.response?.data?.message || err.message;
+      console.error("[AgentProfile] Create error:", serverMsg);
+      setError(serverMsg || "Failed to create profile");
       throw err;
     } finally {
       setIsLoading(false);
-      console.log("[AgentProfile] Create done");
     }
   };
 
@@ -83,29 +68,22 @@ export const useAgentProfile = () => {
   // UPDATE PROFILE
   // -------------------------
   const updateProfile = async (data: any) => {
-    console.log("[AgentProfile] Updating profile with data:", data);
+    console.log("[AgentProfile] Updating profile...");
     setIsLoading(true);
     setError(null);
 
     try {
       const res = await updateAgentProfile(data);
-      console.log("[AgentProfile] Update success:", res);
+      console.log("[AgentProfile] Update success:", JSON.stringify(res).slice(0, 200));
       setAgentProfile(res?.profile || res);
       return res;
     } catch (err: any) {
-      console.error(
-        "[AgentProfile] Update failed:",
-        err?.response?.data || err,
-      );
-      setError(
-        err?.response?.data?.message ||
-          err.message ||
-          "Failed to update profile",
-      );
+      const serverMsg = err?.response?.data?.message || err.message;
+      console.error("[AgentProfile] Update error:", serverMsg);
+      setError(serverMsg || "Failed to update profile");
       throw err;
     } finally {
       setIsLoading(false);
-      console.log("[AgentProfile] Update done");
     }
   };
 
@@ -117,7 +95,7 @@ export const useAgentProfile = () => {
     fetchAgentProfile: fetchProfile,
     createProfile,
     updateProfile,
-    updateAgentProfile,
+    updateAgentProfile: updateProfile,
     setAgentProfile,
   };
 };

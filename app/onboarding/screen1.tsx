@@ -1,4 +1,4 @@
-// app/onboarding/screen2.tsx
+// app/onboarding/screen1.tsx
 
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
@@ -6,6 +6,7 @@ import colors from "@/hooks/colors";
 import { Dimensions, FlatList, ViewToken } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Image, Text, XStack, YStack } from "tamagui";
+import { useAuth } from "@/hooks/useAuth";
 
 // Screen dimensions
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -105,6 +106,7 @@ const ImageCard = ({
 
 export default function Screen2() {
   const router = useRouter();
+  const { setHasSeenOnboarding } = useAuth();
   const [activeIndex, setActiveIndex] = useState(0);
 
   const onViewableItemsChanged = useRef(
@@ -191,7 +193,10 @@ export default function Screen2() {
           backgroundColor="$primary"
           alignSelf="center"
           marginVertical="$6"
-          onPress={() => router.push("/onboarding/role-selection")}
+          onPress={() => {
+            setHasSeenOnboarding(true);
+            router.replace("/(auth)/login");
+          }}
         >
           <Text
             color="#ffffff"

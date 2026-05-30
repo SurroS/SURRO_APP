@@ -10,6 +10,7 @@ import { getAllCountries } from "@/utils/countries";
 import { getStatesByCountry, getLgaByState } from "@/utils/states";
 import colors from "@/hooks/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
+import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 
 export default function AgentCoverageSection() {
   const [countries, setCountries] = useState<any[]>([]);
@@ -249,10 +250,11 @@ export default function AgentCoverageSection() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, padding: 20 }}>
-      <ScreenHeader title="Coverage Area" onBackPress={() => router.back()} />
+    <KeyboardAvoidingWrapper>
+      <SafeAreaView style={{ flex: 1, padding: 20 }}>
+        <ScreenHeader title="Coverage Area" onBackPress={() => router.back()} />
 
-      <ScrollView>
+        <ScrollView>
         <YStack gap="$4">
           <Dropdown
             label="Country"
@@ -307,7 +309,8 @@ export default function AgentCoverageSection() {
             Save & Continue
           </Button>
         </YStack>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </KeyboardAvoidingWrapper>
   );
 }

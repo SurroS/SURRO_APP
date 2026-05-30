@@ -53,13 +53,38 @@ httpClient.interceptors.response.use(
     return response;
   },
   (error) => {
+    const status = error.response?.status;
+    const url = error.config?.url;
+    const method = error.config?.method;
+    const data = error.response?.data;
+
     console.error("[httpClient] Response error:", {
-      url: error.config?.url,
-      method: error.config?.method,
-      status: error.response?.status,
-      data: error.response?.data,
+      url,
+      method,
+      status,
+      data,
       message: error.message,
     });
+
+    // ---- AUTO-LOGOUT ON 401 ----
+    if (status === 401) {
+      console.warn("[httpClient] 401 Unauthorized — clearing auth and redirecting to login");
+      try {
+        // Lazy require to avoid circular dependency
+        const { useAuthStore } = require("@/store/auth");
+        const store = useAuthStore.getState();
+        // Set forceLogout BEFORE clearing auth so UI can show a blocker
+        if (store.setForceLogout) store.setForceLogout(true);
+        if (store.logout) store.logout();
+        // Zustand persist re-saves cleared state automatically via partialize
+      } catch (e) {
+        console.error("[httpClient] Failed to clear auth:", e);
+      }
+      try {
+        const { router } = require("expo-router");
+        setTimeout(() => router.replace("/(auth)/login"), 100);
+      } catch (_) {}
+    }
 
     // Show toast for network errors
     if (!error.response) {

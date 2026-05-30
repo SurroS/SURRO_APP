@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Pressable, View, StyleSheet, ScrollView, RefreshControl } from "react-native";
-import { Text, YStack, Spinner } from "tamagui";
+import { YStack, Text } from "tamagui";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import AgentScreen from "@/components/roles/agent/agent";
@@ -20,19 +20,55 @@ export default function HomeIndex() {
   const { user } = useAuth();
   const role = user?.role?.trim();
 
-  const [hydrated, setHydrated] = useState(false);
-
-  const { surrogateProfile, fetchProfile: fetchSurrogate } =
-    useSurrogateProfile();
-  const { agentProfile, fetchProfile: fetchAgent } = useAgentProfile();
-  const { parentProfile, fetchProfile: fetchParent } = useParentProfile();
+  const { fetchProfile: fetchSurrogate, surrogateProfile } = useSurrogateProfile();
+  const { fetchProfile: fetchAgent, agentProfile } = useAgentProfile();
+  const { fetchProfile: fetchParent, parentProfile } = useParentProfile();
 
   const notifications = useNotificationStore((s) => s.notifications);
   const unreadCount = notifications.filter((n) => !n.read).length;
   const [refreshing, setRefreshing] = useState(false);
 
+  // ---- AUTO-FETCH PROFILE ON MOUNT ----
+  useEffect(() => {
+    console.log(`[HomeIndex] Mounted — role: ${role}, user: ${user?.id || user?.email}`);
+    switch (role) {
+      case "SURROGATE":
+        console.log("[HomeIndex] Auto-fetching surrogate profile...");
+        fetchSurrogate().then((p) =>
+          console.log("[HomeIndex] Surrogate profile loaded:", p ? "YES" : "NO"),
+        );
+        break;
+      case "AGENT":
+        console.log("[HomeIndex] Auto-fetching agent profile...");
+        fetchAgent().then((p) =>
+          console.log("[HomeIndex] Agent profile loaded:", p ? "YES" : "NO"),
+        );
+        break;
+      case "INTENDED_PARENT":
+        console.log("[HomeIndex] Auto-fetching parent profile...");
+        fetchParent().then((p) =>
+          console.log("[HomeIndex] Parent profile loaded:", p ? "YES" : "NO"),
+        );
+        break;
+      default:
+        console.warn(`[HomeIndex] Unknown role: ${role}`);
+    }
+  }, []);
+
+  // ---- logs whenever profile data changes ----
+  useEffect(() => {
+    if (surrogateProfile) console.log("[HomeIndex] surrogateProfile data:", JSON.stringify(surrogateProfile).slice(0, 300));
+  }, [surrogateProfile]);
+  useEffect(() => {
+    if (agentProfile) console.log("[HomeIndex] agentProfile data:", JSON.stringify(agentProfile).slice(0, 300));
+  }, [agentProfile]);
+  useEffect(() => {
+    if (parentProfile) console.log("[HomeIndex] parentProfile data:", JSON.stringify(parentProfile).slice(0, 300));
+  }, [parentProfile]);
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
+    console.log(`[HomeIndex] Pull-to-refresh — role: ${role}`);
     try {
       if (role === "SURROGATE") {
         await fetchSurrogate(true);
@@ -41,54 +77,13 @@ export default function HomeIndex() {
       } else if (role === "INTENDED_PARENT") {
         await fetchParent(true);
       }
+      console.log(`[HomeIndex] Refresh complete`);
     } catch (e) {
-      console.error("Refresh failed", e);
+      console.error("[HomeIndex] Refresh failed", e);
     } finally {
       setRefreshing(false);
     }
   }, [role, fetchSurrogate, fetchAgent, fetchParent]);
-
-  useEffect(() => {
-    const hydrate = async () => {
-      if (!role) return;
-
-      console.log("[HomeIndex] Hydrating role:", role);
-
-      try {
-        if (role === "SURROGATE" && !surrogateProfile) {
-          await fetchSurrogate();
-        }
-
-        if (role === "AGENT" && !agentProfile) {
-          await fetchAgent();
-        }
-
-        if (role === "INTENDED_PARENT" && !parentProfile) {
-          await fetchParent();
-        }
-      } catch (e) {
-        console.error("[HomeIndex] Hydration failed", e);
-      } finally {
-        setHydrated(true);
-        console.log("[HomeIndex] Hydration complete");
-      }
-    };
-
-    hydrate();
-  }, [role]);
-
-  if (!hydrated) {
-    return (
-      <SafeAreaView style={{ flex: 1 }}>
-        <YStack flex={1} justifyContent="center" alignItems="center" gap="$3">
-          <Spinner size="large" color="#0E0E55" />
-          <Text color="#1E1E1E" fontWeight="600">
-            Loading your dashboard…
-          </Text>
-        </YStack>
-      </SafeAreaView>
-    );
-  }
 
   return (
     <YStack style={{ flex: 1, backgroundColor: "#FFFFFF" }} padding="$4">
@@ -98,7 +93,7 @@ export default function HomeIndex() {
       >
         <Pressable
           onPress={() => router.push("/notifications")}
-          style={{ paddingBottom: 8 }}
+          style={{ alignSelf: "flex-end", paddingBottom: 8 }}
         >
           <MaterialCommunityIcons name="bell-outline" size={24} color="black" />
           {unreadCount > 0 && (
@@ -118,10 +113,9 @@ export default function HomeIndex() {
           }
           showsVerticalScrollIndicator={false}
         >
-
-          {role === "SURROGATE" && surrogateProfile && <SurrogateScreen />}
-          {role === "AGENT" && agentProfile && <AgentScreen />}
-          {role === "INTENDED_PARENT" && parentProfile && <ParentScreen />}
+          {role === "SURROGATE" && <SurrogateScreen />}
+          {role === "AGENT" && <AgentScreen />}
+          {role === "INTENDED_PARENT" && <ParentScreen />}
         </ScrollView>
       </SafeAreaView>
     </YStack>

@@ -6,6 +6,7 @@ import {
 } from "@react-native-google-signin/google-signin";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
+import { useEffect } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Toast } from "toastify-react-native";
@@ -16,6 +17,7 @@ import { PrimaryButton } from "@/components/auth/PrimaryButton";
 import { ScreenHeader } from "@/components/navigation/ScreenHeader";
 import { SocialButton } from "@/components/auth/SocialButton";
 import { useLoginForm } from "@/hooks/auth/useLoginForm";
+import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -31,7 +33,10 @@ export default function LoginScreen() {
   const router = useRouter();
   const { formData, errors, updateField, validateForm } = useLoginForm();
   const { signupFormData } = useSignupForm();
-  const { login, googleLogin, devLogin, isLoading } = useAuth();
+  const { login, googleLogin, devLogin, isLoading, setForceLogout } = useAuth();
+
+  // Clear force-logout blocker when login screen mounts
+  useEffect(() => { setForceLogout(false); }, []);
 
   const DEV_AUTH_EMAIL = "dev@surro.local";
   const DEV_AUTH_PASSWORD = "DevSurro123!";
@@ -130,8 +135,9 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
+    <KeyboardAvoidingWrapper>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.container}>
         <ScreenHeader title="Log in" onBackPress={() => router.navigate("/")} />
 
         <InputField
@@ -179,14 +185,15 @@ export default function LoginScreen() {
 
         <TouchableOpacity
           style={styles.signupLink}
-          onPress={() => router.push("/signup")}
+          onPress={() => router.push("/onboarding/how-did-you-hear")}
         >
           <Text style={styles.signupLinkText}>
             Don&apos;t have an account? Sign up
           </Text>
         </TouchableOpacity>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </KeyboardAvoidingWrapper>
   );
 }
 

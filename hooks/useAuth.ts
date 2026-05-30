@@ -32,6 +32,10 @@ export const useAuth = () => {
     clearReferralInfo,
     selectedRole,
     setSelectedRole,
+    hasSeenOnboarding,
+    setHasSeenOnboarding,
+    forceLogout,
+    setForceLogout,
   } = useAuthStore();
 
   return {
@@ -65,5 +69,9 @@ export const useAuth = () => {
     clearReferralInfo,
     selectedRole,
     setSelectedRole,
+    hasSeenOnboarding,
+    setHasSeenOnboarding,
+    forceLogout,
+    setForceLogout,
   };
 };
