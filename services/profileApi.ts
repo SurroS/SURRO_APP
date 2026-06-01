@@ -35,16 +35,22 @@ export const createSurrogateProfile = (data: any) =>
 export const updateSurrogateProfile = (data: any) =>
   authenticatedPatch("/surrogates/profile", data);
 
-export const getSurrogateProfile = () =>
-  authenticatedGet("/surrogates/profile/me");
+export const getSurrogateProfile = async () => {
+  const res = await authenticatedGet("/surrogates/profile/me");
+  console.log("RAW getSurrogateProfile response:", JSON.stringify(res, null, 2));
+  return res;
+};
 
 export const updateMedicalProfile = (data: any) =>
   authenticatedPatch("/surrogates/profile/medical", data);
 
-export const uploadEndometriumImage = (data: any) =>
-  authenticatedPatch("/surrogates/profile/medical/upload-endometrium", data, {
+export const uploadEndometriumImage = async (data: any) => {
+  const res = await authenticatedPatch("/surrogates/profile/medical/upload-endometrium", data, {
     headers: { "Content-Type": "multipart/form-data" },
   });
+  console.log("[profileApi] uploadEndometriumImage response:", JSON.stringify(res, null, 2));
+  return res;
+};
 
 // ----------------------------------------------------
 // AVATAR UPLOAD

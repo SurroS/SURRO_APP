@@ -402,5 +402,30 @@ app/(tabs)/home/walletFlow/   └ paymentFailed.tsx  | MISSING | Referenced but 
     uses production URL for the dev build. Dev should use a different URL.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- END OF REPORT
+  8. BUILD COMMANDS (EAS — Local Token)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+These scripts read EXPO_TOKEN from .env so you never need eas login.
+
+  Development (APK, dev client):
+    npm run build:dev:android
+    npm run build:dev:ios
+
+  Preview (APK, internal):
+    npm run build:preview:android
+    npm run build:preview:ios
+
+  Production (AAB, Play Store):
+    npm run build:prod:android
+    npm run build:prod:ios
+
+Under the hood they run:
+  scripts/eas-build.ps1 -Profile <profile> -Platform <platform>
+
+This reads EXPO_TOKEN from .env, sets it as an env var, then runs:
+  eas build --profile <profile> --platform <platform> --non-interactive
+
+The --non-interactive flag forces EAS to use EXPO_TOKEN instead of
+the global eas login session. Your other projects' sessions stay intact.
+
+

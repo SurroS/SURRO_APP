@@ -8,7 +8,13 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "build:dev:android": "powershell -ExecutionPolicy Bypass -File scripts/eas-build.ps1 -Profile development -Platform android",
+    "build:dev:ios": "powershell -ExecutionPolicy Bypass -File scripts/eas-build.ps1 -Profile development -Platform ios",
+    "build:preview:android": "powershell -ExecutionPolicy Bypass -File scripts/eas-build.ps1 -Profile preview -Platform android",
+    "build:preview:ios": "powershell -ExecutionPolicy Bypass -File scripts/eas-build.ps1 -Profile preview -Platform ios",
+    "build:prod:android": "powershell -ExecutionPolicy Bypass -File scripts/eas-build.ps1 -Profile production -Platform android",
+    "build:prod:ios": "powershell -ExecutionPolicy Bypass -File scripts/eas-build.ps1 -Profile production -Platform ios"
   },
   "dependencies": {
     "@expo/metro-runtime": "^6.1.2",
@@ -45,6 +51,7 @@
     "expo-image-picker": "^17.0.8",
     "expo-linking": "~8.0.8",
     "expo-local-authentication": "^17.0.7",
+    "expo-modules-core": "~3.0.30",
     "expo-navigation-bar": "^56.0.3",
     "expo-notifications": "~0.32.15",
     "expo-router": "~6.0.7",

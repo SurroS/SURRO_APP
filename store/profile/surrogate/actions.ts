@@ -95,8 +95,11 @@ export const createProfileSlice: StateCreator<ProfileStore> = (set, get) => ({
       set({ isLoading: true, error: null });
 
       const response = await getSurrogateProfile();
+      console.log("fetchProfile raw response:", JSON.stringify(response, null, 2));
       const profile = response?.profile || response;
+      console.log("fetchProfile extracted profile:", JSON.stringify(profile, null, 2));
       const medicalProfile = profile?.medical || null;
+      console.log("fetchProfile extracted medicalProfile:", JSON.stringify(medicalProfile, null, 2));
 
       set({
         surrogateProfile: profile,

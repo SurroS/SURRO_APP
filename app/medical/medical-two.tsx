@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView, RefreshControl, Pressable, Text, Keyboard } from "react-native";
+import { ScrollView, RefreshControl, Pressable, Text, Keyboard, KeyboardAvoidingView } from "react-native";
 import { YStack, Button, View } from "tamagui";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { ScreenHeader } from "@/components/auth";
 import colors from "@/hooks/colors";
 import DropdownField from "@/components/medical/DropdownField";
@@ -35,6 +35,7 @@ export default function MedicalDetailsStep2() {
   const [hadMiscarriage, setHadMiscarriage] = useState<YesNo>("");
   const [numberOfMiscarriages, setNumberOfMiscarriages] = useState<number>(0);
   const [refreshing, setRefreshing] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -47,17 +48,25 @@ export default function MedicalDetailsStep2() {
     }
   }, []);
 
-  useEffect(() => {
-    if (!surrogateProfile) {
-      fetchProfile();
-    }
-  }, []);
+  /** Fetch profile on every focus — ensures fresh data */
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      setIsFetching(true);
+      fetchProfile().finally(() => {
+        if (!cancelled) setIsFetching(false);
+      });
+      return () => { cancelled = true; };
+    }, [fetchProfile]),
+  );
 
   /**
    * Prefill strictly from MedicalProfile
    */
   useEffect(() => {
     if (!medical) return;
+
+    console.log("[MedicalStep2] Prefill medical data:", JSON.stringify(medical, null, 2));
 
     // Chronic illness
     setHasChronicIllness(medical.hasChronicIllness ? "Yes" : "No");
@@ -82,8 +91,11 @@ export default function MedicalDetailsStep2() {
         hadMiscarriage === "Yes" ? numberOfMiscarriages : 0,
     };
 
+    console.log("[MedicalStep2] Save payload:", JSON.stringify(payload, null, 2));
+
     try {
-      await updateMedicalProfile(payload as any);
+      const response = await updateMedicalProfile(payload as any);
+      console.log("[MedicalStep2] Save response:", JSON.stringify(response, null, 2));
 
       Toast.show({
         text1: "Medical details saved",
@@ -92,6 +104,7 @@ export default function MedicalDetailsStep2() {
 
       router.push("/medical/medicalUpload");
     } catch (error: any) {
+      console.error("[MedicalStep2] Save failed:", error?.response?.data || error?.message || error);
       Toast.show({
         text1: "Failed to save medical details",
         text2: error?.response?.data?.message || "Please try again later",
@@ -129,6 +142,10 @@ export default function MedicalDetailsStep2() {
         />
       </View>
 
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior="padding"
+      >
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
@@ -203,6 +220,7 @@ export default function MedicalDetailsStep2() {
             </YStack>
         </YStack>
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
     );
   }

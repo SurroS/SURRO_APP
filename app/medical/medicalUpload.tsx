@@ -9,6 +9,7 @@ import UploadCard from "@/components/medical/uploadCard";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { useProfile } from "@/hooks/useProfile";
+import { useProfileStore } from "@/store/profile/surrogate";
 import { uploadEndometriumImage as uploadEndometriumImageApi } from "@/services/profileApi";
 
 // Define a proper type for file uploads
@@ -32,8 +33,8 @@ export default function MedicalUpload() {
     if (!surrogateProfile) {
       fetchProfile();
     }
-    if (medical?.endometriumUploadUrl && !medicalReport) {
-      setMedicalReport({ uri: medical.endometriumUploadUrl });
+    if (medical?.medicalReport && !medicalReport) {
+      setMedicalReport({ uri: medical.medicalReport });
     }
   }, [surrogateProfile, medical, medicalReport, fetchProfile]);
 
@@ -49,8 +50,7 @@ export default function MedicalUpload() {
       return;
     }
 
-    // If it's already a backend URL, skip upload
-    if (medical.endometriumUploadUrl && medicalReport.uri === medical.endometriumUploadUrl) {
+    if (medical?.medicalReport && medicalReport.uri === medical.medicalReport) {
       router.push("/medical/medicalHistorySummary");
       return;
     }
@@ -65,15 +65,20 @@ export default function MedicalUpload() {
         name: (medicalReport as any).name || "endometrium.jpg",
       } as any);
 
-      const uploadResponse = await uploadEndometriumImageApi(formData);
+      // Upload the image
+      await uploadEndometriumImageApi(formData);
 
-      const backendUrl =
-        uploadResponse.data?.medicalProfile?.endometriumUploadUrl ||
-        uploadResponse.data?.endometriumUploadUrl;
+      // Refetch profile to get the updated medicalReport URL from the reliable GET endpoint
+      await fetchProfile();
+      const updatedMedical = useProfileStore.getState().medicalProfile || useProfileStore.getState().surrogateProfile?.medical;
+      const backendUrl = updatedMedical?.medicalReport;
 
-      if (!backendUrl) throw new Error("Upload failed: no URL returned");
+      if (!backendUrl) {
+        console.error("[MedicalUpload] No medicalReport after upload. medical:", JSON.stringify(updatedMedical, null, 2));
+        throw new Error("Upload failed: no URL returned");
+      }
 
-      await updateMedicalProfile({ endometriumUploadUrl: backendUrl });
+      await updateMedicalProfile({ medicalReport: backendUrl } as any);
 
       Toast.show({
         text1: "Endometrium image uploaded successfully",
@@ -83,9 +88,10 @@ export default function MedicalUpload() {
       router.push("/medical/medicalHistorySummary");
     } catch (error: any) {
       console.error("[MedicalUpload] Failed to upload endometrium image", error);
+      console.error("[MedicalUpload] Full error object:", JSON.stringify(error?.response?.data || error?.details || error, null, 2));
       Toast.show({
         text1: "Upload failed",
-        text2: error?.response?.data?.message || "Please try again later",
+        text2: error?.response?.data?.message || error?.message || "Please try again later",
         type: "customError" as ToastType,
       });
     } finally {

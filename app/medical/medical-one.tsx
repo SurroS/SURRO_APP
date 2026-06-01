@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { YStack, Button, ScrollView, View } from "tamagui";
 import { RefreshControl, Pressable, Text } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { ScreenHeader } from "@/components/auth";
 import colors from "@/hooks/colors";
 import DropdownField from "@/components/medical/DropdownField";
@@ -10,7 +10,7 @@ import NumberInputSelect from "@/components/NumberInputSelect";
 import { useProfile } from "@/hooks/useProfile";
 
 export default function MedicalDetailsStep1() {
-  const { surrogateProfile, medicalProfile, fetchProfile, isLoading, updateProfile } =
+  const { surrogateProfile, medicalProfile, fetchProfile, isLoading, updateMedicalProfile } =
     useProfile();
 
   const medical = surrogateProfile?.medical || medicalProfile;
@@ -27,6 +27,7 @@ export default function MedicalDetailsStep1() {
   const [numberOfCs, setNumberOfCs] = useState(0);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -39,43 +40,57 @@ export default function MedicalDetailsStep1() {
     }
   }, []);
 
-  /** Fetch profile once */
-  useEffect(() => {
-    if (!surrogateProfile) {
-      fetchProfile().finally(() => setProfileLoaded(true));
-    } else {
-      setProfileLoaded(true);
-    }
-  }, [surrogateProfile, fetchProfile]);
+  /** Fetch profile on every focus — ensures fresh data */
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      setIsFetching(true);
+      fetchProfile().finally(() => {
+        if (!cancelled) {
+          setProfileLoaded(true);
+          setIsFetching(false);
+        }
+      });
+      return () => { cancelled = true; };
+    }, [fetchProfile]),
+  );
 
   /** Hydrate from backend */
   useEffect(() => {
     if (!surrogateProfile && !medical) return;
 
+    console.log("Hydrate effect — surrogateProfile:", JSON.stringify(surrogateProfile, null, 2));
+    console.log("Hydrate effect — medical:", JSON.stringify(medical, null, 2));
+
     // Check both medical object and root surrogateProfile for genotype/bloodGroup
     const genotypeValue = 
       medical?.genotype || 
       surrogateProfile?.genotype || 
-      surrogateProfile?.genotypeValue || 
       "";
     const bloodGroupValue = 
       medical?.bloodGroup || 
       surrogateProfile?.bloodGroup || 
-      surrogateProfile?.bloodType || 
       "";
 
-    if (genotypeValue) setGenotype(genotypeValue);
-    if (bloodGroupValue) setBloodGroup(bloodGroupValue);
+    if (genotypeValue) {
+      console.log("Setting genotype to:", genotypeValue);
+      setGenotype(genotypeValue);
+    }
+    if (bloodGroupValue) {
+      console.log("Setting bloodGroup to:", bloodGroupValue);
+      setBloodGroup(bloodGroupValue);
+    }
     
-    if (surrogateProfile) {
+    if (medical) {
+      // Backend uses: pregnant, children, caesarean
       setPregnancyExperience(
-        surrogateProfile.pregnancyExperience ? "Yes" : "No"
+        medical.pregnant ? "Yes" : medical.pregnant === false ? "No" : ""
       );
-      setNumberOfChildren(surrogateProfile.numberofChildren || surrogateProfile.numberOfChildren || 0);
+      setNumberOfChildren(medical.children ?? 0);
       setCeasareanSection(
-        surrogateProfile.ceasareanSection ? "Yes" : "No"
+        medical.caesarean ? "Yes" : medical.caesarean === false ? "No" : ""
       );
-      setNumberOfCs(surrogateProfile.numberOfCs || surrogateProfile.numberOfcs || 0);
+      setNumberOfCs(medical.numberOfCs ?? 0);
     }
   }, [medical, surrogateProfile]);
 
@@ -91,16 +106,14 @@ export default function MedicalDetailsStep1() {
 
   const handleContinue = async () => {
     try {
-      await updateProfile({
-        numberOfChildren,
-        medical: {
-          genotype,
-          bloodGroup,
-          pregnancyExperience: pregnancyExperience === "Yes",
-          ceasareanSection: ceasareanSection === "Yes",
-          numberOfCs,
-        },
-      });
+      await updateMedicalProfile({
+        genotype,
+        bloodGroup,
+        pregnant: pregnancyExperience === "Yes" ? "Yes" : "No",
+        caesarean: ceasareanSection === "Yes" ? "Yes" : "No",
+        children: numberOfChildren,
+        numberOfCs,
+      } as any);
     } catch (e) {
       // Silently continue - data will be saved on final step
     }
@@ -124,7 +137,7 @@ export default function MedicalDetailsStep1() {
     router.push("/medical");
   };
 
-  if (!profileLoaded || isLoading) {
+  if (!profileLoaded || isFetching) {
     return (
       <SafeAreaView
         style={{ flex: 1, justifyContent: "center", alignItems: "center" }}

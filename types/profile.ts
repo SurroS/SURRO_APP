@@ -107,6 +107,12 @@ export interface MedicalProfile {
   surrogateProfileId?: string;
   genotype?: string;
   bloodGroup?: string;
+  // Backend field names
+  pregnant?: boolean;
+  children?: number;
+  caesarean?: boolean;
+  medicalReport?: string;
+  // Legacy/frontend field names (maps to same backend fields)
   pregnancyExperience?: boolean;
   numberofChildren?: number;
   numberOFChildren?: number;
@@ -138,6 +144,12 @@ export interface MedicalProfile {
 export interface MedicalProfileUpdate {
   genotype?: string;
   bloodGroup?: string;
+  // Backend field names
+  pregnant?: boolean;
+  children?: number;
+  caesarean?: boolean;
+  medicalReport?: string;
+  // Legacy/frontend field names
   pregnancyExperience?: boolean;
   hasChildren?: boolean;
   numberOfChildren?: number;
