@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 
 export default function AgentCoverageSection() {
+  const [isSaving, setIsSaving] = useState(false);
   const [countries, setCountries] = useState<any[]>([]);
   const [statesList, setStatesList] = useState<string[]>([]);
   const [lgaList, setLgaList] = useState<string[]>([]);
@@ -107,6 +108,7 @@ export default function AgentCoverageSection() {
   }, [lgaSearch, lgaList]);
 
   const save = () => {
+    if (isSaving) return;
     if (!country || selectedStates.length === 0 || selectedLGAs.length === 0) {
       Toast.show({
         text1: "Please complete all required fields",
@@ -114,6 +116,8 @@ export default function AgentCoverageSection() {
       });
       return;
     }
+
+    setIsSaving(true);
 
     Toast.show({
       text1: "Coverage updated",
@@ -305,6 +309,7 @@ export default function AgentCoverageSection() {
             size="$4"
             marginTop={20}
             onPress={save}
+            disabled={isSaving}
           >
             Save & Continue
           </Button>

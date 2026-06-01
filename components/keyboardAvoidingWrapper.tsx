@@ -1,9 +1,6 @@
 import React from "react";
 import {
   KeyboardAvoidingView,
-  Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
   View,
   StyleSheet,
 } from "react-native";
@@ -16,19 +13,18 @@ const KeyboardAvoidingWrapper: React.FC<KeyboardAvoidingWrapperProps> = ({ child
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 1 : 1}
+      behavior="padding"
+      keyboardVerticalOffset={0}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.inner}>{children}</View>
-      </TouchableWithoutFeedback>
+      <View style={styles.inner}>{children}</View>
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, 
+    flex: 1,
+    backgroundColor: "#fff",
   },
   inner: {
     flex: 1,  

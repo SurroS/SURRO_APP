@@ -10,6 +10,7 @@ import { ToastType } from "toastify-react-native/utils/interfaces";
 import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 
 export default function AgentLanguageSection() {
+  const [isSaving, setIsSaving] = useState(false);
   const [languages, setLanguages] = useState<string[]>([]);
   const [allLanguages, setAllLanguages] = useState<string[]>([]);
   const [filteredLanguages, setFilteredLanguages] = useState<string[]>([]);
@@ -77,6 +78,7 @@ export default function AgentLanguageSection() {
   };
 
   const save = () => {
+    if (isSaving) return;
     if (languages.length === 0) {
       Toast.show({
         text1: "Select at least one language",
@@ -84,6 +86,7 @@ export default function AgentLanguageSection() {
       });
       return;
     }
+    setIsSaving(true);
     Toast.show({
       text1: "Languages updated",
       type: "customSuccess" as ToastType,
@@ -198,7 +201,7 @@ export default function AgentLanguageSection() {
             </Popover.Content>
           </Popover>
 
-          <Button backgroundColor="#0A043C" color="white" onPress={save}>
+          <Button backgroundColor="#0A043C" color="white" onPress={save} disabled={isSaving}>
             Save
           </Button>
         </YStack>

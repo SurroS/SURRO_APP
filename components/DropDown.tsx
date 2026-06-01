@@ -86,7 +86,7 @@ const Dropdown = ({
   return (
     <YStack gap="$1">
       {label && (
-        <Label fontWeight="600" fontSize={15} color={colors.text}>
+        <Label fontWeight="600" fontSize={13} color={colors.text}>
           {label}
         </Label>
       )}
@@ -99,7 +99,7 @@ const Dropdown = ({
           borderColor: "#E6E6E6",
           borderRadius: 8,
           paddingHorizontal: 12,
-          height: 50,
+          height: 44,
           justifyContent: "center",
         }}
       >
@@ -197,7 +197,7 @@ const Dropdown = ({
                         </View>
 
                         {isSelected(item) && (
-                          <Check size={18} color={colors.primary} />
+                          <Check size={14} color={colors.primary} />
                         )}
                       </Pressable>
                     );

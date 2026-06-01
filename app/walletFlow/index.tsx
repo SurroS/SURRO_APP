@@ -10,17 +10,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSurrogateProfile } from "@/hooks/profile/useSurrogateProfile";
 import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
 import { useParentProfile } from "@/hooks/profile/useParentProfile";
-import { getWalletTransactions } from "@/services/walletApi";
+import { useWalletStore } from "@/store/wallet/walletStore";
 import { WalletTransactionData } from "@/types/walletTypes";
 
-import RecentActivitiesScreen from "@/components/wallet/RecentActivity";
 import TransactionItem from "@/components/wallet/TransactonItem";
-import { PrimaryButton } from "@/components/auth";
-
-const SCREENS = {
-  WALLET_SUMMARY: "WALLET_SUMMARY",
-  RECENT_ACTIVITIES: "RECENT_ACTIVITIES",
-} as const;
 
 const formatDate = (iso: string): string => {
   const d = new Date(iso);
@@ -39,10 +32,9 @@ const WalletScreen = () => {
   const { agentProfile } = useAgentProfile();
   const { parentProfile } = useParentProfile();
 
-  const [currentScreen, setCurrentScreen] = useState(SCREENS.WALLET_SUMMARY);
-  const [isHidden, setIsHidden] = useState(false);
-  const [transactions, setTransactions] = useState<WalletTransactionData[]>([]);
-  const [loadingTx, setLoadingTx] = useState(true);
+  const { transactions, fetchWallet, loading } = useWalletStore();
+
+  const [isHidden, setIsHidden] = useState(true);
 
   const wallet = useMemo(() => {
     if (role === "SURROGATE") return surrogateProfile?.wallet;
@@ -58,12 +50,9 @@ const WalletScreen = () => {
     ? "******"
     : `${currencyCode} ${totalBalance.toFixed(2)}`;
 
-  // Fetch real transactions
+  // Fetch wallet
   useEffect(() => {
-    getWalletTransactions()
-      .then(setTransactions)
-      .catch(() => setTransactions([]))
-      .finally(() => setLoadingTx(false));
+    fetchWallet().catch(() => {});
   }, []);
 
   const mapTx = (tx: WalletTransactionData) => ({
@@ -75,16 +64,6 @@ const WalletScreen = () => {
   });
 
   const mappedTransactions = transactions.map(mapTx);
-  const recentTransactions = mappedTransactions.slice(0, 5);
-
-  if (currentScreen === SCREENS.RECENT_ACTIVITIES) {
-    return (
-      <RecentActivitiesScreen
-        onBack={() => setCurrentScreen(SCREENS.WALLET_SUMMARY)}
-        allTransactions={transactions.map(mapTx)}
-      />
-    );
-  }
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -99,12 +78,9 @@ const WalletScreen = () => {
         </TouchableOpacity>
       </XStack>
 
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Balance */}
-        <YStack alignItems="center" marginBottom={40}>
+      <YStack flex={1} paddingHorizontal={20}>
+        {/* Balance - static */}
+        <YStack alignItems="center" marginBottom={24}>
           <Text fontSize={20} fontWeight="600" color={colors.balanceText}>
             {currencyCode} Wallet
           </Text>
@@ -146,64 +122,61 @@ const WalletScreen = () => {
           </XStack>
         </YStack>
 
-        {/* Transactions */}
-        <View width="100%" paddingHorizontal={20}>
-          <Text
-            fontSize={18}
-            fontWeight="600"
-            marginBottom={15}
-            color={colors.balanceText}
-          >
-            Recent Transactions
-          </Text>
+        {/* Transactions heading */}
+        <Text
+          fontSize={18}
+          fontWeight="600"
+          marginBottom={12}
+          color={colors.balanceText}
+        >
+          Recent Transactions
+        </Text>
 
-          <YStack>
-            {loadingTx ? (
-              <ActivityIndicator
-                size="small"
-                color={colors.HEADER_ICON_GRAY}
-                style={{ marginVertical: 20 }}
-              />
-            ) : recentTransactions.length === 0 ? (
-              <YStack alignItems="center" marginVertical={30}>
-                <Ionicons
-                  name="receipt-outline"
-                  size={48}
-                  color={colors.secondaryGray}
-                />
-                <Text
-                  fontSize={16}
-                  fontWeight="600"
-                  color={colors.secondaryGray}
-                  marginTop={12}
-                >
-                  No transactions yet
-                </Text>
-                <Text fontSize={14} color={colors.secondaryGray} marginTop={4}>
-                  Your transactions will appear here
-                </Text>
-              </YStack>
-            ) : (
-              recentTransactions.map((tx) => (
-                <TransactionItem
-                  key={tx.id}
-                  title={tx.title}
-                  date={tx.date}
-                  amount={tx.amount}
-                  type={tx.type}
-                />
-              ))
-            )}
+        {/* Transaction list - independently scrollable */}
+        {loading ? (
+          <YStack flex={1} justifyContent="center" alignItems="center">
+            <ActivityIndicator
+              size="small"
+              color={colors.HEADER_ICON_GRAY}
+            />
           </YStack>
-
-          <PrimaryButton
-            title="See all"
-            onPress={() => setCurrentScreen(SCREENS.RECENT_ACTIVITIES)}
-          />
-        </View>
-
-        <View height={40} />
-      </ScrollView>
+        ) : mappedTransactions.length === 0 ? (
+          <YStack flex={1} alignItems="center" justifyContent="center">
+            <Ionicons
+              name="receipt-outline"
+              size={48}
+              color={colors.secondaryGray}
+            />
+            <Text
+              fontSize={16}
+              fontWeight="600"
+              color={colors.secondaryGray}
+              marginTop={12}
+            >
+              No transactions yet
+            </Text>
+            <Text fontSize={14} color={colors.secondaryGray} marginTop={4}>
+              Your transactions will appear here
+            </Text>
+          </YStack>
+        ) : (
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            style={{ flex: 1 }}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          >
+            {mappedTransactions.map((tx) => (
+              <TransactionItem
+                key={tx.id}
+                title={tx.title}
+                date={tx.date}
+                amount={tx.amount}
+                type={tx.type}
+              />
+            ))}
+          </ScrollView>
+        )}
+      </YStack>
     </SafeAreaView>
   );
 };
@@ -240,9 +213,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.white,
     paddingVertical: 10,
-  },
-  scroll: {
-    paddingBottom: 20,
   },
   actionButton: {
     width: 50,

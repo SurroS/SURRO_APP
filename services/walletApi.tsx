@@ -5,12 +5,13 @@ import {
   WalletTransactionResponse,
   WalletTransactionData,
   WalletBalanceResponse,
+  WalletResponse,
   UserId,
 } from "@/types/walletTypes";
 
-export const getWalletTransactions = async (): Promise<WalletTransactionData[]> => {
-  const response = await authenticatedGet("/wallet/transaction");
-  return response?.data ?? response ?? [];
+export const getWallet = async (): Promise<WalletResponse> => {
+  const response = await authenticatedGet("/wallet");
+  return response?.data ?? response;
 };
 
 export const getWalletBalance = async (

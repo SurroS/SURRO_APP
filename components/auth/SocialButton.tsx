@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface SocialButtonProps {
@@ -15,18 +15,32 @@ export const SocialButton: React.FC<SocialButtonProps> = ({
     onPress,
     disabled = false,
     style,
-}) => (
-    <TouchableOpacity
-        style={[styles.button, style, disabled && styles.disabled]}
-        onPress={onPress}
-        disabled={disabled}
-    >
-        <View style={styles.content}>
-            <Image source={icon} style={styles.icon} />
-            <Text style={styles.text}>{title}</Text>
-        </View>
-    </TouchableOpacity>
-);
+}) => {
+    const [pressedOnce, setPressedOnce] = useState(false);
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handlePress = () => {
+        if (pressedOnce) return;
+        setPressedOnce(true);
+        onPress();
+        timerRef.current = setTimeout(() => setPressedOnce(false), 500);
+    };
+
+    const isDisabled = disabled || pressedOnce;
+
+    return (
+        <TouchableOpacity
+            style={[styles.button, style, isDisabled && styles.disabled]}
+            onPress={handlePress}
+            disabled={isDisabled}
+        >
+            <View style={styles.content}>
+                <Image source={icon} style={styles.icon} />
+                <Text style={styles.text}>{title}</Text>
+            </View>
+        </TouchableOpacity>
+    );
+};
 
 const styles = StyleSheet.create({
     button: {

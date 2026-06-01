@@ -27,7 +27,7 @@ export const useBankAccounts = () => {
     // Mock submission
     return new Promise<void>((resolve) => {
       setTimeout(() => {
-        setAccounts((prev) => [...prev, { ...account, bankName: "GTBank" }]);
+        setAccounts((prev) => [...prev, account]);
         setIsSubmitting(false);
         resolve();
       }, 1000);

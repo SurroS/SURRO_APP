@@ -15,11 +15,13 @@ export default function SurrogatePersonalFields({
   setChildren,
 
   fullName,
+  lastName,
   country,
   dob,
   maritalStatus,
   countries,
   setFirstName,
+  setLastName,
   setCountry,
   setDob,
   setMaritalStatus,
@@ -28,11 +30,13 @@ export default function SurrogatePersonalFields({
     <YStack gap="$4" marginTop="$4">
       <SharedPersonalFields
         fullName={fullName}
+        lastName={lastName}
         country={country}
         dob={dob}
         maritalStatus={maritalStatus}
         countries={countries}
         setFirstName={setFirstName}
+        setLastName={setLastName}
         setCountry={setCountry}
         setDob={setDob}
         setMaritalStatus={setMaritalStatus}

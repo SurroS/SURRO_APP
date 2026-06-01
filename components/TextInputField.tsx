@@ -19,7 +19,7 @@ const TextInputField = ({
   multiline,
 }: Props) => (
   <YStack gap="$2">
-    <Text fontWeight="600" fontSize={15} color={colors.text}>
+    <Text fontWeight="600" fontSize={13} color={colors.text}>
       {label}
     </Text>
     <TextInput
@@ -28,7 +28,7 @@ const TextInputField = ({
         borderWidth: 1,
         borderRadius: 5,
         color: "#1E1E1E",
-        padding: 15,
+        padding: 12,
       }}
       multiline={multiline}
       placeholder={placeholder}

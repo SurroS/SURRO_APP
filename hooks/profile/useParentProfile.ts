@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   getParentProfile,
   createParentProfile,
@@ -17,7 +17,7 @@ export const useParentProfile = () => {
   // -------------------------
   // FETCH (CACHED)
   // -------------------------
-  const fetchProfile = async (forceRefresh = false) => {
+  const fetchProfile = useCallback(async (forceRefresh = false) => {
     if (cachedProfile && !forceRefresh) {
       console.log("[ParentProfile] Using cached profile");
       setParentProfile(cachedProfile);
@@ -43,8 +43,7 @@ export const useParentProfile = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
+  }, []);
   // -------------------------
   // CREATE
   // -------------------------

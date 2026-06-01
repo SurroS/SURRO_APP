@@ -10,6 +10,7 @@ import colors from "@/hooks/colors";
 import { router } from "expo-router";
 
 const NotificationsScreen = () => {
+  const [isProcessing, setIsProcessing] = useState(false);
   const notifications = useNotificationStore((s) => s.notifications);
   const selected = useNotificationStore((s) => s.selected);
   const markRead = useNotificationStore((s) => s.markRead);
@@ -72,25 +73,33 @@ const NotificationsScreen = () => {
         {/* Selection Actions */}
         {selected.length > 0 && (
           <XStack justifyContent="space-around" marginBottom={10}>
-            <Button backgroundColor="#0E0E55" onPress={selectAll}>
+            <Button backgroundColor="#0E0E55" onPress={() => { if (isProcessing) return; selectAll(); }} disabled={isProcessing}>
               Select All
             </Button>
 
             <Button
               backgroundColor="#0E0E55"
               onPress={() => {
+                if (isProcessing) return;
+                setIsProcessing(true);
                 selected.forEach((id) => markRead(id));
                 clearSelection();
+                setIsProcessing(false);
               }}
+              disabled={isProcessing}
             >
               Mark Read
             </Button>
             <Button
               backgroundColor={colors.primary}
               onPress={() => {
+                if (isProcessing) return;
+                setIsProcessing(true);
                 selected.forEach((id) => deleteNotification(id));
                 clearSelection();
+                setIsProcessing(false);
               }}
+              disabled={isProcessing}
             >
               Delete
             </Button>

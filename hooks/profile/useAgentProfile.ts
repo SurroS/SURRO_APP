@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   getAgentProfile,
   createAgentProfile,
@@ -13,7 +13,7 @@ export const useAgentProfile = () => {
   // -------------------------
   // FETCH PROFILE
   // -------------------------
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     console.log("[AgentProfile] Fetching profile from API...");
     setIsLoading(true);
     setError(null);
@@ -39,7 +39,7 @@ export const useAgentProfile = () => {
       setIsLoading(false);
       console.log("[AgentProfile] Fetch done");
     }
-  };
+  }, []);
 
   // -------------------------
   // CREATE PROFILE

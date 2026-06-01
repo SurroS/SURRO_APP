@@ -1,6 +1,7 @@
 // stores/wallet/walletStore.ts
 import { create } from "zustand";
 import {
+  getWallet,
   getWalletBalance,
   fundWallet,
   debitWallet,
@@ -9,6 +10,7 @@ import {
 import type {
   UserId,
   WalletCurrency,
+  WalletTransactionData,
 } from "@/types/walletTypes";
 
 // -------------------------------
@@ -20,8 +22,10 @@ interface WalletState {
   loading: boolean;
   error: string | null;
   lastUpdatedAt: string | null;
+  transactions: WalletTransactionData[];
 
   fetchBalance: (userId: UserId, token?: string | null) => Promise<void>;
+  fetchWallet: () => Promise<void>;
 
   credit: (
     userId: UserId,
@@ -47,9 +51,33 @@ export const useWalletStore = create<WalletState>((set, get) => ({
   loading: false,
   error: null,
   lastUpdatedAt: null,
+  transactions: [],
 
   // -------------------------
-  // FETCH BALANCE
+  // FETCH FULL WALLET (includes transactions)
+  // -------------------------
+  fetchWallet: async () => {
+    try {
+      set({ loading: true });
+      const res = await getWallet();
+
+      set({
+        balance: res.balance,
+        currency: res.currency as WalletCurrency,
+        transactions: res.transactions ?? [],
+        loading: false,
+        lastUpdatedAt: new Date().toISOString(),
+      });
+    } catch (err: any) {
+      set({
+        loading: false,
+        error: err?.message ?? "Failed to fetch wallet",
+      });
+    }
+  },
+
+  // -------------------------
+  // FETCH BALANCE ONLY
   // -------------------------
   fetchBalance: async (
     userId: UserId,

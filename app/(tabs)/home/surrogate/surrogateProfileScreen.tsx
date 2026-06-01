@@ -30,6 +30,7 @@ import { SURROGATE_TRANSACTIONS } from "@/types/surrogateTransactionTypes";
 import { SurrogateProfile } from "@/types/profile";
 
 export default function SurrogateProfileScreen() {
+  const [isProcessing, setIsProcessing] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
@@ -58,6 +59,7 @@ export default function SurrogateProfileScreen() {
   }, [user]);
 
   const handleChat = () => {
+    if (isProcessing) return;
     if (!surrogate?.user?.id) {
       Toast.show({
         text1: "Chat unavailable",
@@ -179,6 +181,7 @@ export default function SurrogateProfileScreen() {
   };
 
   const handlePayment = () => {
+    if (isProcessing) return;
     if (wallet < transaction.amount) {
       setShowWalletModal(true);
       return;
@@ -194,8 +197,10 @@ export default function SurrogateProfileScreen() {
     }
   };
 
-  const HandleUseAgent = () =>
+  const HandleUseAgent = () => {
+    if (isProcessing) return;
     router.push("/(tabs)/home/agent/agentsListScreen");
+  };
 
   const profileImages = surrogate?.profilePicture
     ? [surrogate.profilePicture]
@@ -391,7 +396,7 @@ export default function SurrogateProfileScreen() {
             You will be charged N50,000 from your wallet to start a conversation
             with this surrogate.
           </Text>
-          <Button style={styles.payButton} onPress={handlePayment}>
+          <Button style={styles.payButton} onPress={handlePayment} disabled={isProcessing}>
             Pay N50,000 to unlock
           </Button>
         </PaymentModal>
@@ -404,10 +409,10 @@ export default function SurrogateProfileScreen() {
             To stay anonymous, use an agent. Direct message will reveal your
             identity.
           </Text>
-          <Button style={styles.payButton} onPress={HandleUseAgent}>
+          <Button style={styles.payButton} onPress={HandleUseAgent} disabled={isProcessing}>
             Use An Agent
           </Button>
-          <Button style={styles.payButton} onPress={handleChat}>
+          <Button style={styles.payButton} onPress={handleChat} disabled={isProcessing}>
             Direct Message
           </Button>
         </ChatMethodModal>

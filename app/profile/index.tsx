@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { YStack, XStack, Text, ScrollView } from "tamagui";
-import { RefreshControl } from "react-native";
+import { RefreshControl, ActivityIndicator } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { LogOut } from "@tamagui/lucide-icons";
 import { Toast } from "toastify-react-native";
@@ -38,6 +38,7 @@ export default function EditBioView() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [initialFetchDone, setInitialFetchDone] = useState(false);
 
   const { logout, user } = useAuth();
   const Role = user?.role?.trim();
@@ -130,16 +131,23 @@ export default function EditBioView() {
   // Refresh profile on mount and whenever screen gains focus
   useFocusEffect(
     useCallback(() => {
-      if (Role === "SURROGATE") fetchSurrogate(true);
-      else if (Role === "AGENT") fetchAgent(true);
-      else fetchParent(true);
+      setInitialFetchDone(false);
+      if (Role === "SURROGATE") fetchSurrogate(true).finally(() => setInitialFetchDone(true));
+      else if (Role === "AGENT") fetchAgent(true).finally(() => setInitialFetchDone(true));
+      else fetchParent(true).finally(() => setInitialFetchDone(true));
     }, [Role, fetchSurrogate, fetchAgent, fetchParent])
   );
+
+  const showSpinner = !initialFetchDone;
 
   // -------------------------------
   // Logout / Danger zone
   // -------------------------------
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   const handleLogout = () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
     logout();
     Toast.show({
       text1: "Logged out successfully",
@@ -149,7 +157,11 @@ export default function EditBioView() {
     router.replace("/(auth)/login");
   };
 
+  const [isDeactivating, setIsDeactivating] = useState(false);
+
   const handleDeleteAccount = () => {
+    if (isDeactivating) return;
+    setIsDeactivating(true);
     Toast.show({
       text1: "Contact support to delete account",
       text2: "This action requires support team assistance",
@@ -304,6 +316,12 @@ export default function EditBioView() {
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#FFF", paddingTop: 20, padding: 20 }}
     >
+      {showSpinner ? (
+        <YStack flex={1} justifyContent="center" alignItems="center">
+          <ActivityIndicator size="large" color={colors.primary} />
+        </YStack>
+      ) : (
+        <> 
       <ScrollView
         refreshControl={
           <RefreshControl
@@ -322,7 +340,7 @@ export default function EditBioView() {
           {renderRoleContent()}
 
           {/* Danger + Logout */}
-          <YStack marginTop="$5" gap="$3" alignItems="center">
+          <YStack marginTop="$2" gap="$3" alignItems="center">
             <XStack alignItems="center" gap="$2">
               <LogOut size={16} color={colors.primary} />
               <Text
@@ -330,8 +348,9 @@ export default function EditBioView() {
                 fontWeight="600"
                 fontSize={14}
                 onPress={handleLogout}
+                opacity={isLoggingOut ? 0.5 : 1}
               >
-                Log out
+                {isLoggingOut ? "Logging out..." : "Log out"}
               </Text>
             </XStack>
 
@@ -339,7 +358,8 @@ export default function EditBioView() {
               <Text
                 color="#E63946"
                 fontWeight="600"
-                onPress={() => setIsDanger(!isDanger)}
+                onPress={() => !isDeactivating && setIsDanger(!isDanger)}
+                opacity={isDeactivating ? 0.5 : 1}
               >
                 Danger zone
               </Text>
@@ -349,6 +369,7 @@ export default function EditBioView() {
                   color="#E63946"
                   fontWeight="600"
                   onPress={handleDeleteAccount}
+                  opacity={isDeactivating ? 0.5 : 1}
                 >
                   Deactivate account
                 </Text>
@@ -367,6 +388,8 @@ export default function EditBioView() {
           onSave={handleSaveBio}
           profile={uiProfile}
         />
+      )}
+      </>
       )}
     </SafeAreaView>
   );

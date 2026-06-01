@@ -8,11 +8,13 @@ import DateInput from "@/components/DateInput";
 
 interface SharedPersonalFieldsProps {
   fullName?: string;
+  lastName?: string;
   country?: any;
   dob?: string;
   maritalStatus?: string;
   countries?: Array<{ label: string; value: string }>;
   setFirstName?: (value: string) => void;
+  setLastName?: (value: string) => void;
   setCountry?: (value: string) => void;
   setDob?: (value: string) => void;
   setMaritalStatus?: (value: string) => void;
@@ -20,11 +22,13 @@ interface SharedPersonalFieldsProps {
 
 export default function SharedPersonalFields({
   fullName = "",
+  lastName = "",
   country = "",
   dob = "",
   maritalStatus = "",
   countries = [],
   setFirstName = () => {},
+  setLastName = () => {},
   setCountry = () => {},
   setDob = () => {},
   setMaritalStatus = () => {},
@@ -37,6 +41,13 @@ export default function SharedPersonalFields({
         placeholder="First name"
         value={fullName}
         onChangeText={setFirstName}
+      />
+
+      <TextInputField
+        label="Last name"
+        placeholder="Last name"
+        value={lastName}
+        onChangeText={setLastName}
       />
 
       <Dropdown

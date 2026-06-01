@@ -98,7 +98,8 @@ export default function ExperienceForm() {
 
     const prefill: Record<number, string> = {};
 
-    const hasExperience = !!surrogateProfile.previousPregnancyType;
+    const hasBeenSurrogate = surrogateProfile.experienceLevel === "experienced";
+    const hasExperience = hasBeenSurrogate;
 
     if (hasExperience) {
       prefill[1] = "Yes";
@@ -132,19 +133,13 @@ export default function ExperienceForm() {
 
     setAnswers(prefill);
 
-    // Set the correct question flow and index based on existing data
-    if (hasExperience) {
-      setQuestions(questionsForYes);
-      // Find the last answered question index
-      const lastAnswered = Math.max(...Object.keys(prefill).map(Number), 0);
-      const nextIndex = Math.min(lastAnswered, questionsForYes.length - 1);
-      setCurrentIndex(nextIndex);
-    } else {
-      setQuestions(questionsForNo);
-      const lastAnswered = Math.max(...Object.keys(prefill).map(Number), 0);
-      const nextIndex = Math.min(lastAnswered, questionsForNo.length - 1);
-      setCurrentIndex(nextIndex);
-    }
+    const qs = hasExperience ? questionsForYes : questionsForNo;
+    setQuestions(qs);
+
+    // Jump to the first UNANSWERED question, or start at 0
+    const answeredIds = new Set(Object.keys(prefill).map(Number));
+    const firstUnansweredIndex = qs.findIndex((q) => !answeredIds.has(q.id));
+    setCurrentIndex(firstUnansweredIndex >= 0 ? firstUnansweredIndex : qs.length - 1);
   }, [surrogateProfile]);
 
   /* ---------------- ANSWER HANDLING ---------------- */
@@ -188,21 +183,26 @@ export default function ExperienceForm() {
     setLoading(true);
 
     try {
-      const isFirstTime = answers[1]?.toLowerCase() === "yes" ? false : true;
+      const hasExperience = answers[1]?.toLowerCase() === "yes";
       
       // Build payload based on first-time or experienced
-      const payload: any = {};
+      const payload: any = {
+        hasBeenSurrogate: hasExperience,
+      };
       
-      if (isFirstTime) {
-        payload.compensationAmount = answers[2] ? Number(answers[2]) : undefined;
-        payload.compensationNegotiable = answers[3]?.toLowerCase() === "yes";
-        payload.experienceNotes = answers[5] || "";
-      } else {
+      if (hasExperience) {
         payload.previousPregnancyType = answers[2] || "";
         payload.compensationAmount = answers[4] ? Number(answers[4]) : undefined;
         payload.compensationNegotiable = answers[5]?.toLowerCase() === "yes";
         payload.enjoymentNotes = answers[3] || "";
         payload.experienceNotes = answers[6] || "";
+        payload.experienceLevel = "experienced";
+      } else {
+        payload.hasBeenSurrogate = false;
+        payload.compensationAmount = answers[2] ? Number(answers[2]) : undefined;
+        payload.compensationNegotiable = answers[3]?.toLowerCase() === "yes";
+        payload.experienceNotes = answers[5] || "";
+        payload.experienceLevel = "rookie";
       }
 
       console.log("Submitting payload:", JSON.stringify(payload, null, 2));
@@ -225,7 +225,7 @@ export default function ExperienceForm() {
 
   return (
     <KeyboardAvoidingWrapper>
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+      <SafeAreaView style={{ flex: 1 }}>
         <YStack style={styles.container}>
         <Text style={styles.questionText}>{currentQuestion.text}</Text>
 
@@ -256,35 +256,45 @@ export default function ExperienceForm() {
         {/* YES / NO */}
         {currentQuestion.type === "yesno" && (
           <XStack gap="$4" marginTop="$10">
-            {["Yes", "No"].map((opt) => (
-              <Button
-                key={opt}
-                backgroundColor={colors.gray}
-                borderColor={colors.primary}
-                borderWidth={1}
-                onPress={() => handleAnswerChange(opt)}
-              >
-                {opt}
-              </Button>
-            ))}
+            {["Yes", "No"].map((opt) => {
+              const selected = answers[currentQuestion.id] === opt;
+              return (
+                <Button
+                  key={opt}
+                  backgroundColor={selected ? colors.primary : colors.white}
+                  borderColor={colors.primary}
+                  borderWidth={1}
+                  color={selected ? colors.white : colors.primary}
+                  onPress={() => handleAnswerChange(opt)}
+                >
+                  {opt}
+                </Button>
+              );
+            })}
           </XStack>
         )}
 
         {/* SELECT */}
         {currentQuestion.type === "select" && currentQuestion.options && (
           <XStack gap="$4" marginTop="$10" flexWrap="wrap">
-            {currentQuestion.options.map((opt) => (
-              <Button
-                key={opt}
-                backgroundColor={colors.gray}
-                onPress={() => {
-                  handleAnswerChange(opt);
-                  handleNext();
-                }}
-              >
-                {opt}
-              </Button>
-            ))}
+            {currentQuestion.options.map((opt) => {
+              const selected = answers[currentQuestion.id] === opt;
+              return (
+                <Button
+                  key={opt}
+                  backgroundColor={selected ? colors.primary : colors.white}
+                  borderColor={colors.primary}
+                  borderWidth={1}
+                  color={selected ? colors.white : colors.primary}
+                  onPress={() => {
+                    handleAnswerChange(opt);
+                    handleNext();
+                  }}
+                >
+                  {opt}
+                </Button>
+              );
+            })}
           </XStack>
         )}
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useLayoutEffect } from "react";
 import {
   FlatList,
   View,
@@ -6,7 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 import ChatInput from "@/components/chat/ChatInput";
 import { useAuthStore } from "@/store/auth";
@@ -44,6 +44,15 @@ export default function ChatBoxScreen() {
   const { otherUserId } = useLocalSearchParams<Record<string, string>>();
   const currentUser = useAuthStore((s) => s.user);
   const currentUserId = currentUser?.id;
+  const navigation = useNavigation();
+
+  // Hide the tab bar so the chat input sits at the bottom
+  useLayoutEffect(() => {
+    navigation.getParent()?.setOptions({ tabBarStyle: { display: "none" } });
+    return () => {
+      navigation.getParent()?.setOptions({ tabBarStyle: { display: "flex", borderTopWidth: 0, backgroundColor: "#FFFFFF" } });
+    };
+  }, [navigation]);
 
   const [conversationId, setConversationId] = useState<string>();
   const [messages, setMessages] = useState<Message[]>([]);

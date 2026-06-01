@@ -27,9 +27,9 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
       onPress={onBackPress}
       style={{ position: "absolute", left: 0, padding: 4, }}
     >
-      <Ionicons name="arrow-back" size={28} color="#000" />
+      <Ionicons name="arrow-back" size={24} color="#000" />
     </TouchableOpacity>
-    <Text fontSize={21} fontWeight="bold" color="$text">
+    <Text fontSize={16} fontWeight="bold" color="$text">
       {title}
     </Text>
   </XStack>

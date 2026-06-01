@@ -18,6 +18,7 @@ const SPECIALIZATIONS = [
 ];
 
 export default function AgentSpecializationSection() {
+  const [isSaving, setIsSaving] = useState(false);
   const [specialties, setSpecialties] = useState<string[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -33,6 +34,7 @@ export default function AgentSpecializationSection() {
   const deselectAll = () => setSpecialties([]);
 
   const save = () => {
+    if (isSaving) return;
     if (specialties.length === 0) {
       Toast.show({
         text1: "Select at least one specialization",
@@ -40,6 +42,7 @@ export default function AgentSpecializationSection() {
       });
       return;
     }
+    setIsSaving(true);
     Toast.show({
       text1: "Specializations updated",
       type: "customSuccess" as ToastType,
@@ -145,7 +148,7 @@ export default function AgentSpecializationSection() {
             </Popover.Content>
           </Popover>
 
-          <Button backgroundColor="#0A043C" color="white" onPress={save}>
+          <Button backgroundColor="#0A043C" color="white" onPress={save} disabled={isSaving}>
             Save
           </Button>
         </YStack>

@@ -165,7 +165,7 @@ export default function PersonalInformationScreen() {
         await updateProfile(profileData);
       } else if (Role === "INTENDED_PARENT") {
         const profileData = {
-          fullName: firstName.trim(),
+          fullName: `${firstName.trim()} ${lastName.trim()}`.trim(),
           countryOfResidence: country.name,
           dateOfBirth: dob,
           maritalStatus,
@@ -173,7 +173,7 @@ export default function PersonalInformationScreen() {
         await updateParentProfile(profileData);
       } else if (Role === "AGENT") {
         const profileData = {
-          fullName: firstName.trim(),
+          fullName: `${firstName.trim()} ${lastName.trim()}`.trim(),
           country: country.name,
           dateOfBirth: dob ? new Date(dob) : undefined,
           maritalStatus,
@@ -213,11 +213,13 @@ export default function PersonalInformationScreen() {
             {Role === "SURROGATE" && (
               <SurrogatePersonalFields
                 fullName={firstName}
+                lastName={lastName}
                 country={country}
                 dob={dob}
                 maritalStatus={maritalStatus}
                 countries={countries}
                 setFirstName={setFirstName}
+                setLastName={setLastName}
                 setCountry={handleSetCountry}
                 setDob={setDob}
                 setMaritalStatus={setMaritalStatus}
@@ -232,11 +234,13 @@ export default function PersonalInformationScreen() {
             {Role === "INTENDED_PARENT" && (
               <ParentPersonalFields
                 fullName={firstName}
+                lastName={lastName}
                 country={country}
                 dob={dob}
                 maritalStatus={maritalStatus}
                 countries={countries}
                 setFirstName={setFirstName}
+                setLastName={setLastName}
                 setCountry={handleSetCountry}
                 setDob={setDob}
                 setMaritalStatus={setMaritalStatus}
@@ -245,11 +249,13 @@ export default function PersonalInformationScreen() {
             {Role === "AGENT" && (
               <AgentPersonalFields
                 fullName={firstName}
+                lastName={lastName}
                 country={country}
                 dob={dob}
                 maritalStatus={maritalStatus}
                 countries={countries}
                 setFirstName={setFirstName}
+                setLastName={setLastName}
                 setCountry={handleSetCountry}
                 setDob={setDob}
                 setMaritalStatus={setMaritalStatus}

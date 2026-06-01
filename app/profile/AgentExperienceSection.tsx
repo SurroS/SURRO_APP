@@ -8,11 +8,13 @@ import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 import { Toast } from "toastify-react-native";
 
 export default function AgentExperienceSection() {
+  const [isSaving, setIsSaving] = useState(false);
   const [years, setYears] = useState("");
   const [completed, setCompleted] = useState("");
   const [background, setBackground] = useState("");
 
   const save = () => {
+    if (isSaving) return;
     if (!years || !background) {
       Toast.show({
         text1: "Please fill required fields",
@@ -20,6 +22,8 @@ export default function AgentExperienceSection() {
       });
       return;
     }
+
+    setIsSaving(true);
 
     Toast.show({ text1: "Experience updated", type: "success" });
     router.back();
@@ -54,7 +58,7 @@ export default function AgentExperienceSection() {
             onChangeText={setBackground}
           />
 
-          <Button backgroundColor="#0A043C" color="white" onPress={save}>
+          <Button backgroundColor="#0A043C" color="white" onPress={save} disabled={isSaving}>
             Save
           </Button>
         </YStack>

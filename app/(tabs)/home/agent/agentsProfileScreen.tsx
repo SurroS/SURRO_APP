@@ -36,6 +36,7 @@ const fallbackImages = [
 ];
 
 export default function AgentProfileScreen() {
+  const [isProcessing, setIsProcessing] = useState(false);
   const { id } = useLocalSearchParams();
   const [agent, setAgent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -73,11 +74,13 @@ export default function AgentProfileScreen() {
   // Payment Handlers
   // -----------------------------
   const handleTopUp = () => {
+    if (isProcessing) return;
     setShowWalletModal(false);
     router.push("/walletFlow");
   };
 
   const handleChat = () => {
+    if (isProcessing) return;
     if (!id) {
       Toast.show({
         text1: "Cannot start chat",
@@ -96,6 +99,7 @@ export default function AgentProfileScreen() {
   };
 
   const handlePayment = () => {
+    if (isProcessing) return;
     if (wallet < transaction.amount) {
       setShowWalletModal(true);
       return;
@@ -250,7 +254,7 @@ export default function AgentProfileScreen() {
             To start a conversation with this agent, you need to pay N50,000
           </Text>
 
-          <Button style={styles.payButton} onPress={handlePayment}>
+          <Button style={styles.payButton} onPress={handlePayment} disabled={isProcessing}>
             Pay N50,000 to unlock
           </Button>
         </PaymentModal>

@@ -1,5 +1,5 @@
-import { StyleSheet, TextInput } from "react-native";
-import { YStack, Text } from "tamagui";
+import { StyleSheet, TextInput, ActivityIndicator } from "react-native";
+import { YStack, XStack, Text } from "tamagui";
 import usechangePasswordForm from "@/hooks/auth/useChangePasswordForm";
 import { PrimaryButton } from "@/components/auth";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,7 +12,7 @@ import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 
 export default function ChangePasswordScreen() {
-  const { formData, errors, updateField, validateForm, resetForm } =
+  const { formData, errors, passwordRules, updateField, validateForm, resetForm } =
     usechangePasswordForm();
   const { changePassword, isLoading } = useAuth();
 
@@ -75,6 +75,26 @@ export default function ChangePasswordScreen() {
           <Text style={styles.error}>{errors.newPassword}</Text>
         )}
 
+        {/* Password rules */}
+        <YStack gap="$1" marginBottom={12}>
+          {passwordRules.map((rule) => (
+            <XStack key={rule.label} alignItems="center" gap="$2">
+              <Text
+                fontSize={12}
+                color={rule.met ? "#22C55E" : "#9CA3AF"}
+              >
+                {rule.met ? "✓" : "○"}
+              </Text>
+              <Text
+                fontSize={12}
+                color={rule.met ? "#22C55E" : "#9CA3AF"}
+              >
+                {rule.label}
+              </Text>
+            </XStack>
+          ))}
+        </YStack>
+
         <Text style={styles.label}>Confirm New Password</Text>
         <TextInput
           secureTextEntry
@@ -90,6 +110,7 @@ export default function ChangePasswordScreen() {
           title="Change Password"
           onPress={handleSubmit}
           loading={isLoading}
+          disabled={isLoading}
         />
         </YStack>
       </SafeAreaView>

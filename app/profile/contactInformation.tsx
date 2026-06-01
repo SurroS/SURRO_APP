@@ -247,7 +247,7 @@ export default function ContactInformationScreen() {
             "Emergency contact number",
           ].map((label, i) => (
             <YStack key={label} gap="$1">
-              <Label fontWeight="600" fontSize={15} color="#000">
+              <Label fontWeight="600" fontSize={13} color="#000">
                 {label}
               </Label>
               <XStack
@@ -270,7 +270,7 @@ export default function ContactInformationScreen() {
                   <TextInput
                     style={{
                       flex: 1,
-                      height: 50,
+                      height: 44,
                       paddingHorizontal: 10,
                       color: "#000",
                       fontSize: 16,

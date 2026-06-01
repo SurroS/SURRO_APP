@@ -40,3 +40,13 @@ export interface WalletBalanceResponse {
     currency: WalletCurrency;
   };
 }
+
+export interface WalletResponse {
+  id: string;
+  userId: UserId;
+  balance: number;
+  currency: WalletCurrency;
+  createdAt: string;
+  updatedAt: string;
+  transactions: WalletTransactionData[];
+}

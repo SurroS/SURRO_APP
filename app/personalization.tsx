@@ -1,22 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View, ActivityIndicator } from "react-native";
 import { YStack, XStack, Text, ScrollView } from "tamagui";
 import { ScreenHeader } from "@/components/auth";
 import colors from "@/hooks/colors";
 import { router } from "expo-router";
+import { getReminderSettings, updateReminderSettings } from "@/services/notificationApi";
+import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 
 // Custom Toggle Button
 const ToggleButton = ({
   value,
   onToggle,
+  disabled,
 }: {
   value: boolean;
   onToggle: () => void;
+  disabled?: boolean;
 }) => {
   return (
     <TouchableOpacity
       onPress={onToggle}
+      disabled={disabled}
       activeOpacity={0.8}
       style={[
         styles.toggleContainer,
@@ -32,6 +38,7 @@ const ToggleButton = ({
 };
 
 export default function NotificationSettingsScreen() {
+  const [toggling, setToggling] = useState(false);
   const [updates, setUpdates] = useState({
     email: true,
     sms: false,
@@ -44,14 +51,47 @@ export default function NotificationSettingsScreen() {
     push: true,
   });
 
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getReminderSettings()
+      .then((data) => {
+        setReminders({
+          email: data.emailReminder ?? true,
+          sms: data.smsReminder ?? true,
+          push: data.pushReminder ?? true,
+        });
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
   const handleToggle = (
     section: "updates" | "reminders",
     field: "email" | "sms" | "push"
   ) => {
+    if (toggling) return;
     if (section === "updates") {
       setUpdates((prev) => ({ ...prev, [field]: !prev[field] }));
     } else {
-      setReminders((prev) => ({ ...prev, [field]: !prev[field] }));
+      const next = !reminders[field];
+      setReminders((prev) => ({ ...prev, [field]: next }));
+      setToggling(true);
+
+      const payload: any = {};
+      if (field === "email") payload.emailReminder = next;
+      if (field === "sms") payload.smsReminder = next;
+      if (field === "push") payload.pushReminder = next;
+
+      updateReminderSettings(payload)
+        .catch(() => {
+          setReminders((prev) => ({ ...prev, [field]: !next }));
+          Toast.show({
+            text1: "Failed to update reminder setting",
+            type: "customError" as ToastType,
+          });
+        })
+        .finally(() => setToggling(false));
     }
   };
 
@@ -63,6 +103,13 @@ export default function NotificationSettingsScreen() {
             title="Notification"
             onBackPress={() => router.back()}
           />
+
+          {loading ? (
+            <YStack flex={1} justifyContent="center" alignItems="center" marginTop={60}>
+              <ActivityIndicator size="large" color={colors.primary} />
+            </YStack>
+          ) : (
+            <>
 
           {/* Updates and Promotions */}
           <YStack style={styles.sectionCard}>
@@ -76,16 +123,19 @@ export default function NotificationSettingsScreen() {
                 label="Email"
                 value={updates.email}
                 onToggle={() => handleToggle("updates", "email")}
+                disabled={toggling}
               />
               <ToggleRow
                 label="SMS"
                 value={updates.sms}
                 onToggle={() => handleToggle("updates", "sms")}
+                disabled={toggling}
               />
               <ToggleRow
                 label="Push notification"
                 value={updates.push}
                 onToggle={() => handleToggle("updates", "push")}
+                disabled={toggling}
               />
             </YStack>
           </YStack>
@@ -102,19 +152,24 @@ export default function NotificationSettingsScreen() {
                 label="Email"
                 value={reminders.email}
                 onToggle={() => handleToggle("reminders", "email")}
+                disabled={toggling}
               />
               <ToggleRow
                 label="SMS"
                 value={reminders.sms}
                 onToggle={() => handleToggle("reminders", "sms")}
+                disabled={toggling}
               />
               <ToggleRow
                 label="Push notification"
                 value={reminders.push}
                 onToggle={() => handleToggle("reminders", "push")}
+                disabled={toggling}
               />
             </YStack>
           </YStack>
+          </>
+          )}
         </YStack>
       </ScrollView>
     </SafeAreaView>
@@ -126,12 +181,13 @@ type ToggleRowProps = {
   label: string;
   value: boolean;
   onToggle: () => void;
+  disabled?: boolean;
 };
 
-const ToggleRow = ({ label, value, onToggle }: ToggleRowProps) => (
+const ToggleRow = ({ label, value, onToggle, disabled }: ToggleRowProps) => (
   <XStack justifyContent="space-between" alignItems="center" marginTop={18}>
     <Text style={styles.toggleLabel}>{label}</Text>
-    <ToggleButton value={value} onToggle={onToggle} />
+    <ToggleButton value={value} onToggle={onToggle} disabled={disabled} />
   </XStack>
 );
 

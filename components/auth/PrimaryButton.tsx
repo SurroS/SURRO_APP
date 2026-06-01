@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 interface PrimaryButtonProps {
@@ -17,18 +17,32 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
     disabled = false,
     style,
     icon
-}) => (
-    <TouchableOpacity
-        style={[styles.button, style, (loading || disabled) && styles.disabled]}
-        onPress={onPress}
-        disabled={loading || disabled}
-    >
-        
-        <Text style={styles.text}>
-          {icon}  {loading ? 'Please wait...' : title}
-        </Text>
-    </TouchableOpacity>
-);
+}) => {
+    const [pressedOnce, setPressedOnce] = useState(false);
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handlePress = () => {
+        if (pressedOnce) return;
+        setPressedOnce(true);
+        onPress();
+        timerRef.current = setTimeout(() => setPressedOnce(false), 500);
+    };
+
+    const isDisabled = loading || disabled || pressedOnce;
+
+    return (
+        <TouchableOpacity
+            style={[styles.button, style, isDisabled && styles.disabled]}
+            onPress={handlePress}
+            disabled={isDisabled}
+        >
+            
+            <Text style={styles.text}>
+              {icon}  {loading ? 'Please wait...' : title}
+            </Text>
+        </TouchableOpacity>
+    );
+};
 
 const styles = StyleSheet.create({
     button: {
