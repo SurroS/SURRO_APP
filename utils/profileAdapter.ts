@@ -2,7 +2,6 @@ import { UIProfile } from "@/types/uiProfile";
 
 /* ---------------- SURROGATE ---------------- */
 export const surrogateToUIProfile = (p: any): UIProfile => {
-  console.log("surrogateToUIProfile input:", p); // <-- log input
   if (!p) return {
     isAvailable: false,
     profilePicture: "",
@@ -39,7 +38,6 @@ export const uiProfileToSurrogate = (u: UIProfile) => ({
 
 /* ---------------- AGENT ---------------- */
 export const agentToUIProfile = (p: any): UIProfile => {
-  console.log("agentToUIProfile input:", p);
   if (!p) return {
     isAvailable: false,
     profilePicture: "",

@@ -30,45 +30,21 @@ export default function HomeIndex() {
 
   // ---- AUTO-FETCH PROFILE ON MOUNT ----
   useEffect(() => {
-    console.log(`[HomeIndex] Mounted — role: ${role}, user: ${user?.id || user?.email}`);
     switch (role) {
       case "SURROGATE":
-        console.log("[HomeIndex] Auto-fetching surrogate profile...");
-        fetchSurrogate().then((p) =>
-          console.log("[HomeIndex] Surrogate profile loaded:", p ? "YES" : "NO"),
-        );
+        fetchSurrogate();
         break;
       case "AGENT":
-        console.log("[HomeIndex] Auto-fetching agent profile...");
-        fetchAgent().then((p) =>
-          console.log("[HomeIndex] Agent profile loaded:", p ? "YES" : "NO"),
-        );
+        fetchAgent();
         break;
       case "INTENDED_PARENT":
-        console.log("[HomeIndex] Auto-fetching parent profile...");
-        fetchParent().then((p) =>
-          console.log("[HomeIndex] Parent profile loaded:", p ? "YES" : "NO"),
-        );
+        fetchParent();
         break;
-      default:
-        console.warn(`[HomeIndex] Unknown role: ${role}`);
     }
   }, []);
 
-  // ---- logs whenever profile data changes ----
-  useEffect(() => {
-    if (surrogateProfile) console.log("[HomeIndex] surrogateProfile data:", JSON.stringify(surrogateProfile).slice(0, 300));
-  }, [surrogateProfile]);
-  useEffect(() => {
-    if (agentProfile) console.log("[HomeIndex] agentProfile data:", JSON.stringify(agentProfile).slice(0, 300));
-  }, [agentProfile]);
-  useEffect(() => {
-    if (parentProfile) console.log("[HomeIndex] parentProfile data:", JSON.stringify(parentProfile).slice(0, 300));
-  }, [parentProfile]);
-
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    console.log(`[HomeIndex] Pull-to-refresh — role: ${role}`);
     try {
       if (role === "SURROGATE") {
         await fetchSurrogate(true);
@@ -77,7 +53,6 @@ export default function HomeIndex() {
       } else if (role === "INTENDED_PARENT") {
         await fetchParent(true);
       }
-      console.log(`[HomeIndex] Refresh complete`);
     } catch (e) {
       console.error("[HomeIndex] Refresh failed", e);
     } finally {

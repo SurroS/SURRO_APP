@@ -6,21 +6,21 @@ export function useTypedRouter() {
 
   const pushModeScreen = (gateway: PaymentGateway) => {
     router.push({
-      pathname: "/(tabs)/home/walletFlow/paymentMode",
+      pathname: "/walletFlow/paymentMode",
       params: { gateway },
     });
   };
 
   const pushEntryScreen = (gateway: PaymentGateway, mode: PaymentMode) => {
     router.push({
-      pathname: "/(tabs)/home/walletFlow/paymentEntry",
+      pathname: "/walletFlow/paymentEntry",
       params: { gateway, mode },
     });
   };
 
   const pushWebViewScreen = (url: string, gateway: PaymentGateway, mode: PaymentMode) => {
     router.push({
-      pathname: "/(tabs)/home/walletFlow/paymentWebView",
+      pathname: "/walletFlow/paymentWebView",
       params: { paymentUrl: url, gateway, mode },
     });
   };

@@ -16,6 +16,8 @@ import colors from "@/hooks/colors";
 
 const CARD_H = 156;
 
+const DEFAULT_AVATAR = require("@/assets/images/femaleAvatar.png");
+
 type Props = {
   onEditBio?: () => void;
   onChangePicture?: (uri?: string) => void;
@@ -27,31 +29,27 @@ export default function ProfileImageCard({
   onChangePicture,
   imageSrc,
 }: Props) {
+  const [imgError, setImgError] = useState(false);
+
+  const source = imageSrc && !imgError ? imageSrc : DEFAULT_AVATAR;
+  const imgKey = imageSrc && !imgError ? imageSrc.uri : "default";
+
   return (
     <View style={styles.container}>
-      {/* Profile Image */}
+      {/* Profile Image with Camera Overlay */}
       <Pressable onPress={() => onChangePicture?.()}>
         <View style={styles.imageWrapper}>
           <Image
-            source={
-              imageSrc
-                ? imageSrc
-                : require("@/assets/images/femaleAvatar.png")
-            }
+            key={imgKey}
+            source={source}
             style={styles.profileImage}
+            onError={() => setImgError(true)}
           />
+          <View style={styles.cameraOverlay}>
+            <Camera size={24} color="#FFF" />
+          </View>
         </View>
       </Pressable>
-      {/* Change Picture */}
-      <TouchableOpacity
-        style={styles.changePic}
-        onPress={() => onChangePicture?.()}
-        accessibilityRole="button"
-        accessibilityLabel="Change profile picture"
-      >
-        <Camera size={16} color={colors.text} />
-        <Text style={styles.changeText}> Change profile picture</Text>
-      </TouchableOpacity>
 
       {/* Edit Bio */}
       <TouchableOpacity
@@ -91,15 +89,12 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 12,
   },
-  changePic: {
-    flexDirection: "row",
+  cameraOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 12,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    justifyContent: "center",
     alignItems: "center",
-    marginTop: 10,
-  },
-  changeText: {
-    textDecorationLine: "underline",
-    color: "$color",
-    fontSize: 14,
   },
   editBtn: {
     flexDirection: "row",

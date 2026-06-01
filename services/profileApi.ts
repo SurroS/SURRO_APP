@@ -42,7 +42,9 @@ export const updateMedicalProfile = (data: any) =>
   authenticatedPatch("/surrogates/profile/medical", data);
 
 export const uploadEndometriumImage = (data: any) =>
-  authenticatedPut("/surrogates/profile/medical/upload-endometrium", data);
+  authenticatedPatch("/surrogates/profile/medical/upload-endometrium", data, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
 
 // ----------------------------------------------------
 // AVATAR UPLOAD

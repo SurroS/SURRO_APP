@@ -88,7 +88,7 @@ export default function ContactInformationScreen() {
         ? agentProfile
         : null;
 
-    if (!profile || countries.length === 0) return;
+    if (!profile) return;
 
     setPhone1(stripDialCode(profile?.phone1 ?? ""));
     setPhone2(stripDialCode(profile?.phone2 ?? ""));
@@ -99,12 +99,14 @@ export default function ContactInformationScreen() {
     setState(profile?.stateOfOrigin ?? "");
     setLga(profile?.lga ?? "");
 
-    const countryField = profile?.countryOfResidence;
-    if (countryField) {
-      const foundCountry = countries.find((c) => c.name === countryField);
-      if (foundCountry) {
-        setCountry(foundCountry);
-        getStatesByCountry(foundCountry.name).then(setStatesList);
+    if (countries.length > 0) {
+      const countryField = profile?.countryOfResidence;
+      if (countryField) {
+        const foundCountry = countries.find((c) => c.name === countryField);
+        if (foundCountry) {
+          setCountry(foundCountry);
+          getStatesByCountry(foundCountry.name).then(setStatesList);
+        }
       }
     }
   }, [

@@ -18,6 +18,8 @@ import { Ionicons } from "@expo/vector-icons";
 
 import colors from "@/hooks/colors";
 import PlatformInput from "./SocialSelector";
+import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 
 export type Social = {
   platform: string;
@@ -28,8 +30,8 @@ export type EditProfileModalProps = {
   visible: boolean;
   onClose: () => void;
   onSave: (data: {
-    username: string;
-    about: string;
+    userName: string;
+    aboutMe: string;
     socials: Social[];
   }) => Promise<void>;
   profile?: {
@@ -52,6 +54,7 @@ export default function EditProfileModal({
   const [socials, setSocials] = useState<Social[]>([]);
 
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [aboutInputHeight, setAboutInputHeight] = useState(44);
   const anim = useRef(new Animated.Value(0)).current;
 
   /* ---------- Populate from API ---------- */
@@ -61,7 +64,7 @@ export default function EditProfileModal({
     setUsername(profile?.userName || "");
     setAbout(profile?.aboutMe || "");
     setSocials(profile?.socials || []);
-  }, [visible, profile]);
+  }, [visible]);
 
   /* ---------- Keyboard ---------- */
   useEffect(() => {
@@ -125,11 +128,16 @@ export default function EditProfileModal({
     if (isLoading) return;
 
     await onSave({
-      username: username.trim(),
-      about: about.trim(),
+      userName: username.trim(),
+      aboutMe: about.trim(),
       socials: socials.filter(
         (s) => s.handle && s.handle.trim().length > 0
       ),
+    });
+
+    Toast.show({
+      text1: "Bio updated successfully",
+      type: "customSuccess" as ToastType,
     });
 
     onClose();
@@ -156,7 +164,7 @@ export default function EditProfileModal({
           {/* Header */}
           <XStack justifyContent="space-between" alignItems="center">
             <Text  color={colors.text} fontSize={18} fontWeight="700">
-              Edit Profile
+              Edit Bio
             </Text>
             <TouchableOpacity disabled={isLoading} onPress={onClose}>
               <Text color={isLoading ? "#999" : colors.primary}>Close</Text>
@@ -181,14 +189,22 @@ export default function EditProfileModal({
             </YStack>
 
             {/* About */}
-            <YStack marginTop={12}>
-              <Text fontWeight="600">About</Text>
+            <YStack marginTop={16}>
+              <Text color={colors.text} fontWeight="600">About</Text>
               <TextInput
                 multiline
                 editable={!isLoading}
                 value={about}
                 onChangeText={(t) => t.length <= 300 && setAbout(t)}
-                style={[styles.input, styles.textArea]}
+                onContentSizeChange={(e) =>
+                  setAboutInputHeight(
+                    Math.min(Math.max(44, e.nativeEvent.contentSize.height), 200)
+                  )
+                }
+                style={[
+                  styles.input,
+                  { height: aboutInputHeight, paddingVertical: 10 },
+                ]}
               />
               <Text alignSelf="flex-end" fontSize={12}>
                 {about.length}/300

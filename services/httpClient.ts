@@ -15,6 +15,9 @@ export interface APIError extends Error {
   details?: any;
 }
 
+// Guard against repeated 401 handling (prevents infinite logout loop)
+let isLoggingOut = false;
+
 // Create axios instance with default config
 const httpClient: AxiosInstance = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_URL,
@@ -66,24 +69,28 @@ httpClient.interceptors.response.use(
       message: error.message,
     });
 
-    // ---- AUTO-LOGOUT ON 401 ----
-    if (status === 401) {
+    // ---- AUTO-LOGOUT ON 401 (once only) ----
+    if (status === 401 && !isLoggingOut) {
+      isLoggingOut = true;
       console.warn("[httpClient] 401 Unauthorized — clearing auth and redirecting to login");
       try {
-        // Lazy require to avoid circular dependency
         const { useAuthStore } = require("@/store/auth");
         const store = useAuthStore.getState();
-        // Set forceLogout BEFORE clearing auth so UI can show a blocker
         if (store.setForceLogout) store.setForceLogout(true);
         if (store.logout) store.logout();
-        // Zustand persist re-saves cleared state automatically via partialize
       } catch (e) {
         console.error("[httpClient] Failed to clear auth:", e);
       }
       try {
         const { router } = require("expo-router");
-        setTimeout(() => router.replace("/(auth)/login"), 100);
-      } catch (_) {}
+        setTimeout(() => {
+          router.replace("/(auth)/login");
+          // Reset guard after redirect to allow future 401 handling
+          setTimeout(() => { isLoggingOut = false; }, 1000);
+        }, 100);
+      } catch (_) {
+        isLoggingOut = false;
+      }
     }
 
     // Show toast for network errors

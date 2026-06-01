@@ -27,36 +27,42 @@ export default function MedicalUpload() {
   const [medicalReport, setMedicalReport] = useState<FileObject | null>(null);
   const [uploading, setUploading] = useState(false);
 
-  // Fetch profile if not loaded
+  // Fetch profile on mount if not loaded; prefill image once data arrives
   useEffect(() => {
-    if (!medical && !surrogateProfile) {
-      console.log("[MedicalUpload] Fetching profile from backend...");
+    if (!surrogateProfile) {
       fetchProfile();
     }
-  }, [medical, surrogateProfile, fetchProfile]);
-
-  // Prefill endometrium image from backend
-  useEffect(() => {
     if (medical?.endometriumUploadUrl && !medicalReport) {
-      console.log("[MedicalUpload] Loaded endometrium image from backend:", medical.endometriumUploadUrl);
       setMedicalReport({ uri: medical.endometriumUploadUrl });
     }
-  }, [medical, medicalReport]);
+  }, [surrogateProfile, medical, medicalReport, fetchProfile]);
 
-  // Upload handler
-  const handleUpload = async (file: FileObject) => {
-    // Set local preview immediately
+  // Just store the selected file locally — no upload yet
+  const handleFileSelect = (file: FileObject | null) => {
     setMedicalReport(file);
+  };
+
+  // Upload to backend, then navigate
+  const handleContinue = async () => {
+    if (!medicalReport?.uri) {
+      router.push("/medical/medicalHistorySummary");
+      return;
+    }
+
+    // If it's already a backend URL, skip upload
+    if (medical.endometriumUploadUrl && medicalReport.uri === medical.endometriumUploadUrl) {
+      router.push("/medical/medicalHistorySummary");
+      return;
+    }
 
     try {
       setUploading(true);
-      console.log("[MedicalUpload] Uploading file to backend...", file);
 
       const formData = new FormData();
       formData.append("file", {
-        uri: file.uri,
-        type: file.mimeType || file.type || "image/jpeg",
-        name: file.name || "endometrium.jpg",
+        uri: medicalReport.uri,
+        type: (medicalReport as any).mimeType || (medicalReport as any).type || "image/jpeg",
+        name: (medicalReport as any).name || "endometrium.jpg",
       } as any);
 
       const uploadResponse = await uploadEndometriumImageApi(formData);
@@ -67,21 +73,16 @@ export default function MedicalUpload() {
 
       if (!backendUrl) throw new Error("Upload failed: no URL returned");
 
-      console.log("[MedicalUpload] Upload response from backend:", uploadResponse.data);
-
-      // Update profile with backend URL
       await updateMedicalProfile({ endometriumUploadUrl: backendUrl });
-
-      // Merge local preview with backend URL for instant display
-      setMedicalReport({ uri: backendUrl });
 
       Toast.show({
         text1: "Endometrium image uploaded successfully",
         type: "customSuccess" as ToastType,
       });
+
+      router.push("/medical/medicalHistorySummary");
     } catch (error: any) {
       console.error("[MedicalUpload] Failed to upload endometrium image", error);
-
       Toast.show({
         text1: "Upload failed",
         text2: error?.response?.data?.message || "Please try again later",
@@ -115,20 +116,17 @@ export default function MedicalUpload() {
                 source={{ uri: medicalReport.uri }}
                 style={{ width: "100%", maxWidth: 300, aspectRatio: 1, borderRadius: 10 }}
               />
-              <Button
-                backgroundColor={colors.gray}
-                color={colors.primary}
-                onPress={() => setMedicalReport(null)}
-                disabled={uploading}
-              >
-                Change Image
-              </Button>
+              <Pressable onPress={() => setMedicalReport(null)}>
+                <Text style={{ color: colors.primary, textDecorationLine: "underline", fontSize: 13 }}>
+                  Change Image
+                </Text>
+              </Pressable>
             </YStack>
           ) : (
             <UploadCard
               label="1. Endometrium upload"
               file={medicalReport}
-              onFileSelect={handleUpload}
+              onFileSelect={handleFileSelect}
             />
           )}
 
@@ -138,7 +136,7 @@ export default function MedicalUpload() {
               color="#FFF"
               disabled={isLoading || uploading}
               opacity={isLoading || uploading ? 0.7 : 1}
-              onPress={() => router.push("/medical/medicalHistorySummary")}
+              onPress={handleContinue}
             >
               {isLoading || uploading ? <ActivityIndicator color="#FFF" /> : "Continue"}
             </Button>

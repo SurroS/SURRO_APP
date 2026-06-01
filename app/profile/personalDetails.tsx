@@ -74,58 +74,56 @@ export default function PersonalInformationScreen() {
   }, []);
 
   useEffect(() => {
-    if (countries.length > 0) {
-      if (Role === "SURROGATE" && surrogateProfile) {
-        setFirstName(surrogateProfile.firstName || "");
-        setLastName(surrogateProfile.lastName || "");
-        setDob(surrogateProfile.dateOfBirth || "");
-        setMaritalStatus(surrogateProfile.maritalStatus || "");
-        setHeight(surrogateProfile.height || "");
-        setWeight(surrogateProfile.weight || "");
-        setChildren(surrogateProfile.numberOfChildren || 0);
+    if (Role === "SURROGATE" && surrogateProfile) {
+      setFirstName(surrogateProfile.firstName || "");
+      setLastName(surrogateProfile.lastName || "");
+      setDob(surrogateProfile.dateOfBirth || "");
+      setMaritalStatus(surrogateProfile.maritalStatus || "");
+      setHeight(surrogateProfile.height || "");
+      setWeight(surrogateProfile.weight || "");
+      setChildren(surrogateProfile.numberOfChildren || 0);
 
-        if (surrogateProfile.countryOfOrigin) {
-          const foundCountry = countries.find(
-            (c) => c.name === surrogateProfile.countryOfOrigin
-          );
-          if (foundCountry) {
-            setCountry(foundCountry);
-          }
-        }
-      } else if (Role === "INTENDED_PARENT" && parentProfile) {
-        const fullNameParts = parentProfile.fullName?.split(" ") || [];
-        setFirstName(fullNameParts[0] || "");
-        setLastName(fullNameParts.slice(1).join(" ") || "");
-
-        if (parentProfile.countryOfResidence) {
-          const foundCountry = countries.find(
-            (c) => c.name === parentProfile.countryOfResidence
-          );
-          if (foundCountry) {
-            setCountry(foundCountry);
-          }
-        }
-      } else if (Role === "AGENT" && agentProfile) {
-        const nameParts = (
-          agentProfile.fullName ||
-          agentProfile.name ||
-          ""
-        ).split(" ");
-        setFirstName(nameParts[0] || "");
-        setLastName(nameParts.slice(1).join(" ") || "");
-        setDob(
-          agentProfile.dateOfBirth
-            ? new Date(agentProfile.dateOfBirth).toISOString().split("T")[0]
-            : ""
+      if (surrogateProfile.countryOfOrigin && countries.length > 0) {
+        const foundCountry = countries.find(
+          (c) => c.name === surrogateProfile.countryOfOrigin
         );
+        if (foundCountry) {
+          setCountry(foundCountry);
+        }
+      }
+    } else if (Role === "INTENDED_PARENT" && parentProfile) {
+      const fullNameParts = parentProfile.fullName?.split(" ") || [];
+      setFirstName(fullNameParts[0] || "");
+      setLastName(fullNameParts.slice(1).join(" ") || "");
 
-        if (agentProfile.country) {
-          const foundCountry = countries.find(
-            (c) => c.name === agentProfile.country
-          );
-          if (foundCountry) {
-            setCountry(foundCountry);
-          }
+      if (parentProfile.countryOfResidence && countries.length > 0) {
+        const foundCountry = countries.find(
+          (c) => c.name === parentProfile.countryOfResidence
+        );
+        if (foundCountry) {
+          setCountry(foundCountry);
+        }
+      }
+    } else if (Role === "AGENT" && agentProfile) {
+      const nameParts = (
+        agentProfile.fullName ||
+        agentProfile.name ||
+        ""
+      ).split(" ");
+      setFirstName(nameParts[0] || "");
+      setLastName(nameParts.slice(1).join(" ") || "");
+      setDob(
+        agentProfile.dateOfBirth
+          ? new Date(agentProfile.dateOfBirth).toISOString().split("T")[0]
+          : ""
+      );
+
+      if (agentProfile.country && countries.length > 0) {
+        const foundCountry = countries.find(
+          (c) => c.name === agentProfile.country
+        );
+        if (foundCountry) {
+          setCountry(foundCountry);
         }
       }
     }

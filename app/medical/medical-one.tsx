@@ -10,7 +10,7 @@ import NumberInputSelect from "@/components/NumberInputSelect";
 import { useProfile } from "@/hooks/useProfile";
 
 export default function MedicalDetailsStep1() {
-  const { surrogateProfile, medicalProfile, fetchProfile, isLoading } =
+  const { surrogateProfile, medicalProfile, fetchProfile, isLoading, updateProfile } =
     useProfile();
 
   const medical = surrogateProfile?.medical || medicalProfile;
@@ -89,7 +89,22 @@ export default function MedicalDetailsStep1() {
         ceasareanSection &&
         (ceasareanSection === "No" || numberOfCs > 0)));
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
+    try {
+      await updateProfile({
+        numberOfChildren,
+        medical: {
+          genotype,
+          bloodGroup,
+          pregnancyExperience: pregnancyExperience === "Yes",
+          ceasareanSection: ceasareanSection === "Yes",
+          numberOfCs,
+        },
+      });
+    } catch (e) {
+      // Silently continue - data will be saved on final step
+    }
+
     router.push({
       pathname: "/medical/medical-two",
       params: {

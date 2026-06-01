@@ -27,11 +27,18 @@ function SafeRender({ children, fallback }: any) {
 }
 
 export default function AgentHomeScreen() {
-  const { agentProfile, updateProfile, isLoading } = useAgentProfile();
+  const { agentProfile, isLoading, fetchProfile, updateProfile } = useAgentProfile();
   const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Calculate profile completion progress
   const progress = calculateProfileProgress(agentProfile as any);
+
+  // Fetch profile on mount if not loaded
+  useEffect(() => {
+    if (!agentProfile) {
+      fetchProfile();
+    }
+  }, []);
 
   // Show modal if profile is missing or incomplete
   useEffect(() => {

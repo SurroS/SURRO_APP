@@ -35,7 +35,7 @@ const WalletCard = ({ style }: { style?: any }) => {
   const isLoading = !user || !wallet;
 
   return (
-    <Link href="/home/walletFlow" asChild>
+    <Link href="/walletFlow" asChild>
       <TouchableOpacity activeOpacity={0.85} style={{ flex: 1 }}>
         <Card
           bordered

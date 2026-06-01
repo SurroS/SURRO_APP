@@ -3,9 +3,15 @@ import { authenticatedGet, authenticatedPost } from "./httpClient";
 import {
   WalletTransactionPayload,
   WalletTransactionResponse,
+  WalletTransactionData,
   WalletBalanceResponse,
   UserId,
 } from "@/types/walletTypes";
+
+export const getWalletTransactions = async (): Promise<WalletTransactionData[]> => {
+  const response = await authenticatedGet("/wallet/transaction");
+  return response?.data ?? response ?? [];
+};
 
 export const getWalletBalance = async (
   userId: UserId,

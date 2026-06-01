@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   getSurrogateProfile,
   createSurrogateProfile,
@@ -19,7 +19,7 @@ export const useSurrogateProfile = () => {
   // -------------------------
   // FETCH PROFILE (CACHED)
   // -------------------------
-  const fetchProfile = async (forceRefresh = false) => {
+  const fetchProfile = useCallback(async (forceRefresh = false) => {
     if (cachedProfile && !forceRefresh) {
       console.log("[SurrogateProfile] Using cached profile");
       setSurrogateProfile(cachedProfile);
@@ -45,7 +45,7 @@ export const useSurrogateProfile = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   // -------------------------
   // CREATE
@@ -68,13 +68,13 @@ export const useSurrogateProfile = () => {
   // UPDATE PROFILE (PATCH)
   // -------------------------
   const updateProfile = async (data: SurrogateUpdatePayload) => {
-    cachedProfile = null;
     setIsLoading(true);
     console.log("[SurrogateProfile] Updating profile...");
     try {
       const res = await updateSurrogateProfile(data);
       console.log("[SurrogateProfile] Update success:", JSON.stringify(res).slice(0, 200));
-      cachedProfile = res?.profile || res;
+      const updated = res?.profile || res;
+      cachedProfile = { ...cachedProfile, ...updated };
       setSurrogateProfile(cachedProfile);
       return cachedProfile;
     } finally {

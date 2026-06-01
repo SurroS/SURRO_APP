@@ -74,7 +74,7 @@ export default function AgentProfileScreen() {
   // -----------------------------
   const handleTopUp = () => {
     setShowWalletModal(false);
-    router.push("/(tabs)/home/walletFlow");
+    router.push("/walletFlow");
   };
 
   const handleChat = () => {

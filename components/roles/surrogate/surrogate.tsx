@@ -17,7 +17,7 @@ import ProfileData from "@/components/profileDetails/ProfileData";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function SurrogateScreen() {
-  const { surrogateProfile, isLoading, toggleAvailability } =
+  const { surrogateProfile, isLoading, fetchProfile, toggleAvailability } =
     useSurrogateProfile();
   const { user } = useAuth();
 
@@ -25,9 +25,15 @@ export default function SurrogateScreen() {
   // Calculate profile progress
   const progress = calculateProfileProgress(surrogateProfile);
 
+  // Fetch profile on mount if not loaded
+  useEffect(() => {
+    if (!surrogateProfile) {
+      fetchProfile();
+    }
+  }, []);
+
   // Show modal if no profile or progress < 100%
   useEffect(() => {
-    console.log("[Home] surrogateprofile", surrogateProfile);
     if (!isLoading) {
       const hasProfile = surrogateProfile !== null;
       const needsCompletion = hasProfile && progress < 100;

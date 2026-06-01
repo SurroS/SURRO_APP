@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView, RefreshControl, Pressable, Text } from "react-native";
+import { ScrollView, RefreshControl, Pressable, Text, Keyboard } from "react-native";
 import { YStack, Button, View } from "tamagui";
 import { router } from "expo-router";
 import { ScreenHeader } from "@/components/auth";
@@ -8,7 +8,6 @@ import colors from "@/hooks/colors";
 import DropdownField from "@/components/medical/DropdownField";
 import TextInputField from "@/components/TextInputField";
 import MultiSelectField from "@/components/medical/MultiSelectField";
-import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 import NumberInputSelect from "@/components/NumberInputSelect";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
@@ -71,25 +70,20 @@ export default function MedicalDetailsStep2() {
   }, [medical]);
 
   const handleContinue = async () => {
-    const payload: Partial<MedicalProfile> = {
-      hasChronicIllness: hasChronicIllness === "Yes",
+    const payload = {
+      hasChronicIllness: hasChronicIllness === "Yes" ? "Yes" : "No",
       chronicIllnesses:
         hasChronicIllness === "Yes" ? chronicIllnesses : [],
       otherChronicIllness:
         hasChronicIllness === "Yes" ? otherChronicIllness : undefined,
 
-      hadMiscarriage: hadMiscarriage === "Yes",
+      hadMiscarriage: hadMiscarriage === "Yes" ? "Yes" : "No",
       numberOfMiscarriages:
         hadMiscarriage === "Yes" ? numberOfMiscarriages : 0,
-
-      pregnancyComplicationsDetails:
-        hadMiscarriage === "Yes"
-          ? `Miscarriages: ${numberOfMiscarriages}`
-          : "None",
     };
 
     try {
-      await updateMedicalProfile(payload);
+      await updateMedicalProfile(payload as any);
 
       Toast.show({
         text1: "Medical details saved",
@@ -127,26 +121,27 @@ export default function MedicalDetailsStep2() {
     hasChronicIllness === "Yes" && chronicIllnesses.includes("Other");
 
   return (
-    <KeyboardAvoidingWrapper>
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF", paddingTop: 20 }}>
-        <View marginLeft={28}>
-          <ScreenHeader
-            title="Medical details"
-            onBackPress={() => router.back()}
-          />
-        </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF", paddingTop: 20 }}>
+      <View marginLeft={28}>
+        <ScreenHeader
+          title="Medical details"
+          onBackPress={() => router.back()}
+        />
+      </View>
 
-        <ScrollView
-          nestedScrollEnabled
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={["#0E0E55"]}
-            />
-          }
-        >
-          <YStack padding="$4" gap="$5">
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+        onScrollBeginDrag={Keyboard.dismiss}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#0E0E55"]}
+          />
+        }
+      >
+        <YStack padding="$4" gap="$5">
             <DropdownField
               label="Do you have any chronic illnesses?"
               value={hasChronicIllness}
@@ -206,9 +201,8 @@ export default function MedicalDetailsStep2() {
                 </Text>
               </Pressable>
             </YStack>
-          </YStack>
-        </ScrollView>
-      </SafeAreaView>
-    </KeyboardAvoidingWrapper>
-  );
-}
+        </YStack>
+      </ScrollView>
+    </SafeAreaView>
+    );
+  }

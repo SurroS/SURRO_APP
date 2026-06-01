@@ -11,7 +11,6 @@ export default function HomeLayout() {
       <Stack.Screen name="index" />
       <Stack.Screen name="galleryAction" />
       <Stack.Screen name="inviteScreen" /> 
-      <Stack.Screen name="walletFlow" /> 
       <Stack.Screen name="surrogate" />
       {/* <Stack.Screen name="agent" /> */}
     </Stack>

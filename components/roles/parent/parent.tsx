@@ -19,13 +19,19 @@ import ProfileCompletionModal from "@/components/roles/ProfileCompletionModal";
 import { calculateProfileProgress } from "@/utils/profileHelpers";
 import { useParentProfile } from "@/hooks/profile/useParentProfile";
 import ProfileData from "@/components/profileDetails/ProfileData";
-import { useFocusEffect } from "@react-navigation/native";
 
 export default function ParentScreen() {
   const { parentProfile, fetchProfile, isLoading } = useParentProfile();
   const [showProfileModal, setShowProfileModal] = useState(false);
 
   const progress = calculateProfileProgress(parentProfile);
+
+  // Fetch profile on mount if not loaded
+  useEffect(() => {
+    if (!parentProfile) {
+      fetchProfile();
+    }
+  }, []);
 
   useEffect(() => {
     if (!isLoading) {

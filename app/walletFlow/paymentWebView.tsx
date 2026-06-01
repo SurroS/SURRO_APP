@@ -31,9 +31,9 @@ export default function PaymentWebViewScreen() {
 
     // If backend redirects to success/failure page
     if (url.includes("payment-success")) {
-      router.replace("/(tabs)/home/walletFlow/paymentSuccess");
+      router.replace("/walletFlow/paymentSuccess");
     } else if (url.includes("payment-failure")) {
-      router.replace("/(tabs)/home/walletFlow/paymentFailed");
+      router.replace("/walletFlow/paymentFailed");
     }
   };
 

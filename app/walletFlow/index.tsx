@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { TouchableOpacity, StyleSheet } from "react-native";
+import React, { useMemo, useState, useEffect } from "react";
+import { TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { Text, YStack, XStack, ScrollView, View } from "tamagui";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -10,14 +10,26 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSurrogateProfile } from "@/hooks/profile/useSurrogateProfile";
 import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
 import { useParentProfile } from "@/hooks/profile/useParentProfile";
+import { getWalletTransactions } from "@/services/walletApi";
+import { WalletTransactionData } from "@/types/walletTypes";
 
 import RecentActivitiesScreen from "@/components/wallet/RecentActivity";
-import {
-  allMockTransactions,
-  SCREENS,
-} from "@/components/wallet/DummyTransactionData";
 import TransactionItem from "@/components/wallet/TransactonItem";
 import { PrimaryButton } from "@/components/auth";
+
+const SCREENS = {
+  WALLET_SUMMARY: "WALLET_SUMMARY",
+  RECENT_ACTIVITIES: "RECENT_ACTIVITIES",
+} as const;
+
+const formatDate = (iso: string): string => {
+  const d = new Date(iso);
+  const months = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  ];
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+};
 
 const WalletScreen = () => {
   const { user } = useAuth();
@@ -27,8 +39,10 @@ const WalletScreen = () => {
   const { agentProfile } = useAgentProfile();
   const { parentProfile } = useParentProfile();
 
-  const [isHidden, setIsHidden] = useState(false);
   const [currentScreen, setCurrentScreen] = useState(SCREENS.WALLET_SUMMARY);
+  const [isHidden, setIsHidden] = useState(false);
+  const [transactions, setTransactions] = useState<WalletTransactionData[]>([]);
+  const [loadingTx, setLoadingTx] = useState(true);
 
   const wallet = useMemo(() => {
     if (role === "SURROGATE") return surrogateProfile?.wallet;
@@ -44,13 +58,30 @@ const WalletScreen = () => {
     ? "******"
     : `${currencyCode} ${totalBalance.toFixed(2)}`;
 
-  const recentTransactions = allMockTransactions.slice(0, 5);
+  // Fetch real transactions
+  useEffect(() => {
+    getWalletTransactions()
+      .then(setTransactions)
+      .catch(() => setTransactions([]))
+      .finally(() => setLoadingTx(false));
+  }, []);
+
+  const mapTx = (tx: WalletTransactionData) => ({
+    id: tx.id,
+    title: tx.description || (tx.type === "CREDIT" ? "Credit" : "Debit"),
+    date: formatDate(tx.createdAt),
+    amount: tx.amount,
+    type: tx.type === "CREDIT" ? "credit" : "debit",
+  });
+
+  const mappedTransactions = transactions.map(mapTx);
+  const recentTransactions = mappedTransactions.slice(0, 5);
 
   if (currentScreen === SCREENS.RECENT_ACTIVITIES) {
     return (
       <RecentActivitiesScreen
         onBack={() => setCurrentScreen(SCREENS.WALLET_SUMMARY)}
-        allTransactions={allMockTransactions}
+        allTransactions={transactions.map(mapTx)}
       />
     );
   }
@@ -105,12 +136,12 @@ const WalletScreen = () => {
             <ActionButton
               label="Top up"
               icon="add"
-              onPress={() => router.push("/home/walletFlow/paymentMethod")}
+              onPress={() => router.push("/walletFlow/paymentMethod")}
             />
             <ActionButton
               label="Withdraw"
               icon="remove"
-              onPress={() => router.push("/home/walletFlow/withdrawal")}
+              onPress={() => router.push("/walletFlow/withdrawal")}
             />
           </XStack>
         </YStack>
@@ -127,15 +158,42 @@ const WalletScreen = () => {
           </Text>
 
           <YStack>
-            {recentTransactions.map((tx) => (
-              <TransactionItem
-                key={tx.id}
-                title={tx.title}
-                date={tx.dateDetails}
-                amount={tx.amount}
-                type={tx.type}
+            {loadingTx ? (
+              <ActivityIndicator
+                size="small"
+                color={colors.HEADER_ICON_GRAY}
+                style={{ marginVertical: 20 }}
               />
-            ))}
+            ) : recentTransactions.length === 0 ? (
+              <YStack alignItems="center" marginVertical={30}>
+                <Ionicons
+                  name="receipt-outline"
+                  size={48}
+                  color={colors.secondaryGray}
+                />
+                <Text
+                  fontSize={16}
+                  fontWeight="600"
+                  color={colors.secondaryGray}
+                  marginTop={12}
+                >
+                  No transactions yet
+                </Text>
+                <Text fontSize={14} color={colors.secondaryGray} marginTop={4}>
+                  Your transactions will appear here
+                </Text>
+              </YStack>
+            ) : (
+              recentTransactions.map((tx) => (
+                <TransactionItem
+                  key={tx.id}
+                  title={tx.title}
+                  date={tx.date}
+                  amount={tx.amount}
+                  type={tx.type}
+                />
+              ))
+            )}
           </YStack>
 
           <PrimaryButton

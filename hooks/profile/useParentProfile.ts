@@ -67,14 +67,14 @@ export const useParentProfile = () => {
   // UPDATE (PARTIAL)
   // -------------------------
   const updateProfile = async (data: Partial<any>) => {
-    cachedProfile = null;
     setIsLoading(true);
     console.log("[ParentProfile] Updating profile...");
     try {
       const res = await updateParentProfile(data);
       console.log("[ParentProfile] Update success:", JSON.stringify(res).slice(0, 200));
-      cachedProfile = res?.profile || res;
-      setParentProfile(res?.profile || res);
+      const updated = res?.profile || res;
+      cachedProfile = { ...cachedProfile, ...updated };
+      setParentProfile(cachedProfile);
       return res;
     } finally {
       setIsLoading(false);

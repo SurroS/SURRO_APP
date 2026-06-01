@@ -59,6 +59,11 @@ export interface SurrogateProfile {
   age?: number;
   medical?: MedicalProfile;
   wallet?: Wallet;
+  compensationAmount?: number;
+  compensationNegotiable?: boolean;
+  experienceNotes?: string;
+  enjoymentNotes?: string;
+  previousPregnancyType?: string;
 }
 
 export interface SurrogateProfileUpdate {
@@ -90,6 +95,11 @@ export interface SurrogateProfileUpdate {
   isAvailable?: boolean;
   termsAcceptedAt?: string;
   medical?: MedicalProfile;
+  compensationAmount?: number;
+  compensationNegotiable?: boolean;
+  experienceNotes?: string;
+  enjoymentNotes?: string;
+  previousPregnancyType?: string;
 }
 
 export interface MedicalProfile {
@@ -98,13 +108,31 @@ export interface MedicalProfile {
   genotype?: string;
   bloodGroup?: string;
   pregnancyExperience?: boolean;
-  numberofChildren?: number; // Note: backend has typo "numberofChildren"
+  numberofChildren?: number;
+  numberOFChildren?: number;
   ceasareanSection?: boolean;
   chronicIllnessDetails?: string;
   pregnancyComplicationsDetails?: string;
   endometriumUploadUrl?: string;
   createdAt?: string;
   updatedAt?: string;
+
+  hasChildren?: boolean;
+  numberOfChildren?: number;
+  numberOfCs?: number;
+  hadMiscarriage?: boolean;
+  numberOfMiscarriages?: number;
+  hasChronicIllness?: boolean;
+  chronicIllnesses?: string[];
+  otherChronicIllness?: string;
+  hasAllergies?: boolean;
+  allergies?: string[];
+  takesMedication?: boolean;
+  medications?: string[];
+  hadSurgery?: boolean;
+  surgeries?: string[];
+  hasDisability?: boolean;
+  disabilities?: string[];
 }
 
 export interface MedicalProfileUpdate {

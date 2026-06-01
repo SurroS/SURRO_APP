@@ -235,15 +235,20 @@ export default function SurrogateProfileScreen() {
     children:
       surrogate?.medical?.numberofChildren ?? surrogate?.numberOfChildren ?? 0,
     caesarean: surrogate?.medical?.ceasareanSection === true ? "Yes" : "No",
-    numberOfCs: 0, // Not in current backend response
-    hasAllergies: "N/A", // Not in current backend response
-    allergies: "None", // Not in current backend response
-    hasChronicIllness: surrogate?.medical?.chronicIllnessDetails ? "Yes" : "No",
-    takesMedication: "N/A", // Not in current backend response
-    hadSurgery: "N/A", // Not in current backend response
-    hasDisability: "N/A", // Not in current backend response
-    hadMiscarriage: "N/A", // Not in current backend response
-    numberOfMiscarriages: 0, // Not in current backend response
+    numberOfCs: surrogate?.medical?.numberOfCs ?? 0,
+    hasAllergies: surrogate?.medical?.hasAllergies === true ? "yes" : surrogate?.medical?.hasAllergies === false ? "no" : "N/A",
+    allergies: surrogate?.medical?.allergies?.join(", ") ?? "None",
+    hasChronicIllness: surrogate?.medical?.hasChronicIllness === true ? "yes" : surrogate?.medical?.hasChronicIllness === false ? "no" : surrogate?.medical?.chronicIllnessDetails ? "yes" : "N/A",
+    chronicIllnesses: surrogate?.medical?.chronicIllnesses,
+    otherChronicIllness: surrogate?.medical?.otherChronicIllness,
+    takesMedication: surrogate?.medical?.takesMedication === true ? "yes" : surrogate?.medical?.takesMedication === false ? "no" : "N/A",
+    medications: surrogate?.medical?.medications?.join(", ") ?? "None",
+    hadSurgery: surrogate?.medical?.hadSurgery === true ? "yes" : surrogate?.medical?.hadSurgery === false ? "no" : "N/A",
+    surgeries: surrogate?.medical?.surgeries?.join(", ") ?? "None",
+    hasDisability: surrogate?.medical?.hasDisability === true ? "yes" : surrogate?.medical?.hasDisability === false ? "no" : "N/A",
+    disabilities: surrogate?.medical?.disabilities?.join(", ") ?? "None",
+    hadMiscarriage: surrogate?.medical?.hadMiscarriage === true ? "yes" : surrogate?.medical?.hadMiscarriage === false ? "no" : "N/A",
+    numberOfMiscarriages: surrogate?.medical?.numberOfMiscarriages ?? 0,
     medicalReport: surrogate?.medical?.endometriumUploadUrl,
   };
 

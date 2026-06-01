@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   TextInput,
@@ -51,31 +51,31 @@ const questionsForYes: Question[] = [
   },
   {
     id: 3,
-    text: "Anything else you'd like to share?",
-    type: "text",
-  },
-  {
-    id: 4,
     text: "Tell us what you enjoyed about the last process",
     type: "text",
   },
   {
-    id: 5,
+    id: 4,
     text: "How much will you want to be compensated?",
     type: "number",
   },
   {
-    id: 6,
+    id: 5,
     text: "Is this amount negotiable?",
     type: "select",
     options: ["Yes", "No"],
+  },
+  {
+    id: 6,
+    text: "Anything else you'd like to share?",
+    type: "text",
   },
 ];
 
 /* ---------------- COMPONENT ---------------- */
 
 export default function ExperienceForm() {
-  const { updateProfile } = useSurrogateProfile();
+  const { surrogateProfile, fetchProfile, updateProfile, isLoading: profileLoading } = useSurrogateProfile();
 
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [questions, setQuestions] = useState<Question[]>([questionsForNo[0]]);
@@ -84,6 +84,68 @@ export default function ExperienceForm() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const currentQuestion = questions[currentIndex];
+
+  // Fetch profile on mount if not already loaded
+  useEffect(() => {
+    if (!surrogateProfile) {
+      fetchProfile();
+    }
+  }, []);
+
+  // Pre-fill answers from existing profile data
+  useEffect(() => {
+    if (!surrogateProfile) return;
+
+    const prefill: Record<number, string> = {};
+
+    const hasExperience = !!surrogateProfile.previousPregnancyType;
+
+    if (hasExperience) {
+      prefill[1] = "Yes";
+      if (surrogateProfile.previousPregnancyType) {
+        prefill[2] = surrogateProfile.previousPregnancyType;
+      }
+      if (surrogateProfile.enjoymentNotes) {
+        prefill[3] = surrogateProfile.enjoymentNotes;
+      }
+      if (surrogateProfile.compensationAmount) {
+        prefill[4] = String(surrogateProfile.compensationAmount);
+      }
+      if (surrogateProfile.compensationNegotiable !== undefined) {
+        prefill[5] = surrogateProfile.compensationNegotiable ? "Yes" : "No";
+      }
+      if (surrogateProfile.experienceNotes) {
+        prefill[6] = surrogateProfile.experienceNotes;
+      }
+    } else {
+      prefill[1] = "No";
+      if (surrogateProfile.compensationAmount) {
+        prefill[2] = String(surrogateProfile.compensationAmount);
+      }
+      if (surrogateProfile.compensationNegotiable !== undefined) {
+        prefill[3] = surrogateProfile.compensationNegotiable ? "Yes" : "No";
+      }
+      if (surrogateProfile.experienceNotes) {
+        prefill[5] = surrogateProfile.experienceNotes;
+      }
+    }
+
+    setAnswers(prefill);
+
+    // Set the correct question flow and index based on existing data
+    if (hasExperience) {
+      setQuestions(questionsForYes);
+      // Find the last answered question index
+      const lastAnswered = Math.max(...Object.keys(prefill).map(Number), 0);
+      const nextIndex = Math.min(lastAnswered, questionsForYes.length - 1);
+      setCurrentIndex(nextIndex);
+    } else {
+      setQuestions(questionsForNo);
+      const lastAnswered = Math.max(...Object.keys(prefill).map(Number), 0);
+      const nextIndex = Math.min(lastAnswered, questionsForNo.length - 1);
+      setCurrentIndex(nextIndex);
+    }
+  }, [surrogateProfile]);
 
   /* ---------------- ANSWER HANDLING ---------------- */
 
@@ -101,8 +163,9 @@ export default function ExperienceForm() {
   };
 
   const handleNext = () => {
-    // For text inputs, require some input unless it's the "anything else" optional question
-    const isOptionalNotes = currentQuestion.id === 3 || currentQuestion.id === 5;
+    // Optional text questions: enjoyment (id:3), anything else (id:5 for no-path, id:6 for yes-path)
+    const optionalTextIds = [3, 5, 6];
+    const isOptionalNotes = optionalTextIds.includes(currentQuestion.id);
     const hasInput = answers[currentQuestion.id]?.trim().length > 0;
     
     // Allow next if: has input OR it's optional notes OR not a text field
@@ -136,10 +199,10 @@ export default function ExperienceForm() {
         payload.experienceNotes = answers[5] || "";
       } else {
         payload.previousPregnancyType = answers[2] || "";
-        payload.compensationAmount = answers[5] ? Number(answers[5]) : undefined;
-        payload.compensationNegotiable = answers[6]?.toLowerCase() === "yes";
-        payload.experienceNotes = answers[3] || "";
-        payload.enjoymentNotes = answers[4] || "";
+        payload.compensationAmount = answers[4] ? Number(answers[4]) : undefined;
+        payload.compensationNegotiable = answers[5]?.toLowerCase() === "yes";
+        payload.enjoymentNotes = answers[3] || "";
+        payload.experienceNotes = answers[6] || "";
       }
 
       console.log("Submitting payload:", JSON.stringify(payload, null, 2));
@@ -171,7 +234,7 @@ export default function ExperienceForm() {
           <TextInput
             style={styles.textInput}
             multiline
-            placeholder={currentQuestion.id === 3 || currentQuestion.id === 5 ? "Share your thoughts (optional)" : "Type your answer here..."}
+            placeholder={[3, 5, 6].includes(currentQuestion.id) ? "Share your thoughts (optional)" : "Type your answer here..."}
             placeholderTextColor="#999"
             value={answers[currentQuestion.id] || ""}
             onChangeText={handleAnswerChange}
@@ -249,9 +312,8 @@ export default function ExperienceForm() {
                 backgroundColor={colors.primary}
                 onPress={handleNext}
                 disabled={
-                  // For optional notes (id 3 or 5), allow next even when empty
-                  (currentQuestion.id === 3 || currentQuestion.id === 5) 
-                    ? false 
+                  [3, 5, 6].includes(currentQuestion.id)
+                    ? false
                     : !answers[currentQuestion.id]
                 }
               >

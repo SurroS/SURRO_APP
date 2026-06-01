@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { YStack, XStack, Text, ScrollView } from "tamagui";
 import { RefreshControl } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { LogOut } from "@tamagui/lucide-icons";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
@@ -127,18 +127,14 @@ export default function EditBioView() {
       : parentToUIProfile(rawProfile)
     : null;
 
-  // -------------------------------
-  // Fetch profile once on mount
-  // -------------------------------
-  useEffect(() => {
-    console.log("surrogateProfile from EditBio Screen", surrogateProfile);
-    console.log("RawProfile from [EditBio] Screen", rawProfile);
-    console.log("Role from EditBio Screen", Role);
-    if (!currentProfile) {
-      fetchCurrentProfile();
-    }
-    console.log("CurrentProfile from Adapter", currentProfile);
-  }, [currentProfile, fetchCurrentProfile]);
+  // Refresh profile on mount and whenever screen gains focus
+  useFocusEffect(
+    useCallback(() => {
+      if (Role === "SURROGATE") fetchSurrogate(true);
+      else if (Role === "AGENT") fetchAgent(true);
+      else fetchParent(true);
+    }, [Role, fetchSurrogate, fetchAgent, fetchParent])
+  );
 
   // -------------------------------
   // Logout / Danger zone
@@ -182,7 +178,6 @@ export default function EditBioView() {
 
       if (!result.canceled) {
         const uri = result.assets[0].uri;
-        setProfileImage(uri);
 
         const formData = new FormData();
         formData.append("file", {
@@ -196,6 +191,7 @@ export default function EditBioView() {
         const avatarUrl = avatarRes?.data?.url || avatarRes?.url;
         if (avatarUrl) {
           await updateCurrentProfile({ profilePicture: avatarUrl });
+          setProfileImage(avatarUrl);
         }
         await fetchCurrentProfile(true);
         setIsLoading(false);
@@ -264,12 +260,17 @@ export default function EditBioView() {
   // -------------------------------
   // Render role-specific UI
   // -------------------------------
+  const getProfileImageSrc = (backendUrl: string | undefined) => {
+    const url = profileImage || backendUrl;
+    return url ? { uri: url } : undefined;
+  };
+
   const renderRoleContent = () => {
     switch (Role) {
       case "AGENT":
         return (
           <AgentBio
-            profileImage={agentProfile?.profilePicture ? { uri: agentProfile.profilePicture } : undefined}
+            profileImage={getProfileImageSrc(agentProfile?.profilePicture)}
             onChangePicture={handleChangePicture}
             onEditBio={handleOpenModal}
           />
@@ -277,7 +278,7 @@ export default function EditBioView() {
       case "INTENDED_PARENT":
         return (
           <ParentBio
-            profileImage={parentProfile?.profilePicture ? { uri: parentProfile.profilePicture } : undefined}
+            profileImage={getProfileImageSrc(parentProfile?.profilePicture)}
             onChangePicture={handleChangePicture}
             onEditBio={handleOpenModal}
           />
@@ -285,11 +286,10 @@ export default function EditBioView() {
       case "SURROGATE":
         return (
           <SurrogateBio
-            profileImage={surrogateProfile?.profilePicture ? { uri: surrogateProfile.profilePicture } : undefined}
+            profileImage={getProfileImageSrc(surrogateProfile?.profilePicture)}
             onChangePicture={handleChangePicture}
             onEditBio={handleOpenModal}
           />
-          
         );
       default:
         return (

@@ -29,7 +29,7 @@ export default function BankAccountsScreen() {
           <YStack alignItems="center" justifyContent="center" flex={1}>
             <Text style={styles.emptyText}>No bank account linked</Text>
             <Button
-              onPress={() => router.push("/home/walletFlow/addBankAccount")}
+              onPress={() => router.push("/walletFlow/addBankAccount")}
               backgroundColor={colors.primary}
               color="#fff"
               borderRadius={10}
@@ -62,7 +62,7 @@ export default function BankAccountsScreen() {
             ))}
 
             <Button
-              onPress={() => router.push("/home/walletFlow/addBankAccount")}
+              onPress={() => router.push("/walletFlow/addBankAccount")}
               backgroundColor={colors.primary}
               color="#fff"
               borderRadius={10}
