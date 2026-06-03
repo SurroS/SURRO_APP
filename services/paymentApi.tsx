@@ -4,7 +4,6 @@ interface PaymentInitPayload {
   amount: number;
   gateway: string;
   channel: string;
-  location: string;
 }
 
 interface PaymentInitResponse {
@@ -20,8 +19,11 @@ export const initiatePaymentFrontend = async (
   payload: PaymentInitPayload,
   token?: string | null, // optional, pass from secure storage
 ): Promise<PaymentInitResponse> => {
-  // If token is provided explicitly, use it; otherwise rely on httpClient's auth interceptor
+  console.log("[PaymentAPI] initiatePaymentFrontend payload:", JSON.stringify(payload, null, 2));
+
   const response = await authenticatedPost("/payments/init", payload);
+
+  console.log("[PaymentAPI] initiatePaymentFrontend response:", JSON.stringify(response, null, 2));
 
   return response;
 };

@@ -1,22 +1,17 @@
 // ProfileImageCard.tsx
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
   Image,
   StyleSheet,
   TouchableOpacity,
-  Alert,
-  Platform,
   Pressable,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
 import { Camera, Pen } from "@tamagui/lucide-icons";
 import colors from "@/hooks/colors";
 
 const CARD_H = 156;
-
-const DEFAULT_AVATAR = require("@/assets/images/femaleAvatar.png");
 
 type Props = {
   onEditBio?: () => void;
@@ -29,22 +24,18 @@ export default function ProfileImageCard({
   onChangePicture,
   imageSrc,
 }: Props) {
-  const [imgError, setImgError] = useState(false);
-
-  const source = imageSrc && !imgError ? imageSrc : DEFAULT_AVATAR;
-  const imgKey = imageSrc && !imgError ? imageSrc.uri : "default";
-
   return (
     <View style={styles.container}>
       {/* Profile Image with Camera Overlay */}
       <Pressable onPress={() => onChangePicture?.()}>
         <View style={styles.imageWrapper}>
-          <Image
-            key={imgKey}
-            source={source}
-            style={styles.profileImage}
-            onError={() => setImgError(true)}
-          />
+          {imageSrc ? (
+            <Image source={imageSrc} style={styles.profileImage} />
+          ) : (
+            <View style={styles.fallbackBox}>
+              <Text style={styles.fallbackText}>Profile Picture</Text>
+            </View>
+          )}
           <View style={styles.cameraOverlay}>
             <Camera size={24} color="#FFF" />
           </View>
@@ -88,6 +79,19 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 12,
+  },
+  fallbackBox: {
+    width: 120,
+    height: 120,
+    borderRadius: 12,
+    backgroundColor: "#E0E0E0",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  fallbackText: {
+    color: "#666",
+    fontSize: 12,
+    textAlign: "center",
   },
   cameraOverlay: {
     ...StyleSheet.absoluteFillObject,

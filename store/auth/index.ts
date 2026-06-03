@@ -27,6 +27,8 @@ interface HydrationState {
   setHasSeenOnboarding: (value: boolean) => void;
   forceLogout: boolean;
   setForceLogout: (value: boolean) => void;
+  sessionExpired: boolean;
+  setSessionExpired: (value: boolean) => void;
 }
 
 type FullAuthStore = AuthStore & HydrationState;
@@ -58,6 +60,10 @@ export const useAuthStore = create<FullAuthStore>()(
       // Force logout flag — set on 401 to block UI until redirect
       forceLogout: false,
       setForceLogout: (value: boolean) => set({ forceLogout: value }),
+
+      // Session expired modal flag
+      sessionExpired: false,
+      setSessionExpired: (value: boolean) => set({ sessionExpired: value }),
     }),
     {
       name: "auth-storage",

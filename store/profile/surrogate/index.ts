@@ -9,6 +9,7 @@ const initialState: ProfileState = {
   medicalProfile: null,
   isLoading: false,
   error: null,
+  _hydrated: false,
 };
 
 export const useProfileStore = create<ProfileStore>()(
@@ -24,6 +25,9 @@ export const useProfileStore = create<ProfileStore>()(
         surrogateProfile: state.surrogateProfile,
         medicalProfile: state.medicalProfile,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state?.setHydrated) state.setHydrated();
+      },
     },
   ),
 );

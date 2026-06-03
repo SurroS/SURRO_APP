@@ -60,27 +60,35 @@ export const calculateProfileProgress = (
   // SURROGATE PROFILE
   // ------------------------------------------------
   if ("hasBeenSurrogate" in profile) {
-    // Core identity & contact (50%)
+    // Profile photo (5%)
+    applyFields(["profilePicture"], 5);
+
+    // Personal info (30%)
     applyFields(
       [
         "firstName",
         "lastName",
         "userName",
         "dateOfBirth",
+        "countryOfOrigin",
+        "stateOfOrigin",
+      ],
+      30,
+    );
+
+    // Contact (15%)
+    applyFields(
+      [
         "countryOfResidence",
         "stateOfResidence",
         "phone1",
-        "profilePicture",
       ],
-      50,
+      15,
     );
 
     // Medical & experience (25%)
     applyFields(
       [
-        // "hasBeenSurrogate",
-        // "compensationAmount",
-        // "compensationNegotiable",
         "medical",
       ],
       25,
@@ -109,10 +117,13 @@ export const calculateProfileProgress = (
   // AGENT PROFILE
   // ------------------------------------------------
   else if ("services" in profile) {
-    // Core professional info (60%)
+    // Profile photo (5%)
+    applyFields(["profilePicture"], 5);
+
+    // Core professional info (55%)
     applyFields(
-      ["name", "userName", "fullName", "profilePicture", "country", "about"],
-      60,
+      ["name", "userName", "fullName", "country", "about"],
+      55,
     );
 
     // Services & credibility (25%)
@@ -126,10 +137,13 @@ export const calculateProfileProgress = (
   // PARENT PROFILE
   // ------------------------------------------------
   else {
-    // Core info (70%)
+    // Profile photo (5%)
+    applyFields(["profilePicture"], 5);
+
+    // Core info (65%)
     applyFields(
-      ["fullName", "userName", "profilePicture", "countryOfResidence"],
-      70,
+      ["fullName", "userName", "countryOfResidence"],
+      65,
     );
 
     // Contextual depth (20%)
@@ -142,4 +156,123 @@ export const calculateProfileProgress = (
   // Normalize and cap
   const percentage = Math.round((score / maxScore) * 100);
   return Math.min(100, Math.max(0, percentage));
+};
+
+export type MissingFieldGroup = {
+  category: string;
+  fields: string[];
+  route: string;
+};
+
+const FIELD_LABELS: Record<string, string> = {
+  firstName: "First name",
+  lastName: "Last name",
+  userName: "Username",
+  dateOfBirth: "Date of birth",
+  profilePicture: "Profile picture",
+  countryOfOrigin: "Country of origin",
+  stateOfOrigin: "State of origin",
+  countryOfResidence: "Country of residence",
+  stateOfResidence: "State of residence",
+  phone1: "Phone number",
+  medical: "Medical information",
+  aboutMe: "About me",
+  height: "Height",
+  weight: "Weight",
+  numberOfChildren: "Number of children",
+  maritalStatus: "Marital status",
+  name: "Name",
+  fullName: "Full name",
+  country: "Country",
+  about: "About",
+  services: "Services",
+  certifications: "Certifications",
+  performance: "Performance",
+  yearsOfTrying: "Years trying",
+  languagesSpoken: "Languages spoken",
+};
+
+const SOCIAL_FIELDS = [
+  "facebookProfile",
+  "instagramProfile",
+  "twitterProfile",
+  "threadsProfile",
+  "ticktok",
+];
+
+export function getMissingFields(profile: AnyProfile | null): MissingFieldGroup[] {
+  if (!profile) return [];
+
+  const groups: MissingFieldGroup[] = [];
+
+  const addFieldsGroup = (category: string, fields: string[], route: string) => {
+    const missing = fields.filter((f) => !isFilled(profile[f as keyof AnyProfile]));
+    if (missing.length > 0) {
+      groups.push({
+        category,
+        fields: missing.map((f) => FIELD_LABELS[f] || f),
+        route,
+      });
+    }
+  };
+
+  const addGroupCheck = (category: string, fields: string[], route: string, label: string) => {
+    if (!isAnyFilled(profile, fields)) {
+      groups.push({
+        category,
+        fields: [label],
+        route,
+      });
+    }
+  };
+
+  if ("hasBeenSurrogate" in profile) {
+    addFieldsGroup("Profile Photo", ["profilePicture"], "/profile/personalDetails");
+
+    addFieldsGroup("Personal Info", [
+      "firstName", "lastName", "userName", "dateOfBirth",
+      "countryOfOrigin", "stateOfOrigin",
+    ], "/profile/personalDetails");
+
+    addFieldsGroup("Contact", [
+      "countryOfResidence", "stateOfResidence", "phone1",
+    ], "/profile/contactInformation");
+
+    addFieldsGroup("Medical", ["medical"], "/medical");
+
+    addFieldsGroup("Enrichments", [
+      "aboutMe", "height", "weight", "numberOfChildren", "maritalStatus",
+    ], "/profile/personalDetails");
+
+    addGroupCheck("Socials", SOCIAL_FIELDS, "/profile/contactInformation",
+      "At least one social profile");
+  } else if ("services" in profile) {
+    addFieldsGroup("Profile Photo", ["profilePicture"], "/profile/personalDetails");
+
+    addFieldsGroup("Core Info", [
+      "name", "userName", "fullName", "country", "about",
+    ], "/profile/personalDetails");
+
+    addFieldsGroup("Services", [
+      "services", "certifications", "performance",
+    ], "/profile/personalDetails");
+
+    addGroupCheck("Socials", ["socials"], "/profile/contactInformation",
+      "At least one social profile");
+  } else {
+    addFieldsGroup("Profile Photo", ["profilePicture"], "/profile/personalDetails");
+
+    addFieldsGroup("Core Info", [
+      "fullName", "userName", "countryOfResidence",
+    ], "/profile/personalDetails");
+
+    addFieldsGroup("Details", [
+      "about", "yearsOfTrying", "languagesSpoken",
+    ], "/profile/personalDetails");
+
+    addGroupCheck("Socials", ["facebookProfile", "instagramProfile"],
+      "/profile/contactInformation", "At least one social profile");
+  }
+
+  return groups;
 };

@@ -13,10 +13,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import HelpServiceButton from "@/components/HelpServiceButton";
 import { secureGet } from "@/utils/storage";
 import { GetAllChat } from "@/services/chatApi";
-import { Image } from "react-native";
-
-// local fallback avatar
-import defaultAvatar from "@/assets/images/agentImage.png";
 
 interface Conversation {
   id: string;
@@ -82,17 +78,10 @@ export default function ChatListScreen() {
             {other?.avatarUrl ? (
               <Avatar.Image src={other.avatarUrl} />
             ) : (
-              <Avatar.Fallback>
-                <Image
-                  resizeMode="cover"
-                  source={defaultAvatar}
-                  style={{
-                    width: 50,
-                    height: 50,
-                    borderRadius: 10,
-                    alignSelf: "center",
-                  }}
-                />
+              <Avatar.Fallback backgroundColor="#E0E0E0">
+                <Text color="#666" fontSize={10} textAlign="center">
+                  Profile{'\n'}Picture
+                </Text>
               </Avatar.Fallback>
             )}
           </Avatar>

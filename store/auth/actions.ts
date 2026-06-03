@@ -236,7 +236,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
 
       await authApi.authedRequest(
         "/auth/change-password",
-        apiRequest, // send only the required fields
+        apiRequest, // send only { newPassword }
       );
 
       set({

@@ -35,6 +35,7 @@ export default function SurrogateScreen() {
   // Show modal if no profile or progress < 100%
   useEffect(() => {
     if (!isLoading) {
+      if (progress >= 100) { setShowProfileModal(false); return; }
       const hasProfile = surrogateProfile !== null;
       const needsCompletion = hasProfile && progress < 100;
 
@@ -131,12 +132,14 @@ export default function SurrogateScreen() {
         </YStack>
 
         {/* Profile Completion Modal */}
-        <ProfileCompletionModal
-          visible={showProfileModal}
-          onClose={() => setShowProfileModal(false)}
-          profile={surrogateProfile}
-          redirectPath="/profile"
-        />
+        {progress < 100 && (
+          <ProfileCompletionModal
+            visible={showProfileModal}
+            onClose={() => setShowProfileModal(false)}
+            profile={surrogateProfile}
+            redirectPath="/profile"
+          />
+        )}
       </ScrollView>
     </>
   );

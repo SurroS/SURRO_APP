@@ -8,8 +8,10 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { InputField } from "@/components/auth/InputField";
@@ -168,6 +170,28 @@ export default function SignupScreen() {
             />
           )}
 
+          <TouchableOpacity
+            style={styles.termsRow}
+            onPress={() => updateField("termsAccepted", !signupFormData.termsAccepted)}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.checkbox, signupFormData.termsAccepted && styles.checkboxChecked]}>
+              {signupFormData.termsAccepted && (
+                <Ionicons name="checkmark" size={14} color="#fff" />
+              )}
+            </View>
+            <Text style={styles.termsText}>
+              I agree to the{" "}
+              <Text style={styles.termsLink}>Terms of Service</Text>{" "}
+              and{" "}
+              <Text style={styles.termsLink}>Privacy Policy</Text>
+            </Text>
+          </TouchableOpacity>
+
+          {errors.termsAccepted && (
+            <Text style={styles.errorText}>{errors.termsAccepted}</Text>
+          )}
+
           <PrimaryButton
             title="Sign up"
             onPress={handleSignup}
@@ -207,4 +231,35 @@ const styles = StyleSheet.create({
   },
   loginLink: { marginTop: 20, alignSelf: "center" },
   loginLinkText: { color: "#0E0E55", fontWeight: "bold" },
+  termsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 16,
+    marginBottom: 4,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: "#ccc",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  checkboxChecked: {
+    backgroundColor: "#0E0E55",
+    borderColor: "#0E0E55",
+  },
+  termsText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#555",
+    lineHeight: 18,
+  },
+  termsLink: {
+    color: "#0E0E55",
+    fontWeight: "600",
+    textDecorationLine: "underline",
+  },
 });

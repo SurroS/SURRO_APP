@@ -24,7 +24,7 @@ interface CategoryDef {
   guide: string;
 }
 
-const CATEGORIES: CategoryDef[] = [
+const SURROGATE_CATEGORIES: CategoryDef[] = [
   {
     label: "Profile & Account",
     keywords: ["profile", "account", "settings", "password", "logout", "bio", "picture", "username"],
@@ -130,11 +130,163 @@ const CATEGORIES: CategoryDef[] = [
   },
 ];
 
-const CATEGORY_LABELS = CATEGORIES.map((c) => c.label);
+const PARENT_CATEGORIES: CategoryDef[] = [
+  {
+    label: "Profile & Account",
+    keywords: ["profile", "account", "settings", "password", "logout", "bio", "picture"],
+    guide:
+      "Here's how to set up your intended parent profile:\n\n" +
+      "1. Go to your Profile tab and tap Edit Profile.\n" +
+      "2. Fill in your personal details and preferences for a surrogate match.\n" +
+      "3. Write about your journey and what you're looking for in a surrogate.\n" +
+      "4. Upload a profile picture - tap the camera icon, choose from gallery, crop and save.\n" +
+      "5. Set your password under Settings -> Security if you haven't already.\n\n" +
+      "A warm, detailed profile helps surrogates feel connected to your journey!",
+  },
+  {
+    label: "Finding a Surrogate",
+    keywords: ["find", "surrogate", "browse", "search", "discover", "look"],
+    guide:
+      "Here's how to find a surrogate:\n\n" +
+      "1. Go to the Surrogates section from your home screen.\n" +
+      "2. Browse through profile cards - swipe to skip or tap View Profile for details.\n" +
+      "3. Each card shows photos, age, location, experience level, and bio preview.\n" +
+      "4. When you find someone who feels right, unlock their profile to see full contact and medical details.\n" +
+      "5. After unlocking, you can send them a chat request to start the conversation.\n\n" +
+      "Take your time - finding the right connection is the most important step!",
+  },
+  {
+    label: "Matching Process",
+    keywords: ["match", "matching", "unlock", "connect", "request", "chat"],
+    guide:
+      "Here's how the matching process works:\n\n" +
+      "1. Browse available surrogates and find someone you connect with.\n" +
+      "2. Pay a one-time unlock fee to view their full profile (contact + medical info).\n" +
+      "3. After unlocking, send a chat request to start a conversation.\n" +
+      "4. The surrogate can accept or decline your request.\n" +
+      "5. Once connected, you can discuss next steps directly through the app.\n\n" +
+      "You can also work with an agent to help guide you through the process.",
+  },
+  {
+    label: "KYC & Verification",
+    keywords: ["kyc", "verify", "verification", "id", "document", "face scan", "selfie", "identity"],
+    guide:
+      "Here's how to get verified as an intended parent:\n\n" +
+      "1. Go to Profile, then KYC Verification.\n" +
+      "2. Step 1 - ID Upload: Choose your ID type (International Passport, Driver's License, or National ID). Take clear photos of the front and back, then upload.\n" +
+      "3. Step 2 - Face Scan: Position your face within the frame in good lighting and follow the prompts.\n" +
+      "4. Step 3 - Selfie with ID: Take a selfie holding your ID next to your face so both are clearly visible.\n" +
+      "5. Review and submit - you'll receive a notification once verified.\n\n" +
+      "KYC verification helps build trust with surrogates and agents.",
+  },
+  {
+    label: "Wallet & Payments",
+    keywords: ["wallet", "payment", "money", "balance", "bank", "withdraw", "top up", "fund", "transaction"],
+    guide:
+      "Here's how to manage your wallet:\n\n" +
+      "1. Go to your Home tab and tap the Wallet card.\n" +
+      "2. Top up your wallet to pay for profile unlocks and other services.\n" +
+      "3. Use Paystack to add funds - card, bank transfer, or USSD.\n" +
+      "4. Track your spending in the transaction history section.\n\n" +
+      "Your wallet is where you manage all payments related to your surrogacy journey.",
+  },
+  {
+    label: "Notifications",
+    keywords: ["notification", "alert", "reminder", "email", "sms", "push", "notify"],
+    guide:
+      "Here's how to stay updated:\n\n" +
+      "1. Go to Settings, then Personalization or Notifications.\n" +
+      "2. Toggle Push notifications for new surrogate matches and messages.\n" +
+      "3. Toggle Email and SMS notifications as you prefer.\n" +
+      "4. Customize so you never miss a potential match!\n\n" +
+      "Stay on top of your journey with timely alerts.",
+  },
+];
 
-const matchCategory = (input: string): CategoryDef | null => {
+const AGENT_CATEGORIES: CategoryDef[] = [
+  {
+    label: "Profile & Account",
+    keywords: ["profile", "account", "settings", "password", "logout", "bio", "picture", "certification"],
+    guide:
+      "Here's how to set up your agent profile:\n\n" +
+      "1. Go to your Profile tab and fill in your professional details.\n" +
+      "2. Highlight your experience, certifications, and services you offer.\n" +
+      "3. Add certifications to build trust with intended parents and surrogates.\n" +
+      "4. Upload a professional profile picture.\n" +
+      "5. Set your password under Settings -> Security.\n\n" +
+      "A complete professional profile attracts more clients!",
+  },
+  {
+    label: "Managing Surrogates",
+    keywords: ["surrogate", "manage", "browse", "find", "discover", "pool", "available"],
+    guide:
+      "Here's how to manage surrogates:\n\n" +
+      "1. Browse available surrogates from the Surrogates section.\n" +
+      "2. View profile cards with photos, experience level, and bio.\n" +
+      "3. Unlock a surrogate's full profile to access their contact and medical details.\n" +
+      "4. Connect with surrogates to facilitate matches with intended parents.\n" +
+      "5. Fast responses and good communication improve your ranking.\n\n" +
+      "Build a strong network of surrogates to better serve your clients!",
+  },
+  {
+    label: "Matching & Discovery",
+    keywords: ["match", "matching", "connect", "parent", "intended parent", "request"],
+    guide:
+      "Here's how matching works for agents:\n\n" +
+      "1. Receive requests from intended parents looking for surrogates.\n" +
+      "2. Browse your pool of available surrogates to find good matches.\n" +
+      "3. Facilitate introductions between intended parents and surrogates.\n" +
+      "4. Track your active matches and communications in the Chat tab.\n" +
+      "5. Get verified for more visibility and client trust.\n\n" +
+      "Your expertise helps create successful surrogacy journeys!",
+  },
+  {
+    label: "KYC & Verification",
+    keywords: ["kyc", "verify", "verification", "id", "document", "face scan", "selfie", "identity"],
+    guide:
+      "Here's how to get verified as an agent:\n\n" +
+      "1. Go to Profile, then KYC Verification.\n" +
+      "2. Step 1 - ID Upload: Choose your ID type and upload clear photos.\n" +
+      "3. Step 2 - Face Scan: Position your face within the frame in good lighting.\n" +
+      "4. Step 3 - Selfie with ID: Take a selfie holding your ID.\n" +
+      "5. Review and submit - verification helps build trust with clients.\n\n" +
+      "Verified agents get higher visibility and ranking on the platform!",
+  },
+  {
+    label: "Wallet & Payments",
+    keywords: ["wallet", "payment", "money", "balance", "bank", "withdraw", "top up", "fund", "transaction"],
+    guide:
+      "Here's how to manage your wallet as an agent:\n\n" +
+      "1. Go to your Home tab and tap the Wallet card.\n" +
+      "2. Top up to pay for profile unlocks and other services.\n" +
+      "3. Withdraw your earnings to your linked bank account.\n" +
+      "4. Add a bank account for payouts.\n" +
+      "5. Track all transactions in your history.\n\n" +
+      "Your wallet keeps your business finances organized.",
+  },
+  {
+    label: "Notifications",
+    keywords: ["notification", "alert", "reminder", "email", "sms", "push", "notify"],
+    guide:
+      "Here's how to stay updated as an agent:\n\n" +
+      "1. Go to Settings, then Personalization or Notifications.\n" +
+      "2. Toggle Push notifications for new requests and messages.\n" +
+      "3. Toggle Email and SMS for important client updates.\n" +
+      "4. Stay responsive - quick replies improve your ranking!\n\n" +
+      "Never miss an opportunity to connect with clients.",
+  },
+];
+
+const getCategoriesForRole = (role?: string): CategoryDef[] => {
+  if (role === "SURROGATE") return SURROGATE_CATEGORIES;
+  if (role === "INTENDED_PARENT") return PARENT_CATEGORIES;
+  if (role === "AGENT") return AGENT_CATEGORIES;
+  return SURROGATE_CATEGORIES;
+};
+
+const matchCategory = (input: string, categories: CategoryDef[]): CategoryDef | null => {
   const lower = input.toLowerCase();
-  for (const cat of CATEGORIES) {
+  for (const cat of categories) {
     if (cat.keywords.some((kw) => lower.includes(kw))) return cat;
     if (lower.includes(cat.label.toLowerCase())) return cat;
   }
@@ -145,6 +297,8 @@ export default function SupportChatScreen() {
   const { user } = useAuth();
   const role = user?.role?.trim();
   const userName = user?.name || user?.username || user?.firstName;
+  const categories = getCategoriesForRole(role);
+  const categoryLabels = categories.map((c) => c.label);
   const navigation = useNavigation();
 
   useLayoutEffect(() => {
@@ -192,8 +346,8 @@ export default function SupportChatScreen() {
             {
               id: "welcome",
               from: "bot",
-              text: `Hi I'm SurroBot! Great to see you, ${userName}! \n\nI can help you with:\n\n${CATEGORY_LABELS.map((c) => `- ${c}`).join("\n")}\n\nJust type what you need or pick an option below!`,
-              suggestions: CATEGORY_LABELS,
+              text: `Hi I'm SurroBot! Great to see you, ${userName}! \n\nI can help you with:\n\n${categoryLabels.map((c) => `- ${c}`).join("\n")}\n\nJust type what you need or pick an option below!`,
+              suggestions: categoryLabels,
             },
           ]
         : [
@@ -250,15 +404,15 @@ export default function SupportChatScreen() {
       setUserName_(name);
       setStage("greet");
       addBotMessage(
-        `Nice to meet you, ${name}! \n\nI can help you with:\n\n${CATEGORY_LABELS.map((c) => `- ${c}`).join("\n")}\n\nJust type what you need or pick an option below!`,
-        CATEGORY_LABELS,
+        `Nice to meet you, ${name}! \n\nI can help you with:\n\n${categoryLabels.map((c) => `- ${c}`).join("\n")}\n\nJust type what you need or pick an option below!`,
+        categoryLabels,
       );
       return;
     }
 
     // greet: user picks a category
     if (stage === "greet") {
-      const cat = matchCategory(trimmed);
+      const cat = matchCategory(trimmed, categories);
       if (cat) {
         setLastCategory(cat.label);
         setStage("showing_guide");
@@ -267,7 +421,7 @@ export default function SupportChatScreen() {
       }
       addBotMessage(
         "Sorry I didn't get that, please select from the options below.",
-        CATEGORY_LABELS,
+        categoryLabels,
       );
       return;
     }
@@ -299,7 +453,7 @@ export default function SupportChatScreen() {
     if (stage === "ask_next") {
       if (trimmed.includes("yes") || trimmed.includes("something else") || trimmed.includes("another topic") || trimmed.includes("try another")) {
         setStage("greet");
-        addBotMessage("Sure! What would you like help with?", CATEGORY_LABELS);
+        addBotMessage("Sure! What would you like help with?", categoryLabels);
         return;
       }
 
@@ -337,7 +491,7 @@ export default function SupportChatScreen() {
     setStage("greet");
     addBotMessage(
       "Sorry I didn't get that, please select from the options below.",
-      CATEGORY_LABELS,
+      categoryLabels,
     );
   };
 

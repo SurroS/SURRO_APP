@@ -43,6 +43,7 @@ export default function AgentHomeScreen() {
   // Show modal if profile is missing or incomplete
   useEffect(() => {
     if (!isLoading) {
+      if (progress >= 100) { setShowProfileModal(false); return; }
       const hasProfile = !!agentProfile;
       const needsCompletion = hasProfile && progress < 100;
 
@@ -54,7 +55,7 @@ export default function AgentHomeScreen() {
 
   const ViewSurrogate = () => {
     router.push({
-      pathname: "/(tabs)/home/surrogate/surrogateList",
+      pathname: "/surrogate/surrogateList",
     });
   };
 
@@ -144,13 +145,15 @@ export default function AgentHomeScreen() {
       </ScrollView>
 
       {/* Profile Completion Modal */}
-      <ProfileCompletionModal
-        visible={showProfileModal}
-        onClose={() => setShowProfileModal(false)}
-        profile={agentProfile}
-        profileTypeName="Agent"
-        redirectPath="/profile"
-      />
+      {progress < 100 && (
+        <ProfileCompletionModal
+          visible={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          profile={agentProfile}
+          profileTypeName="Agent"
+          redirectPath="/profile"
+        />
+      )}
     </>
   );
 }

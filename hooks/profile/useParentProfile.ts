@@ -6,6 +6,7 @@ import {
   saveParentSurrogateMatch,
   updateParentMatchPreference,
 } from "@/services/profileApi";
+import { useAuthStore } from "@/store/auth";
 
 let cachedProfile: any = null;
 
@@ -19,8 +20,23 @@ export const useParentProfile = () => {
   // -------------------------
   const fetchProfile = useCallback(async (forceRefresh = false) => {
     if (cachedProfile && !forceRefresh) {
-      console.log("[ParentProfile] Using cached profile");
+      // Stale-while-revalidate: show cached immediately, refresh silently
       setParentProfile(cachedProfile);
+      try {
+        const res = await getParentProfile();
+        console.log("[ParentProfile] SWR refresh response keys:", Object.keys(res || {}).join(", "));
+        console.log("[ParentProfile] SWR refresh - phone1:", res?.profile?.phone1 || res?.phone1, "countryOfResidence:", res?.profile?.countryOfResidence || res?.countryOfResidence);
+        cachedProfile = res?.profile || res;
+        setParentProfile(cachedProfile);
+        if (cachedProfile?.profilePicture) {
+          useAuthStore.getState().setUser({
+            avatar: cachedProfile.profilePicture,
+            profilePictureUrl: cachedProfile.profilePicture,
+          });
+        }
+      } catch (_) {
+        // Keep stale data on background refresh failure
+      }
       return cachedProfile;
     }
 
@@ -31,9 +47,20 @@ export const useParentProfile = () => {
       console.log("[ParentProfile] Fetching profile from API...");
       const res = await getParentProfile();
       console.log("[ParentProfile] API response:", JSON.stringify(res).slice(0, 400));
+      console.log("[ParentProfile] Full response keys:", Object.keys(res || {}).join(", "));
+      if (res?.profile) {
+        console.log("[ParentProfile] Nested profile keys:", Object.keys(res.profile).join(", "));
+        console.log("[ParentProfile] profile.phone1:", res.profile?.phone1, "profile.countryOfResidence:", res.profile?.countryOfResidence);
+      }
       cachedProfile = res?.profile || res;
       setParentProfile(cachedProfile);
       console.log("[ParentProfile] Profile loaded:", cachedProfile ? "YES" : "NO");
+      if (cachedProfile?.profilePicture) {
+        useAuthStore.getState().setUser({
+          avatar: cachedProfile.profilePicture,
+          profilePictureUrl: cachedProfile.profilePicture,
+        });
+      }
       return cachedProfile;
     } catch (err: any) {
       const msg = err?.message || "Failed to fetch profile";

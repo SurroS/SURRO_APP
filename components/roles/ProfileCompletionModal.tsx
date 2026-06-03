@@ -1,14 +1,26 @@
 import React from "react";
+import {
+  Modal,
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import BottomModal from "@/components/modals/BottomModal";
-import { calculateProfileProgress } from "@/utils/profileHelpers";
+import {
+  calculateProfileProgress,
+  getMissingFields,
+  MissingFieldGroup,
+} from "@/utils/profileHelpers";
 
 interface ProfileCompletionModalProps<TProfile = any> {
   visible: boolean;
   onClose: () => void;
   profile: TProfile | null;
-  redirectPath?: string; // Path to navigate when creating/completing profile
-  profileTypeName?: string; // Optional name like "Surrogate", "Agent", "Parent"
+  redirectPath?: string;
+  profileTypeName?: string;
 }
 
 export default function ProfileCompletionModal<TProfile>({
@@ -20,44 +32,172 @@ export default function ProfileCompletionModal<TProfile>({
 }: ProfileCompletionModalProps<TProfile>) {
   const progress = calculateProfileProgress(profile as any);
   const hasProfile = !!profile;
+  const missingGroups = hasProfile ? getMissingFields(profile as any) : [];
 
   const title = hasProfile
-    ? `Complete Your ${profileTypeName}`
-    : `Create Your ${profileTypeName}`;
+    ? `Complete Your Profile`
+    : `Create Your Profile`;
 
   const message = hasProfile
-    ? `Your ${profileTypeName.toLowerCase()} is ${progress}% complete. Please complete it to get the most out of the platform.`
-    : `You haven't created a ${profileTypeName.toLowerCase()} yet. Create one to get started and connect with others.`;
+    ? `Your profile is ${progress}% complete.`
+    : `You haven't created a profile yet.`;
 
-  // Use router.replace to ensure the screen remounts
-  const handleCreateProfile = () => {
+  const handleComplete = () => {
     onClose();
     router.navigate(redirectPath as any);
   };
 
   return (
-    <BottomModal
+    <Modal
       visible={visible}
-      onClose={onClose}
-      icon="person-circle"
-      iconColor="#0E0E55"
-      title={title}
-      message={message}
-      buttons={[
-        {
-          label: hasProfile ? "Complete Profile" : "Create Profile",
-          color: "#0E0E55",
-          textColor: "#fff",
-          onPress: handleCreateProfile,
-        },
-        {
-          label: "Later",
-          color: "#E5E5E5",
-          textColor: "#333",
-          onPress: onClose,
-        },
-      ]}
-      orientation="column"
-    />
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+      presentationStyle="overFullScreen"
+      statusBarTranslucent
+    >
+      <View style={styles.overlay}>
+        <View style={styles.card}>
+          <Ionicons name="person-circle" size={56} color="#0E0E55" />
+
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.message}>{message}</Text>
+
+          {missingGroups.length > 0 && (
+            <>
+              <View style={styles.divider} />
+              <Text style={styles.missingHeader}>Missing items</Text>
+              <ScrollView style={styles.missingList} nestedScrollEnabled>
+                {missingGroups.map((group, i) => (
+                  <View key={i} style={styles.missingRow}>
+                    <Text style={styles.bullet}>{"\u2022"}</Text>
+                    <View style={styles.missingContent}>
+                      <Text style={styles.categoryLabel}>{group.category}:</Text>
+                      <Text style={styles.fieldLabel}>{group.fields.join(", ")}</Text>
+                    </View>
+                  </View>
+                ))}
+              </ScrollView>
+            </>
+          )}
+
+          <TouchableOpacity style={styles.primaryBtn} onPress={handleComplete}>
+            <Text style={styles.primaryBtnText}>
+              {hasProfile ? "Complete" : "Create"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.secondaryBtn} onPress={onClose}>
+            <Text style={styles.secondaryBtnText}>Later</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  card: {
+    width: "85%",
+    maxHeight: "80%",
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 24,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#0E0E55",
+    marginTop: 12,
+    textAlign: "center",
+  },
+  message: {
+    fontSize: 14,
+    color: "#555",
+    textAlign: "center",
+    lineHeight: 20,
+    marginTop: 8,
+  },
+  divider: {
+    width: "100%",
+    height: 1,
+    backgroundColor: "#E5E5E5",
+    marginVertical: 16,
+  },
+  missingHeader: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#0E0E55",
+    alignSelf: "flex-start",
+    marginBottom: 8,
+  },
+  missingList: {
+    width: "100%",
+    maxHeight: 160,
+    marginBottom: 16,
+  },
+  missingRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 6,
+    paddingRight: 8,
+  },
+  bullet: {
+    fontSize: 14,
+    color: "#ce9505ff",
+    marginRight: 8,
+    lineHeight: 20,
+  },
+  missingContent: {
+    flex: 1,
+  },
+  categoryLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#333",
+  },
+  fieldLabel: {
+    fontSize: 13,
+    color: "#666",
+    lineHeight: 18,
+  },
+  primaryBtn: {
+    width: "100%",
+    backgroundColor: "#0E0E55",
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 4,
+  },
+  primaryBtnText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  secondaryBtn: {
+    width: "100%",
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
+  },
+  secondaryBtnText: {
+    color: "#555",
+    fontSize: 15,
+    fontWeight: "500",
+  },
+});

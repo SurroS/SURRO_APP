@@ -2,7 +2,7 @@ import React from "react";
 import { YStack, Text } from "tamagui";
 import RoleCommonProfile from "@/components/editBio/RoleCommonProfile";
 import InfoRowCard from "@/components/editBio/InfoRowCard";
-import { Briefcase, MapPin, Globe, ListChecks } from "@tamagui/lucide-icons";
+import { Briefcase, MapPin, Globe, ListChecks, FileText } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
 
 interface AgentBioProps {
@@ -88,6 +88,13 @@ export default function AgentBio({
         onPress={() =>
           router.push("/profile/AgentLanguagesSection")
         }
+      />
+
+      <InfoRowCard
+        title="Profile Summary"
+        subtitle="View your complete profile"
+        icon={FileText}
+        onPress={() => router.navigate("/medical/medicalHistorySummary")}
       />
     </YStack>
   );

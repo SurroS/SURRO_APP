@@ -199,16 +199,10 @@ export default function SurrogateProfileScreen() {
 
   const HandleUseAgent = () => {
     if (isProcessing) return;
-    router.push("/(tabs)/home/agent/agentsListScreen");
+    router.push("/agent/agentsListScreen");
   };
 
-  const profileImages = surrogate?.profilePicture
-    ? [surrogate.profilePicture]
-    : [
-        "https://picsum.photos/600/600",
-        "https://picsum.photos/700/700",
-        "https://picsum.photos/800/800",
-      ];
+  const hasProfilePicture = !!surrogate?.profilePicture;
 
   // ---------------------------
   // FALLBACK MAPPED DATA
@@ -324,7 +318,13 @@ export default function SurrogateProfileScreen() {
         >
           {/* IMAGE CAROUSEL */}
           <View style={styles.carouselContainer}>
-            <ImageCarousel images={profileImages} unlocked={isUnlocked} />
+            {hasProfilePicture ? (
+              <ImageCarousel images={[surrogate!.profilePicture]} unlocked={isUnlocked} />
+            ) : (
+              <View style={{ flex: 1, backgroundColor: "#E0E0E0", justifyContent: "center", alignItems: "center" }}>
+                <Text style={{ color: "#666", fontSize: 14 }}>Profile Picture</Text>
+              </View>
+            )}
           </View>
 
           {/* HEADER */}

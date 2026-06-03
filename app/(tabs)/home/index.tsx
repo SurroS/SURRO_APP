@@ -26,10 +26,12 @@ export default function HomeIndex() {
 
   const notifications = useNotificationStore((s) => s.notifications);
   const unreadCount = notifications.filter((n) => !n.read).length;
+  const fetchNotifications = useNotificationStore((s) => s.fetchNotifications);
   const [refreshing, setRefreshing] = useState(false);
 
   // ---- AUTO-FETCH PROFILE ON MOUNT ----
   useEffect(() => {
+    fetchNotifications();
     switch (role) {
       case "SURROGATE":
         fetchSurrogate();
@@ -46,6 +48,7 @@ export default function HomeIndex() {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
+      await fetchNotifications();
       if (role === "SURROGATE") {
         await fetchSurrogate(true);
       } else if (role === "AGENT") {
@@ -58,7 +61,7 @@ export default function HomeIndex() {
     } finally {
       setRefreshing(false);
     }
-  }, [role, fetchSurrogate, fetchAgent, fetchParent]);
+  }, [role, fetchSurrogate, fetchAgent, fetchParent, fetchNotifications]);
 
   return (
     <YStack style={{ flex: 1, backgroundColor: "#FFFFFF" }} padding="$4">

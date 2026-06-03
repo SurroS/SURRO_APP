@@ -38,11 +38,13 @@ type PlatformInputProps = {
   onAdd?: (platform: string, handle: string) => void;
   initialPlatform?: string;
   disabled?: boolean;
+  onInputFocus?: () => void;
 };
 
 export default function PlatformInput({
   onAdd,
   initialPlatform = "Instagram",
+  onInputFocus,
 }: PlatformInputProps) {
   const [selected, setSelected] = useState<Platform>(
     PLATFORMS.find((p) => p.key === initialPlatform) || PLATFORMS[0],
@@ -178,6 +180,7 @@ export default function PlatformInput({
           onChangeText={setText}
           returnKeyType="done"
           onSubmitEditing={handleAdd}
+          onFocus={onInputFocus}
         />
 
         <TouchableOpacity

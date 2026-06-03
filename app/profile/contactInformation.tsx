@@ -8,7 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Dropdown from "@/components/DropDown";
 import TextInputField from "@/components/TextInputField";
 import { getAllCountries } from "@/utils/countries";
-import { getStatesByCountry } from "@/utils/states";
+import { getStatesByCountry, getLgaByState } from "@/utils/states";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { useAuth } from "@/hooks/useAuth";
@@ -47,7 +47,7 @@ export default function ContactInformationScreen() {
   const [lgaList, setLgaList] = useState<string[]>([]);
 
   const [country, setCountry] = useState<any | null>(null);
-  const [state, setState] = useState<string>("");
+  const [residenceState, setResidenceState] = useState<string>("");
   const [lga, setLga] = useState<string>("");
   const [street, setStreet] = useState<string>("");
   const [zip, setZip] = useState<string>("");
@@ -64,9 +64,12 @@ export default function ContactInformationScreen() {
 
     if (!Role) return;
 
-    if (Role === "SURROGATE" && !surrogateProfile) fetchProfile();
-    else if (Role === "INTENDED_PARENT" && !parentProfile) fetchParentProfile();
-    else if (Role === "AGENT" && !agentProfile) fetchAgentProfile();
+    // Always trigger fetch — stale-while-revalidate handles:
+    // - Cached: returns instantly, silently refreshes in background
+    // - No cache: shows loading, fetches from API
+    if (Role === "SURROGATE") fetchProfile();
+    else if (Role === "INTENDED_PARENT") fetchParentProfile();
+    else if (Role === "AGENT") fetchAgentProfile();
   }, [Role]);
 
   // Strip dial code safely and always return string
@@ -88,15 +91,23 @@ export default function ContactInformationScreen() {
         ? agentProfile
         : null;
 
-    if (!profile) return;
+    if (!profile) {
+      console.log("[ContactInfo] No profile to populate from, role:", Role);
+      return;
+    }
 
-    setPhone1(stripDialCode(profile?.phone1 ?? ""));
-    setPhone2(stripDialCode(profile?.phone2 ?? ""));
+    console.log("[ContactInfo] Populating form from profile keys:", Object.keys(profile).join(", "));
+
+    const isParent = Role === "INTENDED_PARENT";
+    const isAgent = Role === "AGENT";
+
+    setPhone1(stripDialCode(isParent ? profile?.phone : profile?.phone1 ?? ""));
+    setPhone2(stripDialCode(isParent ? "" : profile?.phone2 ?? ""));
     setEmergency(stripDialCode(profile?.emergencyContactPhone ?? ""));
     setRelationship(profile?.emergencyContactRelation ?? "");
     setStreet(profile?.address ?? "");
     setZip(profile?.zipCode ?? "");
-    setState(profile?.stateOfOrigin ?? "");
+    setResidenceState(profile?.stateOfResidence ?? "");
     setLga(profile?.lga ?? "");
 
     if (countries.length > 0) {
@@ -124,7 +135,7 @@ export default function ContactInformationScreen() {
       : selected;
     if (!selectedCountry) return;
     setCountry(selectedCountry);
-    setState("");
+    setResidenceState("");
     setLga("");
     setStatesList([]);
     setLgaList([]);
@@ -132,10 +143,20 @@ export default function ContactInformationScreen() {
     setStatesList(states);
   };
 
+  const handleSelectResidenceState = async (selected: string) => {
+    setResidenceState(selected);
+    setLga("");
+    setLgaList([]);
+    if (country && selected) {
+      const lgas = await getLgaByState(country.name, selected);
+      setLgaList(lgas);
+    }
+  };
+
   const handleSave = async () => {
     if (
       !country ||
-      !state ||
+      !residenceState ||
       !lga ||
       !street ||
       !zip ||
@@ -162,17 +183,24 @@ export default function ContactInformationScreen() {
       ? `${country.dialCode}${emergency}`
       : emergency;
 
-    const profileData = {
+    const isParent = Role === "INTENDED_PARENT";
+
+    const profileData: any = {
       countryOfResidence: country.name,
-      stateOfOrigin: state,
+      stateOfResidence: residenceState,
       lga,
       address: street,
       zipCode: zip,
-      phone1: fullPhone1,
-      phone2: fullPhone2,
       emergencyContactPhone: fullEmergency,
       emergencyContactRelation: relationship,
     };
+
+    if (isParent) {
+      profileData.phone = fullPhone1;
+    } else {
+      profileData.phone1 = fullPhone1;
+      profileData.phone2 = fullPhone2;
+    }
 
     try {
       if (Role === "SURROGATE") await updateProfile(profileData);
@@ -216,17 +244,19 @@ export default function ContactInformationScreen() {
             onSelect={handleSelectCountry}
           />
 
-          <TextInputField
-            label="State"
-            placeholder="Enter your current state"
-            value={state}
-            onChangeText={setState}
+          <Dropdown
+            label="State of Residence"
+            placeholder="Select a state"
+            value={residenceState}
+            options={statesList}
+            onSelect={handleSelectResidenceState}
           />
-          <TextInputField
-            label="Local Government Area"
-            placeholder="Enter your current LGA"
+          <Dropdown
+            label="LGA of Residence"
+            placeholder="Select an LGA"
             value={lga}
-            onChangeText={setLga}
+            options={lgaList}
+            onSelect={setLga}
           />
           <TextInputField
             label="Street address"

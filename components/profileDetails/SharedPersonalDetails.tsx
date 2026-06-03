@@ -10,12 +10,15 @@ interface SharedPersonalFieldsProps {
   fullName?: string;
   lastName?: string;
   country?: any;
+  stateOfOrigin?: string;
+  originStatesList?: string[];
   dob?: string;
   maritalStatus?: string;
   countries?: Array<{ label: string; value: string }>;
   setFirstName?: (value: string) => void;
   setLastName?: (value: string) => void;
   setCountry?: (value: string) => void;
+  setStateOfOrigin?: (value: string) => void;
   setDob?: (value: string) => void;
   setMaritalStatus?: (value: string) => void;
 }
@@ -24,12 +27,15 @@ export default function SharedPersonalFields({
   fullName = "",
   lastName = "",
   country = "",
+  stateOfOrigin = "",
+  originStatesList = [],
   dob = "",
   maritalStatus = "",
   countries = [],
   setFirstName = () => {},
   setLastName = () => {},
   setCountry = () => {},
+  setStateOfOrigin = () => {},
   setDob = () => {},
   setMaritalStatus = () => {},
 }: SharedPersonalFieldsProps) {
@@ -56,6 +62,14 @@ export default function SharedPersonalFields({
         value={countryName}
         options={countries}
         onSelect={(item) => setCountry(String(item))}
+      />
+
+      <Dropdown
+        label="State of Origin"
+        placeholder="Select a state"
+        value={stateOfOrigin}
+        options={originStatesList}
+        onSelect={(item) => setStateOfOrigin(String(item))}
       />
 
       <DateInput

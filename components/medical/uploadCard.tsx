@@ -7,9 +7,10 @@ type UploadCardProps = {
   label: string;
   onFileSelect: (file: any) => void;
   file?: any;
+  isReupload?: boolean;
 };
 
-const StyledUploadCard = ({ label, onFileSelect, file }: UploadCardProps) => {
+const StyledUploadCard = ({ label, onFileSelect, file, isReupload }: UploadCardProps) => {
   const handlePickFile = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -68,7 +69,7 @@ const StyledUploadCard = ({ label, onFileSelect, file }: UploadCardProps) => {
           marginTop="$3"
           onPress={handlePickFile}
         >
-          Upload
+          {isReupload ? "Reupload" : "Upload"}
         </Button>
       </View>
     </YStack>

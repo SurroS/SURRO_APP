@@ -1,6 +1,6 @@
 import { useProfile } from "@/hooks/useProfile";
 import { Feather, Ionicons } from "@expo/vector-icons";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { Image, Text, XStack, YStack } from "tamagui";
 
 const SurrogateProfileDataView = () => {
@@ -19,16 +19,29 @@ const SurrogateProfileDataView = () => {
 
   return (
     <XStack margin={2} gap="$4" alignItems="flex-start" height={150} flex={1}>
-      <Image
-        source={
-          surrogateProfile?.profilePicture
-            ? { uri: surrogateProfile?.profilePicture }
-            : require("@/assets/images/femaleAvatar.png")
-        }
-        width={"45%"}
-        height={"100%"}
-        borderRadius="$3"
-      />
+      {surrogateProfile?.profilePicture ? (
+        <Image
+          source={{ uri: surrogateProfile?.profilePicture }}
+          width={"45%"}
+          height={"100%"}
+          borderRadius="$3"
+        />
+      ) : (
+        <View
+          style={{
+            width: "45%",
+            height: "100%",
+            backgroundColor: "#E0E0E0",
+            borderRadius: 8,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ color: "#666", fontSize: 12, textAlign: "center" }}>
+            Profile Picture
+          </Text>
+        </View>
+      )}
 
       <YStack gap="$3">
         <XStack alignItems="center" gap="$2">

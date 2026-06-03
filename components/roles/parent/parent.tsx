@@ -35,6 +35,7 @@ export default function ParentScreen() {
 
   useEffect(() => {
     if (!isLoading) {
+      if (progress >= 100) { setShowProfileModal(false); return; }
       const hasProfile = !!parentProfile;
       const needsCompletion = hasProfile && progress < 100;
       if (!hasProfile || needsCompletion) {
@@ -44,8 +45,8 @@ export default function ParentScreen() {
   }, [parentProfile, progress, isLoading]);
 
   const ViewSurrogates = () =>
-    router.push("/(tabs)/home/surrogate/surrogateList");
-  const ViewAgents = () => router.push("/(tabs)/home/agent/agentsListScreen");
+    router.push("/surrogate/surrogateList");
+  const ViewAgents = () => router.push("/agent/agentsListScreen");
 
   return (
     <>
@@ -57,7 +58,7 @@ export default function ParentScreen() {
           <ProfileData
             name={parentProfile?.firstName}
             avatarUrl={parentProfile?.profilePicture}
-            dateOfBirth={parentProfile.dateOfBirth}
+            dateOfBirth={parentProfile?.dateOfBirth}
           />
 
           <Accordion
@@ -113,13 +114,15 @@ export default function ParentScreen() {
         </YStack>
       </ScrollView>
 
-      <ProfileCompletionModal
-        visible={showProfileModal}
-        onClose={() => setShowProfileModal(false)}
-        profile={parentProfile}
-        profileTypeName="Parent"
-        redirectPath="/profile"
-      />
+      {progress < 100 && (
+        <ProfileCompletionModal
+          visible={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          profile={parentProfile}
+          profileTypeName="Parent"
+          redirectPath="/profile"
+        />
+      )}
     </>
   );
 }

@@ -1,15 +1,10 @@
 import React from "react";
-import { TouchableOpacity } from "react-native";
-import { XStack, YStack, Text, Image } from "tamagui";
+import { TouchableOpacity, View } from "react-native";
+import { XStack, YStack, Text } from "tamagui";
+import { Ionicons } from "@expo/vector-icons";
 import { AppNotification } from "@/store/notifications/types";
 
 import colors from "@/hooks/colors";
-
-// Icons
-import messageIcon from "@/assets/images/message-icon.png";
-import profileSetup2 from "@/assets/images/profile-setup-2.png";
-import profileSetupIcon from "@/assets/images/profile-setup-icon.png";
-import profileView from "@/assets/images/profile-view.png";
 
 type Props = {
   item?: AppNotification;
@@ -18,82 +13,114 @@ type Props = {
   onLongPress?: () => void;
 };
 
-const iconByType: Partial<Record<AppNotification["type"], any>> = {
-  GENERAL: messageIcon,
-  PROFILE_SETUP: profileSetupIcon,
-  PROFILE_VIEWS: profileView,
-  PROFILE_BOOST: profileSetup2,
-  INACTIVITY: messageIcon, // keep it neutral
+const iconConfig: Record<string, { name: keyof typeof Ionicons.glyphMap; bg: string }> = {
+  GENERAL: { name: "notifications-outline", bg: "#E3F2FD" },
+  PROFILE_SETUP: { name: "person-add-outline", bg: "#E8F5E9" },
+  PROFILE_VIEWS: { name: "eye-outline", bg: "#FFF3E0" },
+  PAYMENT: { name: "wallet-outline", bg: "#E8F5E9" },
+  REFERRAL: { name: "gift-outline", bg: "#FCE4EC" },
+  SURROGATE_BOOST: { name: "trending-up-outline", bg: "#E8F5E9" },
+  KYC: { name: "shield-checkmark-outline", bg: "#E3F2FD" },
+  PROFILE_BOOST: { name: "rocket-outline", bg: "#F3E5F5" },
+  INACTIVITY: { name: "time-outline", bg: "#FFF3E0" },
 };
 
-const FONT = {
-  title: { fontSize: 16, lineHeight: 26 },
+const relativeTime = (timestamp: number): string => {
+  const diff = Date.now() - timestamp;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days}d ago`;
+  return new Date(timestamp).toLocaleDateString();
 };
-
-const formatTime = (timestamp: number) =>
-  new Date(timestamp).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 
 const NotificationItem = ({ item, selected, onPress, onLongPress }: Props) => {
   if (!item) return null;
 
-  const icon = iconByType[item.type] ?? messageIcon;
+  const icon = iconConfig[item.type] ?? iconConfig.GENERAL;
 
   return (
     <TouchableOpacity
       onPress={onPress}
       onLongPress={onLongPress}
       activeOpacity={0.7}
+      style={{ marginHorizontal: 0 }}
     >
-      <YStack
-        backgroundColor={selected ? "#dde6ff" : "#fff"}
-        borderRadius={10}
-        borderWidth={0.5}
-        borderColor={colors.gray}
+      <XStack
+        backgroundColor={selected ? "#EEF0FF" : item.read ? "#fff" : "#F8F9FF"}
+        borderRadius={14}
+        paddingVertical={14}
+        paddingHorizontal={16}
+        gap={14}
+        alignItems="flex-start"
+        style={{
+          borderWidth: 1,
+          borderColor: selected ? colors.primary : "transparent",
+        }}
       >
-        <XStack
-          alignItems="center"
-          justifyContent="space-between"
-          paddingVertical="$3"
-          paddingHorizontal="$4"
-        >
-          <XStack alignItems="center" gap="$3" flex={1}>
-            <Image source={icon} width={22} height={22} resizeMode="contain" />
-            <Text
-              fontSize={FONT.title.fontSize}
-              lineHeight={FONT.title.lineHeight}
-              color="#212121"
-              fontWeight={item.read ? "500" : "800"}
+        {/* Unread dot */}
+        {!item.read && (
+          <View
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: 4,
+              backgroundColor: "#E63946",
+              position: "absolute",
+              left: 6,
+              top: 18,
+              zIndex: 1,
+            }}
+          />
+        )}
 
+        {/* Icon circle */}
+        <View
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: icon.bg,
+            justifyContent: "center",
+            alignItems: "center",
+            marginTop: 2,
+          }}
+        >
+          <Ionicons
+            name={icon.name}
+            size={20}
+            color={item.read ? "#888" : "#333"}
+          />
+        </View>
+
+        {/* Content */}
+        <YStack flex={1} gap={4}>
+          <XStack justifyContent="space-between" alignItems="center">
+            <Text
+              fontSize={15}
+              color="#1A1A1A"
+              fontWeight={item.read ? "500" : "700"}
+              flex={1}
+              numberOfLines={1}
             >
               {item.title}
             </Text>
-            {item.source === "SYSTEM" && (
-              <Text fontSize={12} color="#888">
-                System
-              </Text>
-            )}
-          </XStack>
-
-          <XStack alignItems="center" gap={5}>
-            <Text fontWeight="600" color="#545453">
-              {formatTime(item.createdAt)}
+            <Text fontSize={12} color="#999" marginLeft={8}>
+              {relativeTime(item.createdAt)}
             </Text>
-
-            {/* Red dot for unread messages */}
-            {!item.read && (
-              <YStack
-                width={10}
-                height={10}
-                borderRadius={5}
-                backgroundColor="#E63946"
-              />
-            )}
           </XStack>
-        </XStack>
-      </YStack>
+
+          {item.body ? (
+            <Text fontSize={13} color="#777" numberOfLines={2} lineHeight={18}>
+              {item.body}
+            </Text>
+          ) : null}
+        </YStack>
+      </XStack>
     </TouchableOpacity>
   );
 };

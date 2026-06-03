@@ -7,6 +7,7 @@ import SurrogatePersonalFields from "@/components/profileDetails/SurrogatePerson
 import ParentPersonalFields from "@/components/profileDetails/ParentPersonalFields";
 import AgentPersonalFields from "@/components/profileDetails/AgentPersonalDetails";
 import { getAllCountries } from "@/utils/countries";
+import { getStatesByCountry } from "@/utils/states";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { router } from "expo-router";
@@ -41,15 +42,22 @@ export default function PersonalInformationScreen() {
   const isLoading = surrogateLoading || parentLoading || agentLoading;
 
   const [countries, setCountries] = useState<any[]>([]);
+  const [originStatesList, setOriginStatesList] = useState<string[]>([]);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [country, setCountry] = useState<any>(null);
+  const [stateOfOrigin, setStateOfOrigin] = useState("");
   const [dob, setDob] = useState("");
   const [maritalStatus, setMaritalStatus] = useState("");
 
-  const handleSetCountry = (name: string) => {
+  const handleSetCountry = async (name: string) => {
     const found = countries.find((c) => c.name === name || c.label === name);
-    if (found) setCountry(found);
+    if (found) {
+      setCountry(found);
+      setStateOfOrigin("");
+      const states = await getStatesByCountry(found.name);
+      setOriginStatesList(states);
+    }
   };
 
   // SURROGATE ONLY
@@ -79,6 +87,7 @@ export default function PersonalInformationScreen() {
       setLastName(surrogateProfile.lastName || "");
       setDob(surrogateProfile.dateOfBirth || "");
       setMaritalStatus(surrogateProfile.maritalStatus || "");
+      setStateOfOrigin(surrogateProfile.stateOfOrigin || "");
       setHeight(surrogateProfile.height || "");
       setWeight(surrogateProfile.weight || "");
       setChildren(surrogateProfile.numberOfChildren || 0);
@@ -89,12 +98,16 @@ export default function PersonalInformationScreen() {
         );
         if (foundCountry) {
           setCountry(foundCountry);
+          getStatesByCountry(foundCountry.name).then(setOriginStatesList);
         }
       }
     } else if (Role === "INTENDED_PARENT" && parentProfile) {
       const fullNameParts = parentProfile.fullName?.split(" ") || [];
       setFirstName(fullNameParts[0] || "");
       setLastName(fullNameParts.slice(1).join(" ") || "");
+      setDob(parentProfile.dateOfBirth || "");
+      setMaritalStatus(parentProfile.maritalStatus || "");
+      setStateOfOrigin(parentProfile.stateOfOrigin || "");
 
       if (parentProfile.countryOfResidence && countries.length > 0) {
         const foundCountry = countries.find(
@@ -102,6 +115,7 @@ export default function PersonalInformationScreen() {
         );
         if (foundCountry) {
           setCountry(foundCountry);
+          getStatesByCountry(foundCountry.name).then(setOriginStatesList);
         }
       }
     } else if (Role === "AGENT" && agentProfile) {
@@ -161,15 +175,17 @@ export default function PersonalInformationScreen() {
         if (country) profileData.countryOfOrigin = country.name;
         if (dob) profileData.dateOfBirth = dob;
         if (maritalStatus) profileData.maritalStatus = maritalStatus;
+        if (stateOfOrigin) profileData.stateOfOrigin = stateOfOrigin;
 
         await updateProfile(profileData);
       } else if (Role === "INTENDED_PARENT") {
-        const profileData = {
+        const profileData: any = {
           fullName: `${firstName.trim()} ${lastName.trim()}`.trim(),
           countryOfResidence: country.name,
           dateOfBirth: dob,
           maritalStatus,
         };
+        if (stateOfOrigin) profileData.stateOfOrigin = stateOfOrigin;
         await updateParentProfile(profileData);
       } else if (Role === "AGENT") {
         const profileData = {
@@ -215,12 +231,15 @@ export default function PersonalInformationScreen() {
                 fullName={firstName}
                 lastName={lastName}
                 country={country}
+                stateOfOrigin={stateOfOrigin}
+                originStatesList={originStatesList}
                 dob={dob}
                 maritalStatus={maritalStatus}
                 countries={countries}
                 setFirstName={setFirstName}
                 setLastName={setLastName}
                 setCountry={handleSetCountry}
+                setStateOfOrigin={setStateOfOrigin}
                 setDob={setDob}
                 setMaritalStatus={setMaritalStatus}
                 height={height}
@@ -236,12 +255,15 @@ export default function PersonalInformationScreen() {
                 fullName={firstName}
                 lastName={lastName}
                 country={country}
+                stateOfOrigin={stateOfOrigin}
+                originStatesList={originStatesList}
                 dob={dob}
                 maritalStatus={maritalStatus}
                 countries={countries}
                 setFirstName={setFirstName}
                 setLastName={setLastName}
                 setCountry={handleSetCountry}
+                setStateOfOrigin={setStateOfOrigin}
                 setDob={setDob}
                 setMaritalStatus={setMaritalStatus}
               />

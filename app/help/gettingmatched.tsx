@@ -217,7 +217,7 @@ export default function GettingMatchedScreen() {
                 title="Find Surrogate"
                 onPress={() => {
                   setShowModal(false);
-                  router.push("/(tabs)/home/surrogate/surrogateList");
+                  router.push("/surrogate/surrogateList");
                 }}
               />
 
@@ -225,7 +225,7 @@ export default function GettingMatchedScreen() {
                 title="Find Agent"
                 onPress={() => {
                   setShowModal(false);
-                  router.push("/(tabs)/home/agent/agentsListScreen");
+                  router.push("/agent/agentsListScreen");
                 }}
               />
             </>
@@ -236,7 +236,7 @@ export default function GettingMatchedScreen() {
               title="Find Surrogates"
               onPress={() => {
                 setShowModal(false);
-                router.push("/(tabs)/home/surrogate/surrogateList");
+                router.push("/surrogate/surrogateList");
               }}
             />
           )}

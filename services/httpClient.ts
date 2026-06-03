@@ -69,28 +69,19 @@ httpClient.interceptors.response.use(
       message: error.message,
     });
 
-    // ---- AUTO-LOGOUT ON 401 (once only) ----
+    // ---- SESSION EXPIRED ON 401 (once only) ----
     if (status === 401 && !isLoggingOut) {
       isLoggingOut = true;
-      console.warn("[httpClient] 401 Unauthorized — clearing auth and redirecting to login");
+      console.warn("[httpClient] 401 Unauthorized — clearing auth and showing session expired modal");
       try {
         const { useAuthStore } = require("@/store/auth");
         const store = useAuthStore.getState();
-        if (store.setForceLogout) store.setForceLogout(true);
         if (store.logout) store.logout();
+        if (store.setSessionExpired) store.setSessionExpired(true);
       } catch (e) {
         console.error("[httpClient] Failed to clear auth:", e);
       }
-      try {
-        const { router } = require("expo-router");
-        setTimeout(() => {
-          router.replace("/(auth)/login");
-          // Reset guard after redirect to allow future 401 handling
-          setTimeout(() => { isLoggingOut = false; }, 1000);
-        }, 100);
-      } catch (_) {
-        isLoggingOut = false;
-      }
+      setTimeout(() => { isLoggingOut = false; }, 2000);
     }
 
     // Show toast for network errors

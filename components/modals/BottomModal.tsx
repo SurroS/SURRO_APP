@@ -1,17 +1,16 @@
 import React, { useEffect, useRef } from "react";
 import {
-  Modal,
   View,
   Text,
-  Image,
   TouchableOpacity,
-  Animated,
+  Modal,
   StyleSheet,
+  Animated,
   Dimensions,
+  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
-const { height } = Dimensions.get("window");
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface ButtonConfig {
   label: string;
@@ -47,7 +46,9 @@ export default function BottomModal({
   success = false,
   children,
 }: BottomModalProps) {
-  const slideAnim = useRef(new Animated.Value(height)).current;
+  const insets = useSafeAreaInsets();
+  const { height: winHeight } = Dimensions.get("window");
+  const slideAnim = useRef(new Animated.Value(winHeight)).current;
   const scaleAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -73,7 +74,7 @@ export default function BottomModal({
       Animated.parallel(animations).start();
     } else {
       Animated.timing(slideAnim, {
-        toValue: height,
+        toValue: winHeight,
         duration: 200,
         useNativeDriver: true,
       }).start();
@@ -93,7 +94,7 @@ export default function BottomModal({
     >
       <View style={styles.overlay}>
         <Animated.View
-          style={[styles.modalCard, { transform: [{ translateY: slideAnim }] }]}
+          style={[styles.modalCard, { transform: [{ translateY: slideAnim }], paddingBottom: insets.bottom || 16 }]}
         >
           {success ? (
             <Animated.View

@@ -11,7 +11,6 @@ export default function surrogateLayout() {
       {/* Redirect entry (index) */} 
       {/* <Stack.Screen name="index" />   */}
       <Stack.Screen name="surrogateGuestView" />
-      <Stack.Screen name="surrogateList" />
       <Stack.Screen name="surrogateProfileScreen" /> 
       
     </Stack>

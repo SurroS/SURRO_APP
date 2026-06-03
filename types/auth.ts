@@ -62,6 +62,7 @@ export interface RegisterCredentials {
   passwordConfirmation: string;
   role: string;
   referralCode?: string;
+  termsAccepted?: boolean;
 }
 
 export interface OtpVerification {
@@ -81,7 +82,6 @@ export interface ResetPasswordConfirm {
 }
 
 export interface ChangePasswordRequest {
-  currentPassword: string;
   newPassword: string;
   newPasswordConfirmation: string;
 }

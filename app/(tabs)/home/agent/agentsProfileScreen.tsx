@@ -29,11 +29,7 @@ import { AGENT_TRANSACTIONS } from "@/types/agentTransactionType";
 import { getAgentById } from "@/services/profileApi";
 import { User } from "@tamagui/lucide-icons";
 
-const fallbackImages = [
-  "https://picsum.photos/800/500",
-  "https://picsum.photos/700/700",
-  "https://picsum.photos/600/600",
-];
+
 
 export default function AgentProfileScreen() {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -135,12 +131,7 @@ export default function AgentProfileScreen() {
     );
   }
 
-  // -----------------------------
-  // Dynamic Images
-  // -----------------------------
-  const unlockedImages = agent?.gallery ? [agent.gallery] : fallbackImages;
-
-  const lockedImages = fallbackImages;
+  const hasGalleryImage = !!agent?.gallery;
 
   return (
     <View style={styles.container}>
@@ -151,10 +142,13 @@ export default function AgentProfileScreen() {
         >
           {/* --- IMAGE CAROUSEL --- */}
           <View style={styles.carouselContainer}>
-            <ImageCarousel
-              images={isUnlocked ? unlockedImages : lockedImages}
-              unlocked={isUnlocked}
-            />
+            {isUnlocked && hasGalleryImage ? (
+              <ImageCarousel images={[agent!.gallery]} unlocked={true} />
+            ) : (
+              <View style={{ flex: 1, backgroundColor: "#E0E0E0", justifyContent: "center", alignItems: "center" }}>
+                <Text style={{ color: "#666", fontSize: 14 }}>Profile Picture</Text>
+              </View>
+            )}
           </View>
 
           {/* --- HEADER INFO --- */}

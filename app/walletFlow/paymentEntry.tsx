@@ -15,7 +15,6 @@ interface PaymentInitPayload {
   amount: number;
   gateway: PaymentGateway | "AUTO";
   channel: PaymentMode | "card";
-  location: string;
 }
 
 interface PaymentInitResponse {
@@ -55,24 +54,27 @@ export default function PaymentEntryScreen() {
     try {
       const payload: PaymentInitPayload = {
         amount: numericAmount,
-        gateway,
+        gateway: "AUTO",
         channel: mode,
-        location: "MOBILE_APP",
       };
+
+      console.log("[PaymentEntry] Initiating payment with payload:", JSON.stringify(payload, null, 2));
 
       const response = await initiatePaymentFrontend(payload, token);
 
-      console.log("Response =", response);
+      console.log("[PaymentEntry] Init response:", JSON.stringify(response, null, 2));
 
-      const authorizationUrl = response?.data?.authorization_url;
+      const authorizationUrl = response?.authorization_url;
 
       if (!authorizationUrl) {
+        console.error("[PaymentEntry] Missing authorization_url in response");
         throw new Error("Invalid payment initialization response.");
       }
 
+      console.log("[PaymentEntry] Navigating to WebView with URL:", authorizationUrl);
       pushWebViewScreen(authorizationUrl, gateway, mode);
     } catch (err: any) {
-      console.error("Payment init error:", err);
+      console.error("[PaymentEntry] Payment init error:", err?.response?.data || err?.message || err);
       Toast.error(
         err?.response?.data?.message ||
           "Payment error. Failed to initiate payment.",

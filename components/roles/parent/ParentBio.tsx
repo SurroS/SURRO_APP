@@ -1,7 +1,9 @@
-// components/roles/agent/AgentBio.tsx
 import React from "react";
-import { YStack, Text } from "tamagui";
+import { YStack } from "tamagui";
 import RoleCommonProfile from "@/components/editBio/RoleCommonProfile";
+import InfoRowCard from "@/components/editBio/InfoRowCard";
+import { FileText } from "@tamagui/lucide-icons";
+import { router } from "expo-router";
 
 interface ParentBioProps {
   profileImage?: { uri: string };
@@ -14,6 +16,12 @@ export default function ParentBio(props: ParentBioProps) {
     <YStack gap="$3" width="100%">
       <RoleCommonProfile {...props} />
 
+      <InfoRowCard
+        title="Profile Summary"
+        subtitle="View your complete profile"
+        icon={FileText}
+        onPress={() => router.navigate("/medical/medicalHistorySummary")}
+      />
     </YStack>
   );
 }

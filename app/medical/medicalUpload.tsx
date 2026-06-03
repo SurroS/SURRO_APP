@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView, ActivityIndicator, Image, Pressable } from "react-native";
 import { YStack, Button, Text, View } from "tamagui";
@@ -27,30 +27,39 @@ export default function MedicalUpload() {
 
   const [medicalReport, setMedicalReport] = useState<FileObject | null>(null);
   const [uploading, setUploading] = useState(false);
+  const hasInteracted = useRef(false);
 
-  // Fetch profile on mount if not loaded; prefill image once data arrives
+  // Fetch profile on mount if not loaded
   useEffect(() => {
     if (!surrogateProfile) {
       fetchProfile();
     }
-    if (medical?.medicalReport && !medicalReport) {
-      setMedicalReport({ uri: medical.medicalReport });
-    }
-  }, [surrogateProfile, medical, medicalReport, fetchProfile]);
+  }, []);
 
-  // Just store the selected file locally — no upload yet
+  // Prefill existing image once profile data arrives (only if user hasn't interacted)
+  useEffect(() => {
+    if (medical?.endometriumUploadUrl && !medicalReport && !hasInteracted.current) {
+      setMedicalReport({ uri: medical.endometriumUploadUrl });
+    }
+  }, [medical?.endometriumUploadUrl]);
+
   const handleFileSelect = (file: FileObject | null) => {
+    hasInteracted.current = true;
     setMedicalReport(file);
   };
 
-  // Upload to backend, then navigate
   const handleContinue = async () => {
+    if (medical?.endometriumUploadUrl && !medicalReport) {
+      router.push("/medical/medicalHistorySummary");
+      return;
+    }
+
     if (!medicalReport?.uri) {
       router.push("/medical/medicalHistorySummary");
       return;
     }
 
-    if (medical?.medicalReport && medicalReport.uri === medical.medicalReport) {
+    if (medical?.endometriumUploadUrl && medicalReport.uri === medical.endometriumUploadUrl) {
       router.push("/medical/medicalHistorySummary");
       return;
     }
@@ -65,20 +74,29 @@ export default function MedicalUpload() {
         name: (medicalReport as any).name || "endometrium.jpg",
       } as any);
 
-      // Upload the image
-      await uploadEndometriumImageApi(formData);
+      const uploadRes = await uploadEndometriumImageApi(formData);
+      const endometriumUrl =
+        uploadRes?.endometriumUploadUrl ||
+        uploadRes?.data?.endometriumUploadUrl ||
+        uploadRes?.medical?.endometriumUploadUrl;
 
-      // Refetch profile to get the updated medicalReport URL from the reliable GET endpoint
+      if (endometriumUrl) {
+        useProfileStore.getState().setMedicalProfile(uploadRes as any);
+      }
+
+      // Refetch profile to get the confirmed URL from the GET endpoint
       await fetchProfile();
-      const updatedMedical = useProfileStore.getState().medicalProfile || useProfileStore.getState().surrogateProfile?.medical;
-      const backendUrl = updatedMedical?.medicalReport;
+      const confirmedUrl =
+        endometriumUrl ||
+        useProfileStore.getState().medicalProfile?.endometriumUploadUrl ||
+        useProfileStore.getState().surrogateProfile?.medical?.endometriumUploadUrl;
 
-      if (!backendUrl) {
-        console.error("[MedicalUpload] No medicalReport after upload. medical:", JSON.stringify(updatedMedical, null, 2));
+      if (!confirmedUrl) {
+        console.error("[MedicalUpload] No endometriumUploadUrl after upload.");
         throw new Error("Upload failed: no URL returned");
       }
 
-      await updateMedicalProfile({ medicalReport: backendUrl } as any);
+      await updateMedicalProfile({ endometriumUploadUrl: confirmedUrl } as any);
 
       Toast.show({
         text1: "Endometrium image uploaded successfully",
@@ -88,7 +106,6 @@ export default function MedicalUpload() {
       router.push("/medical/medicalHistorySummary");
     } catch (error: any) {
       console.error("[MedicalUpload] Failed to upload endometrium image", error);
-      console.error("[MedicalUpload] Full error object:", JSON.stringify(error?.response?.data || error?.details || error, null, 2));
       Toast.show({
         text1: "Upload failed",
         text2: error?.response?.data?.message || error?.message || "Please try again later",
@@ -100,7 +117,6 @@ export default function MedicalUpload() {
   };
 
   const handleContinueLater = () => {
-    console.log("[MedicalUpload] Continue Later pressed");
     router.push("/medical/medicalHistorySummary");
   };
 
@@ -122,7 +138,7 @@ export default function MedicalUpload() {
                 source={{ uri: medicalReport.uri }}
                 style={{ width: "100%", maxWidth: 300, aspectRatio: 1, borderRadius: 10 }}
               />
-              <Pressable onPress={() => setMedicalReport(null)}>
+              <Pressable onPress={() => { hasInteracted.current = true; setMedicalReport(null); }}>
                 <Text style={{ color: colors.primary, textDecorationLine: "underline", fontSize: 13 }}>
                   Change Image
                 </Text>
@@ -133,6 +149,7 @@ export default function MedicalUpload() {
               label="1. Endometrium upload"
               file={medicalReport}
               onFileSelect={handleFileSelect}
+              isReupload={!!medical?.endometriumUploadUrl}
             />
           )}
 

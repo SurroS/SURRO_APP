@@ -11,6 +11,7 @@ import { Button, YStack, XStack } from "tamagui";
 import { getAllCountries } from "@/utils/countries";
 import { useAuth } from "@/hooks/useAuth";
 import { useParentProfile } from "@/hooks/profile/useParentProfile";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type FilterOptions = {
   country?: string;
@@ -38,6 +39,7 @@ export default function FilterModal({
   onClose,
   onApply,
 }: FilterModalProps) {
+  const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { updateMatchPreference } = useParentProfile();
   const [countries, setCountries] = useState<{ name: string }[]>([]);
@@ -127,7 +129,7 @@ export default function FilterModal({
           right: 0,
           bottom: 0,
           height: "60%",
-          paddingBottom: 34,
+          paddingBottom: insets.bottom || 16,
           backgroundColor: "#FFFFFF",
           borderTopLeftRadius: 14,
           borderTopRightRadius: 14,

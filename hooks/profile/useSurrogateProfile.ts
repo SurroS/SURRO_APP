@@ -5,6 +5,7 @@ import {
   updateSurrogateProfile,
 } from "@/services/profileApi";
 import { SurrogateProfile, SurrogateProfileUpdate } from "@/types/profile";
+import { useAuthStore } from "@/store/auth";
 
 let cachedProfile: SurrogateProfile | null = null;
 
@@ -36,6 +37,12 @@ export const useSurrogateProfile = () => {
       cachedProfile = res?.profile || res;
       setSurrogateProfile(cachedProfile);
       console.log("[SurrogateProfile] Profile loaded:", cachedProfile ? "YES" : "NO");
+      if (cachedProfile?.profilePicture) {
+        useAuthStore.getState().setUser({
+          avatar: cachedProfile.profilePicture,
+          profilePictureUrl: cachedProfile.profilePicture,
+        });
+      }
       return cachedProfile;
     } catch (err: any) {
       const msg = err?.message || "Failed to fetch profile";

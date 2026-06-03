@@ -4,7 +4,7 @@ import { YStack } from "tamagui";
 import RoleCommonProfile from "@/components/editBio/RoleCommonProfile";
 import InfoRowCard from "@/components/editBio/InfoRowCard";
 import { router } from "expo-router";
-import { History } from "@tamagui/lucide-icons";
+import { History, FileText } from "@tamagui/lucide-icons";
 
 interface SurrogateBioProps {
   profileImage?: { uri: string };
@@ -30,6 +30,12 @@ export default function SurrogateBio(props: SurrogateBioProps) {
         onPress={() =>
           router.navigate("/profile/experienceForm")
         }
+      />
+      <InfoRowCard
+        title="Profile Summary"
+        subtitle="View your complete profile"
+        icon={FileText}
+        onPress={() => router.navigate("/medical/medicalHistorySummary")}
       />
     </YStack>
   );

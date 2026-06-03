@@ -1,11 +1,11 @@
 // components/guest/ProfileCard.tsx
 import React from "react";
-import { YStack, XStack, Text, Image } from "tamagui";
+import { View, Text } from "react-native";
+import { YStack, XStack, Image } from "tamagui";
 import { MapPin, Calendar, AtSign } from "@tamagui/lucide-icons";
 import { useSurrogateProfile } from "@/hooks/profile/useSurrogateProfile";
 
 const VERIFY_ICON = require("../../assets/images/verify-icon.png");
-const DEFAULT_PROFILE_IMAGE = require("../../assets/images/profile-icon.png");
 
 const ProfileCard = () => {
   const { surrogateProfile } = useSurrogateProfile();
@@ -17,20 +17,33 @@ const ProfileCard = () => {
     "no state ";
   const age = surrogateProfile?.dateOfBirth?.split("T")[0];
   const isAvailable = surrogateProfile?.isAvailable ?? true;
-  const profileImage = surrogateProfile?.profilePicture
-    ? { uri: surrogateProfile.profilePicture }
-    : DEFAULT_PROFILE_IMAGE;
+  const hasProfileImage = !!surrogateProfile?.profilePicture;
 
   return (
     <XStack gap={25} alignItems="center" justifyContent="center">
       {/* Profile Image */}
       <YStack width={147} height={147} overflow="hidden" borderRadius={12}>
-        <Image
-          source={profileImage}
-          width={"100%"}
-          height={"100%"}
-          resizeMode="cover"
-        />
+        {hasProfileImage ? (
+          <Image
+            source={{ uri: surrogateProfile!.profilePicture }}
+            width={"100%"}
+            height={"100%"}
+            resizeMode="cover"
+          />
+        ) : (
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "#E0E0E0",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ color: "#666", fontSize: 12, textAlign: "center" }}>
+              Profile Picture
+            </Text>
+          </View>
+        )}
       </YStack>
 
       {/* Info Section */}

@@ -52,7 +52,10 @@ const WalletScreen = () => {
 
   // Fetch wallet
   useEffect(() => {
-    fetchWallet().catch(() => {});
+    console.log("[WalletScreen] Fetching wallet for role:", role);
+    fetchWallet()
+      .then(() => console.log("[WalletScreen] Wallet fetched successfully"))
+      .catch((err) => console.error("[WalletScreen] Wallet fetch error:", err));
   }, []);
 
   const mapTx = (tx: WalletTransactionData) => ({
@@ -112,12 +115,18 @@ const WalletScreen = () => {
             <ActionButton
               label="Top up"
               icon="add"
-              onPress={() => router.push("/walletFlow/paymentMethod")}
+              onPress={() => {
+                console.log("[WalletScreen] Navigating to payment method");
+                router.push("/walletFlow/paymentMethod");
+              }}
             />
             <ActionButton
               label="Withdraw"
               icon="remove"
-              onPress={() => router.push("/walletFlow/withdrawal")}
+              onPress={() => {
+                console.log("[WalletScreen] Navigating to withdrawal");
+                router.push("/walletFlow/withdrawal");
+              }}
             />
           </XStack>
         </YStack>

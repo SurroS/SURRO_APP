@@ -28,11 +28,13 @@ export default function PaymentWebViewScreen() {
 
   const handleNavChange = (navState: any) => {
     const { url } = navState;
+    console.log("[PaymentWebView] Navigation:", url);
 
-    // If backend redirects to success/failure page
     if (url.includes("payment-success")) {
+      console.log("[PaymentWebView] Payment succeeded, redirecting");
       router.replace("/walletFlow/paymentSuccess");
     } else if (url.includes("payment-failure")) {
+      console.log("[PaymentWebView] Payment failed, redirecting");
       router.replace("/walletFlow/paymentFailed");
     }
   };

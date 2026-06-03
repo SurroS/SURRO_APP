@@ -7,6 +7,25 @@ import { ScreenHeader } from "@/components/auth";
 import colors from "@/hooks/colors";
 import { useProfile } from "@/hooks/useProfile";
 
+const formatDate = (dateStr?: string | null) => {
+  if (!dateStr) return "-";
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+};
+
+const formatCurrency = (amount?: number | null) => {
+  if (amount == null) return "-";
+  return `₦${amount.toLocaleString()}`;
+};
+
 export default function SummaryScreen() {
   const { surrogateProfile, medicalProfile, fetchProfile, isLoading } =
     useProfile();
@@ -58,8 +77,11 @@ export default function SummaryScreen() {
     );
   };
 
-  const renderYesNo = (value?: boolean | null) =>
-    value === true ? "Yes" : value === false ? "No" : "-";
+  const renderYesNo = (value?: boolean | string | null) => {
+    if (value === true || value === "Yes") return "Yes";
+    if (value === false || value === "No") return "No";
+    return "-";
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff", padding: 20 }}>
@@ -67,6 +89,22 @@ export default function SummaryScreen() {
 
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <YStack gap="$6">
+          {/* Personal Information */}
+          <YStack gap="$2">
+            <Text fontSize={18} fontWeight="700" color={colors.primary}>
+              Personal Information
+            </Text>
+
+            {renderField("First Name", profile?.firstName)}
+            {renderField("Last Name", profile?.lastName)}
+            {renderField("Username", profile?.userName)}
+            {renderField("Date of Birth", formatDate(profile?.dateOfBirth))}
+            {renderField("Marital Status", profile?.maritalStatus)}
+            {renderField("Height (cm)", profile?.height)}
+            {renderField("Weight (kg)", profile?.weight)}
+            {renderField("Country of Origin", profile?.countryOfOrigin)}
+          </YStack>
+
           {/* Contact Information */}
           <YStack gap="$2">
             <Text fontSize={18} fontWeight="700" color={colors.primary}>
@@ -87,6 +125,23 @@ export default function SummaryScreen() {
             )}
           </YStack>
 
+          {/* Surrogacy Experience */}
+          <YStack gap="$2">
+            <Text fontSize={18} fontWeight="700" color={colors.primary}>
+              Surrogacy Experience
+            </Text>
+
+            {renderField("Has Been Surrogate", renderYesNo(profile?.hasBeenSurrogate))}
+            {renderField("Previous Pregnancy Type", profile?.previousPregnancyType)}
+            {renderField("Number of Babies Carried", profile?.numberOfBabiesCarried)}
+            {renderField("Experience Level", profile?.experienceLevel)}
+            {renderField("Compensation Amount", formatCurrency(profile?.compensationAmount))}
+            {renderField("Compensation Negotiable", renderYesNo(profile?.compensationNegotiable))}
+            {renderField("Experience Notes", profile?.experienceNotes)}
+            {renderField("Enjoyment Notes", profile?.enjoymentNotes)}
+            {renderField("Number of Children", profile?.numberOfChildren)}
+          </YStack>
+
           {/* Medical Details */}
           <YStack gap="$2">
             <Text fontSize={18} fontWeight="700" color={colors.primary}>
@@ -95,27 +150,22 @@ export default function SummaryScreen() {
 
             {renderField("Genotype", medical?.genotype)}
             {renderField("Blood Group", medical?.bloodGroup)}
-            {renderField("Ever Pregnant", renderYesNo(medical?.pregnancyExperience))}
-            {renderField("Number of Children", medical?.numberOfChildren)}
-            {renderField("Caesarean Section", renderYesNo(medical?.ceasareanSection))}
+            {renderField("Pregnant", renderYesNo(medical?.pregnant))}
+            {renderField("Number of Children", medical?.children)}
+            {renderField("Caesarean Section", renderYesNo(medical?.caesarean))}
             {renderField("Number of Cs", medical?.numberOfCs)}
+            {renderField("Has Chronic Illness", renderYesNo(medical?.hasChronicIllness))}
             {renderField("Chronic Illnesses", medical?.chronicIllnesses)}
-            {renderField(
-              "Pregnancy Complications",
-              medical?.pregnancyComplicationsDetails
-            )}
+            {renderField("Other Chronic Illness", medical?.otherChronicIllness)}
             {renderField("Has Allergies", renderYesNo(medical?.hasAllergies))}
             {renderField("Allergies", medical?.allergies)}
-            {renderField("Has Chronic Illness", renderYesNo(medical?.hasChronicIllness))}
-            {renderField("Chronic Illness", medical?.chronicIllnesses)}
-            {renderField("Other Chronic Illness", medical?.otherChronicIllness)}
             {renderField("Takes Medication", renderYesNo(medical?.takesMedication))}
             {renderField("Medications", medical?.medications)}
             {renderField("Had Surgeries", renderYesNo(medical?.hadSurgery))}
             {renderField("Surgeries", medical?.surgeries)}
             {renderField("Has Disability", renderYesNo(medical?.hasDisability))}
             {renderField("Disabilities", medical?.disabilities)}
-            {renderField("Has Miscarriages", renderYesNo(medical?.hadMiscarriage))}
+            {renderField("Had Miscarriage", renderYesNo(medical?.hadMiscarriage))}
             {renderField("Number of Miscarriages", medical?.numberOfMiscarriages)}
 
             {/* Endometrium Upload */}

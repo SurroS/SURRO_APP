@@ -134,7 +134,7 @@ export default function GetStartedScreen() {
 
       <PrimaryButton
         title="Find a Surrogate "
-        onPress={() => router.push("/(tabs)/home/surrogate/surrogateList")}
+        onPress={() => router.push("/surrogate/surrogateList")}
       />
     </>
   );

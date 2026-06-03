@@ -4,9 +4,12 @@ import {
   createAgentProfile,
   updateAgentProfile,
 } from "@/services/profileApi";
+import { useAuthStore } from "@/store/auth";
+
+let cachedAgentProfile: any = null;
 
 export const useAgentProfile = () => {
-  const [agentProfile, setAgentProfile] = useState<any>(null);
+  const [agentProfile, setAgentProfile] = useState<any>(cachedAgentProfile);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,6 +17,20 @@ export const useAgentProfile = () => {
   // FETCH PROFILE
   // -------------------------
   const fetchProfile = useCallback(async () => {
+    if (cachedAgentProfile) {
+      // Stale-while-revalidate: show cached immediately, refresh silently
+      setAgentProfile(cachedAgentProfile);
+      try {
+        const res = await getAgentProfile();
+        const profile = res?.profile || res;
+        cachedAgentProfile = profile;
+        setAgentProfile(profile);
+      } catch (_) {
+        // Keep stale data on background refresh failure
+      }
+      return cachedAgentProfile;
+    }
+
     console.log("[AgentProfile] Fetching profile from API...");
     setIsLoading(true);
     setError(null);
@@ -22,14 +39,22 @@ export const useAgentProfile = () => {
       const res = await getAgentProfile();
       console.log("[AgentProfile] API response:", JSON.stringify(res).slice(0, 400));
       const profile = res?.profile || res;
+      cachedAgentProfile = profile;
       setAgentProfile(profile);
       console.log("[AgentProfile] Profile loaded:", profile ? "YES" : "NO");
+      if (profile?.profilePicture) {
+        useAuthStore.getState().setUser({
+          avatar: profile.profilePicture,
+          profilePictureUrl: profile.profilePicture,
+        });
+      }
       return profile;
     } catch (err: any) {
       const serverMsg = err?.response?.data?.message || err.message;
       console.error("[AgentProfile] Fetch error:", serverMsg);
 
       if (err?.response?.status === 404) {
+        cachedAgentProfile = null;
         setAgentProfile(null);
         setError(null);
       } else {
@@ -52,7 +77,8 @@ export const useAgentProfile = () => {
     try {
       const res = await createAgentProfile(data);
       console.log("[AgentProfile] Create success:", JSON.stringify(res).slice(0, 200));
-      setAgentProfile(res?.profile || res);
+      cachedAgentProfile = res?.profile || res;
+      setAgentProfile(cachedAgentProfile);
       return res;
     } catch (err: any) {
       const serverMsg = err?.response?.data?.message || err.message;

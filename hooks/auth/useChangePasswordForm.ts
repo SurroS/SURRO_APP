@@ -9,7 +9,6 @@ export interface PasswordRule {
 
 const useChangePasswordForm = () => {
   const [formData, setFormData] = useState<ChangePasswordRequest>({
-    currentPassword:"",
     newPassword: "", 
     newPasswordConfirmation:""
   });
@@ -25,7 +24,6 @@ const useChangePasswordForm = () => {
 
   const updateField = (field: keyof ChangePasswordRequest, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
@@ -34,9 +32,6 @@ const useChangePasswordForm = () => {
   const validateForm = (): boolean => {
     const newErrors: Partial<ChangePasswordRequest> = {};
 
-    if (!formData.currentPassword.trim()) {
-      newErrors.currentPassword = "Current password is required";
-    }
     if (!formData.newPassword.trim()) {
       newErrors.newPassword = "New password is required";
     } else if (!passwordRules.every((r) => r.met)) {
@@ -55,7 +50,6 @@ const useChangePasswordForm = () => {
 
   const resetForm = () => {
     setFormData({ 
-      currentPassword: "",
       newPassword: "",
       newPasswordConfirmation: "",
     });

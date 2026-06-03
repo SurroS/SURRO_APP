@@ -13,6 +13,7 @@ import { Platform } from "react-native";
 import { initSystemNotifications } from "@/store/notifications/notificationService";
 import { checkInactivity } from "@/store/notifications/inactivityService";
 import { useAppActivity } from "@/hooks/useAppActivity";
+import SessionGate from "@/components/SessionGate";
 
 export default function RootLayout() {
   useAppActivity();
@@ -45,7 +46,9 @@ export default function RootLayout() {
           config={config}
           defaultTheme={colorScheme === "dark" ? "dark" : "light"}
         >
-          <Stack screenOptions={{ headerShown: false }} />
+          <SessionGate>
+            <Stack screenOptions={{ headerShown: false }} />
+          </SessionGate>
           <StatusBar style="auto" />
           <ToastManager
             config={toastConfig}

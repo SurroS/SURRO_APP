@@ -1,12 +1,16 @@
 import React, { useRef, useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, TouchableOpacity, View, Image, Alert } from "react-native";
+import { StyleSheet, TouchableOpacity, View, Alert, Dimensions } from "react-native";
 import { YStack, Text } from "tamagui";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { router, useLocalSearchParams } from "expo-router";
 import colors from "@/hooks/colors";
-import { ScreenHeader, PrimaryButton } from "@/components/auth";
+import { ScreenHeader } from "@/components/auth";
 import { Ionicons } from "@expo/vector-icons";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const FRAME_WIDTH = SCREEN_WIDTH * 0.72;
+const FRAME_RATIO = 1.586;
 
 export default function KYCUploadScreen() {
   const params = useLocalSearchParams<Record<string, string>>();
@@ -30,9 +34,8 @@ export default function KYCUploadScreen() {
       if (step === "front") {
         setCapturedFront(photo.uri);
         if (idType === "passport") {
-          // Passport only has one side
           router.push({
-pathname: "/kyc/preview",
+            pathname: "/kyc/preview",
             params: { idType, frontUri: photo.uri },
           });
         } else {
@@ -60,11 +63,11 @@ pathname: "/kyc/preview",
   }
 
   const readableId =
-    idType === "national_id"
-      ? "National ID Card"
-      : idType === "drivers_license"
-      ? "Driver’s License"
-      : "Passport";
+    idType === "national_id" ? "National ID Card"
+    : idType === "drivers_license" ? "Driver’s License"
+    : "Passport";
+
+  const isPassport = idType === "passport";
 
   return (
     <SafeAreaView style={styles.container}>
@@ -72,45 +75,188 @@ pathname: "/kyc/preview",
         <ScreenHeader title="KYC" onBackPress={() => router.back()} />
       </YStack>
 
-      <YStack flex={1} paddingHorizontal={20} paddingTop={20}>
+      <YStack flex={1} paddingHorizontal={20} paddingTop={16}>
+        {/* Step indicator */}
+        {!isPassport && (
+          <View style={styles.stepRow}>
+            {["front", "back"].map((s, i) => (
+              <React.Fragment key={s}>
+                <View style={[
+                  styles.dot,
+                  (step === s || (step === "back" && i === 0)) && styles.dotActive,
+                ]} />
+                {i === 0 && (
+                  <View style={[styles.line, step === "back" && styles.lineActive]} />
+                )}
+              </React.Fragment>
+            ))}
+          </View>
+        )}
+
         <Text style={styles.title}>
-          {step === "front"
-            ? `Capture the FRONT of your ${readableId}`
-            : `Capture the BACK of your ${readableId}`}
+          {isPassport
+            ? "Capture your passport"
+            : step === "front"
+            ? `Front side of your ${readableId}`
+            : `Back side of your ${readableId}`}
         </Text>
 
+        {/* Camera */}
         <View style={styles.cameraBox}>
-          <CameraView ref={cameraRef} style={styles.camera} />
+          <CameraView ref={cameraRef} style={styles.camera} facing="back" />
+          <View style={styles.overlay} pointerEvents="none">
+            <View style={styles.frameArea}>
+              <View style={[styles.corner, styles.cornerTL]} />
+              <View style={[styles.corner, styles.cornerTR]} />
+              <View style={[styles.corner, styles.cornerBL]} />
+              <View style={[styles.corner, styles.cornerBR]} />
+            </View>
+          </View>
+          <Text style={styles.guideText}>
+            Position your ID within the frame
+          </Text>
         </View>
 
-        <PrimaryButton
-          title={`Capture ${step === "front" ? "Front" : "Back"}`}
-          onPress={handleCapture}
-          icon={<Ionicons name="camera" size={20} color="#fff" />}
-        />
+        <View style={styles.bottomArea}>
+          <TouchableOpacity style={styles.captureBtn} onPress={handleCapture}>
+            <Ionicons name="camera" size={28} color={colors.white} />
+          </TouchableOpacity>
+        </View>
       </YStack>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({ 
-  container: { flex: 1, backgroundColor: "#fff" },
-  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-  title: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: colors.primary,
-    textAlign: "center",
+const CORNER = 20;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.white,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.white,
+  },
+
+  stepRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 14,
   },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.border,
+  },
+  dotActive: {
+    backgroundColor: colors.primary,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  line: {
+    width: 48,
+    height: 2,
+    backgroundColor: colors.border,
+    marginHorizontal: 6,
+  },
+  lineActive: {
+    backgroundColor: colors.primary,
+  },
+
+  title: {
+    fontSize: 17,
+    fontWeight: "600",
+    color: colors.primary,
+    textAlign: "center",
+    marginBottom: 16,
+  },
+
   cameraBox: {
-    width: "100%",
-    height: 300,
+    flex: 1,
     borderRadius: 16,
     overflow: "hidden",
-    backgroundColor: "#eee",
-    marginBottom: 20,
+    backgroundColor: colors.black,
+    marginBottom: 24,
+    position: "relative",
   },
-  camera: { flex: 1 },
+  camera: {
+    flex: 1,
+  },
+
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  frameArea: {
+    width: FRAME_WIDTH,
+    height: FRAME_WIDTH / FRAME_RATIO,
+    position: "relative",
+  },
+  corner: {
+    position: "absolute",
+    width: CORNER,
+    height: CORNER,
+    borderColor: colors.white,
+  },
+  cornerTL: {
+    top: 0,
+    left: 0,
+    borderTopWidth: 3,
+    borderLeftWidth: 3,
+    borderTopLeftRadius: 4,
+  },
+  cornerTR: {
+    top: 0,
+    right: 0,
+    borderTopWidth: 3,
+    borderRightWidth: 3,
+    borderTopRightRadius: 4,
+  },
+  cornerBL: {
+    bottom: 0,
+    left: 0,
+    borderBottomWidth: 3,
+    borderLeftWidth: 3,
+    borderBottomLeftRadius: 4,
+  },
+  cornerBR: {
+    bottom: 0,
+    right: 0,
+    borderBottomWidth: 3,
+    borderRightWidth: 3,
+    borderBottomRightRadius: 4,
+  },
+
+  guideText: {
+    position: "absolute",
+    bottom: 14,
+    alignSelf: "center",
+    color: "rgba(255,255,255,0.85)",
+    fontSize: 12,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 4,
+    overflow: "hidden",
+  },
+
+  bottomArea: {
+    alignItems: "center",
+    paddingVertical: 16,
+  },
+  captureBtn: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 });
-    

@@ -40,7 +40,7 @@ export default function EditBioView() {
   const [refreshing, setRefreshing] = useState(false);
   const [initialFetchDone, setInitialFetchDone] = useState(false);
 
-  const { logout, user } = useAuth();
+  const { logout, user, setUser } = useAuth();
   const Role = user?.role?.trim();
 
   // -------------------------------
@@ -204,6 +204,7 @@ export default function EditBioView() {
         if (avatarUrl) {
           await updateCurrentProfile({ profilePicture: avatarUrl });
           setProfileImage(avatarUrl);
+          setUser({ avatar: avatarUrl, profilePictureUrl: avatarUrl });
         }
         await fetchCurrentProfile(true);
         setIsLoading(false);

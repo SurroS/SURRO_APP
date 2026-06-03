@@ -2,27 +2,35 @@ import { useAuth } from '@/hooks/useAuth';
 import { RegisterCredentials } from '@/types/auth';
 import { useState } from 'react';
 
+interface SignupFormErrors {
+  email?: string;
+  password?: string;
+  passwordConfirmation?: string;
+  role?: string;
+  termsAccepted?: string;
+}
+
 export const useSignupForm = () => {
     const { user, referralCode } = useAuth();
     const [signupFormData, setFormData] = useState<RegisterCredentials>({
         email: '',
         password: '',
         passwordConfirmation: '',
-        role: user?.role || 'SURROGATE', // Use role from auth store
-        referralCode: referralCode || '', // Use referral code from auth store
+        role: user?.role || 'SURROGATE',
+        referralCode: referralCode || '',
+        termsAccepted: false,
     });
-    const [errors, setErrors] = useState<Partial<RegisterCredentials>>({});
+    const [errors, setErrors] = useState<SignupFormErrors>({});
 
-    const updateField = (field: keyof RegisterCredentials, value: string) => {
+    const updateField = (field: keyof RegisterCredentials, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
-        // Clear error when user starts typing
-        if (errors[field]) {
+        if (errors[field as keyof SignupFormErrors]) {
             setErrors(prev => ({ ...prev, [field]: undefined }));
         }
     };
 
     const validateForm = (): boolean => {
-        const newErrors: Partial<RegisterCredentials> = {};
+        const newErrors: SignupFormErrors = {};
 
         if (!signupFormData.email.trim()) {
             newErrors.email = 'Email is required';
@@ -46,6 +54,10 @@ export const useSignupForm = () => {
             newErrors.role = 'Role is required';
         }
 
+        if (!signupFormData.termsAccepted) {
+            newErrors.termsAccepted = 'You must agree to the Terms of Service';
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -57,6 +69,7 @@ export const useSignupForm = () => {
             passwordConfirmation: '',
             role: user?.role || 'SURROGATE',
             referralCode: referralCode || '',
+            termsAccepted: false,
         });
         setErrors({});
     };

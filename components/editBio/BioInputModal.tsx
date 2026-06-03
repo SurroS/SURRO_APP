@@ -1,20 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
+  ScrollView,
   TouchableOpacity,
   TextInput,
   StyleSheet,
   TouchableWithoutFeedback,
   Keyboard,
-  ScrollView,
-  Platform,
-  Animated,
-  EmitterSubscription,
   ActivityIndicator,
 } from "react-native";
 import { YStack, XStack, Text, Button } from "tamagui";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import colors from "@/hooks/colors";
 import PlatformInput from "./SocialSelector";
@@ -49,104 +45,74 @@ export default function EditProfileModal({
   profile,
   isLoading = false,
 }: EditProfileModalProps) {
+  const insets = useSafeAreaInsets();
+  const scrollRef = useRef<ScrollView>(null);
   const [username, setUsername] = useState("");
   const [about, setAbout] = useState("");
   const [socials, setSocials] = useState<Social[]>([]);
-
+  const [aboutInputHeight, setAboutInputHeight] = useState(80);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [aboutInputHeight, setAboutInputHeight] = useState(44);
-  const anim = useRef(new Animated.Value(0)).current;
+  const aboutY = useRef(0);
+  const socialsY = useRef(0);
 
-  /* ---------- Populate from API ---------- */
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", (e) =>
+      setKeyboardHeight(e.endCoordinates.height)
+    );
+    const hideSub = Keyboard.addListener("keyboardDidHide", () =>
+      setKeyboardHeight(0)
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
   useEffect(() => {
     if (!visible) return;
-
     setUsername(profile?.userName || "");
     setAbout(profile?.aboutMe || "");
     setSocials(profile?.socials || []);
   }, [visible]);
 
-  /* ---------- Keyboard ---------- */
-  useEffect(() => {
-    let showSub: EmitterSubscription;
-    let hideSub: EmitterSubscription;
-
-    const onShow = (e: any) => {
-      const h = e.endCoordinates?.height ?? 0;
-      setKeyboardHeight(h);
-      Animated.timing(anim, {
-        toValue: h * 0.5,
-        duration: 200,
-        useNativeDriver: true,
-      }).start();
-    };
-
-    const onHide = () => {
-      setKeyboardHeight(0);
-      Animated.timing(anim, {
-        toValue: 0,
-        duration: 180,
-        useNativeDriver: true,
-      }).start();
-    };
-
-    if (Platform.OS === "ios") {
-      showSub = Keyboard.addListener("keyboardWillShow", onShow);
-      hideSub = Keyboard.addListener("keyboardWillHide", onHide);
-    } else {
-      showSub = Keyboard.addListener("keyboardDidShow", onShow);
-      hideSub = Keyboard.addListener("keyboardDidHide", onHide);
-    }
-
-    return () => {
-      showSub?.remove();
-      hideSub?.remove();
-    };
-  }, [anim]);
-
-  /* ---------- Add / Update Social ---------- */
   const handleAddSocial = (platform: string, handle: string) => {
     setSocials((prev) => {
       const exists = prev.find((s) => s.platform === platform);
       if (exists) {
         return prev.map((s) =>
-          s.platform === platform ? { platform, handle } : s
+          s.platform === platform ? { platform, handle } : s,
         );
       }
       return [...prev, { platform, handle }];
     });
   };
 
-  /* ---------- Remove Social ---------- */
-  const handleRemoveSocial = (platform: string) => {
-    if (isLoading) return;
-    setSocials((prev) => prev.filter((s) => s.platform !== platform));
-  };
+  const [usernameError, setUsernameError] = useState("");
 
-  /* ---------- Save ---------- */
   const handleSave = async () => {
     if (isLoading) return;
-
+    const trimmed = username.trim();
+    if (!/\d/.test(trimmed) || !/[^a-zA-Z0-9\s]/.test(trimmed)) {
+      setUsernameError("Username must include at least one number and one special character");
+      return;
+    }
+    setUsernameError("");
     await onSave({
-      userName: username.trim(),
+      userName: trimmed,
       aboutMe: about.trim(),
-      socials: socials.filter(
-        (s) => s.handle && s.handle.trim().length > 0
-      ),
+      socials: socials.filter((s) => s.handle && s.handle.trim().length > 0),
     });
-
     Toast.show({
       text1: "Bio updated successfully",
       type: "customSuccess" as ToastType,
     });
-
     onClose();
   };
 
   if (!visible) return null;
 
   return (
-    <SafeAreaView style={styles.full}>
+    <View style={[styles.full, { paddingBottom: insets.bottom || 16 }]}>
       <TouchableWithoutFeedback
         disabled={isLoading}
         onPress={() => {
@@ -156,106 +122,97 @@ export default function EditProfileModal({
       >
         <View style={styles.backdrop} />
       </TouchableWithoutFeedback>
-
-      <Animated.View
-        style={[styles.sheetWrapper, { transform: [{ translateY: anim }] }]}
-      >
+      <View style={styles.sheetWrapper}>
         <View style={styles.sheet}>
-          {/* Header */}
-          <XStack justifyContent="space-between" alignItems="center">
-            <Text  color={colors.text} fontSize={18} fontWeight="700">
+          <XStack
+            justifyContent="space-between"
+            alignItems="center"
+            paddingHorizontal={20}
+            paddingTop={20}
+          >
+            <Text color={colors.text} fontSize={18} fontWeight="700">
               Edit Bio
             </Text>
             <TouchableOpacity disabled={isLoading} onPress={onClose}>
               <Text color={isLoading ? "#999" : colors.primary}>Close</Text>
             </TouchableOpacity>
           </XStack>
-
           <ScrollView
-            keyboardShouldPersistTaps="handled"
+            ref={scrollRef}
             contentContainerStyle={{
-              paddingBottom: Math.max(24, keyboardHeight + 24),
+              paddingHorizontal: 20,
+              paddingBottom: keyboardHeight + 20,
             }}
+            keyboardShouldPersistTaps="handled"
           >
-            {/* Username */}
-            <YStack marginTop={16}>
-              <Text color={colors.text} fontWeight="600">Username</Text>
-              <TextInput 
+            <YStack
+              marginTop={16}
+              onLayout={(e) => { aboutY.current = e.nativeEvent.layout.y; }}
+            >
+              <Text color={colors.text} fontWeight="600">
+                Username
+              </Text>
+              <TextInput
                 value={username}
                 editable={!isLoading}
-                onChangeText={setUsername}
+                onChangeText={(t) => { setUsername(t); setUsernameError(""); }}
+                placeholder="no real names hear"
+                placeholderTextColor="#999"
                 style={styles.input}
+                onFocus={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
               />
+              {usernameError ? (
+                <Text fontSize={12} color={colors.danger} marginTop={4}>
+                  {usernameError}
+                </Text>
+              ) : null}
             </YStack>
-
-            {/* About */}
             <YStack marginTop={16}>
-              <Text color={colors.text} fontWeight="600">About</Text>
+              <Text color={colors.text} fontWeight="600">
+                About
+              </Text>
               <TextInput
                 multiline
                 editable={!isLoading}
                 value={about}
                 onChangeText={(t) => t.length <= 300 && setAbout(t)}
+                placeholder="tell us why you need this, no one else can see this."
+                placeholderTextColor="#999"
                 onContentSizeChange={(e) =>
                   setAboutInputHeight(
-                    Math.min(Math.max(44, e.nativeEvent.contentSize.height), 200)
+                    Math.min(Math.max(80, e.nativeEvent.contentSize.height), 200),
                   )
                 }
                 style={[
                   styles.input,
                   { height: aboutInputHeight, paddingVertical: 10 },
                 ]}
+                onFocus={() => scrollRef.current?.scrollTo({ y: aboutY.current, animated: true })}
               />
               <Text alignSelf="flex-end" fontSize={12}>
                 {about.length}/300
               </Text>
             </YStack>
-
-            {/* Existing Socials */}
-            {socials.length > 0 && (
-              <YStack marginTop={18}>
-                <Text color={colors.text} fontWeight="600" marginBottom={8}>
-                  Your Socials
-                </Text>
-
-                {socials.map((social) => (
-                  <XStack
-                    key={social.platform}
-                    alignItems="center"
-                    justifyContent="space-between"
-                    style={styles.socialRow}
-                  >
-                    <Text color={colors.text}>
-                      {social.platform}: @{social.handle}
-                    </Text>
-
-                    <TouchableOpacity
-                      disabled={isLoading}
-                      onPress={() => handleRemoveSocial(social.platform)}
-                    >
-                      <Ionicons
-                        name="trash-outline"
-                        size={18}
-                        color={isLoading ? "#ccc" : colors.danger}
-                      />
-                    </TouchableOpacity>
-                  </XStack>
-                ))}
-              </YStack>
-            )}
-
-            {/* Add / Update Social */}
             <YStack marginTop={16}>
+              <Text color={colors.text} fontWeight="600" marginBottom={4}>
+                Socials
+              </Text>
+              <Text fontSize={14} color={colors.textSecondary ?? "#555"} marginBottom={12}>
+                Socials will help us verify your identity, no one else will see this.
+              </Text>
+              <YStack
+                onLayout={(e) => { socialsY.current = e.nativeEvent.layout.y; }}
+              >
               <Text fontWeight="600" marginBottom={8}>
                 Add Social
               </Text>
               <PlatformInput
                 onAdd={handleAddSocial}
                 disabled={isLoading}
+                onInputFocus={() => scrollRef.current?.scrollTo({ y: socialsY.current, animated: true })}
               />
             </YStack>
-
-            {/* Save */}
+            </YStack>
             <Button
               height={50}
               marginTop={20}
@@ -273,8 +230,8 @@ export default function EditProfileModal({
             </Button>
           </ScrollView>
         </View>
-      </Animated.View>
-    </SafeAreaView>
+      </View>
+    </View>
   );
 }
 
@@ -298,19 +255,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    padding: 20,
-    maxHeight: "97%",
+    maxHeight: "90%",
+    minHeight: 200,
   },
   input: {
     backgroundColor: "#F8F8FA",
     borderRadius: 8,
     paddingHorizontal: 10,
     height: 44,
-    color: "$color"
-  },
-  textArea: {
-    height: 120,
-    paddingVertical: 10,
+    color: "#000",
   },
   socialRow: {
     backgroundColor: "#F6F6F8",

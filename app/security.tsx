@@ -1,5 +1,7 @@
-import { StyleSheet, TextInput, ActivityIndicator } from "react-native";
+import { StyleSheet, TextInput, ActivityIndicator, View, TouchableOpacity } from "react-native";
+import { useState } from "react";
 import { YStack, XStack, Text } from "tamagui";
+import { Ionicons } from "@expo/vector-icons";
 import usechangePasswordForm from "@/hooks/auth/useChangePasswordForm";
 import { PrimaryButton } from "@/components/auth";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,6 +17,9 @@ export default function ChangePasswordScreen() {
   const { formData, errors, passwordRules, updateField, validateForm, resetForm } =
     usechangePasswordForm();
   const { changePassword, isLoading } = useAuth();
+
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async () => {
     if (!validateForm()) {
@@ -49,28 +54,29 @@ export default function ChangePasswordScreen() {
     <KeyboardAvoidingWrapper>
       <SafeAreaView style={styles.container}>
         <ScreenHeader
-          title="Privacy and security"
+          title="Change Password"
           onBackPress={() => router.back()}
         />
         <YStack>
-        <Text style={styles.label}>Current Password</Text>
-        <TextInput
-          secureTextEntry
-          style={styles.input}
-          value={formData.currentPassword}
-          onChangeText={(text) => updateField("currentPassword", text)}
-        />
-        {errors.currentPassword && (
-          <Text style={styles.error}>{errors.currentPassword}</Text>
-        )}
-
         <Text style={styles.label}>New Password</Text>
-        <TextInput
-          secureTextEntry
-          style={styles.input}
-          value={formData.newPassword}
-          onChangeText={(text) => updateField("newPassword", text)}
-        />
+        <View style={styles.inputWrapper}>
+          <TextInput
+            secureTextEntry={!showNewPassword}
+            style={styles.input}
+            value={formData.newPassword}
+            onChangeText={(text) => updateField("newPassword", text)}
+          />
+          <TouchableOpacity
+            style={styles.eyeButton}
+            onPress={() => setShowNewPassword(!showNewPassword)}
+          >
+            <Ionicons
+              name={showNewPassword ? "eye-off-outline" : "eye-outline"}
+              size={20}
+              color="#888"
+            />
+          </TouchableOpacity>
+        </View>
         {errors.newPassword && (
           <Text style={styles.error}>{errors.newPassword}</Text>
         )}
@@ -96,12 +102,24 @@ export default function ChangePasswordScreen() {
         </YStack>
 
         <Text style={styles.label}>Confirm New Password</Text>
-        <TextInput
-          secureTextEntry
-          style={styles.input}
-          value={formData.newPasswordConfirmation}
-          onChangeText={(text) => updateField("newPasswordConfirmation", text)}
-        />
+        <View style={styles.inputWrapper}>
+          <TextInput
+            secureTextEntry={!showConfirmPassword}
+            style={styles.input}
+            value={formData.newPasswordConfirmation}
+            onChangeText={(text) => updateField("newPasswordConfirmation", text)}
+          />
+          <TouchableOpacity
+            style={styles.eyeButton}
+            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+          >
+            <Ionicons
+              name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
+              size={20}
+              color="#888"
+            />
+          </TouchableOpacity>
+        </View>
         {errors.newPasswordConfirmation && (
           <Text style={styles.error}>{errors.newPasswordConfirmation}</Text>
         )}
@@ -133,8 +151,21 @@ const styles = StyleSheet.create({
     borderColor: colors.gray,
     borderRadius: 8,
     padding: 10,
+    paddingRight: 40,
     marginBottom: 10,
     color: colors.text,
+    flex: 1,
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    position: "relative",
+  },
+  eyeButton: {
+    position: "absolute",
+    right: 10,
+    height: "100%",
+    justifyContent: "center",
   },
   error: {
     color: "red",
