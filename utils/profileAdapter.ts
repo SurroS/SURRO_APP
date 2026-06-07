@@ -73,5 +73,36 @@ export const uiProfileToAgent = (u: UIProfile) => ({
 });
 
 /* ---------------- PARENT ---------------- */
-export const parentToUIProfile = agentToUIProfile;
-export const uiProfileToParent = uiProfileToAgent;
+export const parentToUIProfile = (p: any): UIProfile => {
+  if (!p) return {
+    isAvailable: false,
+    profilePicture: "",
+    userName: "",
+    aboutMe: "",
+    socials: [],
+  };
+
+  return {
+    isAvailable: p.isAvailable,
+    profilePicture: p.profilePicture,
+    userName: p.userName || "",
+    aboutMe: p.about,
+    socials: [
+      { platform: "Facebook", handle: p.facebookProfile },
+      { platform: "Instagram", handle: p.instagramProfile },
+      { platform: "X", handle: p.twitterProfile },
+      { platform: "TikTok", handle: p.tiktokProfile },
+    ].filter((s) => s.handle),
+  };
+};
+
+export const uiProfileToParent = (u: UIProfile) => ({
+  isAvailable: u?.isAvailable,
+  profilePicture: u.profilePicture,
+  userName: u.userName,
+  about: u.aboutMe,
+  facebookProfile: u.socials?.find((s) => s.platform === "Facebook")?.handle,
+  instagramProfile: u.socials?.find((s) => s.platform === "Instagram")?.handle,
+  twitterProfile: u.socials?.find((s) => s.platform === "X")?.handle,
+  tiktokProfile: u.socials?.find((s) => s.platform === "TikTok")?.handle,
+});

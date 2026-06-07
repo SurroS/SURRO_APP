@@ -180,6 +180,8 @@ export default function PersonalInformationScreen() {
         await updateProfile(profileData);
       } else if (Role === "INTENDED_PARENT") {
         const profileData: any = {
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
           fullName: `${firstName.trim()} ${lastName.trim()}`.trim(),
           countryOfResidence: country.name,
           dateOfBirth: dob,

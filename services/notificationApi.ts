@@ -22,6 +22,39 @@ export const updateReminderSettings = async (
   return response?.data ?? response ?? {};
 };
 
+export interface NotificationPreferences {
+  emailNotification: boolean;
+  smsNotification: boolean;
+  pushNotification: boolean;
+  emailPromotions: boolean;
+  smsPromotions: boolean;
+  pushNotificationPromotions: boolean;
+}
+
+export const getNotificationPreferences = async (): Promise<NotificationPreferences> => {
+  console.log("[Notif] getNotificationPreferences: fetching...");
+  const response = await authenticatedGet("/notifications/preferences/me");
+  console.log("[Notif] getNotificationPreferences: response =", JSON.stringify(response).slice(0, 300));
+  const data = response?.data ?? response ?? {};
+  return {
+    emailNotification: data.emailNotification ?? true,
+    smsNotification: data.smsNotification ?? true,
+    pushNotification: data.pushNotification ?? true,
+    emailPromotions: data.emailPromotions ?? true,
+    smsPromotions: data.smsPromotions ?? true,
+    pushNotificationPromotions: data.pushNotificationPromotions ?? true,
+  };
+};
+
+export const updateNotificationPreferences = async (
+  data: Partial<NotificationPreferences>,
+): Promise<NotificationPreferences> => {
+  console.log("[Notif] updateNotificationPreferences:", JSON.stringify(data));
+  const response = await authenticatedPatch("/notifications/preferences/me", data);
+  console.log("[Notif] updateNotificationPreferences: response =", JSON.stringify(response).slice(0, 200));
+  return response?.data ?? response ?? {};
+};
+
 export interface BackendNotification {
   id: string;
   userId: string;

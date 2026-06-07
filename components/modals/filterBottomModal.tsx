@@ -1,363 +1,398 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import {
   Modal,
   TouchableOpacity,
   ScrollView,
   Text,
   View,
+  TextInput,
   ActivityIndicator,
 } from "react-native";
 import { Button, YStack, XStack } from "tamagui";
-import { getAllCountries } from "@/utils/countries";
-import { useAuth } from "@/hooks/useAuth";
-import { useParentProfile } from "@/hooks/profile/useParentProfile";
+import { getAllCountries, getCachedCountries } from "@/utils/countries";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-type FilterOptions = {
-  country?: string;
-  religion?: string;
-  race?: string;
-  pregnancyHistory?: string[];
-};
+type TabKey = "location" | "experience" | "genotype" | "bloodGroup" | "rating" | "specialization";
+
+export type FilterParam = {
+  type: TabKey;
+  value: string;
+} | null;
 
 type FilterModalProps = {
   visible: boolean;
   onClose: () => void;
-  onApply: (options: FilterOptions) => void;
+  onApply: (filter: FilterParam) => void;
+  role: "SURROGATE" | "AGENT";
+  items: any[];
 };
 
-const religionOptions = ["Christianity", "Islam", "Hinduism", "None", "Other"];
-const raceOptions = ["Black", "White", "Asian", "Hispanic/Latinx", "Other"];
-const pregnancyOptions = [
-  "Never pregnant",
-  "Previously pregnant",
-  "Currently pregnant",
-];
+const GENOTYPE_OPTIONS = ["AA", "AS", "SS", "AC"];
+const BLOOD_GROUP_OPTIONS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+const EXPERIENCE_OPTIONS = ["Rookie", "Experienced"];
+const RATING_OPTIONS = ["4.5+", "4.0+", "3.5+", "3.0+", "2.0+"];
+
+const DEBOUNCE_MS = 300;
+const useDebounce = () => {
+  const lastPress = useRef(0);
+  return useCallback((fn: () => void) => () => {
+    const now = Date.now();
+    if (now - lastPress.current < DEBOUNCE_MS) return;
+    lastPress.current = now;
+    fn();
+  }, []);
+};
 
 export default function FilterModal({
   visible,
   onClose,
   onApply,
+  role,
+  items = [],
 }: FilterModalProps) {
   const insets = useSafeAreaInsets();
-  const { user } = useAuth();
-  const { updateMatchPreference } = useParentProfile();
-  const [countries, setCountries] = useState<{ name: string }[]>([]);
-  const [loadingCountries, setLoadingCountries] = useState<boolean>(true);
+  const [countries, setCountries] = useState<{ name: string }[]>(() => getCachedCountries() || []);
 
+  const [activeTab, setActiveTab] = useState<TabKey>("location");
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
-  const [selectedReligion, setSelectedReligion] = useState<string | null>(null);
-  const [selectedRace, setSelectedRace] = useState<string | null>(null);
-  const [selectedPregnancy, setSelectedPregnancy] = useState<string[]>([]);
+  const [selectedState, setSelectedState] = useState<string | null>(null);
+  const [selectedLga, setSelectedLga] = useState<string | null>(null);
+  const [selectedChip, setSelectedChip] = useState<string | null>(null);
+  const [countrySearch, setCountrySearch] = useState("");
+  const [stateSearch, setStateSearch] = useState("");
+  const [isApplying, setIsApplying] = useState(false);
+  const debounce = useDebounce();
 
   useEffect(() => {
-    let mounted = true;
-    setLoadingCountries(true);
-    getAllCountries()
-      .then((res) => {
-        if (mounted) {
-          setCountries(res);
-        }
-      })
-      .finally(() => mounted && setLoadingCountries(false));
-    return () => {
-      mounted = false;
-    };
+    if (!visible) return;
+    setActiveTab("location");
+    setSelectedCountry(null);
+    setSelectedState(null);
+    setSelectedLga(null);
+    setSelectedChip(null);
+    setCountrySearch("");
+    setStateSearch("");
+  }, [visible]);
+
+  useEffect(() => {
+    if (!getCachedCountries()) {
+      getAllCountries().then(setCountries);
+    }
   }, []);
 
-  const togglePregnancy = (option: string) => {
-    setSelectedPregnancy((prev) =>
-      prev.includes(option)
-        ? prev.filter((p) => p !== option)
-        : [...prev, option],
-    );
-  };
+  const filteredCountries = useMemo(() => {
+    if (!countrySearch) return countries;
+    return countries.filter((c) => c.name.toLowerCase().includes(countrySearch.toLowerCase()));
+  }, [countries, countrySearch]);
 
-  const resetFilters = () => {
-    setSelectedCountry(null);
-    setSelectedReligion(null);
-    setSelectedRace(null);
-    setSelectedPregnancy([]);
-  };
+  const filteredStates = useMemo(() => {
+    if (!stateSearch) return availableStates;
+    return availableStates.filter((s) => s.toLowerCase().includes(stateSearch.toLowerCase()));
+  }, [availableStates, stateSearch]);
 
-  const applyFilters = async () => {
-    const filterOptions = {
-      country: selectedCountry ?? undefined,
-      religion: selectedReligion ?? undefined,
-      race: selectedRace ?? undefined,
-      pregnancyHistory: selectedPregnancy,
-    };
-
-    // Save match preferences if user is a parent
-    const isParent = user?.role?.trim() === "INTENDED_PARENT";
-    if (isParent) {
-      try {
-        await updateMatchPreference(filterOptions);
-      } catch (error: any) {
-        // Silently fail - don't block filter application if save fails
-        console.log("Failed to save match preferences:", error?.message);
+  // Pre-compute country → states → lgas maps once from items
+  const countryStatesMap = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    const lgaMap = new Map<string, Set<string>>();
+    (items || []).forEach((item: any) => {
+      const c = (item.country || item.countryOfResidence || "").toLowerCase();
+      const s = item.stateOfResidence || item.state || "";
+      const l = item.lga || "";
+      if (c && s) {
+        if (!map.has(c)) map.set(c, new Set());
+        map.get(c)!.add(s);
       }
-    }
+      if (s && l) {
+        const key = s.toLowerCase();
+        if (!lgaMap.has(key)) lgaMap.set(key, new Set());
+        lgaMap.get(key)!.add(l);
+      }
+    });
+    return { countryStates: map, stateLgas: lgaMap };
+  }, [items]);
 
-    onApply(filterOptions);
-    onClose();
+  const availableStates = useMemo(() => {
+    if (!selectedCountry) return [];
+    const states = countryStatesMap.countryStates.get(selectedCountry.toLowerCase());
+    return states ? Array.from(states).sort() : [];
+  }, [selectedCountry, countryStatesMap]);
+
+  const availableLgas = useMemo(() => {
+    if (!selectedState) return [];
+    const lgas = countryStatesMap.stateLgas.get(selectedState.toLowerCase());
+    return lgas ? Array.from(lgas).sort() : [];
+  }, [selectedState, countryStatesMap]);
+
+  const surrogateTabs: { key: TabKey; label: string }[] = [
+    { key: "location", label: "Location" },
+    { key: "experience", label: "Experience" },
+    { key: "genotype", label: "Genotype" },
+    { key: "bloodGroup", label: "Blood" },
+  ];
+
+  const agentTabs: { key: TabKey; label: string }[] = [
+    { key: "location", label: "Location" },
+    { key: "rating", label: "Rating" },
+    { key: "specialization", label: "Specialization" },
+  ];
+
+  const tabs = role === "SURROGATE" ? surrogateTabs : agentTabs;
+
+  const handleTabPress = (key: TabKey) => {
+    setActiveTab(key);
+    setSelectedCountry(null);
+    setSelectedState(null);
+    setSelectedLga(null);
+    setSelectedChip(null);
   };
 
-  if (!visible) return null;
+  const handleApply = useCallback(async () => {
+    if (isApplying) return;
+    setIsApplying(true);
+    let filter: FilterParam = null;
+    switch (activeTab) {
+      case "location":
+        if (selectedLga) filter = { type: "lga", value: selectedLga };
+        else if (selectedState) filter = { type: "state", value: selectedState };
+        else if (selectedCountry) filter = { type: "country", value: selectedCountry };
+        break;
+      case "experience":
+        if (selectedChip) filter = { type: "experience", value: selectedChip };
+        break;
+      case "genotype":
+        if (selectedChip) filter = { type: "genotype", value: selectedChip };
+        break;
+      case "bloodGroup":
+        if (selectedChip) filter = { type: "bloodGroup", value: selectedChip };
+        break;
+      case "rating":
+        if (selectedChip) filter = { type: "rating", value: selectedChip };
+        break;
+      case "specialization":
+        if (selectedChip) filter = { type: "specialization", value: selectedChip };
+        break;
+    }
+    onApply(filter);
+    onClose();
+    setIsApplying(false);
+  }, [isApplying, activeTab, selectedCountry, selectedState, selectedLga, selectedChip, onApply, onClose]);
 
-  return (
-    <Modal
-      visible={visible}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={onClose}
-      presentationStyle="overFullScreen"
-      statusBarTranslucent
-    >
-      <TouchableOpacity
-        style={{
-          flex: 1,
-          backgroundColor: "rgba(0,0,0,0.35)",
-        }}
-        activeOpacity={1}
-        onPress={onClose}
-      />
-      <View
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: "60%",
-          paddingBottom: insets.bottom || 16,
-          backgroundColor: "#FFFFFF",
-          borderTopLeftRadius: 14,
-          borderTopRightRadius: 14,
-          overflow: "hidden",
-        }}
-      >
-        <View
-          style={{
-            width: 40,
-            height: 6,
-            backgroundColor: "#DDD",
-            borderRadius: 6,
-            alignSelf: "center",
-            marginVertical: 8,
-          }}
-        />
-        <ScrollView
-          style={{
-            paddingHorizontal: 20,
-            flex: 1,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 20,
-              fontWeight: "700",
-              marginBottom: 12,
-            }}
-          >
-            Filters
-          </Text>
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "location":
+        return (
+          <YStack gap={12}>
+            {/* Country */}
+            <Text style={styles.label}>Country</Text>
+            <>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search country..."
+                placeholderTextColor="#999"
+                value={countrySearch}
+                onChangeText={setCountrySearch}
+              />
+              <ScrollView style={{ maxHeight: 140 }} nestedScrollEnabled>
+                <TouchableOpacity style={styles.optionRow} onPress={debounce(() => { setSelectedCountry(null); setSelectedState(null); setSelectedLga(null); })}>
+                  <Text style={[styles.optionText, !selectedCountry && styles.optionActive]}>Any</Text>
+                </TouchableOpacity>
+                {filteredCountries.map((c) => (
+                  <TouchableOpacity
+                    key={c.name}
+                    style={styles.optionRow}
+                    onPress={debounce(() => { setSelectedCountry(c.name); setSelectedState(null); setSelectedLga(null); })}
+                  >
+                    <Text style={[styles.optionText, selectedCountry === c.name && styles.optionActive]}>{c.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </>
 
-          {/* Country Dropdown */}
-          <YStack marginBottom={16}>
-            <Text
-              style={{
-                fontSize: 14,
-                fontWeight: "600",
-                marginBottom: 8,
-              }}
-            >
-              Country of Residence
-            </Text>
-            {loadingCountries ? (
-              <ActivityIndicator />
-            ) : (
-              <TouchableOpacity
-                style={{
-                  borderWidth: 1,
-                  borderColor: "#EEE",
-                  borderRadius: 8,
-                  paddingHorizontal: 12,
-                  paddingVertical: 10,
-                }}
-                onPress={() => {
-                  // cycle through countries for simplicity; in real app, render Picker
-                  const currentIndex = countries.findIndex(
-                    (c) => c.name === selectedCountry,
-                  );
-                  const nextIndex = (currentIndex + 1) % countries.length;
-                  setSelectedCountry(countries[nextIndex].name);
-                }}
-              >
-                <Text>
-                  {selectedCountry ?? "Select country (tap to cycle example)"}
-                </Text>
-              </TouchableOpacity>
+            {/* State */}
+            {selectedCountry && (
+              <>
+                <Text style={styles.label}>State / Region</Text>
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search state..."
+                  placeholderTextColor="#999"
+                  value={stateSearch}
+                  onChangeText={setStateSearch}
+                />
+                <ScrollView style={{ maxHeight: 140 }} nestedScrollEnabled>
+                  <TouchableOpacity style={styles.optionRow} onPress={debounce(() => { setSelectedState(null); setSelectedLga(null); })}>
+                    <Text style={[styles.optionText, !selectedState && styles.optionActive]}>Any</Text>
+                  </TouchableOpacity>
+                  {filteredStates.map((s) => (
+                    <TouchableOpacity
+                      key={s}
+                      style={styles.optionRow}
+                      onPress={debounce(() => { setSelectedState(s); setSelectedLga(null); })}
+                    >
+                      <Text style={[styles.optionText, selectedState === s && styles.optionActive]}>{s}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </>
+            )}
+
+            {/* LGA */}
+            {selectedState && (
+              <>
+                <Text style={styles.label}>LGA</Text>
+                <ScrollView style={{ maxHeight: 140 }} nestedScrollEnabled>
+                  <TouchableOpacity style={styles.optionRow} onPress={debounce(() => setSelectedLga(null))}>
+                    <Text style={[styles.optionText, !selectedLga && styles.optionActive]}>Any</Text>
+                  </TouchableOpacity>
+                  {availableLgas.map((l) => (
+                    <TouchableOpacity
+                      key={l}
+                      style={styles.optionRow}
+                      onPress={debounce(() => setSelectedLga(l))}
+                    >
+                      <Text style={[styles.optionText, selectedLga === l && styles.optionActive]}>{l}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </>
             )}
           </YStack>
+        );
 
-          {/* Religion Chips */}
-          <YStack marginBottom={16}>
-            <Text
-              style={{
-                fontSize: 14,
-                fontWeight: "600",
-                marginBottom: 8,
-              }}
-            >
-              Religion
-            </Text>
-            <XStack flexWrap="wrap">
-              {religionOptions.map((opt) => {
-                const active = selectedReligion === opt;
-                return (
-                  <TouchableOpacity
-                    key={opt}
-                    onPress={() => setSelectedReligion(active ? null : opt)}
-                    style={{
-                      paddingHorizontal: 12,
-                      paddingVertical: 8,
-                      borderRadius: 20,
-                      borderWidth: 1,
-                      borderColor: "#DDD",
-                      marginRight: 8,
-                      marginBottom: 8,
-                      backgroundColor: active ? "#3498db" : "#fff",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: active ? "#fff" : "#333",
-                        fontWeight: active ? "700" : "400",
-                      }}
-                    >
-                      {opt}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </XStack>
-          </YStack>
-
-          {/* Race Chips */}
-          <YStack marginBottom={16}>
-            <Text
-              style={{
-                fontSize: 14,
-                fontWeight: "600",
-                marginBottom: 8,
-              }}
-            >
-              Race / Ethnicity
-            </Text>
-            <XStack flexWrap="wrap">
-              {raceOptions.map((opt) => {
-                const active = selectedRace === opt;
-                return (
-                  <TouchableOpacity
-                    key={opt}
-                    onPress={() => setSelectedRace(active ? null : opt)}
-                    style={{
-                      paddingHorizontal: 12,
-                      paddingVertical: 8,
-                      borderRadius: 20,
-                      borderWidth: 1,
-                      borderColor: "#DDD",
-                      marginRight: 8,
-                      marginBottom: 8,
-                      backgroundColor: active ? "#3498db" : "#fff",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: active ? "#fff" : "#333",
-                        fontWeight: active ? "700" : "400",
-                      }}
-                    >
-                      {opt}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </XStack>
-          </YStack>
-
-          {/* Pregnancy Checkboxes */}
-          <YStack marginBottom={16}>
-            <Text
-              style={{
-                fontSize: 14,
-                fontWeight: "600",
-                marginBottom: 8,
-              }}
-            >
-              Pregnancy History
-            </Text>
-            {pregnancyOptions.map((opt) => {
-              const checked = selectedPregnancy.includes(opt);
-              return (
-                <XStack
+      case "experience":
+        return (
+          <YStack gap={10}>
+            <Text style={styles.label}>Experience Level</Text>
+            <XStack flexWrap="wrap" gap={8}>
+              {EXPERIENCE_OPTIONS.map((opt) => (
+                <TouchableOpacity
                   key={opt}
-                  flexDirection="row"
-                  alignItems="center"
-                  marginBottom={8}
+                  onPress={debounce(() => setSelectedChip(selectedChip === opt ? null : opt))}
+                  style={[styles.chip, selectedChip === opt && styles.chipActive]}
                 >
-                  <TouchableOpacity
-                    onPress={() => togglePregnancy(opt)}
-                    style={{
-                      width: 22,
-                      height: 22,
-                      borderRadius: 4,
-                      borderWidth: 1,
-                      borderColor: "#CCC",
-                      marginRight: 12,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: checked ? "#3498db" : "#fff",
-                    }}
-                  >
-                    {checked && (
-                      <Text
-                        style={{
-                          color: "#fff",
-                          fontWeight: "700",
-                        }}
-                      >
-                        ✓
-                      </Text>
-                    )}
-                  </TouchableOpacity>
-                  <Text>{opt}</Text>
-                </XStack>
-              );
-            })}
+                  <Text style={[styles.chipText, selectedChip === opt && styles.chipTextActive]}>{opt}</Text>
+                </TouchableOpacity>
+              ))}
+            </XStack>
           </YStack>
+        );
 
-          {/* Buttons */}
-          <XStack justifyContent="space-between" marginBottom={20}>
-            <Button
-              onPress={resetFilters}
-              style={{
-                flex: 1,
-                marginRight: 8,
-                backgroundColor: "#EEE",
-              }}
+      case "genotype":
+        return (
+          <YStack gap={10}>
+            <Text style={styles.label}>Genotype</Text>
+            <XStack flexWrap="wrap" gap={8}>
+              {GENOTYPE_OPTIONS.map((opt) => (
+                <TouchableOpacity
+                  key={opt}
+                  onPress={debounce(() => setSelectedChip(selectedChip === opt ? null : opt))}
+                  style={[styles.chip, selectedChip === opt && styles.chipActive]}
+                >
+                  <Text style={[styles.chipText, selectedChip === opt && styles.chipTextActive]}>{opt}</Text>
+                </TouchableOpacity>
+              ))}
+            </XStack>
+          </YStack>
+        );
+
+      case "bloodGroup":
+        return (
+          <YStack gap={10}>
+            <Text style={styles.label}>Blood Group</Text>
+            <XStack flexWrap="wrap" gap={8}>
+              {BLOOD_GROUP_OPTIONS.map((opt) => (
+                <TouchableOpacity
+                  key={opt}
+                  onPress={debounce(() => setSelectedChip(selectedChip === opt ? null : opt))}
+                  style={[styles.chip, selectedChip === opt && styles.chipActive]}
+                >
+                  <Text style={[styles.chipText, selectedChip === opt && styles.chipTextActive]}>{opt}</Text>
+                </TouchableOpacity>
+              ))}
+            </XStack>
+          </YStack>
+        );
+
+      case "rating":
+        return (
+          <YStack gap={10}>
+            <Text style={styles.label}>Minimum Rating</Text>
+            <XStack flexWrap="wrap" gap={8}>
+              {RATING_OPTIONS.map((opt) => (
+                <TouchableOpacity
+                  key={opt}
+                  onPress={debounce(() => setSelectedChip(selectedChip === opt ? null : opt))}
+                  style={[styles.chip, selectedChip === opt && styles.chipActive]}
+                >
+                  <Text style={[styles.chipText, selectedChip === opt && styles.chipTextActive]}>{opt}</Text>
+                </TouchableOpacity>
+              ))}
+            </XStack>
+          </YStack>
+        );
+
+      case "specialization": {
+        const specs = (items || []).map((i: any) => i.specialization).filter(Boolean) as string[];
+        const uniqueSpecs = Array.from(new Set(specs));
+        return (
+          <YStack gap={10}>
+            <Text style={styles.label}>Specialization</Text>
+            <Text style={{ fontSize: 13, color: "#888", marginBottom: 4 }}>
+              Filter by agent specialization keyword
+            </Text>
+            <XStack flexWrap="wrap" gap={8}>
+              {uniqueSpecs.map((spec) => (
+                <TouchableOpacity
+                  key={spec}
+                  onPress={debounce(() => setSelectedChip(selectedChip === spec ? null : spec))}
+                  style={[styles.chip, selectedChip === spec && styles.chipActive]}
+                >
+                  <Text style={[styles.chipText, selectedChip === spec && styles.chipTextActive]}>{spec}</Text>
+                </TouchableOpacity>
+              ))}
+              {uniqueSpecs.length === 0 && (
+                <Text style={{ color: "#999", fontSize: 13 }}>No specializations available</Text>
+              )}
+            </XStack>
+          </YStack>
+        );
+      }
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose} presentationStyle="overFullScreen" statusBarTranslucent>
+      <TouchableOpacity style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.35)" }} activeOpacity={1} onPress={debounce(onClose)} />
+      <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, maxHeight: "70%", paddingBottom: insets.bottom || 16, backgroundColor: "#FFFFFF", borderTopLeftRadius: 14, borderTopRightRadius: 14, overflow: "hidden" }}>
+        <View style={{ width: 40, height: 6, backgroundColor: "#DDD", borderRadius: 6, alignSelf: "center", marginVertical: 8 }} />
+
+        {/* Tab bar */}
+        <XStack paddingHorizontal={16} gap={0} borderBottomWidth={1} borderBottomColor="#EEE">
+          {tabs.map((tab) => (
+            <TouchableOpacity
+              key={tab.key}
+              onPress={debounce(() => handleTabPress(tab.key))}
+              style={{ paddingVertical: 10, paddingHorizontal: 14, borderBottomWidth: 2, borderBottomColor: activeTab === tab.key ? "#0E0E55" : "transparent" }}
             >
+              <Text style={{ fontSize: 14, fontWeight: activeTab === tab.key ? "700" : "500", color: activeTab === tab.key ? "#0E0E55" : "#888" }}>
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </XStack>
+
+        {/* Content */}
+        <ScrollView style={{ paddingHorizontal: 20, paddingTop: 16, flex: 1 }} showsVerticalScrollIndicator={false}>
+          {renderTabContent()}
+          <XStack justifyContent="space-between" marginTop={20} marginBottom={12}>
+            <Button onPress={debounce(() => { setSelectedCountry(null); setSelectedState(null); setSelectedLga(null); setSelectedChip(null); })} style={{ flex: 1, marginRight: 8, backgroundColor: "#EEE" }} color="#000">
               Reset
             </Button>
-            <Button
-              onPress={applyFilters}
-              style={{
-                flex: 1,
-                marginLeft: 8,
-                backgroundColor: "#3498db",
-              }}
-            >
-              Apply Filters
+            <Button onPress={handleApply} disabled={isApplying} style={{ flex: 1, marginLeft: 8, backgroundColor: "#0E0E55" }}>
+              {isApplying ? <ActivityIndicator color="#fff" /> : "Apply"}
             </Button>
           </XStack>
         </ScrollView>
@@ -365,3 +400,15 @@ export default function FilterModal({
     </Modal>
   );
 }
+
+const styles = {
+  label: { fontSize: 14, fontWeight: "600", color: "#333", marginBottom: 4 },
+  optionRow: { paddingVertical: 8, paddingHorizontal: 4, borderBottomWidth: 1, borderBottomColor: "#F0F0F0" },
+  optionText: { fontSize: 15, color: "#333" },
+  optionActive: { color: "#0E0E55", fontWeight: "700" },
+  chip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1, borderColor: "#DDD", backgroundColor: "#fff" },
+  chipActive: { backgroundColor: "#0E0E55", borderColor: "#0E0E55" },
+  chipText: { fontSize: 14, color: "#333" },
+  chipTextActive: { color: "#fff", fontWeight: "700" },
+  searchInput: { backgroundColor: "#F5F5F5", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, fontSize: 14, color: "#333", marginBottom: 8, borderWidth: 1, borderColor: "#E5E5E5" },
+} as const;

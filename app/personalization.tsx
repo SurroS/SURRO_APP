@@ -5,7 +5,12 @@ import { YStack, XStack, Text, ScrollView } from "tamagui";
 import { ScreenHeader } from "@/components/auth";
 import colors from "@/hooks/colors";
 import { router } from "expo-router";
-import { getReminderSettings, updateReminderSettings } from "@/services/notificationApi";
+import {
+  getReminderSettings,
+  updateReminderSettings,
+  getNotificationPreferences,
+  updateNotificationPreferences,
+} from "@/services/notificationApi";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 
@@ -39,10 +44,11 @@ const ToggleButton = ({
 
 export default function NotificationSettingsScreen() {
   const [toggling, setToggling] = useState(false);
-  const [updates, setUpdates] = useState({
-    email: true,
-    sms: false,
-    push: true,
+
+  const [preferences, setPreferences] = useState({
+    emailPromotions: true,
+    smsPromotions: false,
+    pushNotificationPromotions: true,
   });
 
   const [reminders, setReminders] = useState({
@@ -54,12 +60,20 @@ export default function NotificationSettingsScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getReminderSettings()
-      .then((data) => {
+    Promise.all([
+      getNotificationPreferences(),
+      getReminderSettings(),
+    ])
+      .then(([prefs, rem]) => {
+        setPreferences({
+          emailPromotions: prefs.emailPromotions ?? true,
+          smsPromotions: prefs.smsPromotions ?? false,
+          pushNotificationPromotions: prefs.pushNotificationPromotions ?? true,
+        });
         setReminders({
-          email: data.emailReminder ?? true,
-          sms: data.smsReminder ?? true,
-          push: data.pushReminder ?? true,
+          email: rem.emailReminder ?? true,
+          sms: rem.smsReminder ?? true,
+          push: rem.pushReminder ?? true,
         });
       })
       .catch(() => {})
@@ -72,7 +86,22 @@ export default function NotificationSettingsScreen() {
   ) => {
     if (toggling) return;
     if (section === "updates") {
-      setUpdates((prev) => ({ ...prev, [field]: !prev[field] }));
+      const key =
+        field === "email" ? "emailPromotions" :
+        field === "sms" ? "smsPromotions" :
+        "pushNotificationPromotions";
+      const next = !preferences[key];
+      setPreferences((prev) => ({ ...prev, [key]: next }));
+      setToggling(true);
+      updateNotificationPreferences({ [key]: next })
+        .catch(() => {
+          setPreferences((prev) => ({ ...prev, [key]: !next }));
+          Toast.show({
+            text1: "Failed to update preference",
+            type: "customError" as ToastType,
+          });
+        })
+        .finally(() => setToggling(false));
     } else {
       const next = !reminders[field];
       setReminders((prev) => ({ ...prev, [field]: next }));
@@ -121,19 +150,19 @@ export default function NotificationSettingsScreen() {
             <YStack style={styles.toggleGroup}>
               <ToggleRow
                 label="Email"
-                value={updates.email}
+                value={preferences.emailPromotions}
                 onToggle={() => handleToggle("updates", "email")}
                 disabled={toggling}
               />
               <ToggleRow
                 label="SMS"
-                value={updates.sms}
+                value={preferences.smsPromotions}
                 onToggle={() => handleToggle("updates", "sms")}
                 disabled={toggling}
               />
               <ToggleRow
                 label="Push notification"
-                value={updates.push}
+                value={preferences.pushNotificationPromotions}
                 onToggle={() => handleToggle("updates", "push")}
                 disabled={toggling}
               />

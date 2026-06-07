@@ -23,7 +23,6 @@ import { ToastType } from "toastify-react-native/utils/interfaces";
 import { router, useLocalSearchParams } from "expo-router";
 import EmptyWalletModal from "@/components/modals/EmptyWalletModal";
 import { getSurrogateById } from "@/services/profileApi";
-import { fallbackSurrogates } from "@/store/surrogates/actions";
 import { useAuthStore } from "@/store/auth";
 import { useWalletStore } from "@/store/wallet/walletStore";
 import { SURROGATE_TRANSACTIONS } from "@/types/surrogateTransactionTypes";
@@ -94,87 +93,20 @@ export default function SurrogateProfileScreen() {
       if (response.data?.profile) {
         setSurrogate(response.data.profile);
       } else {
-        console.warn("No profile data in response, using fallback");
-        // Create a minimal SurrogateProfile from fallback data
-        const fallback = fallbackSurrogates.find(
-          (s: any) => s.id === surrogateId,
-        );
-        if (fallback) {
-          setSurrogate({
-            id: fallback.id,
-            userName: fallback.name || "Unknown",
-            firstName: fallback.name?.split(" ")[0] || null,
-            lastName: fallback.name?.split(" ").slice(1).join(" ") || null,
-            aboutMe: "Profile not fully set up yet",
-            isAvailable: true,
-            numberOfChildren: 0,
-            countryOfResidence: fallback.country || null,
-            stateOfResidence: fallback.state || null,
-            lga: null,
-            address: null,
-            zipCode: null,
-            phone1: null,
-            phone2: null,
-            emergencyContactPhone: null,
-            emergencyContactRelation: null,
-            facebookProfile: null,
-            instagramProfile: null,
-            twitterProfile: null,
-            tiktokProfile: null,
-            termsAcceptedAt: null,
-            countryOfOrigin: null,
-            dateOfBirth: null,
-            maritalStatus: null,
-            height: null,
-            weight: null,
-            profilePicture: null,
-            stateOfOrigin: null,
-          });
-        } else {
-          setSurrogate(null);
-        }
+        console.warn("No profile data in response");
+        setSurrogate(null);
+        Toast.show({
+          text1: "Surrogate not found",
+          type: "customError" as ToastType,
+        });
       }
     } catch (error) {
       console.log("Surrogate fetch error:", error);
-
-      // Create a minimal SurrogateProfile from fallback data
-      const fallback = fallbackSurrogates.find(
-        (s: any) => s.id === surrogateId,
-      );
-      if (fallback) {
-        setSurrogate({
-          id: fallback.id,
-          userName: fallback.name || "Unknown",
-          firstName: fallback.name?.split(" ")[0] || null,
-          lastName: fallback.name?.split(" ").slice(1).join(" ") || null,
-          aboutMe: "Profile not fully set up yet",
-          isAvailable: true,
-          numberOfChildren: 0,
-          countryOfResidence: fallback.country || null,
-          stateOfResidence: fallback.state || null,
-          lga: null,
-          address: null,
-          zipCode: null,
-          phone1: null,
-          phone2: null,
-          emergencyContactPhone: null,
-          emergencyContactRelation: null,
-          facebookProfile: null,
-          instagramProfile: null,
-          twitterProfile: null,
-          tiktokProfile: null,
-          termsAcceptedAt: null,
-          countryOfOrigin: null,
-          dateOfBirth: null,
-          maritalStatus: null,
-          height: null,
-          weight: null,
-          profilePicture: null,
-          stateOfOrigin: null,
-        });
-      } else {
-        setSurrogate(null);
-      }
+      setSurrogate(null);
+      Toast.show({
+        text1: "Failed to load surrogate profile",
+        type: "customError" as ToastType,
+      });
     } finally {
       setLoading(false);
     }

@@ -41,6 +41,7 @@ export default function ContactInformationScreen() {
   } = useAgentProfile();
 
   const isLoading = surrogateLoading || parentLoading || agentLoading;
+  const isParent = Role === "INTENDED_PARENT";
 
   const [countries, setCountries] = useState<any[]>([]);
   const [statesList, setStatesList] = useState<string[]>([]);
@@ -96,16 +97,13 @@ export default function ContactInformationScreen() {
       return;
     }
 
-    console.log("[ContactInfo] Populating form from profile keys:", Object.keys(profile).join(", "));
-
     const isParent = Role === "INTENDED_PARENT";
-    const isAgent = Role === "AGENT";
 
-    setPhone1(stripDialCode(isParent ? profile?.phone : profile?.phone1 ?? ""));
-    setPhone2(stripDialCode(isParent ? "" : profile?.phone2 ?? ""));
-    setEmergency(stripDialCode(profile?.emergencyContactPhone ?? ""));
+    setPhone1(stripDialCode(profile?.phone1 ?? ""));
+    setPhone2(stripDialCode(profile?.phone2 ?? ""));
+    setEmergency(stripDialCode(profile?.emergencyPhone ?? profile?.emergencyContactPhone ?? ""));
     setRelationship(profile?.emergencyContactRelation ?? "");
-    setStreet(profile?.address ?? "");
+    setStreet(profile?.homeAddress ?? profile?.address ?? "");
     setZip(profile?.zipCode ?? "");
     setResidenceState(profile?.stateOfResidence ?? "");
     setLga(profile?.lga ?? "");
@@ -183,24 +181,18 @@ export default function ContactInformationScreen() {
       ? `${country.dialCode}${emergency}`
       : emergency;
 
-    const isParent = Role === "INTENDED_PARENT";
-
     const profileData: any = {
       countryOfResidence: country.name,
       stateOfResidence: residenceState,
       lga,
-      address: street,
+      homeAddress: street,
       zipCode: zip,
-      emergencyContactPhone: fullEmergency,
+      emergencyPhone: fullEmergency,
       emergencyContactRelation: relationship,
     };
 
-    if (isParent) {
-      profileData.phone = fullPhone1;
-    } else {
-      profileData.phone1 = fullPhone1;
-      profileData.phone2 = fullPhone2;
-    }
+    profileData.phone1 = fullPhone1;
+    profileData.phone2 = fullPhone2;
 
     try {
       if (Role === "SURROGATE") await updateProfile(profileData);
@@ -214,7 +206,11 @@ export default function ContactInformationScreen() {
         text2: "Your contact details have been saved",
       });
 
-      router.push("/medical");
+      if (isParent) {
+        router.push("/profile/additionalInfo");
+      } else {
+        router.push("/medical");
+      }
     } catch (error: any) {
       Toast.show({
         text1: "Update Failed",
@@ -335,7 +331,7 @@ export default function ContactInformationScreen() {
             opacity={isLoading ? 0.7 : 1}
             onPress={handleSave}
           >
-            {isLoading ? <ActivityIndicator color="white" /> : "Save"}
+            {isLoading ? <ActivityIndicator color="white" /> : isParent ? "Continue" : "Save"}
           </Button>
           </YStack>
         </ScrollView>

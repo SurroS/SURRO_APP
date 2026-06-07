@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   PanResponder,
   ActivityIndicator,
   TouchableOpacity,
+  Modal,
 } from "react-native";
 import Animated, {
   useSharedValue,
@@ -14,7 +15,7 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
-import FilterModal from "@/components/modals/filterBottomModal";
+import FilterModal, { FilterParam } from "@/components/modals/filterBottomModal";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenHeader } from "@/components/auth";
 import { router } from "expo-router";
@@ -37,6 +38,7 @@ interface CardStackProps {
   onViewProfile: (card: any) => void;
   onRefresh: () => Promise<any>;
   fetchItems: (showToast?: boolean) => Promise<any>;
+  role: "SURROGATE" | "AGENT";
 }
 
 export default function CardStack({
@@ -49,16 +51,19 @@ export default function CardStack({
   onViewProfile,
   onRefresh,
   fetchItems,
+  role,
 }: CardStackProps) {
   const insets = useSafeAreaInsets();
 
   const [cardIndex, setCardIndex] = useState(0);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
-  const [filters, setFilters] = useState<any>([]);
+  const [activeFilter, setActiveFilter] = useState<FilterParam>(null);
+  const [showNoResultsModal, setShowNoResultsModal] = useState(false);
 
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const rotate = useSharedValue(0);
+  const cardEntryProgress = useSharedValue(1);
 
   const cardIndexRef = useRef(cardIndex);
 
@@ -71,6 +76,8 @@ export default function CardStack({
     translateX.value = 0;
     translateY.value = 0;
     rotate.value = 0;
+    cardEntryProgress.value = 0;
+    cardEntryProgress.value = withSpring(1, { damping: 10, stiffness: 250 });
   }, []);
 
   const resetCardPosition = useCallback(() => {
@@ -85,6 +92,9 @@ export default function CardStack({
         onStartShouldSetPanResponder: () => false,
         onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > 5,
         onPanResponderMove: (_, gestureState) => {
+          if (cardEntryProgress.value < 0.99) {
+            cardEntryProgress.value = 1;
+          }
           translateX.value = gestureState.dx;
           translateY.value = gestureState.dy;
           rotate.value = gestureState.dx / 20;
@@ -106,32 +116,68 @@ export default function CardStack({
     [goToNextCard, resetCardPosition],
   );
 
+  const filteredItems = useMemo(() => {
+    if (!activeFilter) return items;
+    return items.filter((item) => {
+      switch (activeFilter.type) {
+        case "country":
+          return (item.country || item.countryOfResidence || "").toLowerCase() === activeFilter.value.toLowerCase();
+        case "state":
+          return (item.stateOfResidence || item.state || "").toLowerCase() === activeFilter.value.toLowerCase();
+        case "lga":
+          return (item.lga || "").toLowerCase() === activeFilter.value.toLowerCase();
+        case "experience":
+          return (item.experienceLevel || "").toLowerCase() === activeFilter.value.toLowerCase();
+        case "genotype":
+          return (item.genotype || "").toLowerCase() === activeFilter.value.toLowerCase();
+        case "bloodGroup":
+          return (item.bloodGroup || "").toLowerCase() === activeFilter.value.toLowerCase();
+        case "rating":
+          const min = parseFloat(activeFilter.value);
+          const rating = item.performance?.averageRating ?? 0;
+          return rating >= min;
+        case "specialization":
+          return (item.specialization || "").toLowerCase().includes(activeFilter.value.toLowerCase());
+        default:
+          return true;
+      }
+    });
+  }, [items, activeFilter]);
+
+  // Show no-results modal when filter returns empty but full list has items
+  useEffect(() => {
+    if (activeFilter && filteredItems.length === 0 && items.length > 0) {
+      setShowNoResultsModal(true);
+    }
+  }, [activeFilter, filteredItems.length, items.length]);
+
+  const handleClearFilter = useCallback(() => {
+    setActiveFilter(null);
+    setShowNoResultsModal(false);
+  }, []);
+
   const animatedStyle = useAnimatedStyle(() => ({
+    opacity: cardEntryProgress.value,
     transform: [
       { translateX: translateX.value },
-      { translateY: translateY.value },
+      { translateY: translateY.value + (1 - cardEntryProgress.value) * 25 },
       { rotate: `${rotate.value}deg` },
     ],
   }));
 
   const renderFilterSummary = () => {
-    if (!filters || Object.keys(filters).length === 0) {
-      return filterPlaceholder;
-    }
-    return Object.entries(filters)
-      .map(([key, value]) => (value ? `${key}: ${value}` : null))
-      .filter(Boolean)
-      .join("  •  ");
+    if (!activeFilter) return filterPlaceholder;
+    return `${activeFilter.type}: ${activeFilter.value}`;
   };
 
   const handleViewProfile = useCallback(() => {
-    const card = items[cardIndexRef.current];
+    const card = filteredItems[cardIndexRef.current];
     if (!card) return;
     onViewProfile(card);
-  }, [items, onViewProfile]);
+  }, [filteredItems, onViewProfile]);
 
   const renderCardStack = () => {
-    if (cardIndex >= items.length) {
+    if (cardIndex >= filteredItems.length) {
       return (
         <View style={{ alignItems: "center", justifyContent: "center", flex: 1, gap: 16 }}>
           <Ionicons name="search-outline" size={64} color="#ccc" />
@@ -144,6 +190,7 @@ export default function CardStack({
           <TouchableOpacity
             onPress={() => {
               setCardIndex(0);
+              setActiveFilter(null);
               onRefresh();
             }}
             style={{
@@ -162,8 +209,8 @@ export default function CardStack({
       );
     }
 
-    const currentCard = items[cardIndex];
-    const nextCards = items.slice(cardIndex + 1, cardIndex + 3);
+    const currentCard = filteredItems[cardIndex];
+    const nextCards = filteredItems.slice(cardIndex + 1, cardIndex + 3);
 
     return (
       <View style={{ flex: 1, alignItems: "center" }}>
@@ -213,7 +260,7 @@ export default function CardStack({
           {renderCardContent(currentCard)}
         </Animated.View>
 
-        {items.length > 1 && (
+        {filteredItems.length > 1 && (
           <View
             style={{
               position: "absolute",
@@ -223,7 +270,7 @@ export default function CardStack({
               gap: 6,
             }}
           >
-            {items.map((_, idx) => (
+            {filteredItems.map((_, idx) => (
               <View
                 key={idx}
                 style={{
@@ -241,7 +288,7 @@ export default function CardStack({
     );
   };
 
-  if (items.length === 0 && isLoading) {
+  if (filteredItems.length === 0 && isLoading) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
         <View
@@ -308,7 +355,7 @@ export default function CardStack({
 
       <View style={{ flex: 1 }}>{renderCardStack()}</View>
 
-      {cardIndex < items.length && (
+      {cardIndex < filteredItems.length && (
         <View
           style={{
             flexDirection: "row",
@@ -364,8 +411,37 @@ export default function CardStack({
       <FilterModal
         visible={isFilterVisible}
         onClose={() => setIsFilterVisible(false)}
-        onApply={(filters) => setFilters(filters)}
+        onApply={(f) => setActiveFilter(f)}
+        role={role}
+        items={items}
       />
+
+      {/* No Results Modal */}
+      <Modal visible={showNoResultsModal} transparent animationType="fade">
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", padding: 32 }}>
+          <View style={{ backgroundColor: "#fff", borderRadius: 16, padding: 28, alignItems: "center", width: "100%", gap: 14 }}>
+            <Ionicons name="search-outline" size={40} color={colors.primary} />
+            <Text style={{ fontSize: 18, fontWeight: "700", color: "#0E0E55" }}>No Results Found</Text>
+            <Text style={{ fontSize: 14, color: "#666", textAlign: "center", lineHeight: 20 }}>
+              No {entityName} match your current filter. Would you like to clear the filter and browse all available profiles?
+            </Text>
+            <View style={{ flexDirection: "row", gap: 12, marginTop: 8, width: "100%" }}>
+              <TouchableOpacity
+                onPress={() => setShowNoResultsModal(false)}
+                style={{ flex: 1, paddingVertical: 12, borderRadius: 10, borderWidth: 1, borderColor: "#0E0E55", alignItems: "center" }}
+              >
+                <Text style={{ color: "#0E0E55", fontWeight: "600" }}>Keep filter</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleClearFilter}
+                style={{ flex: 1, paddingVertical: 12, borderRadius: 10, backgroundColor: "#0E0E55", alignItems: "center" }}
+              >
+                <Text style={{ color: "#fff", fontWeight: "600" }}>Show all</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

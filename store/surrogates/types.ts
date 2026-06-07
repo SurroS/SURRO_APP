@@ -17,6 +17,8 @@ export interface Surrogate {
   contactEmail: string;
   bio: string;
   experienceLevel: string;
+  genotype?: string;
+  bloodGroup?: string;
 }
 
 // --- Surrogate List State ---
@@ -29,6 +31,7 @@ export interface SurrogateListState {
 // --- Surrogate List Actions ---
 export interface SurrogateListActions {
   fetchSurrogates: (showToast?: boolean) => Promise<void>;
+  fetchMatches: () => Promise<void>;
   setSurrogates: (data: Surrogate[]) => void;
   setLoading: (val: boolean) => void;
   setError: (err: string | null) => void;

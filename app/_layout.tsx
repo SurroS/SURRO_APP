@@ -13,14 +13,22 @@ import { Platform } from "react-native";
 import { initSystemNotifications } from "@/store/notifications/notificationService";
 import { checkInactivity } from "@/store/notifications/inactivityService";
 import { useAppActivity } from "@/hooks/useAppActivity";
+import { useNotificationPreferences } from "@/store/notifications/preferencesStore";
+import { useAuthStore } from "@/store/auth";
+import { getAllCountries } from "@/utils/countries";
 import SessionGate from "@/components/SessionGate";
 
 export default function RootLayout() {
   useAppActivity();
 
+  const loadNotificationPrefs = useNotificationPreferences((s) => s.load);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
   useEffect(() => {
     initSystemNotifications();
     checkInactivity();
+    getAllCountries(); // preload countries cache for filter modal
+    if (isAuthenticated) loadNotificationPrefs();
 
     if (Platform.OS === "android") {
       try {

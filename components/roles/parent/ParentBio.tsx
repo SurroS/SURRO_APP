@@ -2,7 +2,7 @@ import React from "react";
 import { YStack } from "tamagui";
 import RoleCommonProfile from "@/components/editBio/RoleCommonProfile";
 import InfoRowCard from "@/components/editBio/InfoRowCard";
-import { FileText } from "@tamagui/lucide-icons";
+import { FileText, Heart } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
 
 interface ParentBioProps {
@@ -15,6 +15,13 @@ export default function ParentBio(props: ParentBioProps) {
   return (
     <YStack gap="$3" width="100%">
       <RoleCommonProfile {...props} />
+
+      <InfoRowCard
+        title="Additional info & preferences"
+        subtitle="Tell us more about your surrogacy journey"
+        icon={Heart}
+        onPress={() => router.navigate("/profile/additionalInfo")}
+      />
 
       <InfoRowCard
         title="Profile Summary"

@@ -7,8 +7,16 @@ import {
   updateParentMatchPreference,
 } from "@/services/profileApi";
 import { useAuthStore } from "@/store/auth";
+import { Platform } from "react-native";
 
 let cachedProfile: any = null;
+
+const resolveProfilePicture = (url: string | null | undefined) => {
+  if (!url) return null;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  const base = process.env.EXPO_PUBLIC_API_URL?.replace(/\/+$/, "");
+  return base ? `${base}${url.startsWith("/") ? "" : "/"}${url}` : url;
+};
 
 export const useParentProfile = () => {
   const [parentProfile, setParentProfile] = useState<any>(cachedProfile);
@@ -20,13 +28,13 @@ export const useParentProfile = () => {
   // -------------------------
   const fetchProfile = useCallback(async (forceRefresh = false) => {
     if (cachedProfile && !forceRefresh) {
-      // Stale-while-revalidate: show cached immediately, refresh silently
       setParentProfile(cachedProfile);
       try {
         const res = await getParentProfile();
-        console.log("[ParentProfile] SWR refresh response keys:", Object.keys(res || {}).join(", "));
-        console.log("[ParentProfile] SWR refresh - phone1:", res?.profile?.phone1 || res?.phone1, "countryOfResidence:", res?.profile?.countryOfResidence || res?.countryOfResidence);
-        cachedProfile = res?.profile || res;
+        console.log("[ParentProfile] SWR refresh raw:", JSON.stringify(res).slice(0, 500));
+        const fresh = res?.profile || res;
+        fresh.profilePicture = resolveProfilePicture(fresh.profilePicture);
+        cachedProfile = { ...cachedProfile, ...fresh };
         setParentProfile(cachedProfile);
         if (cachedProfile?.profilePicture) {
           useAuthStore.getState().setUser({
@@ -34,9 +42,7 @@ export const useParentProfile = () => {
             profilePictureUrl: cachedProfile.profilePicture,
           });
         }
-      } catch (_) {
-        // Keep stale data on background refresh failure
-      }
+      } catch (_) {}
       return cachedProfile;
     }
 
@@ -44,17 +50,18 @@ export const useParentProfile = () => {
     setError(null);
 
     try {
-      console.log("[ParentProfile] Fetching profile from API...");
       const res = await getParentProfile();
-      console.log("[ParentProfile] API response:", JSON.stringify(res).slice(0, 400));
-      console.log("[ParentProfile] Full response keys:", Object.keys(res || {}).join(", "));
-      if (res?.profile) {
-        console.log("[ParentProfile] Nested profile keys:", Object.keys(res.profile).join(", "));
-        console.log("[ParentProfile] profile.phone1:", res.profile?.phone1, "profile.countryOfResidence:", res.profile?.countryOfResidence);
-      }
-      cachedProfile = res?.profile || res;
+      console.log("[ParentProfile] Fetch raw response:", JSON.stringify(res).slice(0, 500));
+      const fresh = res?.profile || res;
+      // resolve relative profile picture URL
+      fresh.profilePicture = resolveProfilePicture(fresh.profilePicture);
+      // preserve social fields that backend doesn't return on GET
+      cachedProfile = {
+        ...cachedProfile,
+        ...fresh,
+      };
       setParentProfile(cachedProfile);
-      console.log("[ParentProfile] Profile loaded:", cachedProfile ? "YES" : "NO");
+      console.log("[ParentProfile] Cached profile keys:", Object.keys(cachedProfile || {}).join(", "));
       if (cachedProfile?.profilePicture) {
         useAuthStore.getState().setUser({
           avatar: cachedProfile.profilePicture,
@@ -97,7 +104,7 @@ export const useParentProfile = () => {
     console.log("[ParentProfile] Updating profile...");
     try {
       const res = await updateParentProfile(data);
-      console.log("[ParentProfile] Update success:", JSON.stringify(res).slice(0, 200));
+      console.log("[ParentProfile] Update raw response:", JSON.stringify(res).slice(0, 500));
       const updated = res?.profile || res;
       cachedProfile = { ...cachedProfile, ...updated };
       setParentProfile(cachedProfile);

@@ -125,10 +125,11 @@ export default function AgentsListScreen() {
       title="Suggested Agent"
       entityName="agents"
       filterPlaceholder="Filter agents..."
-      renderCardContent={(card) => <CardContent card={card} />}
-      onViewProfile={handleViewProfile}
-      onRefresh={() => fetchAgents(true)}
-      fetchItems={fetchAgents}
-    />
+        renderCardContent={(card) => <CardContent card={card} />}
+        onViewProfile={handleViewProfile}
+        onRefresh={() => fetchAgents(true)}
+        fetchItems={fetchAgents}
+        role="AGENT"
+      />
   );
 }

@@ -28,21 +28,26 @@ export default function HomeIndex() {
   const unreadCount = notifications.filter((n) => !n.read).length;
   const fetchNotifications = useNotificationStore((s) => s.fetchNotifications);
   const [refreshing, setRefreshing] = useState(false);
+  const [profileReady, setProfileReady] = useState(!!parentProfile || !!surrogateProfile || !!agentProfile);
 
-  // ---- AUTO-FETCH PROFILE ON MOUNT ----
+  // ---- AUTO-FETCH PROFILE ON MOUNT & WAIT ----
   useEffect(() => {
     fetchNotifications();
-    switch (role) {
-      case "SURROGATE":
-        fetchSurrogate();
-        break;
-      case "AGENT":
-        fetchAgent();
-        break;
-      case "INTENDED_PARENT":
-        fetchParent();
-        break;
-    }
+    const load = async () => {
+      switch (role) {
+        case "SURROGATE":
+          await fetchSurrogate();
+          break;
+        case "AGENT":
+          await fetchAgent();
+          break;
+        case "INTENDED_PARENT":
+          await fetchParent();
+          break;
+      }
+      setProfileReady(true);
+    };
+    load();
   }, []);
 
   const onRefresh = useCallback(async () => {
@@ -91,9 +96,17 @@ export default function HomeIndex() {
           }
           showsVerticalScrollIndicator={false}
         >
-          {role === "SURROGATE" && <SurrogateScreen />}
-          {role === "AGENT" && <AgentScreen />}
-          {role === "INTENDED_PARENT" && <ParentScreen />}
+          {profileReady ? (
+            <>
+              {role === "SURROGATE" && <SurrogateScreen />}
+              {role === "AGENT" && <AgentScreen />}
+              {role === "INTENDED_PARENT" && <ParentScreen />}
+            </>
+          ) : (
+            <View style={styles.centered}>
+              <Text>Loading profile...</Text>
+            </View>
+          )}
         </ScrollView>
       </SafeAreaView>
     </YStack>
@@ -117,5 +130,11 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 10,
     fontWeight: "700",
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 100,
   },
 });

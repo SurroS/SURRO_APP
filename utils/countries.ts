@@ -1,5 +1,10 @@
 // utils/countries.ts
+let cachedCountries: { name: string; flag?: string; iso2?: string; dialCode?: string }[] | null = null;
+
+export const getCachedCountries = () => cachedCountries;
+
 export const getAllCountries = async () => {
+  if (cachedCountries) return cachedCountries;
   try {
     const res = await fetch(
       "https://restcountries.com/v3.1/all?fields=name,flags,cca2,idd"
@@ -11,7 +16,7 @@ export const getAllCountries = async () => {
       return [];
     }
 
-    const countries = data
+    cachedCountries = data
       .map((c: any) => ({
         name: c.name?.common || "Unknown",
         flag: c.flags?.png || c.flags?.svg,
@@ -23,7 +28,7 @@ export const getAllCountries = async () => {
       // ✅ Sort alphabetically
       .sort((a, b) => a.name.localeCompare(b.name));
 
-    return countries;
+    return cachedCountries;
   } catch (err) {
     console.error("Error fetching countries", err);
     return [];

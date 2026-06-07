@@ -1,5 +1,5 @@
-import React, { useEffect, useCallback } from "react";
-import { Image, Text, View } from "react-native";
+import React, { useEffect, useCallback, useState } from "react";
+import { Image, Text, View, Modal, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSurrogateStore } from "@/store/surrogates";
 import { Toast } from "toastify-react-native";
@@ -88,25 +88,46 @@ const CardContent = ({ card }: { card: any }) => (
 );
 
 export default function SurrogateList() {
-  const { surrogates, fetchSurrogates, isLoading } = useSurrogateStore();
+  const { surrogates, fetchSurrogates, fetchMatches, isLoading } = useSurrogateStore();
   const { user } = useAuth();
   const { saveParentSurrogate } = useParentProfile();
+  const isParent = user?.role?.trim() === "INTENDED_PARENT";
+  const [showModal, setShowModal] = useState(false);
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
 
   useEffect(() => {
-    if (surrogates.length === 0) {
-      fetchSurrogates(true).catch((err: any) => {
-        Toast.show({
-          text1: "Failed to load surrogates",
-          type: "customError" as ToastType,
-          text2: err?.response?.data?.message || "Please try again.",
-        });
-      });
-    }
-  }, [surrogates.length, fetchSurrogates]);
+    if (initialLoadDone || isLoading) return;
+    if (surrogates.length > 0) return;
+
+    const load = async () => {
+      if (isParent) {
+        try {
+          await fetchMatches();
+          const { surrogates: matches } = useSurrogateStore.getState();
+          if (matches.length === 0) {
+            setShowModal(true);
+          }
+        } catch {
+          setShowModal(true);
+        }
+      } else {
+        try {
+          await fetchSurrogates();
+        } catch {}
+      }
+      setInitialLoadDone(true);
+    };
+    load();
+  }, [initialLoadDone, isLoading, surrogates.length, isParent, fetchMatches, fetchSurrogates]);
+
+  const handleShowAll = useCallback(async () => {
+    setShowModal(false);
+    await fetchSurrogates();
+  }, [fetchSurrogates]);
 
   const handleViewProfile = useCallback(
     async (card: any) => {
-      if (user?.role?.trim() === "INTENDED_PARENT") {
+      if (isParent) {
         try {
           await saveParentSurrogate({ surrogateId: card.id });
         } catch {}
@@ -117,20 +138,107 @@ export default function SurrogateList() {
         params: { id: card.id },
       });
     },
-    [user, saveParentSurrogate],
+    [isParent, saveParentSurrogate],
   );
 
+  const handleRefresh = useCallback(() => {
+    setInitialLoadDone(false);
+    useSurrogateStore.getState().setSurrogates([]);
+    setShowModal(false);
+  }, []);
+
   return (
-    <CardStack
-      items={surrogates}
-      isLoading={isLoading}
-      title="Suggested Surrogate"
-      entityName="surrogates"
-      filterPlaceholder="Filter surrogates..."
-      renderCardContent={(card) => <CardContent card={card} />}
-      onViewProfile={handleViewProfile}
-      onRefresh={() => fetchSurrogates(true)}
-      fetchItems={fetchSurrogates}
-    />
+    <>
+      <CardStack
+        items={surrogates}
+        isLoading={isLoading}
+        title="Suggested Surrogate"
+        entityName="surrogates"
+        filterPlaceholder="Filter surrogates..."
+        renderCardContent={(card) => <CardContent card={card} />}
+        onViewProfile={handleViewProfile}
+        onRefresh={handleRefresh}
+        fetchItems={isParent ? fetchMatches : fetchSurrogates}
+        role="SURROGATE"
+      />
+
+      <Modal visible={showModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Ionicons name="search-outline" size={40} color={colors.primary} />
+            <Text style={styles.modalTitle}>No Suggestions Yet</Text>
+            <Text style={styles.modalText}>
+              We couldn't find surrogates matching your preferences. Would you like to browse all available profiles?
+            </Text>
+            <View style={styles.modalActions}>
+              <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setShowModal(false)}>
+                <Text style={styles.modalBtnSecondaryText}>Not now</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalBtnPrimary} onPress={handleShowAll}>
+                <Text style={styles.modalBtnPrimaryText}>Show all</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </>
   );
 }
+
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 32,
+  },
+  modalCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 28,
+    alignItems: "center",
+    width: "100%",
+    gap: 14,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#0E0E55",
+  },
+  modalText: {
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 8,
+    width: "100%",
+  },
+  modalBtnSecondary: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#0E0E55",
+    alignItems: "center",
+  },
+  modalBtnSecondaryText: {
+    color: "#0E0E55",
+    fontWeight: "600",
+  },
+  modalBtnPrimary: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: "#0E0E55",
+    alignItems: "center",
+  },
+  modalBtnPrimaryText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+});

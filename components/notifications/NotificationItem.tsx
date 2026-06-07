@@ -51,7 +51,7 @@ const NotificationItem = ({ item, selected, onPress, onLongPress }: Props) => {
       style={{ marginHorizontal: 0 }}
     >
       <XStack
-        backgroundColor={selected ? "#EEF0FF" : item.read ? "#fff" : "#F8F9FF"}
+        backgroundColor={selected ? "#EEF0FF" : "#fff"}
         borderRadius={14}
         paddingVertical={14}
         paddingHorizontal={16}
@@ -59,25 +59,14 @@ const NotificationItem = ({ item, selected, onPress, onLongPress }: Props) => {
         alignItems="flex-start"
         style={{
           borderWidth: 1,
-          borderColor: selected ? colors.primary : "transparent",
+          borderColor: selected ? colors.primary : "#f0f0f0",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.08,
+          shadowRadius: 4,
+          elevation: 3,
         }}
       >
-        {/* Unread dot */}
-        {!item.read && (
-          <View
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: 4,
-              backgroundColor: "#E63946",
-              position: "absolute",
-              left: 6,
-              top: 18,
-              zIndex: 1,
-            }}
-          />
-        )}
-
         {/* Icon circle */}
         <View
           style={{
@@ -99,19 +88,28 @@ const NotificationItem = ({ item, selected, onPress, onLongPress }: Props) => {
 
         {/* Content */}
         <YStack flex={1} gap={4}>
-          <XStack justifyContent="space-between" alignItems="center">
+          <XStack justifyContent="space-between" alignItems="flex-start">
             <Text
               fontSize={15}
               color="#1A1A1A"
               fontWeight={item.read ? "500" : "700"}
               flex={1}
-              numberOfLines={1}
+              numberOfLines={2}
             >
               {item.title}
             </Text>
-            <Text fontSize={12} color="#999" marginLeft={8}>
-              {relativeTime(item.createdAt)}
-            </Text>
+            {!item.read && (
+              <View
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: 3.5,
+                  backgroundColor: "#E63946",
+                  marginTop: 6,
+                  marginLeft: 6,
+                }}
+              />
+            )}
           </XStack>
 
           {item.body ? (
@@ -119,6 +117,10 @@ const NotificationItem = ({ item, selected, onPress, onLongPress }: Props) => {
               {item.body}
             </Text>
           ) : null}
+
+          <Text fontSize={11} color="#aaa" marginTop={2}>
+            {relativeTime(item.createdAt)}
+          </Text>
         </YStack>
       </XStack>
     </TouchableOpacity>

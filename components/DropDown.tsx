@@ -158,6 +158,7 @@ const Dropdown = ({
                   data={filteredOptions}
                   keyExtractor={(item, index) => index.toString()}
                   keyboardShouldPersistTaps="handled"
+                  style={{ flexGrow: 0 }}
                   renderItem={({ item }) => {
                     const label = getLabel(item);
                     const isObject = typeof item !== "string";
@@ -203,6 +204,23 @@ const Dropdown = ({
                     );
                   }}
                 />
+
+                {multiple && (
+                  <Pressable
+                    onPress={() => setVisible(false)}
+                    style={{
+                      backgroundColor: "#0A043C",
+                      borderRadius: 8,
+                      paddingVertical: 12,
+                      alignItems: "center",
+                      marginTop: 12,
+                    }}
+                  >
+                    <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>
+                      Done
+                    </Text>
+                  </Pressable>
+                )}
               </View>
             </TouchableWithoutFeedback>
           </View>

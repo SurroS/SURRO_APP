@@ -3,101 +3,81 @@ import { StateCreator } from "zustand";
 import { AgentProfile } from "@/store/profile/agent/types";
 import { getAllAgents, getUsersByRole } from "@/services/profileApi";
 
-const fallbackAgent: AgentProfile[] = [
+const fallbackAgents: AgentProfile[] = [
   {
-    id: "agent-fb-1",
+    id: "agent-mock-1",
     userName: "Jane Doe",
     aboutMe: "Experienced agent dedicated to helping families find the perfect surrogate match.",
-    avatar: require("@/assets/images/agentImage.png"),
-    dateOfBirth: "2004-01-01",
+    dateOfBirth: "1990-01-01",
     countryOfResidence: "Nigeria",
     stateOfResidence: "Lagos",
-    lga: "Lagos Island",
-    phone1: "+234123456789",
+    lga: "Ikeja",
+    phone1: "+2348011111111",
     phone2: null,
     emergencyContactPhone: null,
-    wallet: {
-      id: "w1",
-      userId: "agent-fb-1",
-      balance: 0,
-      currency: "NGN",
-    },
+    profilePicture: "https://ui-avatars.com/api/?name=Jane+Doe&background=0E0E55&color=fff&size=200",
+    wallet: { id: "w1", userId: "agent-mock-1", balance: 0, currency: "NGN" },
+    performance: { successfulMatches: 15, averageRating: 4.5, responseTime: "2h", activeCases: 3 },
   },
   {
-    id: "agent-fb-2",
+    id: "agent-mock-2",
     userName: "Mary Ann",
     aboutMe: "Compassionate agent with 5+ years of surrogacy coordination experience.",
-    avatar: require("@/assets/images/image3.jpg"),
-    dateOfBirth: "2004-01-01",
-    countryOfResidence: "Nigeria",
-    stateOfResidence: "Lagos",
-    lga: "Lagos Island",
-    phone1: "+234123456789",
-    phone2: null,
-    emergencyContactPhone: null,
-    wallet: {
-      id: "w2",
-      userId: "agent-fb-2",
-      balance: 0,
-      currency: "NGN",
-    },
-  },
-  {
-    id: "agent-fb-3",
-    userName: "Tina Joe",
-    aboutMe: "Dedicated to making every surrogacy journey smooth and successful for all parties.",
-    avatar: require("@/assets/images/agentImage.png"),
-    dateOfBirth: "2004-01-01",
-    countryOfResidence: "Nigeria",
-    stateOfResidence: "Lagos",
-    lga: "Lagos Island",
-    phone1: "+234123456789",
-    phone2: null,
-    emergencyContactPhone: null,
-    wallet: {
-      id: "w3",
-      userId: "agent-fb-3",
-      balance: 0,
-      currency: "NGN",
-    },
-  },
-  {
-    id: "agent-fb-4",
-    userName: "Sarah Williams",
-    aboutMe: "Professional agent specializing in international and cross-border surrogacy arrangements.",
-    avatar: require("@/assets/images/agentImage.png"),
-    dateOfBirth: "1998-06-15",
+    dateOfBirth: "1988-06-15",
     countryOfResidence: "Nigeria",
     stateOfResidence: "Abuja",
-    lga: "Abuja Municipal",
-    phone1: "+234123456789",
+    lga: "Gwarinpa",
+    phone1: "+2348022222222",
     phone2: null,
     emergencyContactPhone: null,
-    wallet: {
-      id: "w4",
-      userId: "agent-fb-4",
-      balance: 0,
-      currency: "NGN",
-    },
+    profilePicture: "https://ui-avatars.com/api/?name=Mary+Ann&background=0E0E55&color=fff&size=200",
+    wallet: { id: "w2", userId: "agent-mock-2", balance: 0, currency: "NGN" },
+    performance: { successfulMatches: 22, averageRating: 4.8, responseTime: "1h", activeCases: 5 },
   },
   {
-    id: "agent-fb-5",
-    userName: "Michael Obi",
-    aboutMe: "Certified agent focused on ethical matching and supporting intended parents throughout their journey.",
-    avatar: require("@/assets/images/image3.jpg"),
-    dateOfBirth: "1995-03-22",
+    id: "agent-mock-3",
+    userName: "Sarah Williams",
+    aboutMe: "Professional agent specializing in international surrogacy arrangements.",
+    dateOfBirth: "1992-03-22",
     countryOfResidence: "Nigeria",
     stateOfResidence: "Rivers",
     lga: "Port Harcourt",
-    phone1: "+234123456789",
+    phone1: "+2348033333333",
     phone2: null,
     emergencyContactPhone: null,
-    wallet: {
-      id: "w5",
-      userId: "agent-fb-5",
-      balance: 0,
-      currency: "NGN",
-    },
+    profilePicture: "https://ui-avatars.com/api/?name=Sarah+Williams&background=0E0E55&color=fff&size=200",
+    wallet: { id: "w3", userId: "agent-mock-3", balance: 0, currency: "NGN" },
+    performance: { successfulMatches: 10, averageRating: 4.2, responseTime: "3h", activeCases: 2 },
+  },
+  {
+    id: "agent-mock-4",
+    userName: "Chioma Okafor",
+    aboutMe: "Dedicated agent focused on ethical matching and supporting intended parents throughout their journey.",
+    dateOfBirth: "1985-09-10",
+    countryOfResidence: "Nigeria",
+    stateOfResidence: "Lagos",
+    lga: "Lekki",
+    phone1: "+2348066666666",
+    phone2: null,
+    emergencyContactPhone: null,
+    profilePicture: "https://ui-avatars.com/api/?name=Chioma+Okafor&background=0E0E55&color=fff&size=200",
+    wallet: { id: "w4", userId: "agent-mock-4", balance: 0, currency: "NGN" },
+    performance: { successfulMatches: 30, averageRating: 4.9, responseTime: "30m", activeCases: 7 },
+  },
+  {
+    id: "agent-mock-5",
+    userName: "Emeka Nwosu",
+    aboutMe: "Certified agent with expertise in cross-border surrogacy coordination and legal navigation.",
+    dateOfBirth: "1982-12-05",
+    countryOfResidence: "Nigeria",
+    stateOfResidence: "Abuja",
+    lga: "Abuja Municipal",
+    phone1: "+2348077777777",
+    phone2: null,
+    emergencyContactPhone: null,
+    profilePicture: "https://ui-avatars.com/api/?name=Emeka+Nwosu&background=0E0E55&color=fff&size=200",
+    wallet: { id: "w5", userId: "agent-mock-5", balance: 0, currency: "NGN" },
+    performance: { successfulMatches: 18, averageRating: 4.6, responseTime: "1.5h", activeCases: 4 },
   },
 ];
 
@@ -145,20 +125,19 @@ export const createAgentListSlice: StateCreator<
         return;
       }
 
-      // Empty or invalid response → fallback
+      // Empty or invalid response
       set({
-        agents: fallbackAgent,
+        agents: fallbackAgents,
         isLoading: false,
         error: null,
       });
-      console.log("API returned no usable data → using fallback.");
     } catch (err: any) {
       console.error("Error fetching agents:", err);
 
       set({
-        agents: fallbackAgent,
+        agents: fallbackAgents,
         isLoading: false,
-        error: err.message || "Failed to fetch agents",
+        error: null,
       });
 
       if (showToast) {

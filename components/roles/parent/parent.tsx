@@ -1,6 +1,6 @@
 import { ChevronDown } from "@tamagui/lucide-icons";
 import React, { useEffect, useState, useCallback } from "react";
-import { ScrollView, StyleSheet, Pressable } from "react-native";
+import { ScrollView, StyleSheet, Pressable, RefreshControl } from "react-native";
 import Animated, {
   useAnimatedStyle,
   withTiming,
@@ -18,31 +18,41 @@ import AgentPreview from "@/components/roles/agent/AgentPreviewCard";
 import ProfileCompletionModal from "@/components/roles/ProfileCompletionModal";
 import { calculateProfileProgress } from "@/utils/profileHelpers";
 import { useParentProfile } from "@/hooks/profile/useParentProfile";
+import { useAuth } from "@/hooks/useAuth";
 import ProfileData from "@/components/profileDetails/ProfileData";
 
 export default function ParentScreen() {
   const { parentProfile, fetchProfile, isLoading } = useParentProfile();
+  const { user } = useAuth();
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const progress = calculateProfileProgress(parentProfile);
 
-  // Fetch profile on mount if not loaded
+  // Fetch profile on mount if not loaded (cached ref may still be null)
   useEffect(() => {
-    if (!parentProfile) {
+    if (!parentProfile && !isLoading) {
       fetchProfile();
     }
   }, []);
 
+
+
   useEffect(() => {
-    if (!isLoading) {
-      if (progress >= 100) { setShowProfileModal(false); return; }
-      const hasProfile = !!parentProfile;
-      const needsCompletion = hasProfile && progress < 100;
-      if (!hasProfile || needsCompletion) {
-        setShowProfileModal(true);
-      }
+    if (!parentProfile || isLoading) return;
+    if (progress >= 100) { setShowProfileModal(false); return; }
+    const hasProfile = !!parentProfile;
+    const needsCompletion = hasProfile && progress < 100;
+    if (!hasProfile || needsCompletion) {
+      setShowProfileModal(true);
     }
   }, [parentProfile, progress, isLoading]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchProfile(true);
+    setRefreshing(false);
+  }, [fetchProfile]);
 
   const ViewSurrogates = () =>
     router.push("/surrogate/surrogateList");
@@ -53,12 +63,16 @@ export default function ParentScreen() {
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#0E0E55"]} />
+        }
       >
         <YStack flex={1} gap="$3">
           <ProfileData
-            name={parentProfile?.firstName}
+            name={parentProfile?.userName}
             avatarUrl={parentProfile?.profilePicture}
-            dateOfBirth={parentProfile?.dateOfBirth}
+            location={parentProfile?.countryOfResidence}
+            dateOfBirth={parentProfile?.dateOfBirth?.slice(0, 10)}
           />
 
           <Accordion
@@ -72,8 +86,17 @@ export default function ParentScreen() {
               <AccordionTriggerWithChevron title="Profile Information" />
               <Accordion.Content backgroundColor="white" padding="$3">
                 <YStack gap="$3">
-                  <About />
-                  <Contact />
+                  <About aboutMe={parentProfile?.about} />
+                  <Contact
+                    phoneNumber={parentProfile?.phone1}
+                    email={user?.email}
+                    socials={{
+                      facebook: parentProfile?.facebookProfile,
+                      instagram: parentProfile?.instagramProfile,
+                      twitter: parentProfile?.twitterProfile,
+                      tiktok: parentProfile?.tiktokProfile,
+                    }}
+                  />
                 </YStack>
               </Accordion.Content>
             </Accordion.Item>

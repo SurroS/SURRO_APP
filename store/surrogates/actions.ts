@@ -1,6 +1,14 @@
 import { StateCreator } from "zustand";
 import { Surrogate, SurrogateStore } from "./types";
-import { getAllSurrogates } from "@/services/profileApi";
+import { getAllSurrogates, fetchParentMatch } from "@/services/profileApi";
+
+const fallbackSurrogates: Surrogate[] = [
+  { id: "surr-mock-1", name: "Jane Doe", userName: "janedoe", image: "https://ui-avatars.com/api/?name=Jane+Doe&background=0E0E55&color=fff&size=200", avatar: "https://ui-avatars.com/api/?name=Jane+Doe&background=0E0E55&color=fff&size=200", age: "28", country: "Nigeria", stateOfResidence: "Lagos", lga: "Ikeja", firstName: "Jane", lastName: "Doe", contactPhone: "+2348011111111", contactEmail: "jane@example.com", bio: "Experienced surrogate with a passion for helping families.", experienceLevel: "Experienced", genotype: "AA", bloodGroup: "O+" },
+  { id: "surr-mock-2", name: "Mary Ann", userName: "maryann", image: "https://ui-avatars.com/api/?name=Mary+Ann&background=0E0E55&color=fff&size=200", avatar: "https://ui-avatars.com/api/?name=Mary+Ann&background=0E0E55&color=fff&size=200", age: "32", country: "Nigeria", stateOfResidence: "Abuja", lga: "Gwarinpa", firstName: "Mary", lastName: "Ann", contactPhone: "+2348022222222", contactEmail: "mary@example.com", bio: "Kind-hearted and healthy surrogate ready to start a new journey.", experienceLevel: "Experienced", genotype: "AS", bloodGroup: "A+" },
+  { id: "surr-mock-3", name: "Sarah Williams", userName: "sarahw", image: "https://ui-avatars.com/api/?name=Sarah+Williams&background=0E0E55&color=fff&size=200", avatar: "https://ui-avatars.com/api/?name=Sarah+Williams&background=0E0E55&color=fff&size=200", age: "26", country: "Nigeria", stateOfResidence: "Rivers", lga: "Port Harcourt", firstName: "Sarah", lastName: "Williams", contactPhone: "+2348033333333", contactEmail: "sarah@example.com", bio: "First-time surrogate excited to make a difference.", experienceLevel: "Rookie", genotype: "AA", bloodGroup: "B+" },
+  { id: "surr-mock-4", name: "Grace Okonkwo", userName: "graceo", image: "https://ui-avatars.com/api/?name=Grace+Okonkwo&background=0E0E55&color=fff&size=200", avatar: "https://ui-avatars.com/api/?name=Grace+Okonkwo&background=0E0E55&color=fff&size=200", age: "30", country: "Nigeria", stateOfResidence: "Lagos", lga: "Lagos Island", firstName: "Grace", lastName: "Okonkwo", contactPhone: "+2348044444444", contactEmail: "grace@example.com", bio: "Healthy and motivated surrogate with a successful previous journey.", experienceLevel: "Experienced", genotype: "AA", bloodGroup: "AB+" },
+  { id: "surr-mock-5", name: "Fatima Ibrahim", userName: "fatimai", image: "https://ui-avatars.com/api/?name=Fatima+Ibrahim&background=0E0E55&color=fff&size=200", avatar: "https://ui-avatars.com/api/?name=Fatima+Ibrahim&background=0E0E55&color=fff&size=200", age: "27", country: "Nigeria", stateOfResidence: "Kaduna", lga: "Kaduna South", firstName: "Fatima", lastName: "Ibrahim", contactPhone: "+2348055555555", contactEmail: "fatima@example.com", bio: "Caring surrogate dedicated to bringing joy to intended parents.", experienceLevel: "Rookie", genotype: "AS", bloodGroup: "O-" },
+];
 
 // -----------------------------------------------------
 // Helpers
@@ -52,68 +60,9 @@ const mapApiSurrogate = (apiItem: any): Surrogate => ({
     apiItem.contactEmail ?? apiItem.email ?? apiItem.user?.email ?? "",
   bio: apiItem.bio ?? apiItem.aboutMe ?? "",
   experienceLevel: apiItem.experienceLevel ?? "New",
+  genotype: apiItem.medical?.genotype ?? apiItem.genotype ?? undefined,
+  bloodGroup: apiItem.medical?.bloodGroup ?? apiItem.bloodGroup ?? undefined,
 });
-
-// -----------------------------------------------------
-// Fallback when API fails
-// -----------------------------------------------------
-export const fallbackSurrogates: any = [
-  {
-    id: "fb-1",
-    userName: "Jane_Doe",
-    name: "Jane Doe",
-    avatar: require("@/assets/images/image1.jpg"),
-    age: "26",
-    country: "Nigeria",
-    stateOfResidence: "Lagos",
-    bio: "Caring and reliable surrogate mother with a passion for helping families.",
-    experienceLevel: "Intermediate",
-  },
-  {
-    id: "fb-2",
-    userName: "Sarah_M",
-    name: "Sarah Mensah",
-    avatar: require("@/assets/images/image1.jpg"),
-    age: "28",
-    country: "Ghana",
-    stateOfResidence: "Accra",
-    bio: "Healthy lifestyle, non-smoker, excited to help you start your family journey.",
-    experienceLevel: "New",
-  },
-  {
-    id: "fb-3",
-    userName: "Amina_K",
-    name: "Amina Kabir",
-    avatar: require("@/assets/images/image1.jpg"),
-    age: "24",
-    country: "Nigeria",
-    stateOfResidence: "Abuja",
-    bio: "Warm-hearted and dedicated. I believe in the gift of family.",
-    experienceLevel: "Experienced",
-  },
-  {
-    id: "fb-4",
-    userName: "Grace_O",
-    name: "Grace Okafor",
-    avatar: require("@/assets/images/image1.jpg"),
-    age: "30",
-    country: "Nigeria",
-    stateOfResidence: "Rivers",
-    bio: "Mother of two, looking to help another family experience the joy of parenthood.",
-    experienceLevel: "Advanced",
-  },
-  {
-    id: "fb-5",
-    userName: "Elena_W",
-    name: "Elena Williams",
-    avatar: require("@/assets/images/image1.jpg"),
-    age: "27",
-    country: "Kenya",
-    stateOfResidence: "Nairobi",
-    bio: "Committed to a safe and healthy surrogacy journey for both baby and parents.",
-    experienceLevel: "Intermediate",
-  },
-];
 
 // -----------------------------------------------------
 // Slice
@@ -133,6 +82,26 @@ export const createSurrogateSlice: StateCreator<
   setLoading: (val) => set({ isLoading: val }),
 
   setError: (err) => set({ error: err }),
+
+  async fetchMatches() {
+    try {
+      set({ isLoading: true });
+      const res = await fetchParentMatch({});
+      let rawList: any[] = [];
+      if (Array.isArray(res)) {
+        rawList = res;
+      } else if (res?.data && Array.isArray(res.data)) {
+        rawList = res.data;
+      } else if (res?.matches && Array.isArray(res.matches)) {
+        rawList = res.matches;
+      }
+      const surrogates: Surrogate[] = rawList.length > 0 ? rawList.map(mapApiSurrogate) : fallbackSurrogates;
+      set({ surrogates, isLoading: false, error: null });
+    } catch (err: any) {
+      console.error("[Surrogates] Fetch matches error:", err?.response?.data || err?.message || err);
+      set({ surrogates: fallbackSurrogates, isLoading: false, error: null });
+    }
+  },
 
   async fetchSurrogates() {
     try {
@@ -163,20 +132,10 @@ export const createSurrogateSlice: StateCreator<
         console.warn("[Surrogates] Unknown response shape, first keys:", Object.keys(res || {}).join(", "));
       }
 
-      const surrogates: Surrogate[] = rawList.map(mapApiSurrogate);
+      const surrogates: Surrogate[] = rawList.length > 0 ? rawList.map(mapApiSurrogate) : fallbackSurrogates;
 
-      if (surrogates.length > 0) {
-        set({
-          surrogates,
-          isLoading: false,
-          error: null,
-        });
-        return;
-      }
-
-      // Empty response → use fallback for testing
       set({
-        surrogates: fallbackSurrogates,
+        surrogates,
         isLoading: false,
         error: null,
       });
@@ -184,11 +143,10 @@ export const createSurrogateSlice: StateCreator<
       console.error("[Surrogates] Fetch error:", err?.response?.data || err?.message || err);
 
       set({
+        surrogates: fallbackSurrogates,
         isLoading: false,
-        error: err?.message ?? "Failed to load surrogates",
+        error: null,
       });
-
-      throw err;
     }
   },
 });

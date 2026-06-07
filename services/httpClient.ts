@@ -69,15 +69,18 @@ httpClient.interceptors.response.use(
       message: error.message,
     });
 
-    // ---- SESSION EXPIRED ON 401 (once only) ----
+    // ---- SESSION EXPIRED ON 401 (once only, skip if already on auth screen) ----
     if (status === 401 && !isLoggingOut) {
       isLoggingOut = true;
       console.warn("[httpClient] 401 Unauthorized — clearing auth and showing session expired modal");
       try {
         const { useAuthStore } = require("@/store/auth");
         const store = useAuthStore.getState();
-        if (store.logout) store.logout();
-        if (store.setSessionExpired) store.setSessionExpired(true);
+        // Only trigger if user is actually authenticated (avoids loop when already on login)
+        if (store.isAuthenticated) {
+          if (store.logout) store.logout();
+          if (store.setSessionExpired) store.setSessionExpired(true);
+        }
       } catch (e) {
         console.error("[httpClient] Failed to clear auth:", e);
       }

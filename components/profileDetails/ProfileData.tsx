@@ -1,6 +1,8 @@
 import { Feather, Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { Image, Text, XStack, YStack } from "tamagui";
+import { Image } from "expo-image";
+import { Text, XStack, YStack } from "tamagui";
 
 type ProfileHeaderProps = {
   name?: string | null;
@@ -19,16 +21,17 @@ const ProfileHeader = ({
   isAvailable,
   onToggleAvailability,
 }: ProfileHeaderProps) => {
+  const [imgFailed, setImgFailed] = useState(false);
   const handleStatusPress = async () => {
     if (!onToggleAvailability || isAvailable == null) return;
     await onToggleAvailability(!isAvailable);
   };
 
+  const showFallback = !avatarUrl || imgFailed;
+
   return (
     <XStack margin={2} gap="$4" alignItems="flex-start" height={150} flex={1}>
-      {avatarUrl ? (
-        <Image source={{ uri: avatarUrl }} width="45%" height="100%" borderRadius="$3" />
-      ) : (
+      {showFallback ? (
         <View
           style={{
             width: "45%",
@@ -43,6 +46,14 @@ const ProfileHeader = ({
             Profile Picture
           </Text>
         </View>
+      ) : (
+        <Image
+          source={avatarUrl!}
+          style={{ width: "45%", height: "100%", borderRadius: 8 }}
+          contentFit="cover"
+          cachePolicy="memory-disk"
+          onError={() => setImgFailed(true)}
+        />
       )}
 
       <YStack gap="$3">
