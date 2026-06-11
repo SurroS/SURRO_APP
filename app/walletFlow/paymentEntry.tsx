@@ -64,15 +64,16 @@ export default function PaymentEntryScreen() {
 
       console.log("[PaymentEntry] Init response:", JSON.stringify(response, null, 2));
 
-      const authorizationUrl = response?.authorization_url;
+      const authorizationUrl = response?.data?.authorization_url || response?.authorization_url;
+      const reference = response?.data?.reference || response?.reference;
 
       if (!authorizationUrl) {
         console.error("[PaymentEntry] Missing authorization_url in response");
         throw new Error("Invalid payment initialization response.");
       }
 
-      console.log("[PaymentEntry] Navigating to WebView with URL:", authorizationUrl);
-      pushWebViewScreen(authorizationUrl, gateway, mode);
+      console.log("[PaymentEntry] Navigating to WebView with URL:", authorizationUrl, "Reference:", reference);
+      pushWebViewScreen(authorizationUrl, gateway, mode, reference);
     } catch (err: any) {
       console.error("[PaymentEntry] Payment init error:", err?.response?.data || err?.message || err);
       Toast.error(

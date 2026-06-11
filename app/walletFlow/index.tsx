@@ -32,19 +32,19 @@ const WalletScreen = () => {
   const { agentProfile } = useAgentProfile();
   const { parentProfile } = useParentProfile();
 
-  const { transactions, fetchWallet, loading } = useWalletStore();
+  const { balance: storeBalance, transactions, fetchBalance, fetchWallet, loading } = useWalletStore();
 
   const [isHidden, setIsHidden] = useState(true);
 
-  const wallet = useMemo(() => {
+  const profileWallet = useMemo(() => {
     if (role === "SURROGATE") return surrogateProfile?.wallet;
     if (role === "AGENT") return agentProfile?.wallet;
     if (role === "INTENDED_PARENT") return parentProfile?.wallet;
     return null;
   }, [role, surrogateProfile, agentProfile, parentProfile]);
 
-  const totalBalance = Number(wallet?.balance ?? 0);
-  const currencyCode = wallet?.currency ?? "USD";
+  const totalBalance = Number(storeBalance ?? profileWallet?.balance ?? 0);
+  const currencyCode = profileWallet?.currency ?? "NGN";
 
   const displayBalance = isHidden
     ? "******"
@@ -56,6 +56,11 @@ const WalletScreen = () => {
     fetchWallet()
       .then(() => console.log("[WalletScreen] Wallet fetched successfully"))
       .catch((err) => console.error("[WalletScreen] Wallet fetch error:", err));
+    if (user?.id) {
+      fetchBalance(user.id)
+        .then(() => console.log("[WalletScreen] Balance fetched via /wallet/balance"))
+        .catch((err) => console.error("[WalletScreen] Balance fetch error:", err));
+    }
   }, []);
 
   const mapTx = (tx: WalletTransactionData) => ({
@@ -66,7 +71,10 @@ const WalletScreen = () => {
     type: tx.type === "CREDIT" ? "credit" : "debit",
   });
 
-  const mappedTransactions = transactions.map(mapTx);
+  const sortedTransactions = [...transactions].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+  const mappedTransactions = sortedTransactions.map(mapTx);
 
   return (
     <SafeAreaView style={styles.safe}>

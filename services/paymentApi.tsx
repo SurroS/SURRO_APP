@@ -15,6 +15,30 @@ interface PaymentInitResponse {
   };
 }
 
+interface VerifyPaymentPayload {
+  reference: string;
+}
+
+interface VerifyPaymentResponse {
+  success: boolean;
+  data: {
+    status: string;
+    reference: string;
+    amount: number;
+    credited: boolean;
+    new_balance?: number;
+  };
+}
+
+export const verifyPayment = async (
+  reference: string,
+): Promise<VerifyPaymentResponse> => {
+  console.log("[PaymentAPI] verifyPayment reference:", reference);
+  const response = await authenticatedPost("/payments/verify", { reference });
+  console.log("[PaymentAPI] verifyPayment response:", JSON.stringify(response, null, 2));
+  return response;
+};
+
 export const initiatePaymentFrontend = async (
   payload: PaymentInitPayload,
   token?: string | null, // optional, pass from secure storage

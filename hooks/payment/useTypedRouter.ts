@@ -18,10 +18,10 @@ export function useTypedRouter() {
     });
   };
 
-  const pushWebViewScreen = (url: string, gateway: PaymentGateway, mode: PaymentMode) => {
+  const pushWebViewScreen = (url: string, gateway: PaymentGateway, mode: PaymentMode, reference: string) => {
     router.push({
       pathname: "/walletFlow/paymentWebView",
-      params: { paymentUrl: url, gateway, mode },
+      params: { paymentUrl: url, gateway, mode, reference },
     });
   };
 

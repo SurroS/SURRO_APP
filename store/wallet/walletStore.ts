@@ -60,6 +60,7 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     try {
       set({ loading: true });
       const res = await getWallet();
+      console.log("[WalletStore] getWallet result:", JSON.stringify(res, null, 2));
 
       set({
         balance: res.balance,

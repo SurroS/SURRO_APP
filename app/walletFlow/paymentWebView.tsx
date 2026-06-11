@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { StyleSheet, ActivityIndicator} from "react-native";
 import { WebView } from "react-native-webview";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { YStack, Text } from "tamagui";
 import colors from "@/hooks/colors";
-import { PaymentGateway, PaymentMode } from "@/types/payment"; 
+import { PaymentGateway, PaymentMode } from "@/types/payment";
+import { verifyPayment } from "@/services/paymentApi";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 
@@ -15,8 +16,11 @@ export default function PaymentWebViewScreen() {
   const paymentUrl = params.paymentUrl;
   const gateway = params.gateway as PaymentGateway;
   const mode = params.mode as PaymentMode;
+  const reference = params.reference;
 
   const [loading, setLoading] = useState(true);
+  const [verifying, setVerifying] = useState(false);
+  const verifiedRef = useRef(false);
 
   if (!paymentUrl) {
     return (
@@ -30,10 +34,26 @@ export default function PaymentWebViewScreen() {
     const { url } = navState;
     console.log("[PaymentWebView] Navigation:", url);
 
-    if (url.includes("payment-success")) {
-      console.log("[PaymentWebView] Payment succeeded, redirecting");
-      router.replace("/walletFlow/paymentSuccess");
-    } else if (url.includes("payment-failure")) {
+    if (url.includes("reference=") && !verifiedRef.current) {
+      verifiedRef.current = true;
+      setVerifying(true);
+
+      const refMatch = url.match(/[?&]reference=([^&]+)/);
+      const extractedRef = refMatch ? decodeURIComponent(refMatch[1]) : reference;
+
+      console.log("[PaymentWebView] Paystack redirect detected, verifying ref:", extractedRef);
+      verifyPayment(extractedRef)
+        .then((res) => {
+          console.log("[PaymentWebView] Verification successful:", JSON.stringify(res, null, 2));
+          setVerifying(false);
+          router.replace("/walletFlow/paymentSuccess");
+        })
+        .catch((err) => {
+          console.error("[PaymentWebView] Verification failed:", err?.response?.data || err?.message || err);
+          setVerifying(false);
+          router.replace("/walletFlow/paymentFailed");
+        });
+    } else if (url.includes("payment-failure") && !verifiedRef.current) {
       console.log("[PaymentWebView] Payment failed, redirecting");
       router.replace("/walletFlow/paymentFailed");
     }
@@ -53,16 +73,18 @@ export default function PaymentWebViewScreen() {
         javaScriptEnabled
         domStorageEnabled
         startInLoadingState
-        onLoadStart={() => setLoading(true)}
-        onLoadEnd={() => setLoading(false)}
+        onLoadStart={() => !verifying && setLoading(true)}
+        onLoadEnd={() => !verifying && setLoading(false)}
         onNavigationStateChange={handleNavChange}
         style={styles.webview}
       />
 
-      {loading && (
+      {(loading || verifying) && (
         <YStack style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.loadingText}>Processing payment...</Text>
+          <Text style={styles.loadingText}>
+            {verifying ? "Verifying payment..." : "Processing payment..."}
+          </Text>
         </YStack>
       )}
     </SafeAreaView>

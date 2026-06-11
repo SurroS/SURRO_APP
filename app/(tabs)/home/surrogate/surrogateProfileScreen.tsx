@@ -204,27 +204,27 @@ export default function SurrogateProfileScreen() {
   const experienceData = [
     {
       question: "Have you ever been a surrogate?",
-      answer: "Not available",
+      answer: surrogate?.hasBeenSurrogate === true ? "Yes" : surrogate?.hasBeenSurrogate === false ? "No" : "Not available",
     },
     {
       question: "How much compensation do you want?",
-      answer: "Not available",
+      answer: surrogate?.compensationAmount ? `₦${surrogate.compensationAmount.toLocaleString()}` : "Not available",
     },
     {
       question: "Is this amount negotiable?",
-      answer: "Not available",
+      answer: surrogate?.compensationNegotiable === true ? "Yes" : surrogate?.compensationNegotiable === false ? "No" : "Not available",
     },
     {
       question: "Previous pregnancy type?",
-      answer: "Not available",
+      answer: surrogate?.previousPregnancyType ?? "Not available",
     },
     {
       question: "Experience notes?",
-      answer: "Not available",
+      answer: surrogate?.experienceNotes ?? "Not available",
     },
     {
       question: "What did you enjoy?",
-      answer: "Not available",
+      answer: surrogate?.enjoymentNotes ?? "Not available",
     },
   ];
 

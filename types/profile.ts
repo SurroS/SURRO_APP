@@ -64,6 +64,9 @@ export interface SurrogateProfile {
   experienceNotes?: string;
   enjoymentNotes?: string;
   previousPregnancyType?: string;
+  hasBeenSurrogate?: boolean | null;
+  experienceLevel?: string;
+  numberOfBabiesCarried?: number;
 }
 
 export interface SurrogateProfileUpdate {
