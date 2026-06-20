@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
-import { SafeAreaView } from "react-native";
 import { ScrollView, YStack } from "tamagui";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface Props {
   children: ReactNode;

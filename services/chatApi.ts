@@ -13,11 +13,13 @@ import type {
  */
 export async function createConversation(
   otherUserId: string,
+  surrogateId?: string,
+  accessId?: string,
 ): Promise<Conversation> {
   try {
-    console.log(" Creating conversation with:", otherUserId);
+    console.log(" Creating conversation with:", { otherUserId, surrogateId, accessId });
 
-    const body: CreateConversationRequest = { otherUserId };
+    const body: CreateConversationRequest = { otherUserId, surrogateId, accessId };
 
     const res = await authenticatedPost("/chat/conversation", body);
 

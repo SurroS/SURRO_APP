@@ -19,10 +19,11 @@ export const getWalletBalance = async (
   token?: string | null,
 ): Promise<{ balance: number; currency: string }> => {
   const response = await authenticatedGet(`/wallet/balance/${userId}`);
+  const data = response?.data ?? response;
 
   return {
-    balance: response.data.balance,
-    currency: response.data.currency,
+    balance: data.balance,
+    currency: data.currency,
   };
 };
 
@@ -35,7 +36,7 @@ export const performWalletTransaction = async (
 ): Promise<WalletTransactionResponse["data"]> => {
   const response = await authenticatedPost("/wallet/transaction", payload);
 
-  return response.data;
+  return response?.data ?? response;
 };
 
 /**

@@ -159,6 +159,7 @@ export default function EditProfileModal({
                 placeholder="no real names hear"
                 placeholderTextColor="#999"
                 style={styles.input}
+                maxLength={10}
                 onFocus={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
               />
               {usernameError ? (
@@ -197,8 +198,11 @@ export default function EditProfileModal({
               <Text color={colors.text} fontWeight="600" marginBottom={4}>
                 Socials
               </Text>
-              <Text fontSize={14} color={colors.textSecondary ?? "#555"} marginBottom={12}>
-                Socials will help us verify your identity, no one else will see this.
+              <Text fontSize={13} color={colors.textSecondary ?? "#555"} marginBottom={4} lineHeight={18}>
+                Your social profiles help us verify your identity. This information is kept private and will not be shared with anyone.
+              </Text>
+              <Text fontSize={13} color={colors.textSecondary ?? "#555"} marginBottom={12} lineHeight={18}>
+                Please enter links to your social profiles (e.g. Facebook, Instagram).
               </Text>
               <YStack
                 onLayout={(e) => { socialsY.current = e.nativeEvent.layout.y; }}

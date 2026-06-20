@@ -17,9 +17,11 @@ import { useNotificationPreferences } from "@/store/notifications/preferencesSto
 import { useAuthStore } from "@/store/auth";
 import { getAllCountries } from "@/utils/countries";
 import SessionGate from "@/components/SessionGate";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 export default function RootLayout() {
   useAppActivity();
+  usePushNotifications();
 
   const loadNotificationPrefs = useNotificationPreferences((s) => s.load);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);

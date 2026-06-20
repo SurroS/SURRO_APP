@@ -1,4 +1,3 @@
-import React from "react";
 import { Stack } from "expo-router";
 
 export default function ResoucesLayout() {
@@ -23,4 +22,3 @@ export default function ResoucesLayout() {
     </Stack>
   );
 };
-

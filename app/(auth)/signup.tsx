@@ -43,6 +43,7 @@ export default function SignupScreen() {
   const handleGoogleSignup = async () => {
     try {
       await GoogleSignin.hasPlayServices();
+      await GoogleSignin.signOut();
       const userInfo = await GoogleSignin.signIn();
 
       let idToken = userInfo.idToken;

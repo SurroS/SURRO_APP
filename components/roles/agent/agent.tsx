@@ -1,9 +1,8 @@
 import { ChevronDown } from "@tamagui/lucide-icons";
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Pressable } from "react-native";
+import { View, ScrollView, StyleSheet, Pressable } from "react-native";
 import Animated from "react-native-reanimated";
 import { Accordion, Text, XStack, YStack } from "tamagui";
-
 import About from "@/components/roles/about";
 import Contact from "@/components/roles/contact";
 import ProgressMeter from "@/components/roles/progressCircle";
@@ -15,6 +14,7 @@ import ProfileCompletionModal from "@/components/roles/ProfileCompletionModal";
 import { calculateProfileProgress } from "@/utils/profileHelpers";
 import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
 import ProfileData from "@/components/profileDetails/ProfileData";
+import HomeResourceCard from "@/components/resources/HomeResourceCard";
 
 /** Safe render wrapper */
 function SafeRender({ children, fallback }: any) {
@@ -113,9 +113,10 @@ export default function AgentHomeScreen() {
                 />
               </Pressable>
             </SafeRender>
+
           </ScrollView>
 
-          {/* FINANCIAL + WORKLOAD CARDS */}
+          {/* FINANCIAL + WORKLOAD CARDS - 2x2 grid */}
           <XStack
             flexWrap="wrap"
             justifyContent="flex-end"
@@ -126,20 +127,22 @@ export default function AgentHomeScreen() {
               <SafeRender fallback={<Text>Loading wallet...</Text>}>
                 <WalletCard style={{ width: "100%", height: 100 }} />
               </SafeRender>
+              <SafeRender fallback={<Text>Loading progress...</Text>}>
+                <ProgressMeter
+                  progress={progress}
+                  style={{ width: "100%", height: 160 }}
+                />
+              </SafeRender>
             </YStack>
 
             <YStack width={"48%"} gap={10}>
+              <SafeRender fallback={<Text>Loading...</Text>}>
+                <HomeResourceCard />
+              </SafeRender>
               <SafeRender fallback={<Text>Loading referral...</Text>}>
                 <Referral style={{ width: "100%", height: 160 }} />
               </SafeRender>
             </YStack>
-
-            <SafeRender fallback={<Text>Loading progress...</Text>}>
-              <ProgressMeter
-                progress={progress}
-                style={{ width: "100%", height: 210 }}
-              />
-            </SafeRender>
           </XStack>
         </YStack>
       </ScrollView>
@@ -190,4 +193,5 @@ const styles = StyleSheet.create({
   container: {
     paddingBottom: 40,
   },
+
 });

@@ -140,9 +140,12 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     token: string | null = null,
     opts: { description?: string; currency?: WalletCurrency } = {}
   ) => {
+    console.log("[WalletStore] debit start:", { userId, amount, currency: opts?.currency, description: opts?.description });
     try {
       set({ loading: true });
       const result = await debitWallet(userId, amount, token, opts);
+
+      console.log("[WalletStore] debit success:", { newBalance: result.balance });
 
       set({
         balance: result.balance,
@@ -152,6 +155,14 @@ export const useWalletStore = create<WalletState>((set, get) => ({
 
       return result.balance;
     } catch (err: any) {
+      console.error("[WalletStore] debit failed:", {
+        message: err?.message,
+        details: err?.details,
+        status: err?.status,
+        code: err?.code,
+        userId,
+        amount,
+      });
       set({
         loading: false,
         error: err?.message ?? "Debit operation failed",

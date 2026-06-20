@@ -32,6 +32,7 @@ export interface SurrogateProfile {
   tiktokProfile: string | null;
   isAvailable: boolean;
   termsAcceptedAt: string | null;
+  gallery?: Array<{ id: string; url: string; userId: string; createdAt: string }>;
   isSubmitted?: boolean;
   isApproved?: boolean;
   submittedAt?: string;

@@ -1,9 +1,7 @@
 import React, { useEffect, useCallback, useState } from "react";
-import { Image, Text, View, Modal, TouchableOpacity, StyleSheet } from "react-native";
+import { Image, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSurrogateStore } from "@/store/surrogates";
-import { Toast } from "toastify-react-native";
-import { ToastType } from "toastify-react-native/utils/interfaces";
 import { router } from "expo-router";
 import { useAuth } from "@/hooks/useAuth";
 import { useParentProfile } from "@/hooks/profile/useParentProfile";
@@ -87,158 +85,172 @@ const CardContent = ({ card }: { card: any }) => (
   </>
 );
 
+type ViewMode = "all" | "matches" | "saved";
+
 export default function SurrogateList() {
-  const { surrogates, fetchSurrogates, fetchMatches, isLoading } = useSurrogateStore();
+  const { surrogates, fetchSurrogates, fetchMatches, isLoading, setSurrogates, setLoading, clearSurrogates } = useSurrogateStore();
   const { user } = useAuth();
-  const { saveParentSurrogate } = useParentProfile();
+  const { saveParentSurrogate, removeSavedSurrogate, fetchSavedSurrogates } = useParentProfile();
   const isParent = user?.role?.trim() === "INTENDED_PARENT";
-  const [showModal, setShowModal] = useState(false);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  const [viewMode, setViewMode] = useState<ViewMode>("all");
 
   useEffect(() => {
-    if (initialLoadDone || isLoading) return;
-    if (surrogates.length > 0) return;
+    if (!isParent || initialLoadDone) return;
+    fetchSavedSurrogates().then((saved) => {
+      const ids = saved.map((s: any) => (s.surrogate ?? s).id ?? s.surrogateId).filter(Boolean);
+      setSavedIds(new Set(ids));
+    }).catch(() => {});
+  }, []);
 
+  useEffect(() => {
+    if (initialLoadDone || isLoading || surrogates.length > 0) return;
     const load = async () => {
-      if (isParent) {
-        try {
-          await fetchMatches();
-          const { surrogates: matches } = useSurrogateStore.getState();
-          if (matches.length === 0) {
-            setShowModal(true);
-          }
-        } catch {
-          setShowModal(true);
-        }
-      } else {
-        try {
-          await fetchSurrogates();
-        } catch {}
-      }
+      try {
+        if (isParent) await fetchMatches();
+        else await fetchSurrogates();
+      } catch {}
       setInitialLoadDone(true);
     };
     load();
-  }, [initialLoadDone, isLoading, surrogates.length, isParent, fetchMatches, fetchSurrogates]);
+  }, []);
 
-  const handleShowAll = useCallback(async () => {
-    setShowModal(false);
-    await fetchSurrogates();
-  }, [fetchSurrogates]);
+  const handleModeChange = useCallback(async (mode: ViewMode) => {
+    setViewMode(mode);
+    if (mode === "all") {
+      clearSurrogates();
+      fetchSurrogates();
+    } else if (mode === "matches" && isParent) {
+      clearSurrogates();
+      fetchMatches();
+    } else if (mode === "saved") {
+      clearSurrogates();
+      setLoading(true);
+      try {
+        const saved = await fetchSavedSurrogates();
+        const mapped = saved.map((item: any) => {
+          const s = item.surrogate ?? item;
+          return {
+            id: s.id ?? item.surrogateId ?? "",
+            firstName: s.firstName ?? "",
+            lastName: s.lastName ?? "",
+            userName: s.userName ?? s.username ?? "unknown",
+            age: s.age?.toString() ?? "?",
+            countryOfResidence: s.countryOfResidence ?? "",
+            stateOfResidence: s.stateOfResidence ?? s.state ?? "",
+            lga: s.lga ?? "",
+            profilePicture: s.profilePicture ?? null,
+            aboutMe: s.aboutMe ?? s.bio ?? "",
+            experienceLevel: s.experienceLevel ?? "New",
+            image: s.profilePicture ?? "",
+            avatar: s.profilePicture ?? "",
+            bio: s.aboutMe ?? s.bio ?? "",
+            country: s.countryOfResidence ?? s.country ?? "",
+            contactPhone: s.phone1 ?? s.phone ?? "",
+            contactEmail: s.user?.email ?? s.email ?? "",
+            genotype: s.medical?.genotype ?? s.genotype,
+            bloodGroup: s.medical?.bloodGroup ?? s.bloodGroup,
+          };
+        });
+        setSurrogates(mapped);
+        const ids = mapped.map((p: any) => p.id).filter(Boolean);
+        setSavedIds(new Set(ids));
+      } catch (e) {
+        console.error("[SurrogateList] Failed to load saved:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+  }, [fetchSurrogates, fetchMatches, isParent, fetchSavedSurrogates, clearSurrogates, setSurrogates, setLoading]);
+
+  const handleSaveProfile = useCallback(async (surrogateId: string) => {
+    try {
+      if (savedIds.has(surrogateId)) {
+        await removeSavedSurrogate(surrogateId);
+        setSavedIds(prev => { const next = new Set(prev); next.delete(surrogateId); return next; });
+      } else {
+        await saveParentSurrogate({ surrogateId });
+        setSavedIds(prev => new Set(prev).add(surrogateId));
+      }
+    } catch {}
+  }, [savedIds, saveParentSurrogate, removeSavedSurrogate]);
 
   const handleViewProfile = useCallback(
     async (card: any) => {
-      if (isParent) {
-        try {
-          await saveParentSurrogate({ surrogateId: card.id });
-        } catch {}
-      }
-
       router.push({
-        pathname: "/(tabs)/home/surrogate/surrogateProfileScreen",
+        pathname: "/surrogate/surrogateProfileScreen",
         params: { id: card.id },
       });
     },
-    [isParent, saveParentSurrogate],
+    [],
   );
 
-  const handleRefresh = useCallback(() => {
-    setInitialLoadDone(false);
-    useSurrogateStore.getState().setSurrogates([]);
-    setShowModal(false);
-  }, []);
+  const handleRefresh = useCallback(async () => {
+    if (viewMode === "all") {
+      clearSurrogates();
+      await fetchSurrogates();
+    } else if (viewMode === "matches" && isParent) {
+      clearSurrogates();
+      await fetchMatches();
+    } else if (viewMode === "saved") {
+      clearSurrogates();
+      setLoading(true);
+      try {
+        const saved = await fetchSavedSurrogates();
+        const mapped = saved.map((item: any) => {
+          const s = item.surrogate ?? item;
+          return {
+            id: s.id ?? item.surrogateId ?? "",
+            firstName: s.firstName ?? "",
+            lastName: s.lastName ?? "",
+            userName: s.userName ?? s.username ?? "unknown",
+            age: s.age?.toString() ?? "?",
+            countryOfResidence: s.countryOfResidence ?? "",
+            stateOfResidence: s.stateOfResidence ?? s.state ?? "",
+            lga: s.lga ?? "",
+            profilePicture: s.profilePicture ?? null,
+            aboutMe: s.aboutMe ?? s.bio ?? "",
+            experienceLevel: s.experienceLevel ?? "New",
+            image: s.profilePicture ?? "",
+            avatar: s.profilePicture ?? "",
+            bio: s.aboutMe ?? s.bio ?? "",
+            country: s.countryOfResidence ?? s.country ?? "",
+            contactPhone: s.phone1 ?? s.phone ?? "",
+            contactEmail: s.user?.email ?? s.email ?? "",
+            genotype: s.medical?.genotype ?? s.genotype,
+            bloodGroup: s.medical?.bloodGroup ?? s.bloodGroup,
+          };
+        });
+        setSurrogates(mapped);
+        const ids = mapped.map((p: any) => p.id).filter(Boolean);
+        setSavedIds(new Set(ids));
+      } catch (e) {
+        console.error("[SurrogateList] Failed to load saved:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+  }, [viewMode, isParent, fetchMatches, fetchSurrogates, clearSurrogates, fetchSavedSurrogates, setSurrogates, setLoading]);
 
   return (
-    <>
-      <CardStack
-        items={surrogates}
-        isLoading={isLoading}
-        title="Suggested Surrogate"
-        entityName="surrogates"
-        filterPlaceholder="Filter surrogates..."
-        renderCardContent={(card) => <CardContent card={card} />}
-        onViewProfile={handleViewProfile}
-        onRefresh={handleRefresh}
-        fetchItems={isParent ? fetchMatches : fetchSurrogates}
-        role="SURROGATE"
-      />
-
-      <Modal visible={showModal} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Ionicons name="search-outline" size={40} color={colors.primary} />
-            <Text style={styles.modalTitle}>No Suggestions Yet</Text>
-            <Text style={styles.modalText}>
-              We couldn't find surrogates matching your preferences. Would you like to browse all available profiles?
-            </Text>
-            <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setShowModal(false)}>
-                <Text style={styles.modalBtnSecondaryText}>Not now</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.modalBtnPrimary} onPress={handleShowAll}>
-                <Text style={styles.modalBtnPrimaryText}>Show all</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    </>
+    <CardStack
+      key={viewMode}
+      items={surrogates}
+      isLoading={isLoading}
+      title="Suggested Surrogate"
+      entityName="surrogates"
+      filterPlaceholder="Filter surrogates..."
+      renderCardContent={(card) => <CardContent card={card} />}
+      onViewProfile={handleViewProfile}
+      onRefresh={handleRefresh}
+      fetchItems={viewMode === "all" ? fetchSurrogates : isParent ? fetchMatches : fetchSurrogates}
+      role="SURROGATE"
+      onSaveProfile={isParent ? handleSaveProfile : undefined}
+      savedIds={savedIds}
+      viewMode={viewMode}
+      isParent={isParent}
+      onViewModeChange={handleModeChange}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 32,
-  },
-  modalCard: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 28,
-    alignItems: "center",
-    width: "100%",
-    gap: 14,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#0E0E55",
-  },
-  modalText: {
-    fontSize: 14,
-    color: "#666",
-    textAlign: "center",
-    lineHeight: 20,
-  },
-  modalActions: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 8,
-    width: "100%",
-  },
-  modalBtnSecondary: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#0E0E55",
-    alignItems: "center",
-  },
-  modalBtnSecondaryText: {
-    color: "#0E0E55",
-    fontWeight: "600",
-  },
-  modalBtnPrimary: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 10,
-    backgroundColor: "#0E0E55",
-    alignItems: "center",
-  },
-  modalBtnPrimaryText: {
-    color: "#fff",
-    fontWeight: "600",
-  },
-});

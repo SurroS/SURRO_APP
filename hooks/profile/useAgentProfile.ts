@@ -5,6 +5,7 @@ import {
   updateAgentProfile,
 } from "@/services/profileApi";
 import { useAuthStore } from "@/store/auth";
+import { resolveProfilePicture } from "@/utils/resolveMediaUrl";
 
 let cachedAgentProfile: any = null;
 
@@ -23,6 +24,9 @@ export const useAgentProfile = () => {
       try {
         const res = await getAgentProfile();
         const profile = res?.profile || res;
+        if (profile?.profilePicture) {
+          profile.profilePicture = resolveProfilePicture(profile.profilePicture);
+        }
         cachedAgentProfile = profile;
         setAgentProfile(profile);
       } catch (_) {
@@ -39,6 +43,9 @@ export const useAgentProfile = () => {
       const res = await getAgentProfile();
       console.log("[AgentProfile] API response:", JSON.stringify(res).slice(0, 400));
       const profile = res?.profile || res;
+      if (profile?.profilePicture) {
+        profile.profilePicture = resolveProfilePicture(profile.profilePicture);
+      }
       cachedAgentProfile = profile;
       setAgentProfile(profile);
       console.log("[AgentProfile] Profile loaded:", profile ? "YES" : "NO");

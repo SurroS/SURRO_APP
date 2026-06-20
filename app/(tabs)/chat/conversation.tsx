@@ -41,7 +41,7 @@ const normalizeMessage = (msg: any, fallbackId?: string): Message => ({
 });
 
 export default function ChatBoxScreen() {
-  const { otherUserId } = useLocalSearchParams<Record<string, string>>();
+  const { otherUserId, surrogateId, accessId } = useLocalSearchParams<Record<string, string>>();
   const currentUser = useAuthStore((s) => s.user);
   const currentUserId = currentUser?.id;
   const navigation = useNavigation();
@@ -57,6 +57,8 @@ export default function ChatBoxScreen() {
   const [conversationId, setConversationId] = useState<string>();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+  const [connectionStatus, setConnectionStatus] = useState<"connecting" | "connected" | "error">("connecting");
+  const [connectionError, setConnectionError] = useState<string>();
 
   const flatRef = useRef<FlatList<Message>>(null);
 
@@ -68,8 +70,9 @@ export default function ChatBoxScreen() {
 
     const loadConversation = async () => {
       setLoading(true);
+      setConnectionStatus("connecting");
       try {
-        const convo = await createConversation(otherUserId);
+        const convo = await createConversation(otherUserId, surrogateId, accessId);
 
         if (!convo?.id) {
           throw new Error("Conversation creation failed");
@@ -77,6 +80,7 @@ export default function ChatBoxScreen() {
 
         setConversationId(convo.id);
         setCachedConversation(otherUserId, convo.id);
+        setConnectionStatus("connected");
 
         const fetched = await fetchMessages(convo.id);
 
@@ -91,8 +95,10 @@ export default function ChatBoxScreen() {
             }),
           ]);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to load conversation:", err);
+        setConnectionStatus("error");
+        setConnectionError(typeof err === "string" ? err : err?.message || "Conversation could not be created");
       } finally {
         setLoading(false);
       }
@@ -110,6 +116,10 @@ export default function ChatBoxScreen() {
     let text = "✔";
     let color = "#999";
 
+    if (status === "SENDING") {
+      return <RNText style={[styles.ticks, { color: "#999", fontStyle: "italic" }]}>Sending...</RNText>;
+    }
+
     if (status === "DELIVERED") {
       text = "✔✔";
     }
@@ -126,7 +136,7 @@ export default function ChatBoxScreen() {
    * SEND MESSAGE
    * ----------------------------------------*/
   const handleSend = async (text: string) => {
-    if (!conversationId || !text.trim()) return;
+    if (!text.trim()) return;
 
     const tempId = `temp-${Date.now()}`;
 
@@ -143,8 +153,31 @@ export default function ChatBoxScreen() {
 
     setMessages((prev) => [optimistic, ...prev]);
 
+    let currentConvoId = conversationId;
+
+    // If no conversation yet, try to create one
+    if (!currentConvoId) {
+      try {
+        const convo = await createConversation(otherUserId!, surrogateId, accessId);
+        if (convo?.id) {
+          currentConvoId = convo.id;
+          setConversationId(currentConvoId);
+          setCachedConversation(otherUserId!, currentConvoId);
+          setConnectionStatus("connected");
+        } else {
+          throw new Error("Conversation creation failed");
+        }
+      } catch (err: any) {
+        const msg = typeof err === "string" ? err : err?.message || "Conversation not available";
+        setMessages((prev) =>
+          prev.map((m) => (m.id === tempId ? { ...m, failed: true, status: undefined } : m)),
+        );
+        return;
+      }
+    }
+
     try {
-      const sent = await sendMessage(conversationId, text.trim());
+      const sent = await sendMessage(currentConvoId, text.trim());
 
       setMessages((prev) =>
         prev.map((m) =>
@@ -162,7 +195,7 @@ export default function ChatBoxScreen() {
       console.error("Send message failed:", err);
 
       setMessages((prev) =>
-        prev.map((m) => (m.id === tempId ? { ...m, failed: true } : m)),
+        prev.map((m) => (m.id === tempId ? { ...m, failed: true, status: undefined } : m)),
       );
     }
   };
@@ -210,19 +243,32 @@ export default function ChatBoxScreen() {
     );
   };
 
-  if (loading) {
-    return (
-      <KeyboardAvoidingWrapper>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#0E0E55" />
+  /* -----------------------------------------
+   * RENDER STATUS BANNER
+   * ----------------------------------------*/
+  const renderStatusBanner = () => {
+    if (connectionStatus === "connecting") {
+      return (
+        <View style={styles.banner}>
+          <ActivityIndicator size="small" color="#0E0E55" />
+          <RNText style={styles.bannerText}>Connecting...</RNText>
         </View>
-      </KeyboardAvoidingWrapper>
-    );
-  }
+      );
+    }
+    if (connectionStatus === "error") {
+      return (
+        <View style={[styles.banner, styles.bannerError]}>
+          <RNText style={styles.bannerErrorText}>{connectionError}</RNText>
+        </View>
+      );
+    }
+    return null;
+  };
 
   return (
     <KeyboardAvoidingWrapper>
       <View style={styles.container}>
+        {renderStatusBanner()}
         <FlatList
           ref={flatRef}
           data={messages}
@@ -231,7 +277,7 @@ export default function ChatBoxScreen() {
           renderItem={renderItem}
           contentContainerStyle={{ padding: 12, paddingBottom: 20 }}
         />
-        <ChatInput onSend={handleSend} disabled={loading} />
+        <ChatInput onSend={handleSend} disabled={false} />
       </View>
     </KeyboardAvoidingWrapper>
   );
@@ -242,11 +288,18 @@ export default function ChatBoxScreen() {
  * ----------------------------------------*/
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff", paddingTop: 25 },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
+
+  banner: {
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 8,
+    backgroundColor: "#f0f4ff",
   },
+  bannerText: { fontSize: 13, color: "#0E0E55" },
+  bannerError: { backgroundColor: "#fff0f0" },
+  bannerErrorText: { fontSize: 13, color: "#c00" },
 
   messageRow: { marginVertical: 6, paddingHorizontal: 6 },
   myRow: { alignSelf: "flex-end", maxWidth: "80%" },

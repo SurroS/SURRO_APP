@@ -140,7 +140,7 @@ export default function AgentList() {
     if (!current) return;
 
     router.push({
-      pathname: "/(tabs)/home/agent/agentsProfileScreen",
+      pathname: "/agent/agentProfileScreen",
       params: { id: current.id },
     });
     console.log("OtherId from A.list:", current.id);

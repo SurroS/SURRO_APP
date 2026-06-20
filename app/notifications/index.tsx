@@ -201,6 +201,7 @@ const NotificationsScreen = () => {
               borderRadius={16}
               padding={24}
               gap={16}
+              maxHeight={420}
             >
               <XStack justifyContent="space-between" alignItems="flex-start">
                 <Text fontWeight="700" fontSize={18} color="#1A1A1A" flex={1} mr={12}>
@@ -211,22 +212,19 @@ const NotificationsScreen = () => {
                 </TouchableOpacity>
               </XStack>
 
-              <Text
-                fontSize={15}
-                lineHeight={22}
-                color="#555"
+              <ScrollView
+                style={{ maxHeight: 260 }}
+                showsVerticalScrollIndicator={false}
+                nestedScrollEnabled
               >
-                {viewingNotification?.body || "No content available."}
-              </Text>
-
-              <Button
-                height={46}
-                backgroundColor={colors.primary}
-                borderRadius={10}
-                onPress={() => setViewingNotification(null)}
-              >
-                Close
-              </Button>
+                <Text
+                  fontSize={15}
+                  lineHeight={22}
+                  color="#555"
+                >
+                  {viewingNotification?.body || "No content available."}
+                </Text>
+              </ScrollView>
             </YStack>
           </TouchableOpacity>
         </TouchableOpacity>

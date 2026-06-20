@@ -27,6 +27,7 @@ import { useSurrogateProfile } from "@/hooks/profile/useSurrogateProfile";
 import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
 import { useParentProfile } from "@/hooks/profile/useParentProfile";
 import { uploadAvatar } from "@/services/profileApi";
+import { resolveProfilePicture } from "@/utils/resolveMediaUrl";
 
 import AgentBio from "@/components/roles/agent/AgentBio";
 import ParentBio from "@/components/roles/parent/ParentBio";
@@ -200,13 +201,14 @@ export default function EditBioView() {
 
         setIsLoading(true);
         const avatarRes = await uploadAvatar(formData);
-        const avatarUrl = avatarRes?.data?.url || avatarRes?.url;
+        const avatarUrl = resolveProfilePicture(avatarRes?.url || avatarRes?.data?.url);
         if (avatarUrl) {
           await updateCurrentProfile({ profilePicture: avatarUrl });
           setProfileImage(avatarUrl);
           setUser({ avatar: avatarUrl, profilePictureUrl: avatarUrl });
         }
         await fetchCurrentProfile(true);
+        setProfileImage(null);
         setIsLoading(false);
 
         Toast.show({

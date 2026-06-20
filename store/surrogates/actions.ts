@@ -1,6 +1,7 @@
 import { StateCreator } from "zustand";
 import { Surrogate, SurrogateStore } from "./types";
 import { getSurrogatesList, fetchParentMatch } from "@/services/profileApi";
+import { resolveProfilePicture } from "@/utils/resolveMediaUrl";
 
 // -----------------------------------------------------
 // Helpers
@@ -19,8 +20,10 @@ const getDisplayName = (
   userName?: string | null,
 ) => `${firstName ?? ""} ${lastName ?? ""}`.trim() || userName || "Unknown";
 
-const apiImage = (apiItem: any) =>
-  apiItem.profilePicture ?? apiItem.profilePictureUrl ?? apiItem.avatar ?? "";
+const apiImage = (apiItem: any) => {
+  const raw = apiItem.profilePicture ?? apiItem.profilePictureUrl ?? apiItem.avatar ?? "";
+  return resolveProfilePicture(raw) ?? "";
+};
 
 const mapApiSurrogate = (apiItem: any): Surrogate => ({
   id: apiItem.id || apiItem.userId || "",
@@ -74,6 +77,8 @@ export const createSurrogateSlice: StateCreator<
   setLoading: (val) => set({ isLoading: val }),
 
   setError: (err) => set({ error: err }),
+
+  clearSurrogates: () => set({ surrogates: [], error: null }),
 
   async fetchMatches() {
     try {

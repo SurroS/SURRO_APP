@@ -15,6 +15,9 @@ import { calculateProfileProgress } from "@/utils/profileHelpers";
 import ProfileCompletionModal from "@/components/roles/ProfileCompletionModal";
 import ProfileData from "@/components/profileDetails/ProfileData";
 import { useAuth } from "@/hooks/useAuth";
+import HomeResourceCard from "@/components/resources/HomeResourceCard";
+import AdEarnCard from "@/components/ads/AdEarnCard";
+import BoostCard from "@/components/boost/BoostCard";
 
 export default function SurrogateScreen() {
   const { surrogateProfile, isLoading, fetchProfile, toggleAvailability } =
@@ -96,7 +99,7 @@ export default function SurrogateScreen() {
 
           <Pressable
             onPress={() =>
-              router.push("/(tabs)/home/surrogate/surrogateGuestView")
+              router.push("/surrogateGuestView")
             }
           >
             <Text
@@ -109,7 +112,9 @@ export default function SurrogateScreen() {
               View profile as guest
             </Text>
           </Pressable>
-          {/* Floating Card Section */}
+          <Gallery style={{ height: 210, marginTop: 10 }} />
+
+          {/* Floating Card Section - 2x2 grid */}
           <XStack
             flexWrap="wrap"
             justifyContent="flex-end"
@@ -119,15 +124,21 @@ export default function SurrogateScreen() {
             <YStack width={"48%"} gap={10}>
               <WalletCard style={{ width: "100%", height: 100 }} />
               <ProgressMeter
-                style={{ width: "100%", height: 210 }}
                 progress={progress}
+                style={{ width: "100%", height: 160 }}
               />
             </YStack>
 
-            <YStack width={"48%"} gap={10} flexGrow={1}>
-              <Gallery style={{ width: "100%", height: 210 }} />
-              <Referral style={{ width: "100%", height: 160, padding: 4 }} />
+            <YStack width={"48%"} gap={10}>
+              <HomeResourceCard />
+              <Referral style={{ width: "100%", height: 160 }} />
             </YStack>
+          </XStack>
+
+          {/* Promotion row - AdEarnCard + BoostCard */}
+          <XStack gap={10} marginTop={10}>
+            <AdEarnCard style={{ flex: 1 }} />
+            <BoostCard style={{ flex: 1 }} />
           </XStack>
         </YStack>
 
@@ -179,4 +190,5 @@ const styles = StyleSheet.create({
   container: {
     paddingBottom: 40,
   },
+
 });

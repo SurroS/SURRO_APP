@@ -6,7 +6,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSurrogateProfile } from "@/hooks/profile/useSurrogateProfile";
 import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
 import { useParentProfile } from "@/hooks/profile/useParentProfile";
-import { useMemo, useState } from "react";
+import { useWalletStore } from "@/store/wallet/walletStore";
+import { useMemo, useState, useEffect } from "react";
 
 const WalletCard = ({ style }: { style?: any }) => {
   const { user } = useAuth();
@@ -16,23 +17,39 @@ const WalletCard = ({ style }: { style?: any }) => {
   const { agentProfile } = useAgentProfile();
   const { parentProfile } = useParentProfile();
 
+  const storeBalance = useWalletStore((s) => s.balance);
+  const storeCurrency = useWalletStore((s) => s.currency);
+  const lastUpdatedAt = useWalletStore((s) => s.lastUpdatedAt);
+  const fetchBalance = useWalletStore((s) => s.fetchBalance);
+
   const [hidden, setHidden] = useState(true);
 
-  const wallet = useMemo(() => {
+  const profileWallet = useMemo(() => {
     if (role === "SURROGATE") return surrogateProfile?.wallet;
     if (role === "AGENT") return agentProfile?.wallet;
     if (role === "INTENDED_PARENT") return parentProfile?.wallet;
     return null;
   }, [role, surrogateProfile, agentProfile, parentProfile]);
 
-  const balance = Number(wallet?.balance ?? 0);
-  const currency = wallet?.currency ?? "USD";
+  const storeFetched = !!lastUpdatedAt;
+  const balance = storeFetched
+    ? storeBalance
+    : (profileWallet?.balance ?? 0);
+  const currency = storeFetched
+    ? storeCurrency
+    : (profileWallet?.currency ?? "NGN");
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchBalance(user.id);
+    }
+  }, [user?.id]);
 
   const displayBalance = hidden
     ? "******"
-    : `${currency} ${balance.toFixed(2)}`;
+    : `${currency} ${Number(balance).toFixed(2)}`;
 
-  const isLoading = !user || !wallet;
+  const isLoading = !user;
 
   return (
     <Link href="/walletFlow" asChild>

@@ -1,7 +1,7 @@
 import React from "react";
 import { ActivityIndicator, View, StyleSheet } from "react-native";
 import Entypo from "@expo/vector-icons/Entypo";
-import { LibraryBig, MessageSquare, Settings } from "@tamagui/lucide-icons";
+import { MessageSquare, Settings } from "@tamagui/lucide-icons";
 import { Tabs } from "expo-router";
 import { useAuthStore } from "@/store/auth";
 
@@ -54,14 +54,14 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="resources"
+        name="network"
         options={{
-          title: "Resources",
+          title: "Network",
           tabBarIcon: ({ focused, size }) => (
-            <LibraryBig
+            <Entypo
+              name="users"
               size={size}
               color={focused ? "#0E0E55" : "#808080"}
-              fill={focused ? "#0E0E55" : "transparent"}
             />
           ),
         }}

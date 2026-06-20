@@ -1,63 +1,7 @@
-import { authenticatedGet, authenticatedPatch } from "./httpClient";
-
-export interface ReminderSettings {
-  emailReminder: boolean;
-  smsReminder: boolean;
-  pushReminder: boolean;
-}
-
-export const getReminderSettings = async (): Promise<ReminderSettings> => {
-  console.log("[Notif] getReminderSettings: fetching...");
-  const response = await authenticatedGet("/notifications/reminders/me");
-  console.log("[Notif] getReminderSettings: response =", JSON.stringify(response).slice(0, 200));
-  return response?.data ?? response ?? {};
-};
-
-export const updateReminderSettings = async (
-  data: Partial<ReminderSettings>,
-): Promise<ReminderSettings> => {
-  console.log("[Notif] updateReminderSettings:", JSON.stringify(data));
-  const response = await authenticatedPatch("/notifications/reminders/me", data);
-  console.log("[Notif] updateReminderSettings: response =", JSON.stringify(response).slice(0, 200));
-  return response?.data ?? response ?? {};
-};
-
-export interface NotificationPreferences {
-  emailNotification: boolean;
-  smsNotification: boolean;
-  pushNotification: boolean;
-  emailPromotions: boolean;
-  smsPromotions: boolean;
-  pushNotificationPromotions: boolean;
-}
-
-export const getNotificationPreferences = async (): Promise<NotificationPreferences> => {
-  console.log("[Notif] getNotificationPreferences: fetching...");
-  const response = await authenticatedGet("/notifications/preferences/me");
-  console.log("[Notif] getNotificationPreferences: response =", JSON.stringify(response).slice(0, 300));
-  const data = response?.data ?? response ?? {};
-  return {
-    emailNotification: data.emailNotification ?? true,
-    smsNotification: data.smsNotification ?? true,
-    pushNotification: data.pushNotification ?? true,
-    emailPromotions: data.emailPromotions ?? true,
-    smsPromotions: data.smsPromotions ?? true,
-    pushNotificationPromotions: data.pushNotificationPromotions ?? true,
-  };
-};
-
-export const updateNotificationPreferences = async (
-  data: Partial<NotificationPreferences>,
-): Promise<NotificationPreferences> => {
-  console.log("[Notif] updateNotificationPreferences:", JSON.stringify(data));
-  const response = await authenticatedPatch("/notifications/preferences/me", data);
-  console.log("[Notif] updateNotificationPreferences: response =", JSON.stringify(response).slice(0, 200));
-  return response?.data ?? response ?? {};
-};
+import { authenticatedGet, authenticatedPost, authenticatedPatch, authenticatedDelete } from "./httpClient";
 
 export interface BackendNotification {
   id: string;
-  userId: string;
   title: string;
   message: string;
   type: string;
@@ -65,10 +9,53 @@ export interface BackendNotification {
   createdAt: string;
 }
 
-export const getNotifications = async (): Promise<BackendNotification[]> => {
-  console.log("[Notif] getNotifications: fetching...");
-  const response = await authenticatedGet("/notifications");
-  console.log("[Notif] getNotifications: response =", JSON.stringify(response).slice(0, 300));
-  const data = response?.data ?? response ?? [];
-  return Array.isArray(data) ? data : [];
-};
+export interface NotificationPreferences {
+  emailPromotions: boolean;
+  smsPromotions: boolean;
+  pushNotificationPromotions: boolean;
+}
+
+export interface ReminderSettings {
+  emailReminder: boolean;
+  smsReminder: boolean;
+  pushReminder: boolean;
+}
+
+export async function registerPushToken(
+  token: string,
+  platform: "ios" | "android",
+): Promise<void> {
+  await authenticatedPost("/notifications/push-token", { token, platform });
+}
+
+export async function getNotifications(): Promise<BackendNotification[]> {
+  return authenticatedGet("/notifications");
+}
+
+export async function getNotificationPreferences(): Promise<NotificationPreferences> {
+  return authenticatedGet("/notifications/preferences");
+}
+
+export async function updateNotificationPreferences(
+  prefs: Partial<NotificationPreferences>,
+): Promise<NotificationPreferences> {
+  return authenticatedPatch("/notifications/preferences", prefs);
+}
+
+export async function getReminderSettings(): Promise<ReminderSettings> {
+  return authenticatedGet("/notifications/reminders");
+}
+
+export async function updateReminderSettings(
+  settings: Partial<ReminderSettings>,
+): Promise<ReminderSettings> {
+  return authenticatedPatch("/notifications/reminders", settings);
+}
+
+export async function markNotificationRead(id: string): Promise<void> {
+  await authenticatedPatch(`/notifications/${id}`, { isRead: true });
+}
+
+export async function deleteNotification(id: string): Promise<void> {
+  await authenticatedDelete(`/notifications/${id}`);
+}

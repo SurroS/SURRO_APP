@@ -14,6 +14,7 @@ import { useNotificationStore } from "@/store/notifications";
 import { useSurrogateProfile } from "@/hooks/profile/useSurrogateProfile";
 import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
 import { useParentProfile } from "@/hooks/profile/useParentProfile";
+import { useWalletStore } from "@/store/wallet/walletStore";
 
 export default function HomeIndex() {
   const router = useRouter();
@@ -27,6 +28,7 @@ export default function HomeIndex() {
   const notifications = useNotificationStore((s) => s.notifications);
   const unreadCount = notifications.filter((n) => !n.read).length;
   const fetchNotifications = useNotificationStore((s) => s.fetchNotifications);
+  const fetchBalance = useWalletStore((s) => s.fetchBalance);
   const [refreshing, setRefreshing] = useState(false);
   const [profileReady, setProfileReady] = useState(!!parentProfile || !!surrogateProfile || !!agentProfile);
 
@@ -61,12 +63,15 @@ export default function HomeIndex() {
       } else if (role === "INTENDED_PARENT") {
         await fetchParent(true);
       }
+      if (user?.id) {
+        await fetchBalance(user.id);
+      }
     } catch (e) {
       console.error("[HomeIndex] Refresh failed", e);
     } finally {
       setRefreshing(false);
     }
-  }, [role, fetchSurrogate, fetchAgent, fetchParent, fetchNotifications]);
+  }, [role, fetchSurrogate, fetchAgent, fetchParent, fetchNotifications, fetchBalance, user?.id]);
 
   return (
     <YStack style={{ flex: 1, backgroundColor: "#FFFFFF" }} padding="$4">

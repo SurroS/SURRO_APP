@@ -30,9 +30,10 @@ export const getSurrogatesList = () =>
   authenticatedGet("/surrogates");
 
 export const getSurrogateById = async (id: string) => {
-  console.log(`[Surrogates] GET /users/${id}`);
-  const user = await getUserById(id);
-  return { data: { profile: user } };
+  console.log(`[Surrogates] GET /surrogates/${id}`);
+  const res = await authenticatedGet(`/surrogates/${id}`);
+  console.log("[Surrogates] getSurrogateById raw response:", JSON.stringify(res, null, 2));
+  return res;
 };
 
 export const createSurrogateProfile = (data: any) =>
@@ -67,7 +68,7 @@ export const uploadAvatar = async (data: any) => {
       "Content-Type": "multipart/form-data",
     },
   });
-  return response;
+  return response.data;
 };
 
 // ----------------------------------------------------
@@ -109,6 +110,9 @@ export const saveParentSurrogateMatch = (data: any) =>
 
 export const GetsavedParentSurrogateMatch = (data: any) =>
   authenticatedGet("/intended-parents/saved", { params: data });
+
+export const deleteSavedParentSurrogateMatch = (surrogateId: string) =>
+  authenticatedDelete(`/intended-parents/save/${surrogateId}`);
 
 export const updateParentMatchPreference = (data: any) =>
   authenticatedPost("/intended-parents/match-preferences", data);

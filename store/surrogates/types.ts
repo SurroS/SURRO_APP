@@ -35,6 +35,7 @@ export interface SurrogateListActions {
   setSurrogates: (data: Surrogate[]) => void;
   setLoading: (val: boolean) => void;
   setError: (err: string | null) => void;
+  clearSurrogates: () => void;
 }
 
 // Combined type

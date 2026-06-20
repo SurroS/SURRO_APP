@@ -25,23 +25,34 @@ import EmptyWalletModal from "@/components/modals/EmptyWalletModal";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { router, useLocalSearchParams } from "expo-router";
-import { AGENT_TRANSACTIONS } from "@/types/agentTransactionType";
 import { getAgentById } from "@/services/profileApi";
-import { User } from "@tamagui/lucide-icons";
-
-
+import { useAuthStore } from "@/store/auth";
+import { useWalletStore } from "@/store/wallet/walletStore";
+import { useUnlock } from "@/hooks/useUnlock";
 
 export default function AgentProfileScreen() {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const { id } = useLocalSearchParams();
+  const params = useLocalSearchParams();
+  const id = typeof params?.id === "string" ? params.id : null;
+  const fromNetwork = params.fromNetwork === "1";
   const [agent, setAgent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const [isUnlocked, setIsUnlocked] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
-  const wallet = agent?.wallet;
-  const transaction = AGENT_TRANSACTIONS.GET_SURROGATE;
+  const { user, token } = useAuthStore();
+  const { balance, fetchBalance } = useWalletStore();
+
+  const {
+    isUnlocked: unlockStatus,
+    isProcessing,
+    fee: unlockFee,
+    unlock,
+  } = useUnlock({
+    targetUserId: agent?.userId ?? agent?.id,
+    targetRole: "AGENT",
+  });
+
+  const isUnlocked = fromNetwork || unlockStatus;
   // -----------------------------
   // Fetch Agent
   // -----------------------------
@@ -65,6 +76,12 @@ export default function AgentProfileScreen() {
 
     fetchAgent();
   }, [id]);
+
+  useEffect(() => {
+    if (user) {
+      fetchBalance(user.id, token || null);
+    }
+  }, [user]);
 
   // -----------------------------
   // Payment Handlers
@@ -94,20 +111,27 @@ export default function AgentProfileScreen() {
     });
   };
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     if (isProcessing) return;
-    if (wallet < transaction.amount) {
-      setShowWalletModal(true);
-      return;
-    } else {
-      setIsUnlocked(true);
-      setShowPaymentModal(false);
 
+    const result = await unlock();
+    setShowPaymentModal(false);
+
+    if (result.success) {
       Toast.show({
         text1: "Payment successful",
         type: "customSuccess" as ToastType,
-        text2: "You now have full access to agent data",
+        text2: "You now have full access to this profile",
       });
+    } else if (result.error) {
+      Toast.show({
+        text1: "Payment failed",
+        type: "customError" as ToastType,
+        text2: result.error,
+      });
+      if (result.error === "Insufficient balance") {
+        setShowWalletModal(true);
+      }
     }
   };
 
@@ -244,12 +268,13 @@ export default function AgentProfileScreen() {
           visible={showPaymentModal}
           onClose={() => setShowPaymentModal(false)}
         >
+          <Entypo name="lock-open" size={32} color={colors.primary} style={styles.lockIcon} />
           <Text style={styles.paymentDescription}>
-            To start a conversation with this agent, you need to pay N50,000
+            You will be charged <Text style={styles.amountText}>₦{unlockFee?.amount?.toLocaleString() ?? "50,000"}</Text> from your wallet to unlock this profile.
           </Text>
 
           <Button style={styles.payButton} onPress={handlePayment} disabled={isProcessing}>
-            Pay N50,000 to unlock
+            Pay to unlock
           </Button>
         </PaymentModal>
       </SafeAreaView>
@@ -281,16 +306,29 @@ const styles = StyleSheet.create({
   },
   lockedText: { color: "gray", fontSize: 14 },
 
+  lockIcon: {
+    textAlign: "center",
+    marginBottom: 16,
+  },
   paymentDescription: {
     textAlign: "center",
-    color: "#444",
+    color: "#444444",
     marginBottom: 12,
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  amountText: {
+    fontWeight: "800",
+    fontSize: 17,
+    color: "#222",
   },
   payButton: {
     backgroundColor: colors.primary,
     borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 24,
+    alignSelf: "center",
+    marginVertical: 8,
   },
 
   loaderContainer: {

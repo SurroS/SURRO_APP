@@ -45,6 +45,7 @@ export default function LoginScreen() {
   const handleGoogleSignin = async () => {
     try {
       await GoogleSignin.hasPlayServices();
+      await GoogleSignin.signOut();
       const userInfo = await GoogleSignin.signIn();
 
       // Get idToken

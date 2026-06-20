@@ -6,6 +6,7 @@ import {
 } from "@/services/profileApi";
 import { SurrogateProfile, SurrogateProfileUpdate } from "@/types/profile";
 import { useAuthStore } from "@/store/auth";
+import { resolveProfilePicture } from "@/utils/resolveMediaUrl";
 
 let cachedProfile: SurrogateProfile | null = null;
 
@@ -35,6 +36,9 @@ export const useSurrogateProfile = () => {
       const res = await getSurrogateProfile();
       console.log("[SurrogateProfile] API response:", JSON.stringify(res).slice(0, 400));
       cachedProfile = res?.profile || res;
+      if (cachedProfile?.profilePicture) {
+        cachedProfile.profilePicture = resolveProfilePicture(cachedProfile.profilePicture);
+      }
       setSurrogateProfile(cachedProfile);
       console.log("[SurrogateProfile] Profile loaded:", cachedProfile ? "YES" : "NO");
       if (cachedProfile?.profilePicture) {
@@ -65,6 +69,9 @@ export const useSurrogateProfile = () => {
       const res = await createSurrogateProfile(data);
       console.log("[SurrogateProfile] Create success:", JSON.stringify(res).slice(0, 200));
       cachedProfile = res?.profile || res;
+      if (cachedProfile?.profilePicture) {
+        cachedProfile.profilePicture = resolveProfilePicture(cachedProfile.profilePicture);
+      }
       setSurrogateProfile(cachedProfile);
       return cachedProfile;
     } finally {
@@ -81,6 +88,9 @@ export const useSurrogateProfile = () => {
       const res = await updateSurrogateProfile(data);
       console.log("[SurrogateProfile] Update success:", JSON.stringify(res).slice(0, 200));
       const updated = res?.profile || res;
+      if (updated?.profilePicture) {
+        updated.profilePicture = resolveProfilePicture(updated.profilePicture);
+      }
       cachedProfile = { ...cachedProfile, ...updated };
       setSurrogateProfile(cachedProfile);
       return cachedProfile;

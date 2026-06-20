@@ -12,7 +12,7 @@ import { Button, YStack, XStack } from "tamagui";
 import { getAllCountries, getCachedCountries } from "@/utils/countries";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-type TabKey = "location" | "experience" | "genotype" | "bloodGroup" | "rating" | "specialization";
+type TabKey = "location" | "experience" | "genotype" | "bloodGroup" | "age" | "rating" | "specialization";
 
 export type FilterParam = {
   type: TabKey;
@@ -81,20 +81,23 @@ export default function FilterModal({
   }, []);
 
   const filteredCountries = useMemo(() => {
-    if (!countrySearch) return countries;
-    return countries.filter((c) => c.name.toLowerCase().includes(countrySearch.toLowerCase()));
+    const list = Array.isArray(countries) ? countries : [];
+    if (!countrySearch) return list;
+    return list.filter((c) => c.name.toLowerCase().includes(countrySearch.toLowerCase()));
   }, [countries, countrySearch]);
 
   const filteredStates = useMemo(() => {
-    if (!stateSearch) return availableStates;
-    return availableStates.filter((s) => s.toLowerCase().includes(stateSearch.toLowerCase()));
+    const list = Array.isArray(availableStates) ? availableStates : [];
+    if (!stateSearch) return list;
+    return list.filter((s) => s.toLowerCase().includes(stateSearch.toLowerCase()));
   }, [availableStates, stateSearch]);
 
   // Pre-compute country → states → lgas maps once from items
   const countryStatesMap = useMemo(() => {
     const map = new Map<string, Set<string>>();
     const lgaMap = new Map<string, Set<string>>();
-    (items || []).forEach((item: any) => {
+    const list = Array.isArray(items) ? items : [];
+    list.forEach((item: any) => {
       const c = (item.country || item.countryOfResidence || "").toLowerCase();
       const s = item.stateOfResidence || item.state || "";
       const l = item.lga || "";
@@ -128,6 +131,7 @@ export default function FilterModal({
     { key: "experience", label: "Experience" },
     { key: "genotype", label: "Genotype" },
     { key: "bloodGroup", label: "Blood" },
+    { key: "age", label: "Age" },
   ];
 
   const agentTabs: { key: TabKey; label: string }[] = [
@@ -164,6 +168,9 @@ export default function FilterModal({
         break;
       case "bloodGroup":
         if (selectedChip) filter = { type: "bloodGroup", value: selectedChip };
+        break;
+      case "age":
+        if (selectedChip) filter = { type: "age", value: selectedChip };
         break;
       case "rating":
         if (selectedChip) filter = { type: "rating", value: selectedChip };
@@ -301,6 +308,24 @@ export default function FilterModal({
             <Text style={styles.label}>Blood Group</Text>
             <XStack flexWrap="wrap" gap={8}>
               {BLOOD_GROUP_OPTIONS.map((opt) => (
+                <TouchableOpacity
+                  key={opt}
+                  onPress={debounce(() => setSelectedChip(selectedChip === opt ? null : opt))}
+                  style={[styles.chip, selectedChip === opt && styles.chipActive]}
+                >
+                  <Text style={[styles.chipText, selectedChip === opt && styles.chipTextActive]}>{opt}</Text>
+                </TouchableOpacity>
+              ))}
+            </XStack>
+          </YStack>
+        );
+
+      case "age":
+        return (
+          <YStack gap={10}>
+            <Text style={styles.label}>Age Range</Text>
+            <XStack flexWrap="wrap" gap={8}>
+              {["18-25", "26-30", "31-35", "36-40", "40+"].map((opt) => (
                 <TouchableOpacity
                   key={opt}
                   onPress={debounce(() => setSelectedChip(selectedChip === opt ? null : opt))}

@@ -1,6 +1,6 @@
-// components/chat/ChatInput.tsx
 import React, { useState } from "react";
-import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { View, TextInput, TouchableOpacity, StyleSheet, Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SendHorizontal } from "@tamagui/lucide-icons";
 
 interface ChatInputProps {
@@ -10,6 +10,7 @@ interface ChatInputProps {
 
 const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
   const [text, setText] = useState("");
+  const insets = useSafeAreaInsets();
 
   const handleSend = () => {
     if (!text.trim()) return;
@@ -18,7 +19,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: insets.bottom > 0 ? insets.bottom : 6 }]}>
       <TextInput
         style={styles.input}
         placeholder="Type a message..."
@@ -45,7 +46,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 12,
     paddingTop: 10,
-    paddingBottom: 6,
     borderTopWidth: 1,
     borderColor: "#eee",
     backgroundColor: "#fff",

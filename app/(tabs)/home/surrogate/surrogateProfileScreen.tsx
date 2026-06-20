@@ -23,29 +23,39 @@ import { ToastType } from "toastify-react-native/utils/interfaces";
 import { router, useLocalSearchParams } from "expo-router";
 import EmptyWalletModal from "@/components/modals/EmptyWalletModal";
 import { getSurrogateById } from "@/services/profileApi";
+import { resolveProfilePicture } from "@/utils/resolveMediaUrl";
 import { useAuthStore } from "@/store/auth";
 import { useWalletStore } from "@/store/wallet/walletStore";
-import { SURROGATE_TRANSACTIONS } from "@/types/surrogateTransactionTypes";
+import { useUnlock } from "@/hooks/useUnlock";
 import { SurrogateProfile } from "@/types/profile";
 
 export default function SurrogateProfileScreen() {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isUnlocked, setIsUnlocked] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
   const { user, token } = useAuthStore();
   console.log("current User:", user);
 
-  const { balance, debit, fetchBalance } = useWalletStore();
+  const { balance, fetchBalance } = useWalletStore();
 
   const params = useLocalSearchParams();
   const surrogateId = typeof params?.id === "string" ? params.id : null;
+  const fromNetwork = params.fromNetwork === "1";
 
   const [surrogate, setSurrogate] = useState<SurrogateProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const wallet = surrogate?.wallet?.balance ?? 0;
-  const transaction = SURROGATE_TRANSACTIONS.PROFILE_BOOST;
+
+  const {
+    isUnlocked: unlockStatus,
+    isProcessing,
+    fee: unlockFee,
+    unlock,
+  } = useUnlock({
+    targetUserId: surrogate?.userId ?? surrogate?.user?.id,
+    targetRole: "SURROGATE",
+  });
+
+  const isUnlocked = fromNetwork || unlockStatus;
 
   // Load backend profile
   useEffect(() => {
@@ -59,7 +69,7 @@ export default function SurrogateProfileScreen() {
 
   const handleChat = () => {
     if (isProcessing) return;
-    if (!surrogate?.user?.id) {
+    if (!surrogate?.userId && !surrogate?.user?.id) {
       Toast.show({
         text1: "Chat unavailable",
         text2: "This profile cannot be messaged yet",
@@ -71,7 +81,9 @@ export default function SurrogateProfileScreen() {
     router.push({
       pathname: "/(tabs)/chat/conversation",
       params: {
-        otherUserId: surrogate.user.id,
+        otherUserId: surrogate?.userId ?? surrogate?.user?.id,
+        surrogateId: surrogate?.id,
+        accessId: (surrogate as any)?.currentAccessId,
       },
     });
   };
@@ -88,20 +100,26 @@ export default function SurrogateProfileScreen() {
       setLoading(true);
 
       const response = await getSurrogateById(surrogateId);
-      console.log("Surrogate API response:", response);
+      console.log("[SurrogateProfile] Full API response:", JSON.stringify(response, null, 2));
 
-      if (response.data?.profile) {
-        setSurrogate(response.data.profile);
+      const profile = response?.profile ?? response?.data?.profile ?? response?.data ?? response;
+      console.log("[SurrogateProfile] Extracted profile keys:", Object.keys(profile || {}).join(", "));
+      if (profile?.profilePicture) {
+        profile.profilePicture = resolveProfilePicture(profile.profilePicture);
+      }
+
+      if (profile && profile.id) {
+        setSurrogate(profile);
       } else {
-        console.warn("No profile data in response");
+        console.warn("[SurrogateProfile] No valid profile data in response");
         setSurrogate(null);
         Toast.show({
           text1: "Surrogate not found",
           type: "customError" as ToastType,
         });
       }
-    } catch (error) {
-      console.log("Surrogate fetch error:", error);
+    } catch (error: any) {
+      console.error("[SurrogateProfile] Fetch error:", error?.response?.data || error?.message || error);
       setSurrogate(null);
       Toast.show({
         text1: "Failed to load surrogate profile",
@@ -112,21 +130,34 @@ export default function SurrogateProfileScreen() {
     }
   };
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     if (isProcessing) return;
-    if (wallet < transaction.amount) {
-      setShowWalletModal(true);
-      return;
-    } else {
-      setIsUnlocked(true);
-      setShowPaymentModal(false);
 
+    const result = await unlock();
+    setShowPaymentModal(false);
+
+    if (result.success) {
       Toast.show({
         text1: "Payment successful",
         type: "customSuccess" as ToastType,
-        text2: "You now have full access to agent data",
+        text2: "You now have full access to this profile",
       });
+    } else if (result.error) {
+      Toast.show({
+        text1: "Payment failed",
+        type: "customError" as ToastType,
+        text2: result.error,
+      });
+      if (result.error === "Insufficient balance") {
+        setShowWalletModal(true);
+      }
     }
+  };
+
+  const handleTopUp = () => {
+    if (isProcessing) return;
+    setShowWalletModal(false);
+    router.push("/walletFlow");
   };
 
   const HandleUseAgent = () => {
@@ -135,6 +166,13 @@ export default function SurrogateProfileScreen() {
   };
 
   const hasProfilePicture = !!surrogate?.profilePicture;
+
+  const galleryUrls: string[] = surrogate?.gallery?.filter(i => i?.url).map(i => i.url) ?? [];
+  const carouselImages: string[] = [
+    ...(hasProfilePicture && surrogate?.profilePicture ? [surrogate.profilePicture] : []),
+    ...galleryUrls,
+  ];
+  const hasCarouselImages = carouselImages.length > 0;
 
   // ---------------------------
   // FALLBACK MAPPED DATA
@@ -153,8 +191,8 @@ export default function SurrogateProfileScreen() {
     maritalStatus: surrogate?.maritalStatus ?? "Not specified",
     height: surrogate?.height ? `${surrogate.height} cm` : "N/A",
     weight: surrogate?.weight ? `${surrogate.weight} kg` : "N/A",
-    compensation: 0,
-    isNegotiable: false,
+    compensation: surrogate?.compensationAmount ?? 0,
+    isNegotiable: surrogate?.compensationNegotiable ?? false,
   };
 
   const aboutContent = surrogate?.aboutMe ?? "No description available";
@@ -250,11 +288,11 @@ export default function SurrogateProfileScreen() {
         >
           {/* IMAGE CAROUSEL */}
           <View style={styles.carouselContainer}>
-            {hasProfilePicture ? (
-              <ImageCarousel images={[surrogate!.profilePicture]} unlocked={isUnlocked} />
+            {hasCarouselImages ? (
+              <ImageCarousel images={carouselImages} unlocked={isUnlocked} />
             ) : (
               <View style={{ flex: 1, backgroundColor: "#E0E0E0", justifyContent: "center", alignItems: "center" }}>
-                <Text style={{ color: "#666", fontSize: 14 }}>Profile Picture</Text>
+                <Text style={{ color: "#666", fontSize: 14 }}>No images</Text>
               </View>
             )}
           </View>
@@ -282,10 +320,12 @@ export default function SurrogateProfileScreen() {
             unlockReport={() => setShowPaymentModal(true)}
           />
 
+          <SurrogacyExperienceSection data={experienceData} />
+
           {/* CONTACT */}
           <View style={styles.contactWrapper}>
             {isUnlocked ? (
-              <ContactSection data={contactData} />
+              <ContactSection data={contactData} isUnlocked onChat={handleChat} />
             ) : (
               <TouchableOpacity
                 onPress={() => setShowPaymentModal(true)}
@@ -299,24 +339,17 @@ export default function SurrogateProfileScreen() {
             )}
           </View>
 
-          <SurrogacyExperienceSection data={experienceData} />
+          <Text style={styles.anonymousHint}>If you want to stay anonymous to the surrogate, we recommend you use an agent</Text>
 
-          {/* UNLOCK BUTTON */}
           <TouchableOpacity
             onPress={() =>
               isUnlocked ? setShowChatModal(true) : setShowPaymentModal(true)
             }
-            style={styles.openNowButton}
+            style={styles.agentButton}
           >
-            <Text style={{ color: "white" }}>
-              {isUnlocked ? "Use an Agent" : "Unlock now"}
-            </Text>
-            <Entypo
-              name={isUnlocked ? "lock-open" : "lock"}
-              size={18}
-              color="white"
-            />
+            <Text style={styles.agentButtonText}>Use Agent</Text>
           </TouchableOpacity>
+          <Text style={styles.agentCaption}>Stay anonymous</Text>
         </ScrollView>
 
         {/* Modals */}
@@ -324,14 +357,20 @@ export default function SurrogateProfileScreen() {
           visible={showPaymentModal}
           onClose={() => setShowPaymentModal(false)}
         >
+          <Entypo name="lock-open" size={32} color={colors.primary} style={styles.lockIcon} />
           <Text style={styles.paymentDescription}>
-            You will be charged N50,000 from your wallet to start a conversation
-            with this surrogate.
+            You will be charged <Text style={styles.amountText}>₦{unlockFee?.amount?.toLocaleString() ?? "50,000"}</Text> from your wallet to unlock this profile.
           </Text>
           <Button style={styles.payButton} onPress={handlePayment} disabled={isProcessing}>
-            Pay N50,000 to unlock
+            Pay to unlock
           </Button>
         </PaymentModal>
+
+        <EmptyWalletModal
+          visible={showWalletModal}
+          onClose={() => setShowWalletModal(false)}
+          onTopUp={handleTopUp}
+        />
 
         <ChatMethodModal
           visible={showChatModal}
@@ -372,18 +411,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   lockedText: { color: "gray", fontSize: 14 },
+  lockIcon: {
+    textAlign: "center",
+    marginBottom: 16,
+  },
   paymentDescription: {
     textAlign: "center",
     color: "#444444",
     marginBottom: 12,
-    fontWeight: "700",
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  amountText: {
+    fontWeight: "800",
+    fontSize: 17,
+    color: "#222",
   },
   payButton: {
     backgroundColor: colors.primary,
     borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginVertical: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 24,
+    alignSelf: "center",
+    marginVertical: 8,
   },
   openNowButton: {
     flexDirection: "row",
@@ -394,5 +444,33 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     justifyContent: "center",
+  },
+  anonymousHint: {
+    color: "#000",
+    fontSize: 13,
+    textAlign: "center",
+    marginTop: 16,
+    marginBottom: 4,
+    paddingHorizontal: 20,
+  },
+  agentButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    paddingVertical: 14,
+    marginTop: -4,
+    alignSelf: "center",
+    paddingHorizontal: 30,
+  },
+  agentButtonText: {
+    color: "#fff",
+    fontSize: 17,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+  agentCaption: {
+    color: colors.gray,
+    fontSize: 12,
+    textAlign: "center",
+    marginTop: 6,
   },
 });

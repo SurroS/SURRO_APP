@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Modal,
+  StyleSheet,
 } from "react-native";
 import Animated, {
   useSharedValue,
@@ -39,6 +40,11 @@ interface CardStackProps {
   onRefresh: () => Promise<any>;
   fetchItems: (showToast?: boolean) => Promise<any>;
   role: "SURROGATE" | "AGENT";
+  onSaveProfile?: (surrogateId: string) => void;
+  savedIds?: Set<string>;
+  viewMode?: "all" | "matches" | "saved";
+  isParent?: boolean;
+  onViewModeChange?: (mode: "all" | "matches" | "saved") => void;
 }
 
 export default function CardStack({
@@ -52,6 +58,11 @@ export default function CardStack({
   onRefresh,
   fetchItems,
   role,
+  onSaveProfile,
+  savedIds,
+  viewMode,
+  isParent,
+  onViewModeChange,
 }: CardStackProps) {
   const insets = useSafeAreaInsets();
 
@@ -64,12 +75,62 @@ export default function CardStack({
   const translateY = useSharedValue(0);
   const rotate = useSharedValue(0);
   const cardEntryProgress = useSharedValue(1);
+  const heartScale = useSharedValue(1);
 
   const cardIndexRef = useRef(cardIndex);
 
   useEffect(() => {
     cardIndexRef.current = cardIndex;
   }, [cardIndex]);
+
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      if (viewMode === "saved" && !(savedIds?.has(item.id) ?? false)) {
+        return false;
+      }
+      if (!activeFilter) return true;
+      switch (activeFilter.type) {
+        case "country":
+          return (item.country || item.countryOfResidence || "").toLowerCase() === activeFilter.value.toLowerCase();
+        case "state":
+          return (item.stateOfResidence || item.state || "").toLowerCase() === activeFilter.value.toLowerCase();
+        case "lga":
+          return (item.lga || "").toLowerCase() === activeFilter.value.toLowerCase();
+        case "experience":
+          return (item.experienceLevel || "").toLowerCase() === activeFilter.value.toLowerCase();
+        case "genotype":
+          return (item.genotype || "").toLowerCase() === activeFilter.value.toLowerCase();
+        case "bloodGroup":
+          return (item.bloodGroup || "").toLowerCase() === activeFilter.value.toLowerCase();
+        case "age": {
+          const age = Number(item.age);
+          switch (activeFilter.value) {
+            case "18-25": return age >= 18 && age <= 25;
+            case "26-30": return age >= 26 && age <= 30;
+            case "31-35": return age >= 31 && age <= 35;
+            case "36-40": return age >= 36 && age <= 40;
+            case "40+": return age >= 41;
+            default: return true;
+          }
+        }
+        case "rating":
+          const min = parseFloat(activeFilter.value);
+          const rating = item.performance?.averageRating ?? 0;
+          return rating >= min;
+        case "specialization":
+          return (item.specialization || "").toLowerCase().includes(activeFilter.value.toLowerCase());
+        default:
+          return true;
+      }
+    });
+  }, [items, activeFilter, savedIds, viewMode]);
+
+  // Clamp cardIndex when items shrink (e.g. after refresh or filter)
+  useEffect(() => {
+    if (cardIndex >= filteredItems.length && filteredItems.length > 0) {
+      setCardIndex(0);
+    }
+  }, [filteredItems.length]);
 
   const goToNextCard = useCallback(() => {
     setCardIndex((prev) => prev + 1);
@@ -85,6 +146,20 @@ export default function CardStack({
     translateY.value = withSpring(0);
     rotate.value = withSpring(0);
   }, []);
+
+  const currentCard = filteredItems[cardIndex];
+
+  const handleSavePress = useCallback(() => {
+    if (!currentCard || !onSaveProfile) return;
+    heartScale.value = withSpring(1.3, {}, () => {
+      heartScale.value = withSpring(1);
+    });
+    onSaveProfile(currentCard.id);
+  }, [currentCard, onSaveProfile]);
+
+  const heartAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: heartScale.value }],
+  }));
 
   const panResponder = React.useMemo(
     () =>
@@ -116,34 +191,6 @@ export default function CardStack({
     [goToNextCard, resetCardPosition],
   );
 
-  const filteredItems = useMemo(() => {
-    if (!activeFilter) return items;
-    return items.filter((item) => {
-      switch (activeFilter.type) {
-        case "country":
-          return (item.country || item.countryOfResidence || "").toLowerCase() === activeFilter.value.toLowerCase();
-        case "state":
-          return (item.stateOfResidence || item.state || "").toLowerCase() === activeFilter.value.toLowerCase();
-        case "lga":
-          return (item.lga || "").toLowerCase() === activeFilter.value.toLowerCase();
-        case "experience":
-          return (item.experienceLevel || "").toLowerCase() === activeFilter.value.toLowerCase();
-        case "genotype":
-          return (item.genotype || "").toLowerCase() === activeFilter.value.toLowerCase();
-        case "bloodGroup":
-          return (item.bloodGroup || "").toLowerCase() === activeFilter.value.toLowerCase();
-        case "rating":
-          const min = parseFloat(activeFilter.value);
-          const rating = item.performance?.averageRating ?? 0;
-          return rating >= min;
-        case "specialization":
-          return (item.specialization || "").toLowerCase().includes(activeFilter.value.toLowerCase());
-        default:
-          return true;
-      }
-    });
-  }, [items, activeFilter]);
-
   // Show no-results modal when filter returns empty but full list has items
   useEffect(() => {
     if (activeFilter && filteredItems.length === 0 && items.length > 0) {
@@ -164,11 +211,6 @@ export default function CardStack({
       { rotate: `${rotate.value}deg` },
     ],
   }));
-
-  const renderFilterSummary = () => {
-    if (!activeFilter) return filterPlaceholder;
-    return `${activeFilter.type}: ${activeFilter.value}`;
-  };
 
   const handleViewProfile = useCallback(() => {
     const card = filteredItems[cardIndexRef.current];
@@ -209,14 +251,13 @@ export default function CardStack({
       );
     }
 
-    const currentCard = filteredItems[cardIndex];
     const nextCards = filteredItems.slice(cardIndex + 1, cardIndex + 3);
 
     return (
       <View style={{ flex: 1, alignItems: "center" }}>
-        {nextCards.map((card, idx) => {
-          const level = nextCards.length - 1 - idx;
-          const shrink = (level + 1) * BACK_CARD_STEP;
+        {nextCards.filter(Boolean).map((card, idx) => {
+          const shrink = (idx + 1) * BACK_CARD_STEP;
+          const z = nextCards.length - idx;
           return (
             <View
               key={card.id}
@@ -228,9 +269,9 @@ export default function CardStack({
                 overflow: "hidden",
                 backgroundColor: "#f0f0f0",
                 justifyContent: "flex-end",
-                top: CARD_TOP_OFFSET - (level + 1) * 14,
-                zIndex: 0,
-                elevation: 0,
+                top: CARD_TOP_OFFSET - (idx + 1) * 14,
+                zIndex: z,
+                elevation: z,
               }}
             >
               {renderCardContent(card)}
@@ -257,7 +298,7 @@ export default function CardStack({
           ]}
           {...panResponder.panHandlers}
         >
-          {renderCardContent(currentCard)}
+          {currentCard && renderCardContent(currentCard)}
         </Animated.View>
 
         {filteredItems.length > 1 && (
@@ -308,50 +349,89 @@ export default function CardStack({
     );
   }
 
+  type TabItem = { key: "filter" | "all" | "matches" | "saved"; label: string };
+
+  const parentTabs: TabItem[] = [
+    { key: "filter", label: "Filter" },
+    { key: "all", label: "All" },
+    { key: "matches", label: "Matches" },
+    { key: "saved", label: "Saved" },
+  ];
+
+  const agentTabs: TabItem[] = [
+    { key: "filter", label: "Filter" },
+    { key: "all", label: "All" },
+    { key: "saved", label: "Saved" },
+  ];
+
+  const tabs = isParent ? parentTabs : agentTabs;
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-      <View style={{ paddingLeft: 18 }}>
-        <ScreenHeader
-          title={title}
-          onBackPress={() => router.back()}
-        />
+      <View style={{ flexDirection: "row", alignItems: "center", paddingLeft: 10, paddingRight: 18 }}>
+        <View style={{ flex: 1 }}>
+          <ScreenHeader
+            title={title}
+            onBackPress={() => router.back()}
+          />
+        </View>
       </View>
 
-      {/* Filter bar */}
-      <TouchableOpacity
-        onPress={() => setIsFilterVisible(true)}
-        style={{
-          marginHorizontal: 20,
-          marginBottom: 16,
-          marginTop: 8,
-          borderWidth: 1,
-          borderColor: "#e0e0e0",
-          borderRadius: 10,
-          paddingHorizontal: 14,
-          paddingVertical: 12,
-          flexDirection: "row",
-          alignItems: "center",
-          backgroundColor: "#fafafa",
-        }}
-      >
-        <Ionicons
-          name="funnel-outline"
-          size={18}
-          color="#888"
-          style={{ marginRight: 8 }}
-        />
-        <Text
-          style={{
-            color: "#666",
-            fontSize: 14,
-            flex: 1,
-          }}
-          numberOfLines={1}
-        >
-          {renderFilterSummary()}
-        </Text>
-        <Ionicons name="chevron-down" size={18} color="#888" />
-      </TouchableOpacity>
+      {/* Mode toggle + Filter */}
+      {onViewModeChange && viewMode && (
+        <View style={styles.toggleBar}>
+          {tabs.map((tab) => {
+            if (tab.key === "filter") {
+              const isFilterActive = activeFilter !== null;
+              return (
+                <TouchableOpacity
+                  key="filter"
+                  onPress={() => setIsFilterVisible(true)}
+                  style={[
+                    styles.togglePill,
+                    styles.filterPill,
+                    isFilterActive && styles.filterPillActive,
+                  ]}
+                >
+                  <Ionicons
+                    name="funnel-outline"
+                    size={15}
+                    color={isFilterActive ? "#fff" : "#555"}
+                    style={{ marginRight: 4 }}
+                  />
+                  <Text
+                    style={[
+                      styles.togglePillText,
+                      isFilterActive && styles.togglePillTextActive,
+                    ]}
+                  >
+                    {isFilterActive ? `${activeFilter!.type}: ${activeFilter!.value}` : "Filter"}
+                  </Text>
+                </TouchableOpacity>
+              );
+            }
+            return (
+              <TouchableOpacity
+                key={tab.key}
+                onPress={() => onViewModeChange(tab.key)}
+                style={[
+                  styles.togglePill,
+                  viewMode === tab.key && styles.togglePillActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.togglePillText,
+                    viewMode === tab.key && styles.togglePillTextActive,
+                  ]}
+                >
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      )}
 
       <View style={{ flex: 1 }}>{renderCardStack()}</View>
 
@@ -359,33 +439,41 @@ export default function CardStack({
         <View
           style={{
             flexDirection: "row",
-            justifyContent: "space-around",
+            alignItems: "center",
             paddingHorizontal: 20,
             paddingBottom: Math.max(insets.bottom, 8) + 5,
             paddingTop: 10,
+            marginTop: 40,
             gap: 12,
           }}
         >
-          <TouchableOpacity
-            onPress={goToNextCard}
-            style={{
-              flex: 1,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-              paddingVertical: 14,
-              borderRadius: 12,
-              backgroundColor: "#f5f5f5",
-              borderWidth: 1,
-              borderColor: "#e0e0e0",
-            }}
-          >
-            <Ionicons name="close-outline" size={20} color="#999" />
-            <Text style={{ color: "#666", fontWeight: "600", fontSize: 15 }}>
-              Skip
-            </Text>
-          </TouchableOpacity>
+          {onSaveProfile && (
+            <TouchableOpacity
+              onPress={handleSavePress}
+              activeOpacity={0.7}
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                backgroundColor: "#fff",
+                alignItems: "center",
+                justifyContent: "center",
+                shadowColor: "#000",
+                shadowOpacity: 0.1,
+                shadowOffset: { width: 0, height: 2 },
+                shadowRadius: 4,
+                elevation: 3,
+              }}
+            >
+              <Animated.View style={heartAnimatedStyle}>
+                <Ionicons
+                  name={savedIds?.has(currentCard?.id) ? "heart" : "heart-outline"}
+                  size={26}
+                  color={savedIds?.has(currentCard?.id) ? "#FF3B30" : "#999"}
+                />
+              </Animated.View>
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity
             onPress={handleViewProfile}
@@ -445,3 +533,43 @@ export default function CardStack({
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  toggleBar: {
+    flexDirection: "row",
+    justifyContent: "center",
+    paddingVertical: 10,
+    gap: 8,
+    backgroundColor: "#fff",
+  },
+  togglePill: {
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    backgroundColor: "#fff",
+  },
+  togglePillActive: {
+    backgroundColor: "#0E0E55",
+    borderColor: "#0E0E55",
+  },
+  togglePillText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#555",
+  },
+  togglePillTextActive: {
+    color: "#fff",
+  },
+  filterPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderColor: colors.primary,
+    backgroundColor: "#fff",
+  },
+  filterPillActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+});

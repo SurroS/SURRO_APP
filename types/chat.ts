@@ -32,6 +32,8 @@ export interface Message {
 
 export interface CreateConversationRequest {
   otherUserId: string;
+  surrogateId?: string;
+  accessId?: string;
 }
 
 export interface SendMessageRequest {

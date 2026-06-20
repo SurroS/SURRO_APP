@@ -19,8 +19,9 @@ interface Props {
   compensation: number;
   isNegotiable: boolean;
 
-  onChatPress: () => void;
+  onChatPress?: () => void;
   isUnlocked: boolean;
+  hideActions?: boolean;
 }
 
 export default function HeaderInfo({
@@ -37,6 +38,7 @@ export default function HeaderInfo({
   onChatPress,
   isUnlocked,
   currency,
+  hideActions,
 }: Props) {
   return (
     <View style={styles.container}>
@@ -92,20 +94,21 @@ export default function HeaderInfo({
         </Text>
       </View>
 
-      {/* ACTION BUTTON */}
-      <Button
-        style={styles.chatButton}
-        iconAfter={
-          isUnlocked ? (
-            <Entypo name="lock-open" size={18} color="white" />
-          ) : (
-            <Entypo name="lock" size={18} color="white" />
-          )
-        }
-        onPress={onChatPress}
-      >
-        {isUnlocked ? "Chat now" : "Unlock to chat"}
-      </Button>
+      {!hideActions && onChatPress && (
+        <Button
+          style={styles.chatButton}
+          iconAfter={
+            isUnlocked ? (
+              <Entypo name="lock-open" size={18} color="white" />
+            ) : (
+              <Entypo name="lock" size={18} color="white" />
+            )
+          }
+          onPress={onChatPress}
+        >
+          {isUnlocked ? "Chat now" : "Unlock to chat"}
+        </Button>
+      )}
     </View>
   );
 }

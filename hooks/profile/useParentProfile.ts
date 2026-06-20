@@ -4,19 +4,14 @@ import {
   createParentProfile,
   updateParentProfile,
   saveParentSurrogateMatch,
+  deleteSavedParentSurrogateMatch,
+  GetsavedParentSurrogateMatch,
   updateParentMatchPreference,
 } from "@/services/profileApi";
 import { useAuthStore } from "@/store/auth";
-import { Platform } from "react-native";
+import { resolveProfilePicture } from "@/utils/resolveMediaUrl";
 
 let cachedProfile: any = null;
-
-const resolveProfilePicture = (url: string | null | undefined) => {
-  if (!url) return null;
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  const base = process.env.EXPO_PUBLIC_API_URL?.replace(/\/+$/, "");
-  return base ? `${base}${url.startsWith("/") ? "" : "/"}${url}` : url;
-};
 
 export const useParentProfile = () => {
   const [parentProfile, setParentProfile] = useState<any>(cachedProfile);
@@ -137,6 +132,28 @@ export const useParentProfile = () => {
     }
   };
 
+  // -------------------------
+  // REMOVE SAVED SURROGATE
+  // -------------------------
+  const removeSavedSurrogate = async (surrogateId: string) => {
+    setIsLoading(true);
+    try {
+      return await deleteSavedParentSurrogateMatch(surrogateId);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // -------------------------
+  // FETCH SAVED SURROGATES
+  // -------------------------
+  const fetchSavedSurrogates = async () => {
+    const res = await GetsavedParentSurrogateMatch({});
+    const raw = Array.isArray(res) ? res : res?.data ?? res?.results ?? [];
+    console.log("[ParentProfile] Saved surrogates:", raw.length);
+    return raw;
+  };
+
   return {
     parentProfile,
     isLoading,
@@ -147,6 +164,8 @@ export const useParentProfile = () => {
     updateProfile,
     updateParentProfile: updateProfile,
     saveParentSurrogate,
+    removeSavedSurrogate,
+    fetchSavedSurrogates,
     updateMatchPreference,
   };
 };

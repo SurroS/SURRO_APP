@@ -27,7 +27,8 @@ const ProfileHeader = ({
     await onToggleAvailability(!isAvailable);
   };
 
-  const showFallback = !avatarUrl || imgFailed;
+  const noImage = !avatarUrl;
+  const showFallback = noImage || imgFailed;
 
   return (
     <XStack margin={2} gap="$4" alignItems="flex-start" height={150} flex={1}>
@@ -42,9 +43,11 @@ const ProfileHeader = ({
             alignItems: "center",
           }}
         >
-          <Text style={{ color: "#666", fontSize: 12, textAlign: "center" }}>
-            Profile Picture
-          </Text>
+          {noImage && (
+            <Text style={{ color: "#666", fontSize: 12, textAlign: "center" }}>
+              Profile Picture
+            </Text>
+          )}
         </View>
       ) : (
         <Image

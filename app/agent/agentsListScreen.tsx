@@ -6,6 +6,7 @@ import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { router } from "expo-router";
 import CardStack from "@/components/cards/CardStack";
+import { resolveProfilePicture } from "@/utils/resolveMediaUrl";
 
 const getAge = (dob?: string | null): string => {
   if (!dob) return "?";
@@ -24,7 +25,7 @@ const normalizeAgent = (a: any): any => ({
     a.userName ?? a.username ?? a.user?.userName ?? a.firstName
       ? `${a.firstName ?? ""} ${a.lastName ?? ""}`.trim()
       : "",
-  avatar: a.avatar ?? a.profilePicture ?? a.profilePictureUrl ?? "",
+  avatar: resolveProfilePicture(a.avatar ?? a.profilePicture ?? a.profilePictureUrl ?? "") ?? "",
   age: a.age ? a.age.toString() : getAge(a.dateOfBirth ?? a.dob),
   stateOfResidence: a.stateOfResidence ?? a.state ?? "",
   country: a.countryOfResidence ?? a.country ?? "",
@@ -111,7 +112,7 @@ export default function AgentsListScreen() {
   const handleViewProfile = useCallback(
     (card: any) => {
       router.push({
-        pathname: "/(tabs)/home/agent/agentsProfileScreen",
+        pathname: "/agent/agentProfileScreen",
         params: { id: card.id },
       });
     },

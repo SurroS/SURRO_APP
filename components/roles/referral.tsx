@@ -9,7 +9,7 @@ const Referral = ({ style }: { style?: any }) => {
   const { user } = useAuth();
 
   const handleInvite = () => {
-    router.push("/home/inviteScreen");
+    router.push("/inviteScreen");
   };
 
   return (

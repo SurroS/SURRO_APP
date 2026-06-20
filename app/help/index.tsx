@@ -15,6 +15,7 @@ import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScreenHeader } from "@/components/auth";
 import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
+import { useAuth } from "@/hooks/useAuth";
 
 interface HelpTopic {
   id: string;
@@ -62,22 +63,37 @@ const helpTopics: HelpTopic[] = [
   },
 ];
 
-const popularArticles: ArticleItem[] = [
-  {
-    id: "article1",
-    title: "Getting the best representative as  a\n surrogate",
-    route: "/help/getStarted",
-  },
-  {
-    id: "article2",
-    title: "My experience as a surrogate",
-    route: "/help/gettingmatched",
-  },
+const surrogateFaqs: ArticleItem[] = [
+  { id: "sf1", title: "How secure is my data?", route: "/help/faq" },
+  { id: "sf2", title: "What medical checks are required?", route: "/help/faq" },
+  { id: "sf3", title: "How do I get verified?", route: "/help/faq" },
+  { id: "sf4", title: "What if I need to withdraw from a match?", route: "/help/faq" },
+];
+
+const parentFaqs: ArticleItem[] = [
+  { id: "pf1", title: "How do I find a surrogate?", route: "/help/faq" },
+  { id: "pf2", title: "What if a surrogate doesn\u2019t respond?", route: "/help/faq" },
+  { id: "pf3", title: "How do I top up my wallet?", route: "/help/faq" },
+  { id: "pf4", title: "Can I get a refund?", route: "/help/faq" },
+];
+
+const agentFaqs: ArticleItem[] = [
+  { id: "af1", title: "How do I get verified as an agent?", route: "/help/faq" },
+  { id: "af2", title: "Can I represent both sides?", route: "/help/faq" },
+  { id: "af3", title: "How do I find clients?", route: "/help/faq" },
+  { id: "af4", title: "What if a client backs out?", route: "/help/faq" },
 ];
 
 export default function HelpCentreScreen(): React.ReactElement {
   const router = useRouter();
+  const { user } = useAuth();
+  const role = user?.role?.trim();
   const [refreshing, setRefreshing] = useState(false);
+
+  const faqs = role === "SURROGATE" ? surrogateFaqs
+    : role === "INTENDED_PARENT" ? parentFaqs
+    : role === "AGENT" ? agentFaqs
+    : surrogateFaqs;
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -130,24 +146,24 @@ export default function HelpCentreScreen(): React.ReactElement {
           ))}
         </YStack>
 
-        {/* Popular Articles */}
+        {/* FAQ */}
         <YStack marginTop={25}>
-          <Text style={styles.sectionTitle}>Popular articles</Text>
-          {popularArticles.map((article) => (
+          <Text style={styles.sectionTitle}>FAQ</Text>
+          {faqs.map((faq) => (
             <TouchableOpacity
-              key={article.id}
+              key={faq.id}
               style={styles.articleCard}
               activeOpacity={0.7}
-              onPress={() => router.push(article.route)}
+              onPress={() => router.push(faq.route)}
             >
               <XStack alignItems="center">
-                <MaterialCommunityIcons
-                  name="file-document-outline"
+                <Ionicons
+                  name="help-circle-outline"
                   size={22}
                   color="#1E1E80"
                   style={styles.articleIcon}
                 />
-                <Text style={styles.articleTitle}>{article.title}</Text>
+                <Text style={styles.articleTitle}>{faq.title}</Text>
               </XStack>
               <Ionicons name="chevron-forward" size={18} color="#999" />
             </TouchableOpacity>

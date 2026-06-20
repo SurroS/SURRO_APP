@@ -4,6 +4,7 @@ export default function AgentLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="agentsListScreen" />
+      <Stack.Screen name="agentProfileScreen" />
     </Stack>
   );
 }

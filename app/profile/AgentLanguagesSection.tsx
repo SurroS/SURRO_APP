@@ -8,6 +8,7 @@ import colors from "@/hooks/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
+import languagesData from "@/utils/languages.json";
 
 export default function AgentLanguageSection() {
   const [isSaving, setIsSaving] = useState(false);
@@ -20,44 +21,11 @@ export default function AgentLanguageSection() {
   const triggerRef = useRef<View>(null);
   const [popoverWidth, setPopoverWidth] = useState(200);
 
-  // Fetch languages
+  // Load languages from embedded dataset
   useEffect(() => {
-    const fetchLanguages = async () => {
-      try {
-        const res = await fetch("https://restcountries.com/v3.1/all");
-        const data: any[] = await res.json();
-
-        if (!Array.isArray(data)) throw new Error("Invalid API response");
-
-        const langsSet = new Set<string>();
-        data.forEach((country) => {
-          if (country?.languages && typeof country.languages === "object") {
-            Object.values(country.languages).forEach((lang) => {
-              if (typeof lang === "string") langsSet.add(lang);
-            });
-          }
-        });
-
-        const langsArray = Array.from(langsSet).sort();
-        setAllLanguages(langsArray);
-        setFilteredLanguages(langsArray);
-      } catch (err) {
-        console.error("Error fetching languages:", err);
-        const fallback = [
-          "English",
-          "French",
-          "Spanish",
-          "Arabic",
-          "Yoruba",
-          "Hausa",
-          "Igbo",
-        ];
-        setAllLanguages(fallback);
-        setFilteredLanguages(fallback);
-      }
-    };
-
-    fetchLanguages();
+    const sorted = [...languagesData].sort();
+    setAllLanguages(sorted);
+    setFilteredLanguages(sorted);
   }, []);
 
   // Filter languages

@@ -1,6 +1,11 @@
 import { create } from "zustand";
 import { AppNotification } from "./types";
-import { getNotifications, BackendNotification } from "@/services/notificationApi";
+import {
+  getNotifications,
+  BackendNotification,
+  markNotificationRead as apiMarkRead,
+  deleteNotification as apiDeleteNotification,
+} from "@/services/notificationApi";
 
 const generateId = () =>
   `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -70,13 +75,18 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
     }
   },
 
-  markRead: (id) => {
+  markRead: async (id) => {
     console.log("[Notif] markRead:", id);
-    set((state) => ({
-      notifications: state.notifications.map((n) =>
-        n.id === id ? { ...n, read: true } : n
-      ),
-    }));
+    try {
+      await apiMarkRead(id);
+      set((state) => ({
+        notifications: state.notifications.map((n) =>
+          n.id === id ? { ...n, read: true } : n
+        ),
+      }));
+    } catch (err) {
+      console.log("[Notif] markRead API error:", err);
+    }
   },
 
   deleteNotification: (id) => {
@@ -85,6 +95,9 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
       notifications: state.notifications.filter((n) => n.id !== id),
       selected: state.selected.filter((s) => s !== id),
     }));
+    apiDeleteNotification(id).catch((err) =>
+      console.log("[Notif] deleteNotification API error:", err)
+    );
   },
 
   selectNotification: (id) =>

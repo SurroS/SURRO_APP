@@ -1,13 +1,12 @@
 import { ChevronDown } from "@tamagui/lucide-icons";
 import React, { useEffect, useState, useCallback } from "react";
-import { ScrollView, StyleSheet, Pressable, RefreshControl } from "react-native";
+import { View, ScrollView, StyleSheet, Pressable, RefreshControl } from "react-native";
 import Animated, {
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
 import { Accordion, Text, XStack, YStack } from "tamagui";
 import { router } from "expo-router";
-
 import About from "@/components/roles/about";
 import Contact from "@/components/roles/contact";
 import ProgressMeter from "@/components/roles/progressCircle";
@@ -20,6 +19,7 @@ import { calculateProfileProgress } from "@/utils/profileHelpers";
 import { useParentProfile } from "@/hooks/profile/useParentProfile";
 import { useAuth } from "@/hooks/useAuth";
 import ProfileData from "@/components/profileDetails/ProfileData";
+import HomeResourceCard from "@/components/resources/HomeResourceCard";
 
 export default function ParentScreen() {
   const { parentProfile, fetchProfile, isLoading } = useParentProfile();
@@ -113,9 +113,10 @@ export default function ParentScreen() {
             <Pressable onPress={ViewAgents} style={{ marginRight: 5 }}>
               <AgentPreview style={{ height: 200, padding: 2, width: 150 }} />
             </Pressable>
+
           </ScrollView>
 
-          {/* Floating Cards */}
+          {/* Floating Cards - 2x2 grid */}
           <XStack
             flexWrap="wrap"
             justifyContent="flex-end"
@@ -126,11 +127,12 @@ export default function ParentScreen() {
               <WalletCard style={{ width: "100%", height: 100 }} />
               <ProgressMeter
                 progress={progress}
-                style={{ width: "100%", height: 210 }}
+                style={{ width: "100%", height: 160 }}
               />
             </YStack>
 
             <YStack width={"48%"} gap={10}>
+              <HomeResourceCard />
               <Referral style={{ width: "100%", height: 160 }} />
             </YStack>
           </XStack>
@@ -189,4 +191,5 @@ function AccordionTriggerWithChevron({ title }: { title: string }) {
 
 const styles = StyleSheet.create({
   container: { paddingBottom: 40 },
+
 });
