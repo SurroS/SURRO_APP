@@ -2,7 +2,7 @@ import React from "react";
 import { YStack, Text } from "tamagui";
 import RoleCommonProfile from "@/components/editBio/RoleCommonProfile";
 import InfoRowCard from "@/components/editBio/InfoRowCard";
-import { Briefcase, MapPin, Globe, ListChecks, FileText } from "@tamagui/lucide-icons";
+import { Briefcase, MapPin, Globe, ListChecks, Award } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
 
 interface AgentBioProps {
@@ -15,6 +15,7 @@ interface AgentBioProps {
   specializations?: string[];
   coverage?: string[];
   languages?: string[];
+  certifications?: string[];
 }
 
 export default function AgentBio({
@@ -25,6 +26,7 @@ export default function AgentBio({
   specializations,
   coverage,
   languages,
+  certifications,
 }: AgentBioProps) {
   return (
     <YStack gap="$4" width="100%">
@@ -90,11 +92,19 @@ export default function AgentBio({
         }
       />
 
+      {/* CERTIFICATIONS */}
+
       <InfoRowCard
-        title="Profile Summary"
-        subtitle="View your complete profile"
-        icon={FileText}
-        onPress={() => router.navigate("/medical/medicalHistorySummary")}
+        title="Certifications"
+        subtitle={
+          certifications?.length
+            ? certifications.join(", ")
+            : "Add your certifications"
+        }
+        icon={Award}
+        onPress={() =>
+          router.push("/profile/AgentCertificationSection")
+        }
       />
     </YStack>
   );

@@ -88,19 +88,18 @@ const CardContent = ({ card }: { card: any }) => (
 type ViewMode = "all" | "matches" | "saved";
 
 export default function SurrogateList() {
-  const { surrogates, fetchSurrogates, fetchMatches, isLoading, setSurrogates, setLoading, clearSurrogates } = useSurrogateStore();
+  const { surrogates, fetchSurrogates, fetchMatches, isLoading, setSurrogates, setLoading, clearSurrogates, savedIds, setSavedIds, addSavedId, removeSavedId } = useSurrogateStore();
   const { user } = useAuth();
   const { saveParentSurrogate, removeSavedSurrogate, fetchSavedSurrogates } = useParentProfile();
   const isParent = user?.role?.trim() === "INTENDED_PARENT";
   const [initialLoadDone, setInitialLoadDone] = useState(false);
-  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<ViewMode>("all");
 
   useEffect(() => {
     if (!isParent || initialLoadDone) return;
     fetchSavedSurrogates().then((saved) => {
       const ids = saved.map((s: any) => (s.surrogate ?? s).id ?? s.surrogateId).filter(Boolean);
-      setSavedIds(new Set(ids));
+      setSavedIds(ids);
     }).catch(() => {});
   }, []);
 
@@ -155,7 +154,7 @@ export default function SurrogateList() {
         });
         setSurrogates(mapped);
         const ids = mapped.map((p: any) => p.id).filter(Boolean);
-        setSavedIds(new Set(ids));
+        setSavedIds(ids);
       } catch (e) {
         console.error("[SurrogateList] Failed to load saved:", e);
       } finally {
@@ -166,15 +165,15 @@ export default function SurrogateList() {
 
   const handleSaveProfile = useCallback(async (surrogateId: string) => {
     try {
-      if (savedIds.has(surrogateId)) {
+      if (savedIds?.has(surrogateId)) {
         await removeSavedSurrogate(surrogateId);
-        setSavedIds(prev => { const next = new Set(prev); next.delete(surrogateId); return next; });
+        removeSavedId(surrogateId);
       } else {
         await saveParentSurrogate({ surrogateId });
-        setSavedIds(prev => new Set(prev).add(surrogateId));
+        addSavedId(surrogateId);
       }
     } catch {}
-  }, [savedIds, saveParentSurrogate, removeSavedSurrogate]);
+  }, [savedIds, saveParentSurrogate, removeSavedSurrogate, addSavedId, removeSavedId]);
 
   const handleViewProfile = useCallback(
     async (card: any) => {

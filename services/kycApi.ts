@@ -43,7 +43,7 @@ export const submitKYC = async (
   }
 
   // Use httpClient directly for multipart/form-data (bypasses JSON Content-Type)
-  const response = await httpClient.post("/api/v1/kyc/submit", formData, {
+  const response = await httpClient.post("/kyc/submit", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -56,7 +56,7 @@ export const submitKYC = async (
  * Get current KYC status
  */
 export const getKYCStatus = async () => {
-  return authenticatedGet("/api/v1/kyc/status");
+  return authenticatedGet("/kyc/status");
 };
 
 // Legacy wrapper for backward compatibility (remove after updating all usages)

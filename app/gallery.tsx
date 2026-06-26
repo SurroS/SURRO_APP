@@ -14,6 +14,7 @@ import { useRouter } from "expo-router";
 import BottomModal from "@/components/modals/BottomModal";
 import { useGallery } from "@/hooks/useGallery";
 import { SafeAreaView } from "react-native-safe-area-context";
+import ImageCropperModal from "@/components/ImageCropperModal";
 
 export default function GalleryScreen() {
   const router = useRouter();
@@ -32,6 +33,8 @@ export default function GalleryScreen() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showUploadSuccess, setShowUploadSuccess] = useState(false);
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+  const [cropperImageUri, setCropperImageUri] = useState<string | null>(null);
+  const [showCropper, setShowCropper] = useState(false);
 
   const safeGalleryImages = Array.isArray(galleryImages)
     ? galleryImages.filter((img) => img && img.url)
@@ -63,26 +66,38 @@ export default function GalleryScreen() {
 
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
-      allowsEditing: true,
       quality: 1,
     });
 
     if (!res.canceled && res.assets?.length) {
-      try {
-        const formData = new FormData();
-        formData.append("files", {
-          uri: res.assets[0].uri,
-          type: "image/jpeg",
-          name: "image.jpg",
-        } as any);
-
-        await uploadImage(formData);
-        setShowUploadSuccess(true);
-        setTimeout(() => setShowUploadSuccess(false), 1500);
-      } catch (error) {
-        console.error("Error uploading image:", error);
-      }
+      setCropperImageUri(res.assets[0].uri);
+      setShowCropper(true);
     }
+  };
+
+  const handleCropComplete = async (croppedUri: string) => {
+    try {
+      const formData = new FormData();
+      formData.append("files", {
+        uri: croppedUri,
+        type: "image/jpeg",
+        name: "image.jpg",
+      } as any);
+
+      await uploadImage(formData);
+      setShowUploadSuccess(true);
+      setTimeout(() => setShowUploadSuccess(false), 1500);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    } finally {
+      setShowCropper(false);
+      setCropperImageUri(null);
+    }
+  };
+
+  const handleCropperCancel = () => {
+    setShowCropper(false);
+    setCropperImageUri(null);
   };
 
   const handleLongPress = (index: number) => {
@@ -262,6 +277,13 @@ export default function GalleryScreen() {
           title="Deleted"
           message="Image(s) removed successfully."
           onClose={() => setShowDeleteSuccess(false)}
+        />
+
+        <ImageCropperModal
+          visible={showCropper}
+          imageUri={cropperImageUri || ""}
+          onCrop={handleCropComplete}
+          onCancel={handleCropperCancel}
         />
       </View>
     </SafeAreaView>

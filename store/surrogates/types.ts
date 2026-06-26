@@ -36,6 +36,12 @@ export interface SurrogateListActions {
   setLoading: (val: boolean) => void;
   setError: (err: string | null) => void;
   clearSurrogates: () => void;
+  // Saved items (for intended-parents)
+  savedIds: Set<string>;
+  fetchSavedIds: () => Promise<void>;
+  setSavedIds: (ids: string[] | Set<string>) => void;
+  addSavedId: (id: string) => void;
+  removeSavedId: (id: string) => void;
 }
 
 // Combined type

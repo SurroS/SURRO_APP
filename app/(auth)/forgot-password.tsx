@@ -1,6 +1,8 @@
 import { useRouter } from "expo-router";
-import { Alert, ScrollView, StyleSheet, Text } from "react-native";
+import { ScrollView, StyleSheet, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useState } from "react";
+import AlertModal from "@/components/modals/AlertModal";
 import { InputField } from "@/components/auth/InputField";
 import { PrimaryButton } from "@/components/auth/PrimaryButton";
 import { ScreenHeader } from "@/components/navigation/ScreenHeader";
@@ -15,6 +17,7 @@ export default function ForgotPasswordScreen() {
   const router = useRouter();
   const { email, error, updateEmail, validateForm } = useForgotPasswordForm();
   const { forgotPassword, isLoading, resetPassword} = useAuth();
+  const [alertVisible, setAlertVisible] = useState(false);
 
   const handleForgotPassword = async () => {
     if (!validateForm()) {
@@ -23,11 +26,7 @@ export default function ForgotPasswordScreen() {
 
     try {
       await forgotPassword({ email });
-      Alert.alert("Success", "Password reset instructions sent to your email.");
-      console.log(updateEmail);
-      console.log(validateForm);
-      console.log(email); 
-      // Navigation will be handled by the auth store state changes
+      setAlertVisible(true);
     } catch (err) {
       Toast.show({
         text1: "Password reset instructions sent to your email.",
@@ -75,6 +74,15 @@ export default function ForgotPasswordScreen() {
           loading={isLoading}
         />
         </ScrollView>
+        <AlertModal
+          visible={alertVisible}
+          title="Success"
+          message="Password reset instructions sent to your email."
+          onClose={() => {
+            setAlertVisible(false);
+            router.push("/otp");
+          }}
+        />
       </SafeAreaView>
     </KeyboardAvoidingWrapper>
   );

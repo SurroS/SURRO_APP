@@ -71,6 +71,7 @@ export const createSurrogateSlice: StateCreator<
   surrogates: [],
   isLoading: false,
   error: null,
+  savedIds: new Set<string>(),
 
   setSurrogates: (data) => set({ surrogates: data }),
 
@@ -79,6 +80,28 @@ export const createSurrogateSlice: StateCreator<
   setError: (err) => set({ error: err }),
 
   clearSurrogates: () => set({ surrogates: [], error: null }),
+
+  fetchSavedIds: async () => {
+    // noop placeholder - actual saved list comes from parent profile hooks
+    set({});
+  },
+
+  setSavedIds: (ids: string[] | Set<string>) => {
+    const next = ids instanceof Set ? ids : new Set(ids);
+    set({ savedIds: next });
+  },
+
+  addSavedId: (id: string) => {
+    set((s: any) => ({ savedIds: new Set([...(s.savedIds || []), id]) }));
+  },
+
+  removeSavedId: (id: string) => {
+    set((s: any) => {
+      const next = new Set(s.savedIds || []);
+      next.delete(id);
+      return { savedIds: next };
+    });
+  },
 
   async fetchMatches() {
     try {

@@ -21,15 +21,12 @@ const cardImageSource = (avatar: any) =>
 
 const normalizeAgent = (a: any): any => ({
   id: a.id || "",
-  userName:
-    a.userName ?? a.username ?? a.user?.userName ?? a.firstName
-      ? `${a.firstName ?? ""} ${a.lastName ?? ""}`.trim()
-      : "",
+  userName: a.userName ?? a.username ?? a.user?.userName ?? a.fullName ?? "",
   avatar: resolveProfilePicture(a.avatar ?? a.profilePicture ?? a.profilePictureUrl ?? "") ?? "",
   age: a.age ? a.age.toString() : getAge(a.dateOfBirth ?? a.dob),
-  stateOfResidence: a.stateOfResidence ?? a.state ?? "",
-  country: a.countryOfResidence ?? a.country ?? "",
-  bio: a.aboutMe ?? a.bio ?? "",
+  stateOfResidence: a.state ?? "",
+  country: a.country ?? "",
+  bio: a.about ?? a.bio ?? "",
 });
 
 const CardContent = ({ card }: { card: any }) => (

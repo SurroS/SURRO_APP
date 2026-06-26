@@ -28,6 +28,7 @@ import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
 import { useParentProfile } from "@/hooks/profile/useParentProfile";
 import { uploadAvatar } from "@/services/profileApi";
 import { resolveProfilePicture } from "@/utils/resolveMediaUrl";
+import ImageCropperModal from "@/components/ImageCropperModal";
 
 import AgentBio from "@/components/roles/agent/AgentBio";
 import ParentBio from "@/components/roles/parent/ParentBio";
@@ -40,6 +41,8 @@ export default function EditBioView() {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [initialFetchDone, setInitialFetchDone] = useState(false);
+  const [cropperImageUri, setCropperImageUri] = useState<string | null>(null);
+  const [showCropper, setShowCropper] = useState(false);
 
   const { logout, user, setUser } = useAuth();
   const Role = user?.role?.trim();
@@ -184,37 +187,13 @@ export default function EditBioView() {
       }
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
         quality: 0.8,
       });
 
       if (!result.canceled) {
         const uri = result.assets[0].uri;
-
-        const formData = new FormData();
-        formData.append("file", {
-          uri,
-          type: "image/jpeg",
-          name: "avatar.jpg",
-        } as any);
-
-        setIsLoading(true);
-        const avatarRes = await uploadAvatar(formData);
-        const avatarUrl = resolveProfilePicture(avatarRes?.url || avatarRes?.data?.url);
-        if (avatarUrl) {
-          await updateCurrentProfile({ profilePicture: avatarUrl });
-          setProfileImage(avatarUrl);
-          setUser({ avatar: avatarUrl, profilePictureUrl: avatarUrl });
-        }
-        await fetchCurrentProfile(true);
-        setProfileImage(null);
-        setIsLoading(false);
-
-        Toast.show({
-          text1: "Profile picture updated!",
-          type: "customSuccess" as ToastType,
-        });
+        setCropperImageUri(uri);
+        setShowCropper(true);
       }
     } catch (err) {
       console.error(err);
@@ -224,6 +203,52 @@ export default function EditBioView() {
         type: "customError" as ToastType,
       });
     }
+  };
+
+  // -------------------------------
+  // Handle cropped image from custom cropper
+  // -------------------------------
+  const handleCropComplete = async (croppedUri: string) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", {
+        uri: croppedUri,
+        type: "image/jpeg",
+        name: "avatar.jpg",
+      } as any);
+
+      setIsLoading(true);
+      const avatarRes = await uploadAvatar(formData);
+      const avatarUrl = resolveProfilePicture(avatarRes?.url || avatarRes?.data?.url);
+      if (avatarUrl) {
+        await updateCurrentProfile({ profilePictureUrl: avatarUrl });
+        setProfileImage(avatarUrl);
+        setUser({ avatar: avatarUrl, profilePictureUrl: avatarUrl });
+      }
+      await fetchCurrentProfile(true);
+      setProfileImage(null);
+      setIsLoading(false);
+
+      Toast.show({
+        text1: "Profile picture updated!",
+        type: "customSuccess" as ToastType,
+      });
+    } catch (err) {
+      console.error(err);
+      Toast.show({
+        text1: "Error",
+        text2: "Something went wrong while updating your profile picture.",
+        type: "customError" as ToastType,
+      });
+    } finally {
+      setShowCropper(false);
+      setCropperImageUri(null);
+    }
+  };
+
+  const handleCropperCancel = () => {
+    setShowCropper(false);
+    setCropperImageUri(null);
   };
 
   // -------------------------------
@@ -288,6 +313,11 @@ export default function EditBioView() {
             profileImage={getProfileImageSrc(agentProfile?.profilePicture)}
             onChangePicture={handleChangePicture}
             onEditBio={handleOpenModal}
+            experience={agentProfile?.additionalDetails?.yearsOfExperience}
+            specializations={agentProfile?.services}
+            coverage={agentProfile?.additionalDetails?.coverage ? [agentProfile.additionalDetails.coverage] : undefined}
+            languages={agentProfile?.languages}
+            certifications={agentProfile?.certifications?.map((c: any) => c.name || c.title)}
           />
         );
       case "INTENDED_PARENT":
@@ -382,16 +412,25 @@ export default function EditBioView() {
         </YStack>
       </ScrollView>
 
-      {/* Edit Profile Modal */}
-      {isModalVisible && (
-        <EditProfileModal
-          isLoading={isLoading}
-          visible={isModalVisible}
-          onClose={() => setIsModalVisible(false)}
-          onSave={handleSaveBio}
-          profile={uiProfile}
-        />
-      )}
+       {/* Edit Profile Modal */}
+       {isModalVisible && (
+         <EditProfileModal
+           isLoading={isLoading}
+           visible={isModalVisible}
+           onClose={() => setIsModalVisible(false)}
+           onSave={handleSaveBio}
+           profile={uiProfile}
+           role={Role}
+         />
+       )}
+
+      <ImageCropperModal
+        visible={showCropper}
+        imageUri={cropperImageUri || ""}
+        aspect={[1, 1]}
+        onCrop={handleCropComplete}
+        onCancel={handleCropperCancel}
+      />
       </>
       )}
     </SafeAreaView>

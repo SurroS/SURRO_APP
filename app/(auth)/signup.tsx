@@ -36,7 +36,7 @@ GoogleSignin.configure({
 
 export default function SignupScreen() {
   const router = useRouter();
-  const { signupFormData, errors, updateField, validateForm } = useSignupForm();
+  const { signupFormData, errors, passwordRules, updateField, validateForm } = useSignupForm();
   const { register, googleLogin, isLoading } = useAuth();
 
   // Handle Google Sign-Up
@@ -151,6 +151,23 @@ export default function SignupScreen() {
             errorMessage={errors.password}
           />
 
+          {signupFormData.password.length > 0 && (
+            <View style={styles.passwordRules}>
+              {passwordRules.map((rule, i) => (
+                <View key={i} style={styles.passwordRuleRow}>
+                  <Ionicons
+                    name={rule.met ? "checkmark-circle" : "ellipse-outline"}
+                    size={16}
+                    color={rule.met ? "#4CAF50" : "#999"}
+                  />
+                  <Text style={[styles.passwordRuleText, rule.met && styles.passwordRuleMet]}>
+                    {rule.label}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
+
           <InputField
             label="Confirm Password"
             value={signupFormData.passwordConfirmation}
@@ -262,5 +279,23 @@ const styles = StyleSheet.create({
     color: "#0E0E55",
     fontWeight: "600",
     textDecorationLine: "underline",
+  },
+  passwordRules: {
+    marginTop: -10,
+    marginBottom: 16,
+    paddingHorizontal: 4,
+  },
+  passwordRuleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  passwordRuleText: {
+    fontSize: 13,
+    color: "#999",
+    marginLeft: 6,
+  },
+  passwordRuleMet: {
+    color: "#4CAF50",
   },
 });

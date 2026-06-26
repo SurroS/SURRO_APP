@@ -36,6 +36,7 @@ export type EditProfileModalProps = {
     socials?: Social[];
   };
   isLoading?: boolean;
+  role?: string;
 };
 
 export default function EditProfileModal({
@@ -44,6 +45,7 @@ export default function EditProfileModal({
   onSave,
   profile,
   isLoading = false,
+  role,
 }: EditProfileModalProps) {
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollView>(null);
@@ -111,6 +113,10 @@ export default function EditProfileModal({
 
   if (!visible) return null;
 
+  // Reduce the effective keyboard offset so the sheet doesn't move too high when
+  // the keyboard opens. Subtract 50px from the keyboard height (minimum 0).
+  const effectiveKeyboardOffset = Math.max(0, keyboardHeight - 50);
+
   return (
     <View style={[styles.full, { paddingBottom: insets.bottom || 16 }]}>
       <TouchableWithoutFeedback
@@ -141,7 +147,8 @@ export default function EditProfileModal({
             ref={scrollRef}
             contentContainerStyle={{
               paddingHorizontal: 20,
-              paddingBottom: keyboardHeight + 20,
+              // Use a slightly reduced keyboard height so the modal doesn't get pushed up too far
+              paddingBottom: effectiveKeyboardOffset + 20,
             }}
             keyboardShouldPersistTaps="handled"
           >
@@ -162,38 +169,41 @@ export default function EditProfileModal({
                 maxLength={10}
                 onFocus={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
               />
+              <Text alignSelf="flex-end" fontSize={12} color={colors.textSecondary ?? "#666"} marginTop={4}>
+                {username.length}/10
+              </Text>
               {usernameError ? (
                 <Text fontSize={12} color={colors.danger} marginTop={4}>
                   {usernameError}
                 </Text>
               ) : null}
             </YStack>
-            <YStack marginTop={16}>
-              <Text color={colors.text} fontWeight="600">
-                About
-              </Text>
-              <TextInput
-                multiline
-                editable={!isLoading}
-                value={about}
-                onChangeText={(t) => t.length <= 300 && setAbout(t)}
-                placeholder="tell us why you need this, no one else can see this."
-                placeholderTextColor="#999"
-                onContentSizeChange={(e) =>
-                  setAboutInputHeight(
-                    Math.min(Math.max(80, e.nativeEvent.contentSize.height), 200),
-                  )
-                }
-                style={[
-                  styles.input,
-                  { height: aboutInputHeight, paddingVertical: 10 },
-                ]}
-                onFocus={() => scrollRef.current?.scrollTo({ y: aboutY.current, animated: true })}
-              />
-              <Text alignSelf="flex-end" fontSize={12}>
-                {about.length}/300
-              </Text>
-            </YStack>
+             <YStack marginTop={16}>
+               <Text color={colors.text} fontWeight="600">
+                 About
+               </Text>
+               <TextInput
+                 multiline
+                 editable={!isLoading}
+                 value={about}
+                 onChangeText={(t) => t.length <= 300 && setAbout(t)}
+                 placeholder={role === "AGENT" ? "tell us why you want to be an agent" : "tell us why you need this, no one else can see this."}
+                 placeholderTextColor="#999"
+                 onContentSizeChange={(e) =>
+                   setAboutInputHeight(
+                     Math.min(Math.max(80, e.nativeEvent.contentSize.height), 200),
+                   )
+                 }
+                 style={[
+                   styles.input,
+                   { height: aboutInputHeight, paddingVertical: 10 },
+                 ]}
+                 onFocus={() => scrollRef.current?.scrollTo({ y: aboutY.current, animated: true })}
+               />
+               <Text alignSelf="flex-end" fontSize={12}>
+                 {about.length}/300
+               </Text>
+             </YStack>
             <YStack marginTop={16}>
               <Text color={colors.text} fontWeight="600" marginBottom={4}>
                 Socials

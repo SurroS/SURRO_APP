@@ -111,7 +111,7 @@ export default function AddBankAccountScreen() {
     } catch {
       Toast.show({
         text1: "Failed to add account. Try again.",
-        type: "customSError" as ToastType,
+        type: "customError" as ToastType,
         text2: "something went wrong, try again later",
       });
     }

@@ -7,7 +7,7 @@ import { useSurrogateStore } from "@/store/surrogates";
 import colors from "@/hooks/colors";
 
 const SurrogatePreview = ({ style }: { style?: any }) => {
-  const { surrogates, isLoading, fetchSurrogates } = useSurrogateStore();
+  const { surrogates, isLoading, fetchSurrogates, savedIds } = useSurrogateStore();
 
   useEffect(() => {
     fetchSurrogates(true).catch((err: any) => {

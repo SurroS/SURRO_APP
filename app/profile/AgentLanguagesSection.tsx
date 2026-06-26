@@ -9,10 +9,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 import languagesData from "@/utils/languages.json";
+import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
 
 export default function AgentLanguageSection() {
+  const { agentProfile, updateAgentProfile } = useAgentProfile();
   const [isSaving, setIsSaving] = useState(false);
-  const [languages, setLanguages] = useState<string[]>([]);
+  const [languages, setLanguages] = useState<string[]>(() => {
+    return agentProfile?.languages || [];
+  });
   const [allLanguages, setAllLanguages] = useState<string[]>([]);
   const [filteredLanguages, setFilteredLanguages] = useState<string[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -45,7 +49,7 @@ export default function AgentLanguageSection() {
     );
   };
 
-  const save = () => {
+  const save = async () => {
     if (isSaving) return;
     if (languages.length === 0) {
       Toast.show({
@@ -55,11 +59,21 @@ export default function AgentLanguageSection() {
       return;
     }
     setIsSaving(true);
-    Toast.show({
-      text1: "Languages updated",
-      type: "customSuccess" as ToastType,
-    });
-    router.back();
+    try {
+      await updateAgentProfile({ languages });
+      Toast.show({
+        text1: "Languages updated",
+        type: "customSuccess" as ToastType,
+      });
+      router.back();
+    } catch {
+      Toast.show({
+        text1: "Failed to update",
+        type: "customError" as ToastType,
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (

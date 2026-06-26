@@ -46,7 +46,7 @@ const AgentProfileDataView = () => {
       <YStack gap="$3">
         <XStack alignItems="center" gap="$2">
           <Text color="black" fontSize="$4" fontWeight={"bold"} textWrap="wrap">
-            {agentProfile ? `${agentProfile.userName}` : "User Name"}
+            {agentProfile ? `${agentProfile.fullName || agentProfile.user?.email || "User Name"}` : "User Name"}
           </Text>
           {/* Add verification status if available */}
         </XStack>
@@ -54,7 +54,7 @@ const AgentProfileDataView = () => {
         <XStack alignItems="center" gap="$2">
           <Ionicons name="location-outline" size={19} color="#666" />
           <Text color="black" fontSize="$3">
-            {agentProfile?.countryOfResidence || "Location not set"}
+            {agentProfile?.country || "Location not set"}
           </Text>
         </XStack>
 

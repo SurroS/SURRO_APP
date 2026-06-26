@@ -15,10 +15,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   Linking,
+  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import Entypo from "@expo/vector-icons/Entypo";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import colors from "@/hooks/colors";
 import { getUnlocks, UnlockListItem } from "@/services/unlockApi";
 import { resolveProfilePicture } from "@/utils/resolveMediaUrl";
@@ -26,6 +28,7 @@ import { reportUnresponsiveUser } from "@/services/reportApi";
 import { useAuth } from "@/hooks/useAuth";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
+import { getSurrogateById, getAgentById, getUserById } from "@/services/profileApi";
 import AdBanner from "@/components/ads/AdBanner";
 import BoostCarousel from "@/components/boost/BoostCarousel";
 
@@ -49,7 +52,7 @@ function formatTimeRemaining(expiresAt: string): string {
 function getRoleBadgeColor(role: string): string {
   switch (role) {
     case "SURROGATE":
-      return "#E91E63";
+      return "#F59E0B";
     case "AGENT":
       return "#2196F3";
     case "INTENDED_PARENT":
@@ -95,6 +98,8 @@ export default function NetworkScreen() {
   const [reasonDetail, setReasonDetail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [showCallModal, setShowCallModal] = useState(false);
+  const [callNumbers, setCallNumbers] = useState<string[]>([]);
 
   useEffect(() => {
     const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
@@ -150,10 +155,49 @@ export default function NetworkScreen() {
     });
   };
 
-  const handleCall = (item: UnlockListItem) => {
-    const phone = item.targetUser.phone1 || item.targetUser.phone;
-    if (phone) {
-      Linking.openURL(`tel:${phone}`);
+  const handleCall = async (item: UnlockListItem) => {
+    try {
+      let phone1: string | null | undefined;
+      let phone2: string | null | undefined;
+      let emergency: string | null | undefined;
+
+      if (item.targetUser.role === "SURROGATE") {
+        const res = await getSurrogateById(item.targetUserId);
+        phone1 = res.phone1;
+        phone2 = res.phone2;
+        emergency = res.emergencyContactPhone;
+      } else if (item.targetUser.role === "AGENT") {
+        const res = await getAgentById(item.targetUserId);
+        phone1 = res.data?.phone1;
+        phone2 = res.data?.phone2;
+      } else {
+        const res = await getUserById(item.targetUserId);
+        phone1 = res.phone1;
+        phone2 = res.phone2;
+      }
+
+      const numbers = [phone1, phone2, emergency].filter(Boolean) as string[];
+
+      if (numbers.length === 0) {
+        Toast.show({
+          text1: "No phone number available",
+          type: "customWarning" as ToastType,
+        });
+        return;
+      }
+
+      if (numbers.length === 1) {
+        Linking.openURL(`tel:${numbers[0]}`);
+        return;
+      }
+
+      setCallNumbers(numbers);
+      setShowCallModal(true);
+    } catch {
+      Toast.show({
+        text1: "Failed to load contact",
+        type: "customError" as ToastType,
+      });
     }
   };
 
@@ -472,6 +516,39 @@ export default function NetworkScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Call number selection modal */}
+      <Modal
+        visible={showCallModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowCallModal(false)}
+      >
+        <Pressable style={styles.callModalOverlay} onPress={() => setShowCallModal(false)}>
+          <Pressable style={styles.callModalContent}>
+            <Text style={styles.callModalTitle}>Select Number to Call</Text>
+            {callNumbers.map((num, idx) => (
+              <TouchableOpacity
+                key={`call-${idx}`}
+                style={styles.callModalOption}
+                onPress={() => {
+                  setShowCallModal(false);
+                  Linking.openURL(`tel:${num}`);
+                }}
+              >
+                <Ionicons name="call-outline" size={18} color="#0A2A66" />
+                <Text style={styles.callModalOptionText}>{num}</Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity
+              style={styles.callModalCancel}
+              onPress={() => setShowCallModal(false)}
+            >
+              <Text style={styles.callModalCancelText}>Cancel</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -770,5 +847,53 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: "#fff",
+  },
+
+  // Call number selection modal
+  callModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  callModalContent: {
+    width: "80%",
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+  },
+  callModalTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#222",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  callModalOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  callModalOptionText: {
+    fontSize: 15,
+    color: "#0A2A66",
+    fontWeight: "500",
+  },
+  callModalCancel: {
+    marginTop: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+  },
+  callModalCancelText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#666",
   },
 });

@@ -1,6 +1,11 @@
 import { useAuth } from '@/hooks/useAuth';
 import { RegisterCredentials } from '@/types/auth';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+
+export interface PasswordRule {
+  label: string;
+  met: boolean;
+}
 
 interface SignupFormErrors {
   email?: string;
@@ -22,6 +27,14 @@ export const useSignupForm = () => {
     });
     const [errors, setErrors] = useState<SignupFormErrors>({});
 
+    const passwordRules: PasswordRule[] = useMemo(() => [
+        { label: "At least 8 characters", met: signupFormData.password.length >= 8 },
+        { label: "At least one uppercase letter", met: /[A-Z]/.test(signupFormData.password) },
+        { label: "At least one lowercase letter", met: /[a-z]/.test(signupFormData.password) },
+        { label: "At least one number", met: /\d/.test(signupFormData.password) },
+        { label: "At least one special character", met: /[!@#$%^&*(),.?":{}|<>]/.test(signupFormData.password) },
+    ], [signupFormData.password]);
+
     const updateField = (field: keyof RegisterCredentials, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
         if (errors[field as keyof SignupFormErrors]) {
@@ -40,8 +53,8 @@ export const useSignupForm = () => {
 
         if (!signupFormData.password.trim()) {
             newErrors.password = 'Password is required';
-        } else if (signupFormData.password.length < 8) {
-            newErrors.password = 'Password must be at least 8 characters';
+        } else if (!passwordRules.every(r => r.met)) {
+            newErrors.password = 'Password does not meet all requirements';
         }
 
         if (!signupFormData.passwordConfirmation.trim()) {
@@ -77,6 +90,7 @@ export const useSignupForm = () => {
     return {
         signupFormData,
         errors,
+        passwordRules,
         updateField,
         validateForm,
         resetForm,

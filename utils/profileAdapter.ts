@@ -49,8 +49,9 @@ export const agentToUIProfile = (p: any): UIProfile => {
   return {
     isAvailable: p.isAvailable,
     profilePicture: p.profilePicture,
-    userName: p.fullName || "",
-    aboutMe: p.aboutMe,
+    // prefer explicit userName, fall back to fullName for display
+    userName: p.userName ?? p.fullName ?? "",
+    aboutMe: p.about,
     socials: [
       { platform: "Facebook", handle: p.facebookProfile },
       { platform: "Instagram", handle: p.instagramProfile },
@@ -60,15 +61,19 @@ export const agentToUIProfile = (p: any): UIProfile => {
   };
 };
 
-
 export const uiProfileToAgent = (u: UIProfile) => ({
   isAvailable:u?.isAvailable,
   profilePicture: u.profilePicture,
-  fullName: u.userName,
-  bio: u.aboutMe,
+  // Save username to backend userName field. Do not overwrite fullName here unless
+  // the UI explicitly supplies it.
+  userName: u.userName,
+  about: u.aboutMe,
   facebookProfile: u.socials?.find((s) => s.platform === "Facebook")?.handle,
   instagramProfile: u.socials?.find((s) => s.platform === "Instagram")?.handle,
-  twitterProfile: u.socials?.find((s) => s.platform === "Twitter")?.handle,
+  // accept both 'X' and 'Twitter' labels from the UI
+  twitterProfile:
+    u.socials?.find((s) => s.platform === "Twitter")?.handle ||
+    u.socials?.find((s) => s.platform === "X")?.handle,
   threadsProfile: u.socials?.find((s) => s.platform === "Threads")?.handle,
 });
 

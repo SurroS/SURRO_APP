@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useRef, useCallback } from "react";
+import { useCallback, useState } from "react";
 import {
   Image,
   ScrollView,
@@ -8,7 +8,6 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -24,21 +23,16 @@ const OTP_LENGTH = 6;
 
 export default function OTPScreen() {
   const router = useRouter();
-  const { otp, error, updateOtpDigit, validateOtp, getOtpCode } = useOtpForm();
+  const { otp, error, updateOtpDigit, setOtpFromString, validateOtp, getOtpCode } = useOtpForm();
   const { verifyOtp, resendOtp, tempEmail, isLoading } = useAuth();
 
-  const hiddenInput = useRef<TextInput>(null);
+  const [otpCode, setOtpCode] = useState("");
 
-  const handleHiddenInputChange = useCallback((text: string) => {
+  const handleOtpChange = useCallback((text: string) => {
     const digits = text.replace(/[^0-9]/g, "").slice(0, OTP_LENGTH);
-    for (let i = 0; i < OTP_LENGTH; i++) {
-      updateOtpDigit(i, digits[i] ?? "");
-    }
-  }, [updateOtpDigit]);
-
-  const focusHiddenInput = useCallback(() => {
-    hiddenInput.current?.focus();
-  }, []);
+    setOtpCode(digits);
+    setOtpFromString(digits);
+  }, [setOtpFromString]);
 
   const handleVerify = async () => {
     console.log("handleVerify =", validateOtp());
@@ -97,7 +91,7 @@ export default function OTPScreen() {
   return (
     <KeyboardAvoidingWrapper>
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <ScreenHeader title="Enter OTP" onBackPress={() => router.back()} />
 
         <Image
@@ -110,7 +104,16 @@ export default function OTPScreen() {
           {tempEmail || "your email"}.
         </Text>
 
-        <Pressable onPress={focusHiddenInput} style={styles.otpContainer}>
+        <View style={styles.otpContainer}>
+          <TextInput
+            style={styles.hiddenInput}
+            keyboardType="number-pad"
+            maxLength={OTP_LENGTH}
+            value={otpCode}
+            onChangeText={handleOtpChange}
+            autoFocus
+            caretHidden
+          />
           {otp.map((digit, index) => (
             <View
               key={index}
@@ -122,17 +125,7 @@ export default function OTPScreen() {
               <Text style={styles.otpDigit}>{digit}</Text>
             </View>
           ))}
-        </Pressable>
-
-        <TextInput
-          ref={hiddenInput}
-          style={styles.hiddenInput}
-          keyboardType="number-pad"
-          maxLength={OTP_LENGTH}
-          value={otp.join("")}
-          onChangeText={handleHiddenInputChange}
-          autoFocus
-        />
+        </View>
 
         {error && <Text style={styles.errorText}>{error}</Text>}
 
@@ -183,6 +176,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     width: "100%",
     alignSelf: "center",
+    position: "relative",
   },
   otpBox: {
     width: 50,
@@ -191,6 +185,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 0.5,
+    borderColor: "#D0D0D0",
   },
   otpBoxFilled: {
     backgroundColor: "#EBEBEB",
@@ -204,9 +200,12 @@ const styles = StyleSheet.create({
   },
   hiddenInput: {
     position: "absolute",
-    width: 1,
-    height: 1,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     opacity: 0,
+    zIndex: 1,
   },
   errorText: {
     color: "red",

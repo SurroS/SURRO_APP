@@ -5,6 +5,7 @@ import Animated from "react-native-reanimated";
 import { Accordion, Text, XStack, YStack } from "tamagui";
 import About from "@/components/roles/about";
 import Contact from "@/components/roles/contact";
+import Gallery from "@/components/roles/gallery";
 import ProgressMeter from "@/components/roles/progressCircle";
 import Referral from "@/components/roles/referral";
 import WalletCard from "@/components/roles/wallet";
@@ -13,6 +14,7 @@ import { router } from "expo-router";
 import ProfileCompletionModal from "@/components/roles/ProfileCompletionModal";
 import { calculateProfileProgress } from "@/utils/profileHelpers";
 import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
+import { useAuth } from "@/hooks/useAuth";
 import ProfileData from "@/components/profileDetails/ProfileData";
 import HomeResourceCard from "@/components/resources/HomeResourceCard";
 
@@ -28,6 +30,7 @@ function SafeRender({ children, fallback }: any) {
 
 export default function AgentHomeScreen() {
   const { agentProfile, isLoading, fetchProfile, updateProfile } = useAgentProfile();
+  const { user } = useAuth();
   const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Calculate profile completion progress
@@ -69,11 +72,12 @@ export default function AgentHomeScreen() {
         <YStack flex={1} gap="$3">
           {/* AGENT PROFILE SECTION */}
           <SafeRender fallback={<Text>Loading profile...</Text>}>
-            return (
             <ProfileData
-              name={agentProfile?.firstName}
+              name={agentProfile?.userName || agentProfile?.fullName}
               avatarUrl={agentProfile?.profilePicture}
+              location={agentProfile?.country || agentProfile?.city}
               dateOfBirth={agentProfile?.dateOfBirth}
+              isAvailable={agentProfile?.isAvailable}
               onToggleAvailability={async (next) => {
                 await updateProfile({ isAvailable: next });
               }}
@@ -93,28 +97,59 @@ export default function AgentHomeScreen() {
               <Accordion.Content backgroundColor="white" padding="$3">
                 <YStack gap="$3">
                   <SafeRender fallback={<Text>Loading about info...</Text>}>
-                    <About />
+                    <About aboutMe={agentProfile?.about} />
                   </SafeRender>
 
                   <SafeRender fallback={<Text>Loading contact info...</Text>}>
-                    <Contact />
+                    <Contact
+                      phoneNumber={agentProfile?.phone1}
+                      email={user?.email}
+                      socials={{
+                        facebook: agentProfile?.facebookProfile,
+                        instagram: agentProfile?.instagramProfile,
+                        twitter: agentProfile?.twitterProfile,
+                        tiktok: agentProfile?.tiktokProfile,
+                      }}
+                    />
                   </SafeRender>
                 </YStack>
               </Accordion.Content>
             </Accordion.Item>
           </Accordion>
 
-          {/* HORIZONTAL SLIDER FOR PARENTS + SURROGATES */}
-          <ScrollView horizontal nestedScrollEnabled style={{ height: 210 }}>
-            <SafeRender fallback={<Text>Loading...</Text>}>
-              <Pressable onPress={ViewSurrogate} style={{ marginRight: 5 }}>
-                <SurrogatePreview
-                  style={{ height: 200, padding: 2, width: 150 }}
-                />
-              </Pressable>
-            </SafeRender>
+           {/* VIEW PROFILE AS GUEST */}
+           <Pressable
+             onPress={() =>
+               router.push("/(tabs)/home/agent/agentsGuestView")
+             }
+           >
+             <Text
+               color="black"
+               fontWeight="bold"
+               textDecorationLine="underline"
+               textDecorationColor="#0E0E55"
+               marginBottom={8}
+             >
+               View profile as guest
+             </Text>
+           </Pressable>
 
-          </ScrollView>
+           {/* HORIZONTAL SLIDER FOR PARENTS + SURROGATES */}
+           <ScrollView horizontal nestedScrollEnabled style={{ height: 210 }}>
+             <SafeRender fallback={<Text>Loading...</Text>}>
+               <Pressable onPress={ViewSurrogate} style={{ marginRight: 5 }}>
+                 <SurrogatePreview
+                   style={{ height: 200, padding: 2, width: 150 }}
+                 />
+               </Pressable>
+             </SafeRender>
+
+           </ScrollView>
+
+           {/* GALLERY */}
+           <SafeRender fallback={<Text>Loading gallery...</Text>}>
+             <Gallery style={{ height: 210, marginTop: 10 }} />
+           </SafeRender>
 
           {/* FINANCIAL + WORKLOAD CARDS - 2x2 grid */}
           <XStack

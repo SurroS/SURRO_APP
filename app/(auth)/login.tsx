@@ -139,7 +139,7 @@ export default function LoginScreen() {
     <KeyboardAvoidingWrapper>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.container}>
-        <ScreenHeader title="Log in" onBackPress={() => router.navigate("/")} />
+        <ScreenHeader title="Log in" />
 
         <InputField
           label="Username/Email"

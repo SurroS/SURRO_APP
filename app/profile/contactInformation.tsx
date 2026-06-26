@@ -56,6 +56,7 @@ export default function ContactInformationScreen() {
   const [phone2, setPhone2] = useState<string>("");
   const [emergency, setEmergency] = useState<string>("");
   const [relationship, setRelationship] = useState<string>("");
+  const [publicEmail, setPublicEmail] = useState<string>("");
 
   useEffect(() => {
     (async () => {
@@ -102,14 +103,21 @@ export default function ContactInformationScreen() {
     setPhone1(stripDialCode(profile?.phone1 ?? ""));
     setPhone2(stripDialCode(profile?.phone2 ?? ""));
     setEmergency(stripDialCode(profile?.emergencyPhone ?? profile?.emergencyContactPhone ?? ""));
-    setRelationship(profile?.emergencyContactRelation ?? "");
-    setStreet(profile?.homeAddress ?? profile?.address ?? "");
-    setZip(profile?.zipCode ?? "");
-    setResidenceState(profile?.stateOfResidence ?? "");
-    setLga(profile?.lga ?? "");
+    setRelationship(profile?.emergencyContactRelationship ?? "");
+    setStreet(profile?.address ?? "");
+    setZip(profile?.zipcode ?? "");
+
+    if (Role === "AGENT") {
+      setResidenceState(profile?.state ?? "");
+      setLga(profile?.city ?? "");
+      setPublicEmail(profile?.publicEmail ?? "");
+    } else {
+      setResidenceState(profile?.stateOfResidence ?? "");
+      setLga(profile?.lga ?? "");
+    }
 
     if (countries.length > 0) {
-      const countryField = profile?.countryOfResidence;
+      const countryField = Role === "AGENT" ? profile?.country : profile?.countryOfResidence;
       if (countryField) {
         const foundCountry = countries.find((c) => c.name === countryField);
         if (foundCountry) {
@@ -185,10 +193,10 @@ export default function ContactInformationScreen() {
       countryOfResidence: country.name,
       stateOfResidence: residenceState,
       lga,
-      homeAddress: street,
-      zipCode: zip,
+      address: street,
+      zipcode: zip,
       emergencyPhone: fullEmergency,
-      emergencyContactRelation: relationship,
+      emergencyContactRelationship: relationship,
     };
 
     profileData.phone1 = fullPhone1;
@@ -198,7 +206,21 @@ export default function ContactInformationScreen() {
       if (Role === "SURROGATE") await updateProfile(profileData);
       else if (Role === "INTENDED_PARENT")
         await updateParentProfile(profileData);
-      else if (Role === "AGENT") await updateAgentProfile(profileData);
+      else if (Role === "AGENT") {
+        const agentData: any = {
+          country: country.name,
+          state: residenceState,
+          city: lga,
+          address: street,
+          zipcode: zip,
+          phone1: fullPhone1,
+          emergencyPhone: fullEmergency,
+          emergencyContactRelationship: relationship,
+        };
+        if (publicEmail) agentData.publicEmail = publicEmail;
+        if (phone2) agentData.phone2 = fullPhone2;
+        await updateAgentProfile(agentData);
+      }
 
       Toast.show({
         text1: "Contact information updated successfully",
@@ -313,6 +335,16 @@ export default function ContactInformationScreen() {
               </XStack>
             </YStack>
           ))}
+
+          {Role === "AGENT" && (
+            <TextInputField
+              label="Public email"
+              placeholder="Enter public email"
+              value={publicEmail}
+              onChangeText={setPublicEmail}
+              keyboardType="email-address"
+            />
+          )}
 
           <Dropdown
             label="Relationship with emergency contact"

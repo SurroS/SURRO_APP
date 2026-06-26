@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, TouchableOpacity, View, Alert, Dimensions } from "react-native";
+import { StyleSheet, TouchableOpacity, View, Dimensions } from "react-native";
+import AlertModal from "@/components/modals/AlertModal";
 import { YStack, Text } from "tamagui";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { router, useLocalSearchParams } from "expo-router";
@@ -20,6 +21,7 @@ export default function KYCUploadScreen() {
   const cameraRef = useRef<CameraView>(null);
   const [capturedFront, setCapturedFront] = useState<string | null>(null);
   const [capturedBack, setCapturedBack] = useState<string | null>(null);
+  const [alertVisible, setAlertVisible] = useState(false);
   const [step, setStep] = useState<"front" | "back">("front");
 
   useEffect(() => {
@@ -50,7 +52,7 @@ export default function KYCUploadScreen() {
       }
     } catch (error) {
       console.error("Camera capture error:", error);
-      Alert.alert("Error", "Could not take picture. Try again.");
+      setAlertVisible(true);
     }
   };
 
@@ -123,6 +125,12 @@ export default function KYCUploadScreen() {
           </TouchableOpacity>
         </View>
       </YStack>
+      <AlertModal
+        visible={alertVisible}
+        title="Error"
+        message="Could not take picture. Try again."
+        onClose={() => setAlertVisible(false)}
+      />
     </SafeAreaView>
   );
 }

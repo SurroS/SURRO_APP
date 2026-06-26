@@ -5,7 +5,7 @@ import { XStack, YStack, Text } from "tamagui";
 
 interface ScreenHeaderProps {
   title?: string;
-  onBackPress: () => void;
+  onBackPress?: () => void;
   style?: any;
 }
 
@@ -23,12 +23,14 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
     height={50}
     style={style}
   >
-    <TouchableOpacity
-      onPress={onBackPress}
-      style={{ position: "absolute", left: 0, padding: 4, }}
-    >
-      <Ionicons name="arrow-back" size={24} color="#000" />
-    </TouchableOpacity>
+    {onBackPress && (
+      <TouchableOpacity
+        onPress={onBackPress}
+        style={{ position: "absolute", left: 0, padding: 4, }}
+      >
+        <Ionicons name="arrow-back" size={24} color="#000" />
+      </TouchableOpacity>
+    )}
     <Text fontSize={16} fontWeight="bold" color="$text">
       {title}
     </Text>

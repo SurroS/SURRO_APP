@@ -1,8 +1,15 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
+interface CertItem {
+  title?: string;
+  name?: string;
+  valid?: string | null;
+  status?: "Verified" | "Pending" | "Expired";
+}
+
 interface Props {
-  certifications: { name: string; verified?: boolean }[];
+  certifications: CertItem[];
 }
 
 export default function AgentCertifications({ certifications }: Props) {
@@ -10,17 +17,23 @@ export default function AgentCertifications({ certifications }: Props) {
     <View style={styles.container}>
       <Text style={styles.title}>Certifications & Licenses</Text>
 
-      {certifications.map((c, idx) => (
-        <View key={idx} style={styles.row}>
-          <Text style={styles.cert}>{c.name}</Text>
+      {certifications.map((c, idx) => {
+        const label = c.name || c.title || "Untitled";
+        const verified = c.status === "Verified";
+        const validFrom = c.valid ? ` • ${c.valid}` : "";
 
-          {c.verified && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>Verified</Text>
-            </View>
-          )}
-        </View>
-      ))}
+        return (
+          <View key={idx} style={styles.row}>
+            <Text style={styles.cert}>{label}{validFrom}</Text>
+
+            {verified && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>Verified</Text>
+              </View>
+            )}
+          </View>
+        );
+      })}
     </View>
   );
 }

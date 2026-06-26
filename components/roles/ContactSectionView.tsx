@@ -32,6 +32,7 @@ interface ContactData {
   lGA?: string;
   relationship?: string;
   social?: SocialLink;
+  email?: string; // public contact email
 }
 
 interface Props {
@@ -62,6 +63,19 @@ export default function ContactSection({ data, containerStyle, isUnlocked, onCha
         <Text style={styles.socialText}>
           {label}: {url}
         </Text>
+      </TouchableOpacity>
+    );
+  };
+
+  const renderEmail = (email?: string) => {
+    if (!email) return null;
+    return (
+      <TouchableOpacity onPress={async () => {
+        try {
+          await Linking.openURL(`mailto:${email}`);
+        } catch {}
+      }}>
+        <Text style={[styles.value, { textDecorationLine: "underline", color: "#0A2A66" }]}>{email}</Text>
       </TouchableOpacity>
     );
   };
@@ -180,6 +194,13 @@ export default function ContactSection({ data, containerStyle, isUnlocked, onCha
           <Text style={styles.value}>
             {data.emergency} {data.relationship ? `(${data.relationship})` : ""}
           </Text>
+        </View>
+      )}
+
+      {data.email && (
+        <View style={styles.row}>
+          <Text style={styles.label}>Email:</Text>
+          {renderEmail(data.email)}
         </View>
       )}
 

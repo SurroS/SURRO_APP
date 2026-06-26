@@ -1,53 +1,48 @@
 import React, { useState } from "react";
-import { Pressable, TextInput } from "react-native";
+import { Pressable } from "react-native";
 import { YStack, Button, ScrollView, XStack, Text } from "tamagui";
 import { ScreenHeader } from "@/components/auth";
 import { router } from "expo-router";
 import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 import colors from "@/hooks/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ToastType } from "toastify-react-native/utils/interfaces";
 import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
 
-const SPECIALIZATIONS = [
-  "Surrogacy Coordination",
-  "Surrogate care giving",
-  "Emotional support",
-  "Progress tracking and documentation",
+const PREDEFINED_CERTIFICATIONS = [
+  "Certified Surrogacy Professional",
   "IVF Clinic Liaison",
-  "Counseling Support",
+  "Certified Nurse",
+  "Counseling Certification",
+  "Legal Coordination Certification",
+  "Social Work License",
 ];
 
-export default function AgentSpecializationSection() {
+export default function AgentCertificationSection() {
   const { agentProfile, updateAgentProfile } = useAgentProfile();
   const [isSaving, setIsSaving] = useState(false);
-  const [specialties, setSpecialties] = useState<string[]>(() => {
-    return agentProfile?.services || [];
+  const [selected, setSelected] = useState<string[]>(() => {
+    const certs = agentProfile?.certifications || [];
+    return certs.map((c: any) => c.title || "");
   });
 
   const toggle = (item: string) => {
-    setSpecialties((prev) =>
+    setSelected((prev) =>
       prev.includes(item) ? prev.filter((x) => x !== item) : [...prev, item]
     );
   };
 
-  const selectAll = () => setSpecialties([...SPECIALIZATIONS]);
-  const deselectAll = () => setSpecialties([]);
-
   const save = async () => {
     if (isSaving) return;
-    if (specialties.length === 0) {
-      Toast.show({
-        text1: "Select at least one specialization",
-        type: "customError" as ToastType,
-      });
-      return;
-    }
     setIsSaving(true);
+
     try {
-      await updateAgentProfile({ services: specialties });
+      const certifications = selected.map((title) => ({
+        title,
+      }));
+      await updateAgentProfile({ certifications });
       Toast.show({
-        text1: "Specializations updated",
+        text1: "Certifications updated",
         type: "customSuccess" as ToastType,
       });
       router.back();
@@ -63,52 +58,15 @@ export default function AgentSpecializationSection() {
 
   return (
     <SafeAreaView style={{ flex: 1, padding: 20 }}>
-      <ScreenHeader title="Specializations" onBackPress={() => router.back()} />
+      <ScreenHeader title="Certifications" onBackPress={() => router.back()} />
 
       <ScrollView>
         <YStack gap="$4">
           <Text fontWeight="600" fontSize={15} color={colors.text}>
-            Your Specialties
+            Select your certifications
           </Text>
 
-          <TextInput
-            style={{
-              borderWidth: 1,
-              borderColor: "#E6E6E6",
-              borderRadius: 8,
-              padding: 12,
-              fontSize: 15,
-              color: "#333",
-            }}
-            value={
-              specialties.length > 0
-                ? specialties.join(", ")
-                : "Select all that applies"
-            }
-            editable={false}
-            multiline
-          />
-
-          <XStack justifyContent="space-between" paddingVertical={4}>
-            <Button
-              size="$3"
-              backgroundColor="#E6E6E6"
-              color={colors.text}
-              onPress={selectAll}
-            >
-              Select All
-            </Button>
-            <Button
-              size="$3"
-              backgroundColor="#E6E6E6"
-              color={colors.text}
-              onPress={deselectAll}
-            >
-              Deselect All
-            </Button>
-          </XStack>
-
-          {SPECIALIZATIONS.map((item) => (
+          {PREDEFINED_CERTIFICATIONS.map((item) => (
             <XStack
               key={item}
               alignItems="center"
@@ -124,14 +82,14 @@ export default function AgentSpecializationSection() {
                   borderWidth: 1,
                   borderColor: "#E6E6E6",
                   borderRadius: 4,
-                  backgroundColor: specialties.includes(item)
+                  backgroundColor: selected.includes(item)
                     ? colors.primary
                     : "transparent",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                {specialties.includes(item) && (
+                {selected.includes(item) && (
                   <Text style={{ color: "white", fontSize: 14 }}>✓</Text>
                 )}
               </Pressable>
@@ -141,7 +99,12 @@ export default function AgentSpecializationSection() {
             </XStack>
           ))}
 
-          <Button backgroundColor="#0A043C" color="white" onPress={save} disabled={isSaving}>
+          <Button
+            backgroundColor="#0A043C"
+            color="white"
+            onPress={save}
+            disabled={isSaving}
+          >
             Save
           </Button>
         </YStack>

@@ -21,6 +21,7 @@ import AgentPerformanceSection from "@/components/roles/agent/PerormanceSection"
 import AgentAdditionalDetails from "@/components/roles/agent/AditionalDetails";
 import AgentServices from "@/components/roles/agent/AgentServiceOffered";
 import AgentCertifications from "@/components/roles/agent/AgentCertification";
+import { resolveProfilePicture } from "@/utils/resolveMediaUrl";
 import EmptyWalletModal from "@/components/modals/EmptyWalletModal";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
@@ -62,7 +63,24 @@ export default function AgentProfileScreen() {
     const fetchAgent = async () => {
       try {
         const res = await getAgentById(id as string);
-        setAgent(res.data);
+        // Response shapes vary. Extract profile if present.
+        const profile = res?.profile ?? res?.data?.profile ?? res?.data ?? res;
+
+        // normalize profilePicture urls
+        if (profile?.profilePicture) {
+          profile.profilePicture = resolveProfilePicture(profile.profilePicture);
+        }
+
+        // normalize gallery entries to string[]
+        if (Array.isArray(profile?.gallery)) {
+          profile._galleryUrls = profile.gallery
+            .map((it: any) => (typeof it === "string" ? it : it?.url || null))
+            .filter(Boolean);
+        } else {
+          profile._galleryUrls = [];
+        }
+
+        setAgent(profile);
       } catch (err: any) {
         Toast.show({
           text1: "Failed to load agent",
@@ -155,7 +173,12 @@ export default function AgentProfileScreen() {
     );
   }
 
-  const hasGalleryImage = !!agent?.gallery;
+  const galleryUrls: string[] = Array.isArray(agent?._galleryUrls)
+    ? agent._galleryUrls
+    : Array.isArray(agent?.gallery)
+    ? agent.gallery.map((g: any) => (typeof g === "string" ? g : g?.url)).filter(Boolean)
+    : [];
+  const hasGalleryImage = galleryUrls.length > 0 || !!agent?.profilePicture;
 
   return (
     <View style={styles.container}>
@@ -167,7 +190,7 @@ export default function AgentProfileScreen() {
           {/* --- IMAGE CAROUSEL --- */}
           <View style={styles.carouselContainer}>
             {isUnlocked && hasGalleryImage ? (
-              <ImageCarousel images={[agent!.gallery]} unlocked={true} />
+              <ImageCarousel images={[...(agent?.profilePicture ? [agent.profilePicture] : []), ...galleryUrls]} unlocked={true} />
             ) : (
               <View style={{ flex: 1, backgroundColor: "#E0E0E0", justifyContent: "center", alignItems: "center" }}>
                 <Text style={{ color: "#666", fontSize: 14 }}>Profile Picture</Text>
@@ -175,27 +198,27 @@ export default function AgentProfileScreen() {
             )}
           </View>
 
-          {/* --- HEADER INFO --- */}
-          <HeaderInfo
-            name={agent?.fullName || "Unnamed Agent"}
-            username={agent?.userName || "No Username"}
-            location={agent?.country || "Unknown"}
-            city={agent?.city || "N/A"}
-            age={agent?.age || "N/A"}
-            maritalStatus="N/A"
-            height="N/A"
-            weight="N/A"
-            compensation={agent?.compensation || 0}
-            isNegotiable={agent?.negotiable || false}
-            onChatPress={() => {
-              if (!isUnlocked) {
-                setShowPaymentModal(true);
-                return;
-              }
-              handleChat();
-            }}
-            isUnlocked={isUnlocked}
-          />
+           {/* --- HEADER INFO --- */}
+           <HeaderInfo
+             name={agent?.userName || agent?.fullName || "Unnamed Agent"}
+             username={agent?.userName}
+             location={agent?.country || "Unknown"}
+             city={agent?.city || "N/A"}
+             age={agent?.age || "N/A"}
+             maritalStatus="N/A"
+             height="N/A"
+             weight="N/A"
+             compensation={agent?.compensation || 0}
+             isNegotiable={agent?.negotiable || false}
+             onChatPress={() => {
+               if (!isUnlocked) {
+                 setShowPaymentModal(true);
+                 return;
+               }
+               handleChat();
+             }}
+             isUnlocked={isUnlocked}
+           />
 
           {/* --- ABOUT --- */}
           <BioSection
@@ -205,8 +228,8 @@ export default function AgentProfileScreen() {
 
           {/* --- PERFORMANCE --- */}
           <AgentPerformanceSection
-            matches={agent?.performance?.matches || 0}
-            rating={agent?.performance?.rating || 0}
+            matches={agent?.performance?.successfulMatches || 0}
+            rating={agent?.performance?.averageRating || 0}
             responseTime={agent?.performance?.responseTime || "N/A"}
             activeCases={agent?.performance?.activeCases || 0}
           />
@@ -232,6 +255,7 @@ export default function AgentProfileScreen() {
                     Instagram: agent?.instagramProfile,
                     X: agent?.twitterProfile,
                   },
+                  email: agent?.publicEmail ?? undefined,
                 }}
               />
             ) : (

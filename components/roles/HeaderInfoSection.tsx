@@ -6,7 +6,7 @@ import colors from "@/hooks/colors";
 
 interface Props {
   name: string;
-  username: string;
+  username?: string;
   location: string;
   age: number;
   city?: string;
@@ -45,7 +45,7 @@ export default function HeaderInfo({
       {isUnlocked ? (
         <Text style={styles.name}>{name}</Text>
       ) : (
-        <Text style={styles.username}>@{username}</Text>
+        <Text style={styles.username}>@{username || "no username"}</Text>
       )}
 
       {/* LOCATION + AGE */}

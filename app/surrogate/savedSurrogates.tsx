@@ -2,16 +2,17 @@ import React, { useEffect, useCallback, useState } from "react";
 import { Image, Text, View } from "react-native";
 import { router } from "expo-router";
 import { useParentProfile } from "@/hooks/profile/useParentProfile";
+import { useSurrogateStore } from "@/store/surrogates";
 import CardStack from "@/components/cards/CardStack";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function SavedSurrogatesScreen() {
   const { fetchSavedSurrogates, removeSavedSurrogate } = useParentProfile();
+  const { savedIds, setSavedIds, removeSavedId } = useSurrogateStore();
   const { user } = useAuth();
   const isParent = user?.role?.trim() === "INTENDED_PARENT";
   const [savedProfiles, setSavedProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadSaved();
@@ -32,7 +33,7 @@ export default function SavedSurrogatesScreen() {
       });
       setSavedProfiles(profiles);
       const ids = profiles.map((p: any) => p.id).filter(Boolean);
-      setSavedIds(new Set(ids));
+      setSavedIds(ids);
     } catch {
       setSavedProfiles([]);
     } finally {
@@ -50,8 +51,8 @@ export default function SavedSurrogatesScreen() {
   const handleSaveProfile = useCallback(async (surrogateId: string) => {
     try {
       await removeSavedSurrogate(surrogateId);
-      setSavedIds(prev => { const next = new Set(prev); next.delete(surrogateId); return next; });
-      setSavedProfiles(prev => prev.filter((p: any) => p.id !== surrogateId));
+      removeSavedId(surrogateId);
+      setSavedProfiles((prev) => prev.filter((p: any) => p.id !== surrogateId));
     } catch {}
   }, [removeSavedSurrogate]);
 

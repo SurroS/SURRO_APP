@@ -49,6 +49,7 @@ export default function PersonalInformationScreen() {
   const [stateOfOrigin, setStateOfOrigin] = useState("");
   const [dob, setDob] = useState("");
   const [maritalStatus, setMaritalStatus] = useState("");
+  const [userName, setUserName] = useState("");
 
   const handleSetCountry = async (name: string) => {
     const found = countries.find((c) => c.name === name || c.label === name);
@@ -85,7 +86,19 @@ export default function PersonalInformationScreen() {
     if (Role === "SURROGATE" && surrogateProfile) {
       setFirstName(surrogateProfile.firstName || "");
       setLastName(surrogateProfile.lastName || "");
-      setDob(surrogateProfile.dateOfBirth || "");
+      if (surrogateProfile.dateOfBirth) {
+        const d = new Date(surrogateProfile.dateOfBirth);
+        if (!isNaN(d.getTime())) {
+          const dd = String(d.getDate()).padStart(2, "0");
+          const mm = String(d.getMonth() + 1).padStart(2, "0");
+          const yyyy = d.getFullYear();
+          setDob(`${dd}/${mm}/${yyyy}`);
+        } else {
+          setDob(surrogateProfile.dateOfBirth || "");
+        }
+      } else {
+        setDob("");
+      }
       setMaritalStatus(surrogateProfile.maritalStatus || "");
       setStateOfOrigin(surrogateProfile.stateOfOrigin || "");
       setHeight(surrogateProfile.height || "");
@@ -105,7 +118,19 @@ export default function PersonalInformationScreen() {
       const fullNameParts = parentProfile.fullName?.split(" ") || [];
       setFirstName(fullNameParts[0] || "");
       setLastName(fullNameParts.slice(1).join(" ") || "");
-      setDob(parentProfile.dateOfBirth || "");
+      if (parentProfile.dateOfBirth) {
+        const d = new Date(parentProfile.dateOfBirth);
+        if (!isNaN(d.getTime())) {
+          const dd = String(d.getDate()).padStart(2, "0");
+          const mm = String(d.getMonth() + 1).padStart(2, "0");
+          const yyyy = d.getFullYear();
+          setDob(`${dd}/${mm}/${yyyy}`);
+        } else {
+          setDob(parentProfile.dateOfBirth || "");
+        }
+      } else {
+        setDob("");
+      }
       setMaritalStatus(parentProfile.maritalStatus || "");
       setStateOfOrigin(parentProfile.stateOfOrigin || "");
 
@@ -126,11 +151,19 @@ export default function PersonalInformationScreen() {
       ).split(" ");
       setFirstName(nameParts[0] || "");
       setLastName(nameParts.slice(1).join(" ") || "");
-      setDob(
-        agentProfile.dateOfBirth
-          ? new Date(agentProfile.dateOfBirth).toISOString().split("T")[0]
-          : ""
-      );
+      if (agentProfile.dateOfBirth) {
+        const d = new Date(agentProfile.dateOfBirth);
+        if (!isNaN(d.getTime())) {
+          const dd = String(d.getDate()).padStart(2, "0");
+          const mm = String(d.getMonth() + 1).padStart(2, "0");
+          const yyyy = d.getFullYear();
+          setDob(`${dd}/${mm}/${yyyy}`);
+        } else {
+          setDob("");
+        }
+      } else {
+        setDob("");
+      }
 
       if (agentProfile.country && countries.length > 0) {
         const foundCountry = countries.find(
@@ -138,8 +171,11 @@ export default function PersonalInformationScreen() {
         );
         if (foundCountry) {
           setCountry(foundCountry);
+          getStatesByCountry(foundCountry.name).then(setOriginStatesList);
         }
       }
+      setStateOfOrigin(agentProfile.state || "");
+      setUserName(agentProfile.userName || "");
     }
   }, [surrogateProfile, parentProfile, agentProfile, countries, Role]);
 
@@ -152,8 +188,16 @@ export default function PersonalInformationScreen() {
         });
         return;
       } 
-    } else if (Role === "INTENDED_PARENT" || Role === "AGENT") {
+    } else if (Role === "INTENDED_PARENT") {
       if (!firstName || !country || !dob || !maritalStatus) {
+        Toast.show({
+          text1: "Please fill all required fields",
+          type: "customError" as ToastType,
+        });
+        return;
+      }
+    } else if (Role === "AGENT") {
+      if (!firstName || !country || !dob) {
         Toast.show({
           text1: "Please fill all required fields",
           type: "customError" as ToastType,
@@ -190,12 +234,17 @@ export default function PersonalInformationScreen() {
         if (stateOfOrigin) profileData.stateOfOrigin = stateOfOrigin;
         await updateParentProfile(profileData);
       } else if (Role === "AGENT") {
-        const profileData = {
+        const profileData: any = {
           fullName: `${firstName.trim()} ${lastName.trim()}`.trim(),
           country: country.name,
-          dateOfBirth: dob ? new Date(dob) : undefined,
-          maritalStatus,
         };
+        if (userName) profileData.userName = userName;
+        if (dob) {
+          const parts = dob.split("/");
+          if (parts.length === 3) {
+            profileData.dateOfBirth = `${parts[2]}-${parts[1]}-${parts[0]}`;
+          }
+        }
         await updateAgentProfile(profileData);
       }
 
@@ -274,15 +323,18 @@ export default function PersonalInformationScreen() {
               <AgentPersonalFields
                 fullName={firstName}
                 lastName={lastName}
+                userName={userName}
                 country={country}
+                stateOfOrigin={stateOfOrigin}
+                originStatesList={originStatesList}
                 dob={dob}
-                maritalStatus={maritalStatus}
                 countries={countries}
                 setFirstName={setFirstName}
                 setLastName={setLastName}
+                setUserName={setUserName}
                 setCountry={handleSetCountry}
+                setStateOfOrigin={setStateOfOrigin}
                 setDob={setDob}
-                setMaritalStatus={setMaritalStatus}
               />
             )}
             <Button

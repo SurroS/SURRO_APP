@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { YStack, Text, Button, View } from "tamagui";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
+import ImageCropperModal from "@/components/ImageCropperModal";
 
 type UploadCardProps = {
   label: string;
@@ -11,6 +12,9 @@ type UploadCardProps = {
 };
 
 const StyledUploadCard = ({ label, onFileSelect, file, isReupload }: UploadCardProps) => {
+  const [cropperImageUri, setCropperImageUri] = useState<string | null>(null);
+  const [showCropper, setShowCropper] = useState(false);
+
   const handlePickFile = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -32,13 +36,24 @@ const StyledUploadCard = ({ label, onFileSelect, file, isReupload }: UploadCardP
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
       quality: 0.8,
     });
 
     if (!result.canceled) {
-      onFileSelect(result.assets[0]);
+      setCropperImageUri(result.assets[0].uri);
+      setShowCropper(true);
     }
+  };
+
+  const handleCropComplete = (croppedUri: string) => {
+    onFileSelect({ uri: croppedUri, type: "image/jpeg", name: "cropped.jpg" });
+    setShowCropper(false);
+    setCropperImageUri(null);
+  };
+
+  const handleCropperCancel = () => {
+    setShowCropper(false);
+    setCropperImageUri(null);
   };
 
   return (
@@ -72,6 +87,13 @@ const StyledUploadCard = ({ label, onFileSelect, file, isReupload }: UploadCardP
           {isReupload ? "Reupload" : "Upload"}
         </Button>
       </View>
+
+      <ImageCropperModal
+        visible={showCropper}
+        imageUri={cropperImageUri || ""}
+        onCrop={handleCropComplete}
+        onCancel={handleCropperCancel}
+      />
     </YStack>
   );
 };

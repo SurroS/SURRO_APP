@@ -41,10 +41,22 @@ export const useAgentProfile = () => {
 
     try {
       const res = await getAgentProfile();
-      console.log("[AgentProfile] API response:", JSON.stringify(res).slice(0, 400));
+      console.log("[AgentProfile] API response:", JSON.stringify(res, null, 2));
       const profile = res?.profile || res;
       if (profile?.profilePicture) {
         profile.profilePicture = resolveProfilePicture(profile.profilePicture);
+      }
+      // normalize gallery to simple string[] of urls for UI
+      try {
+        if (Array.isArray(profile?.gallery)) {
+          profile._galleryUrls = profile.gallery
+            .map((it: any) => (typeof it === "string" ? it : it?.url || null))
+            .filter(Boolean);
+        } else {
+          profile._galleryUrls = [];
+        }
+      } catch (e) {
+        profile._galleryUrls = [];
       }
       cachedAgentProfile = profile;
       setAgentProfile(profile);
@@ -82,11 +94,26 @@ export const useAgentProfile = () => {
     setError(null);
 
     try {
-      const res = await createAgentProfile(data);
-      console.log("[AgentProfile] Create success:", JSON.stringify(res).slice(0, 200));
-      cachedAgentProfile = res?.profile || res;
-      setAgentProfile(cachedAgentProfile);
-      return res;
+      await createAgentProfile(data);
+      const res = await getAgentProfile();
+      const profile = res?.profile || res;
+      if (profile?.profilePicture) {
+        profile.profilePicture = resolveProfilePicture(profile.profilePicture);
+      }
+      try {
+        if (Array.isArray(profile?.gallery)) {
+          profile._galleryUrls = profile.gallery
+            .map((it: any) => (typeof it === "string" ? it : it?.url || null))
+            .filter(Boolean);
+        } else {
+          profile._galleryUrls = [];
+        }
+      } catch (e) {
+        profile._galleryUrls = [];
+      }
+      cachedAgentProfile = profile;
+      setAgentProfile(profile);
+      return profile;
     } catch (err: any) {
       const serverMsg = err?.response?.data?.message || err.message;
       console.error("[AgentProfile] Create error:", serverMsg);
@@ -106,10 +133,26 @@ export const useAgentProfile = () => {
     setError(null);
 
     try {
-      const res = await updateAgentProfile(data);
-      console.log("[AgentProfile] Update success:", JSON.stringify(res).slice(0, 200));
-      setAgentProfile(res?.profile || res);
-      return res;
+      await updateAgentProfile(data);
+      const res = await getAgentProfile();
+      const profile = res?.profile || res;
+      if (profile?.profilePicture) {
+        profile.profilePicture = resolveProfilePicture(profile.profilePicture);
+      }
+      try {
+        if (Array.isArray(profile?.gallery)) {
+          profile._galleryUrls = profile.gallery
+            .map((it: any) => (typeof it === "string" ? it : it?.url || null))
+            .filter(Boolean);
+        } else {
+          profile._galleryUrls = [];
+        }
+      } catch (e) {
+        profile._galleryUrls = [];
+      }
+      cachedAgentProfile = profile;
+      setAgentProfile(profile);
+      return profile;
     } catch (err: any) {
       const serverMsg = err?.response?.data?.message || err.message;
       console.error("[AgentProfile] Update error:", serverMsg);

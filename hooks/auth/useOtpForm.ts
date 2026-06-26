@@ -28,6 +28,14 @@ export const useOtpForm = () => {
         return otp.join('');
     };
 
+    const setOtpFromString = (digits: string) => {
+        const arr = digits.split('').slice(0, 6);
+        const newOtp = ['', '', '', '', '', ''];
+        arr.forEach((d, i) => { newOtp[i] = d; });
+        setOtp(newOtp);
+        if (error) setError(null);
+    };
+
     const resetOtp = () => {
         setOtp(['', '', '', '', '', '']);
         setError(null);
@@ -37,6 +45,7 @@ export const useOtpForm = () => {
         otp,
         error,
         updateOtpDigit,
+        setOtpFromString,
         validateOtp,
         getOtpCode,
         resetOtp,

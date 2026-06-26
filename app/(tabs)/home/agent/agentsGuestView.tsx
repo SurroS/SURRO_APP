@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import colors from "@/hooks/colors";
+import { ImageCarousel } from "@/components/ImageCarousel";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Entypo from "@expo/vector-icons/Entypo";
 import BioSection from "@/components/roles/BioSectionView";
@@ -36,7 +37,12 @@ export default function AgentGuestView() {
   }
 
   const agent = agentProfile;
-  const hasGalleryImage = !!agent?.gallery;
+  const galleryUrls: string[] = Array.isArray(agent?._galleryUrls)
+    ? agent._galleryUrls
+    : Array.isArray(agent?.gallery)
+    ? agent.gallery.map((g: any) => (typeof g === "string" ? g : g?.url)).filter(Boolean)
+    : [];
+  const hasGalleryImage = galleryUrls.length > 0 || !!agent?.profilePicture;
 
   return (
     <View style={styles.container}>
@@ -54,9 +60,7 @@ export default function AgentGuestView() {
           {/* --- IMAGE CAROUSEL --- */}
           <View style={styles.carouselContainer}>
             {hasGalleryImage ? (
-              <View style={{ flex: 1, backgroundColor: "#E0E0E0", justifyContent: "center", alignItems: "center" }}>
-                <Text style={{ color: "#666", fontSize: 14 }}>Gallery Image</Text>
-              </View>
+              <ImageCarousel images={[...(agent?.profilePicture ? [agent.profilePicture] : []), ...galleryUrls]} unlocked={true} />
             ) : (
               <View style={{ flex: 1, backgroundColor: "#E0E0E0", justifyContent: "center", alignItems: "center" }}>
                 <Text style={{ color: "#666", fontSize: 14 }}>Profile Picture</Text>
@@ -66,8 +70,8 @@ export default function AgentGuestView() {
 
           {/* --- HEADER INFO --- */}
           <HeaderInfo
-            name={agent?.fullName || `${agent?.firstName ?? ""} ${agent?.lastName ?? ""}`.trim() || "Unnamed Agent"}
-            username={agent?.userName || "No Username"}
+            name={agent?.userName || agent?.fullName || "Unnamed Agent"}
+            username={agent?.userName || agent?.fullName || agent?.user?.email || "No Name"}
             location={agent?.country || "Unknown"}
             city={agent?.city || "N/A"}
             age={agent?.age || "N/A"}
@@ -83,37 +87,43 @@ export default function AgentGuestView() {
           {/* --- ABOUT --- */}
           <BioSection
             title="About"
-            content={agent?.aboutMe || agent?.about || "No description available."}
+            content={agent?.about || "No description available."}
           />
 
           {/* --- PERFORMANCE --- */}
           <AgentPerformanceSection
-            matches={agent?.performance?.matches || 0}
-            rating={agent?.performance?.rating || 0}
+            matches={agent?.performance?.successfulMatches || 0}
+            rating={agent?.performance?.averageRating || 0}
             responseTime={agent?.performance?.responseTime || "N/A"}
             activeCases={agent?.performance?.activeCases || 0}
           />
 
           {/* --- ADDITIONAL DETAILS --- */}
           <AgentAdditionalDetails
-            languages={agent?.additionalDetails?.languages || []}
-            experience={agent?.additionalDetails?.experience || "N/A"}
-            coverage={agent?.additionalDetails?.coverage || "N/A"}
+            languages={agent?.languages || agent?.additionalDetails?.languages || []}
+            experience={agent?.yearsOfExperience?.toString() || agent?.additionalDetails?.experience || "N/A"}
+            coverage={agent?.coverageAreas || agent?.additionalDetails?.coverage || "N/A"}
           />
 
           {/* --- CONTACT INFO (always visible) --- */}
           <View style={styles.contactWrapper}>
             <ContactSection
               data={{
-                country: agent?.country || "N/A",
-                phone1: agent?.phone1 || "N/A",
-                phone2: agent?.phone2 || "N/A",
-                emergency: agent?.emergencyPhone || "N/A",
+               country: agent?.country || "N/A",
+               phone1: agent?.phone1 || "N/A",
+               phone2: agent?.phone2 || "N/A",
+               emergency: agent?.emergencyPhone || "N/A",
                 social: {
                   Facebook: agent?.facebookProfile,
                   Instagram: agent?.instagramProfile,
                   X: agent?.twitterProfile,
                 },
+                street: agent?.address ?? undefined,
+                state: agent?.state ?? undefined,
+                zip: agent?.zipcode ?? undefined,
+                lGA: agent?.lga ?? undefined,
+                relationship: agent?.emergencyContactRelationship ?? undefined,
+                email: agent?.publicEmail ?? undefined,
               }}
             />
           </View>

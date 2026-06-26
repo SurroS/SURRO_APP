@@ -33,23 +33,23 @@ export async function getNotifications(): Promise<BackendNotification[]> {
 }
 
 export async function getNotificationPreferences(): Promise<NotificationPreferences> {
-  return authenticatedGet("/notifications/preferences");
+  return authenticatedGet("/notifications/preferences/me");
 }
 
 export async function updateNotificationPreferences(
   prefs: Partial<NotificationPreferences>,
 ): Promise<NotificationPreferences> {
-  return authenticatedPatch("/notifications/preferences", prefs);
+  return authenticatedPatch("/notifications/preferences/me", prefs);
 }
 
 export async function getReminderSettings(): Promise<ReminderSettings> {
-  return authenticatedGet("/notifications/reminders");
+  return authenticatedGet("/notifications/reminders/me");
 }
 
 export async function updateReminderSettings(
   settings: Partial<ReminderSettings>,
 ): Promise<ReminderSettings> {
-  return authenticatedPatch("/notifications/reminders", settings);
+  return authenticatedPatch("/notifications/reminders/me", settings);
 }
 
 export async function markNotificationRead(id: string): Promise<void> {
