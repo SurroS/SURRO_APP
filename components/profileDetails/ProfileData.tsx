@@ -11,6 +11,7 @@ type ProfileHeaderProps = {
   dateOfBirth?: string | null;
   isAvailable?: boolean | null;
   onToggleAvailability?: (next: boolean) => Promise<void>;
+  isVerified?: boolean;
 };
 
 const ProfileHeader = ({
@@ -20,6 +21,7 @@ const ProfileHeader = ({
   dateOfBirth,
   isAvailable,
   onToggleAvailability,
+  isVerified,
 }: ProfileHeaderProps) => {
   const [imgFailed, setImgFailed] = useState(false);
   const handleStatusPress = async () => {
@@ -60,9 +62,12 @@ const ProfileHeader = ({
       )}
 
       <YStack gap="$3">
-        <Text color="black" fontSize="$4" fontWeight="bold">
-          {name || "User Name"}
-        </Text>
+        <XStack alignItems="center" gap="$2">
+          <Text color="black" fontSize="$4" fontWeight="bold">
+            {name || "User Name"}
+          </Text>
+          {isVerified && <Ionicons name="shield-checkmark" size={16} color="#1DA1F2" />}
+        </XStack>
 
         <XStack alignItems="center" gap="$2">
           <Ionicons name="location-outline" size={18} color="#666" />
@@ -74,7 +79,9 @@ const ProfileHeader = ({
         <XStack alignItems="center" gap="$2">
           <Feather name="calendar" size={18} color="#666" />
           <Text color="black">
-            {dateOfBirth || "DOB not set"}
+            {dateOfBirth
+              ? (() => { const d = new Date(dateOfBirth); return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`; })()
+              : "DOB not set"}
           </Text>
         </XStack>
 

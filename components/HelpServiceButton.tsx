@@ -49,8 +49,8 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: "absolute",
-    bottom: 25,
-    right: 25,
+    bottom: 80,
+    right: 20,
     backgroundColor: colors.secondry,
     borderRadius: 30,
     width: 60,

@@ -9,6 +9,7 @@ import {
   Keyboard,
   ActivityIndicator,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { YStack, XStack, Text, Button } from "tamagui";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -225,6 +226,36 @@ export default function EditProfileModal({
                 disabled={isLoading}
                 onInputFocus={() => scrollRef.current?.scrollTo({ y: socialsY.current, animated: true })}
               />
+
+              {socials.length > 0 && (
+                <YStack marginTop={12}>
+                  {socials.map((s) => (
+                    <XStack
+                      key={s.platform}
+                      alignItems="center"
+                      gap="$2"
+                      backgroundColor="#F8F8FA"
+                      borderRadius={10}
+                      padding={10}
+                      marginBottom={8}
+                    >
+                      <Ionicons name="link" size={18} color="#666" />
+                      <Text flex={1} fontSize={14} color="#111">
+                        {s.platform}: <Text fontWeight="700">{s.handle}</Text>
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() =>
+                          setSocials((prev) =>
+                            prev.filter((x) => x.platform !== s.platform),
+                          )
+                        }
+                      >
+                        <Text color="#E63946" fontWeight="700">delete</Text>
+                      </TouchableOpacity>
+                    </XStack>
+                  ))}
+                </YStack>
+              )}
             </YStack>
             </YStack>
             <Button

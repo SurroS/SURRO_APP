@@ -239,12 +239,17 @@ export default function PersonalInformationScreen() {
           country: country.name,
         };
         if (userName) profileData.userName = userName;
+        console.log("[personalDetails] dob raw value:", JSON.stringify(dob));
         if (dob) {
-          const parts = dob.split("/");
-          if (parts.length === 3) {
-            profileData.dateOfBirth = `${parts[2]}-${parts[1]}-${parts[0]}`;
+          const dateStr = dob.split("/").reverse().join("-");
+          console.log("[personalDetails] parsed dateStr:", dateStr);
+          const d = new Date(dateStr);
+          console.log("[personalDetails] Date object:", d.toString(), "ISO:", d.toISOString(), "valid:", !isNaN(d.getTime()));
+          if (!isNaN(d.getTime())) {
+            profileData.dateOfBirth = dateStr;
           }
         }
+        console.log("[personalDetails] AGENT profileData:", JSON.stringify(profileData));
         await updateAgentProfile(profileData);
       }
 
@@ -254,7 +259,7 @@ export default function PersonalInformationScreen() {
         text2: "Your personal details have been saved",
       });
 
-      router.push("/profile/contactInformation");
+      setTimeout(() => router.push("/profile/contactInformation"), 500);
     } catch (error: any) {
       Toast.show({
         text1: "Update Failed",

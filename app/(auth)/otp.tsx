@@ -27,6 +27,7 @@ export default function OTPScreen() {
   const { verifyOtp, resendOtp, tempEmail, isLoading } = useAuth();
 
   const [otpCode, setOtpCode] = useState("");
+  const [isResending, setIsResending] = useState(false);
 
   const handleOtpChange = useCallback((text: string) => {
     const digits = text.replace(/[^0-9]/g, "").slice(0, OTP_LENGTH);
@@ -62,15 +63,8 @@ export default function OTPScreen() {
   };
 
   const handleResendOtp = async () => {
-    if (!tempEmail) {
-      Toast.show({
-        text1: "No email found. Please restart the process.",
-        type: "customError" as ToastType,
-        text2: "No email found. Please restart the process!",
-      });
-      return;
-    }
-
+    if (!tempEmail || isResending) return;
+    setIsResending(true);
     try {
       await resendOtp(tempEmail);
       Toast.show({
@@ -85,6 +79,8 @@ export default function OTPScreen() {
         type: "customError" as ToastType,
         text2: "Failed to resend OTP. Please try again!",
       });
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -135,10 +131,12 @@ export default function OTPScreen() {
           loading={isLoading}
         />
 
-        <TouchableOpacity style={styles.resendButton} onPress={handleResendOtp}>
+        <TouchableOpacity style={styles.resendButton} onPress={handleResendOtp} disabled={isResending}>
           <Text style={styles.resendText}>
             Didn&apos;t get the code?{" "}
-            <Text style={styles.resendLink}>Resend</Text>
+            <Text style={[styles.resendLink, isResending && { opacity: 0.5 }]}>
+              {isResending ? "Resending..." : "Resend"}
+            </Text>
           </Text>
         </TouchableOpacity>
         </ScrollView>

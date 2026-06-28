@@ -67,6 +67,7 @@ export default function SurrogateScreen() {
             dateOfBirth={surrogateProfile?.dateOfBirth?.split("T")[0]}
             isAvailable={surrogateProfile?.isAvailable}
             onToggleAvailability={toggleAvailability}
+            isVerified={surrogateProfile?.user?.isVerified || surrogateProfile?.user?.kycStatus === "APPROVED"}
           />
 
           {/* Accordion for About + Contact */}

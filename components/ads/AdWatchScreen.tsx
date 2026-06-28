@@ -35,6 +35,7 @@ export default function AdWatchScreen() {
   const [timer, setTimer] = useState(15);
   const [rewardAmount, setRewardAmount] = useState(0);
   const [dailyStats, setDailyStats] = useState<any>(null);
+  const [claiming, setClaiming] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -96,7 +97,8 @@ export default function AdWatchScreen() {
   };
 
   const handleClaim = async () => {
-    if (!ad) return;
+    if (!ad || claiming) return;
+    setClaiming(true);
     try {
       setScreenState("claimed");
       const result = await claimAdReward(ad.id);
@@ -108,6 +110,8 @@ export default function AdWatchScreen() {
       setDailyStats(updatedStats);
     } catch {
       setScreenState("claimable");
+    } finally {
+      setClaiming(false);
     }
   };
 
@@ -160,11 +164,16 @@ export default function AdWatchScreen() {
         <Text style={styles.rewardText}>+₦{rewardAmount}</Text>
 
         <TouchableOpacity
-          style={styles.claimButton}
+          style={[styles.claimButton, claiming && { opacity: 0.7 }]}
           onPress={handleClaim}
           activeOpacity={0.8}
+          disabled={claiming}
         >
-          <Text style={styles.claimButtonText}>Claim Reward</Text>
+          {claiming ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={styles.claimButtonText}>Claim Reward</Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>

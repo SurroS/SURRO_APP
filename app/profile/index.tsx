@@ -158,7 +158,7 @@ export default function EditBioView() {
       type: "customSuccess" as ToastType,
       text2: "You have been logged out",
     });
-    router.replace("/(auth)/login");
+    setTimeout(() => router.replace("/(auth)/login"), 500);
   };
 
   const [isDeactivating, setIsDeactivating] = useState(false);
@@ -221,7 +221,7 @@ export default function EditBioView() {
       const avatarRes = await uploadAvatar(formData);
       const avatarUrl = resolveProfilePicture(avatarRes?.url || avatarRes?.data?.url);
       if (avatarUrl) {
-        await updateCurrentProfile({ profilePictureUrl: avatarUrl });
+        await updateCurrentProfile({ profilePicture: avatarUrl });
         setProfileImage(avatarUrl);
         setUser({ avatar: avatarUrl, profilePictureUrl: avatarUrl });
       }
@@ -266,35 +266,46 @@ export default function EditBioView() {
     logProfileFlow("UI_INPUT", data);
     console.log("profile from Edit bioscreen", uiProfile);
 
-    switch (Role) {
-      case "SURROGATE": {
-        const payload = uiProfileToSurrogate(data);
-        logProfileFlow("SURROGATE_PAYLOAD", payload);
-        surrogateProfile
-          ? await updateSurrogate(payload as any)
-          : await createSurrogate(payload);
-        break;
+    try {
+      switch (Role) {
+        case "SURROGATE": {
+          const payload = uiProfileToSurrogate(data);
+          logProfileFlow("SURROGATE_PAYLOAD", payload);
+          surrogateProfile
+            ? await updateSurrogate(payload as any)
+            : await createSurrogate(payload);
+          break;
+        }
+
+        case "AGENT": {
+          const payload = uiProfileToAgent(data);
+          logProfileFlow("AGENT_PAYLOAD", payload);
+          agentProfile ? await updateAgent(payload) : await createAgent(payload);
+          break;
+        }
+
+        case "INTENDED_PARENT": {
+          const payload = uiProfileToParent(data);
+          logProfileFlow("PARENT_PAYLOAD", payload);
+          parentProfile
+            ? await updateParent(payload)
+            : await createParent(payload);
+          break;
+        }
       }
 
-      case "AGENT": {
-        const payload = uiProfileToAgent(data);
-        logProfileFlow("AGENT_PAYLOAD", payload);
-        agentProfile ? await updateAgent(payload) : await createAgent(payload);
-        break;
-      }
-
-      case "INTENDED_PARENT": {
-        const payload = uiProfileToParent(data);
-        logProfileFlow("PARENT_PAYLOAD", payload);
-        parentProfile
-          ? await updateParent(payload)
-          : await createParent(payload);
-        break;
-      }
+      // Refresh profile after save
+      fetchCurrentProfile();
+      Toast.show({
+        text1: "Profile updated",
+        type: "customSuccess" as ToastType,
+      });
+    } catch {
+      Toast.show({
+        text1: "Failed to update profile",
+        type: "customError" as ToastType,
+      });
     }
-
-    // Refresh profile after save
-    fetchCurrentProfile();
   };
 
   // -------------------------------

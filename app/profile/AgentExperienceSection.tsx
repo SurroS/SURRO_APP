@@ -55,18 +55,18 @@ export default function AgentExperienceSection() {
       if (compensation) profileData.compensation = compensation;
       if (negotiable) profileData.negotiable = negotiable;
       await updateAgentProfile(profileData);
+      setIsSaving(false);
       Toast.show({
         text1: "Experience updated",
         type: "customSuccess" as ToastType,
       });
-      router.back();
+      setTimeout(() => router.back(), 500);
     } catch {
+      setIsSaving(false);
       Toast.show({
         text1: "Failed to update",
         type: "customError" as ToastType,
       });
-    } finally {
-      setIsSaving(false);
     }
   };
 

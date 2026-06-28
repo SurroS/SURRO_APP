@@ -58,12 +58,14 @@ const AgentProfileDataView = () => {
           </Text>
         </XStack>
 
-        <XStack alignItems="center" gap="$2">
-          <Feather name="calendar" size={19} color="#666" />
-          <Text color="black" fontSize="$3">
-            {agentProfile?.dateOfBirth || "DOB not set"}
-          </Text>
-        </XStack>
+        {agentProfile?.dateOfBirth && (
+          <XStack alignItems="center" gap="$2">
+            <Feather name="calendar" size={19} color="#666" />
+            <Text color="black" fontSize="$3">
+              {(() => { const d = new Date(agentProfile.dateOfBirth); return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`; })()}
+            </Text>
+          </XStack>
+        )}
 
         <TouchableOpacity
           onPress={handleStatusPress}
@@ -76,7 +78,7 @@ const AgentProfileDataView = () => {
             },
           ]}
         >
-          <Text color="black" fontSize="$3" fontWeight={"bold"}>
+          <Text color="black" fontSize="$2" fontWeight={"bold"}>
             {agentProfile?.isAvailable ? "Available" : "Not Available"}
           </Text>
         </TouchableOpacity>
@@ -89,10 +91,9 @@ export default AgentProfileDataView;
 
 const styles = StyleSheet.create({
   statusButton: {
-    borderRadius: 30,
-    height: "24%",
-    flexGrow: 0.5,
-    justifyContent: "center",
-    alignItems: "center",
+    borderRadius: 20,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    alignSelf: "flex-start",
   },
 });

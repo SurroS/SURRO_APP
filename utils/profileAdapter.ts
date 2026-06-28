@@ -33,7 +33,9 @@ export const uiProfileToSurrogate = (u: UIProfile) => ({
   facebookProfile: u.socials?.find((s) => s.platform === "Facebook")?.handle,
   instagramProfile: u.socials?.find((s) => s.platform === "Instagram")?.handle,
   twitterProfile: u.socials?.find((s) => s.platform === "Twitter")?.handle,
-  threadsProfile: u.socials?.find((s) => s.platform === "Threads")?.handle,
+  threadsProfile:
+    u.socials?.find((s) => s.platform === "Threads")?.handle ||
+    u.socials?.find((s) => s.platform === "TikTok")?.handle,
 });
 
 /* ---------------- AGENT ---------------- */

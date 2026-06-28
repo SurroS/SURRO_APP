@@ -5,6 +5,7 @@ import Animated from "react-native-reanimated";
 import { Accordion, Text, XStack, YStack } from "tamagui";
 import About from "@/components/roles/about";
 import Contact from "@/components/roles/contact";
+import AgentAdditionalDetails from "@/components/roles/agent/AditionalDetails";
 import Gallery from "@/components/roles/gallery";
 import ProgressMeter from "@/components/roles/progressCircle";
 import Referral from "@/components/roles/referral";
@@ -17,6 +18,8 @@ import { useAgentProfile } from "@/hooks/profile/useAgentProfile";
 import { useAuth } from "@/hooks/useAuth";
 import ProfileData from "@/components/profileDetails/ProfileData";
 import HomeResourceCard from "@/components/resources/HomeResourceCard";
+import AdEarnCard from "@/components/ads/AdEarnCard";
+import SubscriptionCard from "@/components/subscription/SubscriptionCard";
 
 /** Safe render wrapper */
 function SafeRender({ children, fallback }: any) {
@@ -81,6 +84,7 @@ export default function AgentHomeScreen() {
               onToggleAvailability={async (next) => {
                 await updateProfile({ isAvailable: next });
               }}
+              isVerified={agentProfile?.user?.isVerified || agentProfile?.user?.kycStatus === "APPROVED"}
             />
           </SafeRender>
 
@@ -98,6 +102,15 @@ export default function AgentHomeScreen() {
                 <YStack gap="$3">
                   <SafeRender fallback={<Text>Loading about info...</Text>}>
                     <About aboutMe={agentProfile?.about} />
+                  </SafeRender>
+
+                  <SafeRender fallback={null}>
+                    <AgentAdditionalDetails
+                      languages={agentProfile?.languages}
+                      experience={agentProfile?.additionalDetails?.yearsOfExperience}
+                      specialization={agentProfile?.services?.join(", ")}
+                      coverage={agentProfile?.additionalDetails?.coverage}
+                    />
                   </SafeRender>
 
                   <SafeRender fallback={<Text>Loading contact info...</Text>}>
@@ -179,6 +192,14 @@ export default function AgentHomeScreen() {
               </SafeRender>
             </YStack>
           </XStack>
+
+          {/* Promotion row - AdEarnCard + SubscriptionCard */}
+          <SafeRender fallback={null}>
+            <XStack gap={10} marginTop={10}>
+              <AdEarnCard style={{ flex: 1 }} />
+              <SubscriptionCard style={{ flex: 1 }} />
+            </XStack>
+          </SafeRender>
         </YStack>
       </ScrollView>
 
@@ -217,7 +238,9 @@ function AccordionTriggerWithChevron({ title }: { title: string }) {
             style={{
               transform: [{ rotate: open ? "180deg" : "0deg" }],
             }}
-          />
+          >
+            <ChevronDown color="white" size={20} />
+          </Animated.View>
         </XStack>
       )}
     </Accordion.Trigger>

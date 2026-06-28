@@ -164,6 +164,7 @@ export default function SurrogateGuestView() {
             {...headerData}
             isUnlocked={true}
             hideActions
+            isVerified={profile?.user?.isVerified || profile?.user?.kycStatus === "APPROVED"}
           />
 
           {/* ABOUT */}

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Pressable, TextInput, View } from "react-native";
-import { YStack, Button, ScrollView, XStack, Text, Popover } from "tamagui";
+import React, { useState, useMemo } from "react";
+import { Pressable, TextInput, View, ActivityIndicator, Keyboard } from "react-native";
+import { YStack, Button, ScrollView, XStack, Text } from "tamagui";
 import { ScreenHeader } from "@/components/auth";
 import { router } from "expo-router";
 import { Toast } from "toastify-react-native";
@@ -17,36 +17,23 @@ export default function AgentLanguageSection() {
   const [languages, setLanguages] = useState<string[]>(() => {
     return agentProfile?.languages || [];
   });
-  const [allLanguages, setAllLanguages] = useState<string[]>([]);
-  const [filteredLanguages, setFilteredLanguages] = useState<string[]>([]);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const sortedLanguages = [...languagesData].sort();
   const [search, setSearch] = useState("");
 
-  const triggerRef = useRef<View>(null);
-  const [popoverWidth, setPopoverWidth] = useState(200);
+  const languagesSet = useMemo(() => new Set(languages), [languages]);
 
-  // Load languages from embedded dataset
-  useEffect(() => {
-    const sorted = [...languagesData].sort();
-    setAllLanguages(sorted);
-    setFilteredLanguages(sorted);
-  }, []);
-
-  // Filter languages
-  useEffect(() => {
-    if (!search) setFilteredLanguages(allLanguages);
-    else
-      setFilteredLanguages(
-        allLanguages.filter((lang) =>
-          lang.toLowerCase().includes(search.toLowerCase())
-        )
-      );
-  }, [search, allLanguages]);
+  const filteredLanguages = useMemo(() => {
+    if (!search) return sortedLanguages;
+    return sortedLanguages.filter((lang) =>
+      lang.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [search]);
 
   const toggleLang = (lang: string) => {
     setLanguages((prev) =>
       prev.includes(lang) ? prev.filter((l) => l !== lang) : [...prev, lang]
     );
+    setSearch("");
   };
 
   const save = async () => {
@@ -61,18 +48,18 @@ export default function AgentLanguageSection() {
     setIsSaving(true);
     try {
       await updateAgentProfile({ languages });
+      setIsSaving(false);
       Toast.show({
         text1: "Languages updated",
         type: "customSuccess" as ToastType,
       });
-      router.back();
+      setTimeout(() => router.back(), 500);
     } catch {
+      setIsSaving(false);
       Toast.show({
         text1: "Failed to update",
         type: "customError" as ToastType,
       });
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -81,113 +68,94 @@ export default function AgentLanguageSection() {
       <SafeAreaView style={{ flex: 1, padding: 20 }}>
         <ScreenHeader title="Languages" onBackPress={() => router.back()} />
 
-        <ScrollView>
-        <YStack gap="$4">
+        <Pressable style={{ flex: 1 }} pointerEvents="box-none" onPress={Keyboard.dismiss}>
+        <YStack gap="$4" flex={1}>
           <Text fontWeight="600" fontSize={15} color={colors.text}>
             Languages Spoken
           </Text>
 
-          <Popover open={dropdownOpen} onOpenChange={setDropdownOpen}>
-            <Popover.Trigger asChild>
+          <TextInput
+            placeholder="Search languages..."
+            value={search}
+            onChangeText={setSearch}
+            editable={!isSaving}
+            style={{
+              borderWidth: 1,
+              borderColor: "#E6E6E6",
+              borderRadius: 8,
+              paddingHorizontal: 10,
+              height: 40,
+              color: colors.text,
+              opacity: isSaving ? 0.5 : 1,
+            }}
+            placeholderTextColor="#9B9B9B"
+          />
+
+          {languages.length > 0 && (
+            <XStack flexWrap="wrap" gap="$2">
+              {languages.map((lang) => (
+                <XStack key={lang} backgroundColor={colors.primary} borderRadius={20} paddingHorizontal={14} paddingVertical={6} alignItems="center" gap="$2">
+                  <Text color="white" fontSize={15}>{lang}</Text>
+                  <Pressable onPress={() => toggleLang(lang)} hitSlop={10}>
+                    <Text color="white" fontSize={20} fontWeight="700">×</Text>
+                  </Pressable>
+                </XStack>
+              ))}
+            </XStack>
+          )}
+
+          <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps="handled">
+            {filteredLanguages.map((lang) => (
               <Pressable
-                ref={triggerRef}
-                onLayout={(e) => setPopoverWidth(e.nativeEvent.layout.width)}
-                style={{
-                  borderWidth: 1,
-                  borderColor: "#E6E6E6",
-                  borderRadius: 8,
-                  padding: 12,
-                }}
+                key={lang}
+                onPress={() => !isSaving && toggleLang(lang)}
+                disabled={isSaving}
+                style={{ opacity: isSaving ? 0.5 : 1 }}
               >
-                <Text fontSize={15} color={colors.gray}>
-                  {languages.length > 0
-                    ? languages.join(", ")
-                    : "Select languages"}
-                </Text>
-              </Pressable>
-            </Popover.Trigger>
-
-            <Popover.Content
-              style={{
-                width: popoverWidth,
-                backgroundColor: "white",
-                borderWidth: 1,
-                borderColor: "#E6E6E6",
-                borderRadius: 8,
-                padding: 10,
-                maxHeight: 300,
-              }}
-            >
-              <YStack gap="$2">
-                {/* Search input */}
-                <TextInput
-                  placeholder="Search languages..."
-                  value={search}
-                  onChangeText={setSearch}
-                  style={{
-                    borderWidth: 1,
+                <XStack
+                  alignItems="center"
+                  justifyContent="flex-start"
+                  gap="$3"
+                  paddingVertical={6}
+                >
+                  <View style={{
+                    width: 28,
+                    height: 28,
+                    borderWidth: 2,
                     borderColor: "#E6E6E6",
-                    borderRadius: 8,
-                    paddingHorizontal: 10,
-                    height: 40,
-                    marginBottom: 10,
-                    color: colors.text,
+                    borderRadius: 6,
+                    backgroundColor: languagesSet.has(lang)
+                      ? colors.primary
+                      : "transparent",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
-                  placeholderTextColor="#9B9B9B"
-                />
-
-                {/* Scrollable list */}
-                <ScrollView style={{ maxHeight: 200 }}>
-                  {filteredLanguages.map((lang) => (
-                    <XStack
-                      key={lang}
-                      alignItems="center"
-                      justifyContent="flex-start"
-                      gap="$3"
-                      paddingVertical={6}
-                    >
-                      <Pressable
-                        onPress={() => toggleLang(lang)}
-                        style={{
-                          width: 20,
-                          height: 20,
-                          borderWidth: 1,
-                          borderColor: "#E6E6E6",
-                          borderRadius: 4,
-                          backgroundColor: languages.includes(lang)
-                            ? colors.primary
-                            : "transparent",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        {languages.includes(lang) && (
-                          <Text style={{ color: "white", fontSize: 14 }}>
-                            ✓
-                          </Text>
-                        )}
-                      </Pressable>
-                      <Text fontSize={15} color={colors.text}>
-                        {lang}
+                  >
+                    {languagesSet.has(lang) && (
+                      <Text style={{ color: "white", fontSize: 18 }}>
+                        ✓
                       </Text>
-                    </XStack>
-                  ))}
+                    )}
+                  </View>
+                  <Text fontSize={15} color={colors.text}>
+                    {lang}
+                  </Text>
+                </XStack>
+              </Pressable>
+            ))}
 
-                  {filteredLanguages.length === 0 && (
-                    <Text fontSize={14} color={colors.gray} paddingVertical={6}>
-                      No languages found
-                    </Text>
-                  )}
-                </ScrollView>
-              </YStack>
-            </Popover.Content>
-          </Popover>
+            {filteredLanguages.length === 0 ? (
+              <Text fontSize={14} color={colors.gray} paddingVertical={6}>
+                No languages found
+              </Text>
+            ) : null}
+          </ScrollView>
 
-          <Button backgroundColor="#0A043C" color="white" onPress={save} disabled={isSaving}>
-            Save
+          <Button backgroundColor="#0A043C" color="white" onPress={save} disabled={isSaving} opacity={isSaving ? 0.7 : 1} marginTop={30}>
+            {isSaving ? <XStack gap="$2" alignItems="center"><ActivityIndicator size="small" color="white" /><Text color="white">Saving...</Text></XStack> : "Save"}
           </Button>
         </YStack>
-        </ScrollView>
+        </Pressable>
       </SafeAreaView>
     </KeyboardAvoidingWrapper>
   );

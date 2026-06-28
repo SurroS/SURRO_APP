@@ -38,9 +38,11 @@ export default function SignupScreen() {
   const router = useRouter();
   const { signupFormData, errors, passwordRules, updateField, validateForm } = useSignupForm();
   const { register, googleLogin, isLoading } = useAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   // Handle Google Sign-Up
   const handleGoogleSignup = async () => {
+    setGoogleLoading(true);
     try {
       await GoogleSignin.hasPlayServices();
       await GoogleSignin.signOut();
@@ -97,6 +99,8 @@ export default function SignupScreen() {
           text2: "An unexpected error occurred.",
         });
       }
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -222,6 +226,7 @@ export default function SignupScreen() {
             title="Continue with Google"
             icon={require("../../assets/images/google.png")}
             onPress={handleGoogleSignup}
+            loading={googleLoading}
           />
 
           <TouchableOpacity

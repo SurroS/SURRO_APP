@@ -31,6 +31,7 @@ import { ToastType } from "toastify-react-native/utils/interfaces";
 import { getSurrogateById, getAgentById, getUserById } from "@/services/profileApi";
 import AdBanner from "@/components/ads/AdBanner";
 import BoostCarousel from "@/components/boost/BoostCarousel";
+import HelpServiceButton from "@/components/HelpServiceButton";
 
 function formatTimeRemaining(expiresAt: string): string {
   const remaining = new Date(expiresAt).getTime() - Date.now();
@@ -549,6 +550,7 @@ export default function NetworkScreen() {
           </Pressable>
         </Pressable>
       </Modal>
+      <HelpServiceButton />
     </SafeAreaView>
   );
 }

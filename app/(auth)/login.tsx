@@ -6,7 +6,7 @@ import {
 } from "@react-native-google-signin/google-signin";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Toast } from "toastify-react-native";
@@ -34,6 +34,7 @@ export default function LoginScreen() {
   const { formData, errors, updateField, validateForm } = useLoginForm();
   const { signupFormData } = useSignupForm();
   const { login, googleLogin, devLogin, isLoading, setForceLogout } = useAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   // Clear force-logout blocker when login screen mounts
   useEffect(() => { setForceLogout(false); }, []);
@@ -43,6 +44,7 @@ export default function LoginScreen() {
 
   // Handle Google Sign-In
   const handleGoogleSignin = async () => {
+    setGoogleLoading(true);
     try {
       await GoogleSignin.hasPlayServices();
       await GoogleSignin.signOut();
@@ -101,6 +103,8 @@ export default function LoginScreen() {
           text2: "An unexpected error occurred.",
         });
       }
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -182,6 +186,7 @@ export default function LoginScreen() {
           title="Continue with Google"
           icon={require("../../assets/images/google.png")}
           onPress={handleGoogleSignin}
+          loading={googleLoading}
         />
 
         <TouchableOpacity

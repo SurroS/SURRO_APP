@@ -13,7 +13,6 @@ import Entypo from "@expo/vector-icons/Entypo";
 import BioSection from "@/components/roles/BioSectionView";
 import ContactSection from "@/components/roles/ContactSectionView";
 import HeaderInfo from "@/components/roles/HeaderInfoSection";
-import AgentPerformanceSection from "@/components/roles/agent/PerormanceSection";
 import AgentAdditionalDetails from "@/components/roles/agent/AditionalDetails";
 import AgentServices from "@/components/roles/agent/AgentServiceOffered";
 import AgentCertifications from "@/components/roles/agent/AgentCertification";
@@ -37,6 +36,9 @@ export default function AgentGuestView() {
   }
 
   const agent = agentProfile;
+  const age = agent?.dateOfBirth
+    ? new Date().getFullYear() - new Date(agent.dateOfBirth).getFullYear()
+    : "N/A";
   const galleryUrls: string[] = Array.isArray(agent?._galleryUrls)
     ? agent._galleryUrls
     : Array.isArray(agent?.gallery)
@@ -74,28 +76,18 @@ export default function AgentGuestView() {
             username={agent?.userName || agent?.fullName || agent?.user?.email || "No Name"}
             location={agent?.country || "Unknown"}
             city={agent?.city || "N/A"}
-            age={agent?.age || "N/A"}
-            maritalStatus="N/A"
-            height="N/A"
-            weight="N/A"
+            age={age}
             compensation={agent?.compensation || 0}
-            isNegotiable={agent?.negotiable || false}
-            onChatPress={() => {}}
+            isNegotiable={agent?.negotiable === "Yes" || agent?.negotiable === true}
             isUnlocked={true}
+            hideActions
+            isVerified={agent?.user?.isVerified || agent?.user?.kycStatus === "APPROVED"}
           />
 
           {/* --- ABOUT --- */}
           <BioSection
             title="About"
             content={agent?.about || "No description available."}
-          />
-
-          {/* --- PERFORMANCE --- */}
-          <AgentPerformanceSection
-            matches={agent?.performance?.successfulMatches || 0}
-            rating={agent?.performance?.averageRating || 0}
-            responseTime={agent?.performance?.responseTime || "N/A"}
-            activeCases={agent?.performance?.activeCases || 0}
           />
 
           {/* --- ADDITIONAL DETAILS --- */}
@@ -117,6 +109,7 @@ export default function AgentGuestView() {
                   Facebook: agent?.facebookProfile,
                   Instagram: agent?.instagramProfile,
                   X: agent?.twitterProfile,
+                  TikTok: agent?.threadsProfile,
                 },
                 street: agent?.address ?? undefined,
                 state: agent?.state ?? undefined,
@@ -125,6 +118,7 @@ export default function AgentGuestView() {
                 relationship: agent?.emergencyContactRelationship ?? undefined,
                 email: agent?.publicEmail ?? undefined,
               }}
+              hideActions
             />
           </View>
 

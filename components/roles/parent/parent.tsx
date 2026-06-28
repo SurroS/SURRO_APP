@@ -73,6 +73,7 @@ export default function ParentScreen() {
             avatarUrl={parentProfile?.profilePicture}
             location={parentProfile?.countryOfResidence}
             dateOfBirth={parentProfile?.dateOfBirth?.slice(0, 10)}
+            isVerified={parentProfile?.user?.isVerified || parentProfile?.user?.kycStatus === "APPROVED"}
           />
 
           <Accordion
@@ -87,6 +88,39 @@ export default function ParentScreen() {
               <Accordion.Content backgroundColor="white" padding="$3">
                 <YStack gap="$3">
                   <About aboutMe={parentProfile?.about} />
+
+                  {(() => {
+                    const p = parentProfile as any;
+                    const rows: { label: string; value: string }[] = [];
+
+                    if (p?.whySurrogacy) rows.push({ label: "Why Surrogacy", value: p.whySurrogacy });
+                    if (p?.yearsOfTrying != null) rows.push({ label: "Years Trying", value: `${p.yearsOfTrying} yrs` });
+                    if (p?.languagesSpoken?.length) rows.push({ label: "Languages", value: p.languagesSpoken.join(", ") });
+                    if (p?.surrogacyType) rows.push({ label: "Surrogacy Type", value: p.surrogacyType });
+                    if (p?.preferredAgeRanges?.length) rows.push({ label: "Preferred Age", value: p.preferredAgeRanges[0] });
+                    if (p?.preferredLocations?.length) rows.push({ label: "Preferred Location", value: p.preferredLocations[0] });
+                    if (p?.preferredHeights?.length) rows.push({ label: "Preferred Height", value: p.preferredHeights[0] });
+                    if (p?.preferredCountries?.length) rows.push({ label: "Preferred Country", value: p.preferredCountries[0] });
+                    if (p?.preferredGenotypes?.length) rows.push({ label: "Preferred Genotype", value: p.preferredGenotypes[0] });
+                    if (p?.preferredBloodGroups?.length) rows.push({ label: "Preferred Blood Group", value: p.preferredBloodGroups[0] });
+
+                    if (rows.length === 0) return null;
+
+                    return (
+                      <YStack gap="$1" width="100%">
+                        <Text fontWeight="700" fontSize="$4" color="#222" marginBottom="$1">
+                          Profile Summary
+                        </Text>
+                        {rows.map((r) => (
+                          <XStack key={r.label} alignItems="center" justifyContent="space-between" width="100%">
+                            <Text fontWeight="600" color="#444" fontSize={14}>{r.label}</Text>
+                            <Text color="#555" fontSize={14} flexShrink={1} textAlign="right">{r.value}</Text>
+                          </XStack>
+                        ))}
+                      </YStack>
+                    );
+                  })()}
+
                   <Contact
                     phoneNumber={parentProfile?.phone1}
                     email={user?.email}

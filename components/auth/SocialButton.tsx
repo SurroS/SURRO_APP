@@ -1,10 +1,11 @@
 import React, { useState, useRef } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface SocialButtonProps {
     title: string;
     icon: any;
     onPress: () => void;
+    loading?: boolean;
     disabled?: boolean;
     style?: any;
 }
@@ -13,6 +14,7 @@ export const SocialButton: React.FC<SocialButtonProps> = ({
     title,
     icon,
     onPress,
+    loading = false,
     disabled = false,
     style,
 }) => {
@@ -26,7 +28,7 @@ export const SocialButton: React.FC<SocialButtonProps> = ({
         timerRef.current = setTimeout(() => setPressedOnce(false), 500);
     };
 
-    const isDisabled = disabled || pressedOnce;
+    const isDisabled = loading || disabled || pressedOnce;
 
     return (
         <TouchableOpacity
@@ -35,8 +37,12 @@ export const SocialButton: React.FC<SocialButtonProps> = ({
             disabled={isDisabled}
         >
             <View style={styles.content}>
-                <Image source={icon} style={styles.icon} />
-                <Text style={styles.text}>{title}</Text>
+                {loading ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                    <Image source={icon} style={styles.icon} />
+                )}
+                <Text style={styles.text}>{loading ? 'Please wait...' : title}</Text>
             </View>
         </TouchableOpacity>
     );

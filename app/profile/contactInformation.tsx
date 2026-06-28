@@ -228,11 +228,13 @@ export default function ContactInformationScreen() {
         text2: "Your contact details have been saved",
       });
 
-      if (isParent) {
-        router.push("/profile/additionalInfo");
-      } else {
-        router.push("/medical");
-      }
+      setTimeout(() => {
+        if (isParent) {
+          router.push("/profile/additionalInfo");
+        } else {
+          router.push("/medical");
+        }
+      }, 500);
     } catch (error: any) {
       Toast.show({
         text1: "Update Failed",

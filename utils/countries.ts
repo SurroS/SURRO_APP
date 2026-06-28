@@ -12,6 +12,9 @@ export const getCachedCountries = () => cachedCountries;
 const flagUrl = (iso2: string) =>
   `https://flags.restcountries.com/v5/w320/${iso2.toLowerCase()}.png`;
 
+/** Synchronous — returns raw names from bundled JSON, no async delay */
+export const getAllCountriesSync = () => countriesData;
+
 export const getAllCountries = async () => {
   if (cachedCountries) return cachedCountries;
   cachedCountries = countriesData.map((c) => ({

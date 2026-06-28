@@ -46,18 +46,18 @@ export default function AgentSpecializationSection() {
     setIsSaving(true);
     try {
       await updateAgentProfile({ services: specialties });
+      setIsSaving(false);
       Toast.show({
         text1: "Specializations updated",
         type: "customSuccess" as ToastType,
       });
-      router.back();
+      setTimeout(() => router.back(), 500);
     } catch {
+      setIsSaving(false);
       Toast.show({
         text1: "Failed to update",
         type: "customError" as ToastType,
       });
-    } finally {
-      setIsSaving(false);
     }
   };
 

@@ -120,17 +120,34 @@ export const calculateProfileProgress = (
     // Profile photo (5%)
     applyFields(["profilePicture"], 5);
 
-    // Core professional info (55%)
-    applyFields(
-      ["name", "userName", "fullName", "country", "about"],
-      55,
+    // Identity & about (30%)
+    applyFields(["userName", "fullName", "country", "about"], 30);
+
+    // Contact (15%)
+    applyFields(["phone1", "publicEmail"], 15);
+
+    // Languages & specializations (15%)
+    applyFields(["languages", "services"], 15);
+
+    // Credentials (5%)
+    applyFields(["certifications"], 5);
+
+    // Coverage areas (10%)
+    applyFields(["coverageAreas"], 10);
+
+    // Location detail (10%)
+    applyFields(["city", "state"], 10);
+
+    // Social presence (any one counts) (10%)
+    applyGroup(
+      [
+        "facebookProfile",
+        "instagramProfile",
+        "twitterProfile",
+        "threadsProfile",
+      ],
+      10,
     );
-
-    // Services & credibility (25%)
-    applyFields(["services", "certifications", "performance"], 25);
-
-    // Social presence (any) (15%)
-    applyGroup(["socials"], 15);
   }
 
   // ------------------------------------------------
@@ -190,6 +207,11 @@ const FIELD_LABELS: Record<string, string> = {
   performance: "Performance",
   yearsOfTrying: "Years trying",
   languagesSpoken: "Languages spoken",
+  phone1: "Phone number",
+  publicEmail: "Public email",
+  languages: "Languages",
+  city: "City",
+  state: "State",
 };
 
 const SOCIAL_FIELDS = [
@@ -249,16 +271,23 @@ export function getMissingFields(profile: AnyProfile | null): MissingFieldGroup[
   } else if ("services" in profile) {
     addFieldsGroup("Profile Photo", ["profilePicture"], "/profile/personalDetails");
 
-    addFieldsGroup("Core Info", [
-      "name", "userName", "fullName", "country", "about",
+    addFieldsGroup("Identity", [
+      "userName", "fullName", "country", "about",
     ], "/profile/personalDetails");
 
-    addFieldsGroup("Services", [
-      "services", "certifications", "performance",
-    ], "/profile/personalDetails");
+    addFieldsGroup("Contact", ["phone1", "publicEmail"], "/profile/contactInformation");
 
-    addGroupCheck("Socials", ["socials"], "/profile/contactInformation",
-      "At least one social profile");
+    addFieldsGroup("Languages & Services", ["languages", "services"], "/profile/personalDetails");
+
+    addFieldsGroup("Credentials", ["certifications"], "/profile/personalDetails");
+
+    addFieldsGroup("Coverage Areas", ["coverageAreas"], "/profile/AgentCoverageSection");
+
+    addFieldsGroup("Location", ["city", "state"], "/profile/contactInformation");
+
+    addGroupCheck("Socials", [
+      "facebookProfile", "instagramProfile", "twitterProfile", "threadsProfile",
+    ], "/profile/contactInformation", "At least one social profile");
   } else {
     addFieldsGroup("Profile Photo", ["profilePicture"], "/profile/personalDetails");
 

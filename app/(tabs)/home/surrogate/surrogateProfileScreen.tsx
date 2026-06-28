@@ -308,6 +308,7 @@ export default function SurrogateProfileScreen() {
               }
               handleChat();
             }}
+            isVerified={surrogate?.user?.isVerified || surrogate?.user?.kycStatus === "APPROVED"}
           />
 
           {/* ABOUT */}

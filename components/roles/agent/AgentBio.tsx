@@ -51,11 +51,7 @@ export default function AgentBio({
 
       <InfoRowCard
         title="Specializations"
-        subtitle={
-          specializations?.length
-            ? specializations.join(", ")
-            : "What do you specialize in?"
-        }
+        subtitle="What do you specialize in?"
         icon={ListChecks}
         onPress={() =>
           router.push("/profile/AgentSpecializationSection")

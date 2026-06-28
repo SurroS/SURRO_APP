@@ -28,6 +28,7 @@ export default function MedicalDetailsStep1() {
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -105,6 +106,8 @@ export default function MedicalDetailsStep1() {
         (ceasareanSection === "No" || numberOfCs > 0)));
 
   const handleContinue = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
     try {
       await updateMedicalProfile({
         genotype,
@@ -116,6 +119,8 @@ export default function MedicalDetailsStep1() {
       } as any);
     } catch (e) {
       // Silently continue - data will be saved on final step
+    } finally {
+      setIsSaving(false);
     }
 
     router.push({
@@ -220,10 +225,10 @@ export default function MedicalDetailsStep1() {
               backgroundColor={isFormValid ? colors.primary : "#CCC"}
               color="#FFF"
               onPress={handleContinue}
-              disabled={!isFormValid}
-              opacity={isFormValid ? 1 : 0.7}
+              disabled={!isFormValid || isSaving}
+              opacity={isFormValid && !isSaving ? 1 : 0.7}
             >
-              Continue
+              {isSaving ? "Saving..." : "Continue"}
             </Button>
 
             <Pressable onPress={handleContinueLater} style={{ alignSelf: "center", paddingVertical: 12 }}>
