@@ -25,7 +25,7 @@ const AgentPreview = ({ style }: { style?: any }) => {
 
 const displayAvatars =
   validAgents.length > 0
-    ? validAgents.slice(0, 3).map((a) => a.avatar ?? require("@/assets/images/emptyGallery.png"))
+    ? validAgents.slice(0, 3).map((a) => (a.avatar ?? a.profilePicture ?? require("@/assets/images/emptyGallery.png")))
     : [require("@/assets/images/emptyGallery.png")];
   return (
     <Card

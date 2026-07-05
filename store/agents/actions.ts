@@ -1,7 +1,27 @@
-// store/profile/agents/listSlice.ts
 import { StateCreator } from "zustand";
 import { AgentProfile } from "@/store/profile/agent/types";
-import { getAllAgents, getUsersByRole } from "@/services/profileApi";
+import { getAllAgents } from "@/services/profileApi";
+import { resolveProfilePicture } from "@/utils/resolveMediaUrl";
+
+const mapApiAgent = (apiItem: any): any => {
+  const raw =
+    apiItem.profilePicture ??
+    apiItem.profilePictureUrl ??
+    apiItem.avatar ??
+    "";
+  const resolved = resolveProfilePicture(raw) ?? "";
+  return {
+    ...apiItem,
+    profilePicture: resolved,
+    avatar: resolved,
+    userName:
+      apiItem.userName ??
+      apiItem.username ??
+      apiItem.user?.userName ??
+      apiItem.fullName ??
+      "",
+  };
+};
 
 export interface AgentListStore {
   agents: AgentProfile[];
@@ -30,12 +50,8 @@ export const createAgentListSlice: StateCreator<
 
       const res = await getAllAgents();
 
-      let Agents: AgentProfile[] = res?.data || [];
-
-      console.log(
-        "single agent array",
-        Agents.map((agent, index) => agent.id),
-      );
+      const raw: any[] = res?.data || [];
+      const Agents = raw.map(mapApiAgent);
 
       if (Array.isArray(Agents) && Agents.length > 0) {
         set({
@@ -43,7 +59,6 @@ export const createAgentListSlice: StateCreator<
           isLoading: false,
           error: null,
         });
-        console.log("Agents loaded from API:", Agents);
         return;
       }
 

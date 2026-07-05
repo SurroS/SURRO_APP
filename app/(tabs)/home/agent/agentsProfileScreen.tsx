@@ -65,10 +65,10 @@ export default function AgentProfileScreen() {
         // Response shapes vary. Extract profile if present.
         const profile = res?.profile ?? res?.data?.profile ?? res?.data ?? res;
 
-        // normalize profilePicture urls
-        if (profile?.profilePicture) {
-          profile.profilePicture = resolveProfilePicture(profile.profilePicture);
-        }
+        // normalize profilePicture — API may return profilePicture, profilePictureUrl, or avatar
+        const rawPic = profile?.profilePicture ?? profile?.profilePictureUrl ?? profile?.avatar ?? "";
+        profile.profilePicture = resolveProfilePicture(rawPic) ?? "";
+        profile.avatar = profile.profilePicture;
 
         // normalize gallery entries to string[]
         if (Array.isArray(profile?.gallery)) {

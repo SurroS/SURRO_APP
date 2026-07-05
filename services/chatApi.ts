@@ -1,5 +1,4 @@
-// services/chatApi.ts
-import { authenticatedGet, authenticatedPost } from "./httpClient";
+import { authenticatedGet, authenticatedPost, authenticatedPatch } from "./httpClient";
 import { explainAxiosError } from "@/utils/apiErrorHandler";
 import type {
   Conversation,
@@ -33,19 +32,22 @@ export async function createConversation(
 }
 
 /**
- * Fetch all messages for a conversation
+ * Fetch messages for a conversation with pagination
  */
 export async function fetchMessages(
   conversationId: string,
+  take = 50,
+  skip = 0,
 ): Promise<Message[]> {
   try {
     console.log(" Fetching messages for conversation:", conversationId);
 
-    const res = await authenticatedGet(`/chat`);
+    const res = await authenticatedGet(`/chat/messages/${conversationId}`, {
+      params: { take, skip },
+    });
 
-    console.log("conversationId:", conversationId);
     console.log(" Messages fetched:", res);
-    return res as Message[];
+    return res?.data ?? (Array.isArray(res) ? res : []);
   } catch (err) {
     const info = explainAxiosError(err);
     console.error(" Fetch messages failed:", info);
@@ -54,7 +56,7 @@ export async function fetchMessages(
 }
 
 /**
- * Fetch all chats
+ * Fetch all conversations for the current user
  */
 export async function GetAllChat() {
   try {
@@ -64,12 +66,25 @@ export async function GetAllChat() {
 
     console.log(" Chat library fetched:", res);
 
-    // normalize return
     return res?.data ?? [];
   } catch (error) {
     const info = explainAxiosError(error);
     console.error(" Failed to fetch chat library", info);
     return [];
+  }
+}
+
+/**
+ * Mark messages as read
+ */
+export async function markMessagesAsRead(messageIds: string[]) {
+  try {
+    console.log(" Marking messages as read:", messageIds);
+
+    await authenticatedPatch("/chat/messages/read", { messageIds });
+  } catch (err) {
+    const info = explainAxiosError(err);
+    console.error(" Mark as read failed:", info);
   }
 }
 

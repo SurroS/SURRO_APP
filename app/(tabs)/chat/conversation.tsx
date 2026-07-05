@@ -14,6 +14,7 @@ import {
   fetchMessages,
   createConversation,
   sendMessage,
+  markMessagesAsRead,
 } from "@/services/chatApi";
 import type { Message } from "@/types/chat";
 import { setCachedConversation } from "@/utils/chatCache";
@@ -72,6 +73,8 @@ export default function ChatBoxScreen() {
       setLoading(true);
       setConnectionStatus("connecting");
       try {
+        console.log("[ChatConvo] Route params:", { otherUserId, surrogateId, accessId });
+        console.log("[ChatConvo] Calling createConversation with:", { otherUserId, surrogateId, accessId });
         const convo = await createConversation(otherUserId, surrogateId, accessId);
 
         if (!convo?.id) {
@@ -106,6 +109,26 @@ export default function ChatBoxScreen() {
 
     loadConversation();
   }, [otherUserId]);
+
+  /* -----------------------------------------
+   * MARK INCOMING MESSAGES AS READ
+   * ----------------------------------------*/
+  useEffect(() => {
+    if (!messages.length || !currentUserId) return;
+
+    const unreadIds = messages
+      .filter((m) => m.sender?.id !== currentUserId && m.status !== "READ")
+      .map((m) => m.id);
+
+    if (unreadIds.length) {
+      markMessagesAsRead(unreadIds);
+      setMessages((prev) =>
+        prev.map((m) =>
+          unreadIds.includes(m.id) ? { ...m, status: "READ" as const } : m,
+        ),
+      );
+    }
+  }, [messages, currentUserId]);
 
   /* -----------------------------------------
    * message status
@@ -158,6 +181,7 @@ export default function ChatBoxScreen() {
     // If no conversation yet, try to create one
     if (!currentConvoId) {
       try {
+        console.log("[ChatConvo:send] Creating conversation:", { otherUserId, surrogateId, accessId });
         const convo = await createConversation(otherUserId!, surrogateId, accessId);
         if (convo?.id) {
           currentConvoId = convo.id;
@@ -287,7 +311,7 @@ export default function ChatBoxScreen() {
  * Styles
  * ----------------------------------------*/
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", paddingTop: 25 },
+  container: { flex: 1, backgroundColor: "#fff", paddingTop: 45 },
 
   banner: {
     flexDirection: "row",

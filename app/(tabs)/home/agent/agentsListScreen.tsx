@@ -163,7 +163,7 @@ export default function AgentList() {
     const CardInner = (
       <>
         <Image
-          source={{ uri: agent?.avatar }}
+          source={{ uri: (agent?.avatar || agent?.profilePicture) }}
           style={{ width: "100%", height: "100%", position: "absolute" }}
           resizeMode="cover"
         />
