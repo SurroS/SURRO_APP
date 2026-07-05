@@ -55,11 +55,6 @@ export default function SignupScreen() {
       }
       if (!idToken) throw new Error("Google returned null idToken");
 
-      console.log("====== GOOGLE SIGNUP SUCCESS ======");
-      console.log("ID Token:", idToken);
-      console.log("User Info:", userInfo.user);
-
-      // Call your backend action
       await googleLogin({
         idToken,
         role: signupFormData?.role,

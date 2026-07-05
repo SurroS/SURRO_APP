@@ -37,7 +37,7 @@ export const useParentProfile = () => {
             profilePictureUrl: cachedProfile.profilePicture,
           });
         }
-      } catch (_) {}
+      } catch (_) { console.warn("[ParentProfile] SWR refresh failed"); }
       return cachedProfile;
     }
 

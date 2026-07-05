@@ -33,7 +33,6 @@ httpClient.interceptors.request.use(
     // Always add auth token if available
     try {
       const token = await secureGet("auth_token");
-      console.log("🔒 AccessToken:", token);
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }

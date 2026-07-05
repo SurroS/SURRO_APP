@@ -1,5 +1,5 @@
 // services/walletApi.ts
-import { authenticatedGet, authenticatedPost } from "./httpClient";
+import { authenticatedGet, authenticatedPost, authenticatedPatch, authenticatedDelete } from "./httpClient";
 import {
   WalletTransactionPayload,
   WalletTransactionResponse,
@@ -7,6 +7,8 @@ import {
   WalletBalanceResponse,
   WalletResponse,
   UserId,
+  BankAccount,
+  AddBankAccountRequest,
 } from "@/types/walletTypes";
 
 export const getWallet = async (): Promise<WalletResponse> => {
@@ -80,3 +82,28 @@ export const debitWallet = async (
   const data = await performWalletTransaction(payload, token);
   return { balance: data.balance };
 };
+
+// -------------------------
+// BANK ACCOUNTS
+// -------------------------
+
+export const getBankAccounts = async (): Promise<BankAccount[]> => {
+  const response = await authenticatedGet("/wallet/bank/accounts");
+  const data = response?.data ?? response;
+  return data?.accounts ?? data ?? [];
+};
+
+export const addBankAccount = async (payload: AddBankAccountRequest): Promise<BankAccount> => {
+  const response = await authenticatedPost("/wallet/bank/accounts", payload);
+  return response?.data ?? response;
+};
+
+export const setDefaultBankAccount = async (id: string): Promise<void> => {
+  await authenticatedPatch(`/wallet/bank/accounts/${id}/default`);
+};
+
+export const deleteBankAccount = async (id: string): Promise<void> => {
+  await authenticatedDelete(`/wallet/bank/accounts/${id}`);
+};
+
+

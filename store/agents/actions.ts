@@ -1,27 +1,7 @@
 import { StateCreator } from "zustand";
-import { AgentProfile } from "@/store/profile/agent/types";
-import { getAllAgents } from "@/services/profileApi";
+import { AgentProfile } from "@/types/agent";
+import { getAgentsList } from "@/services/profileApi";
 import { resolveProfilePicture } from "@/utils/resolveMediaUrl";
-
-const mapApiAgent = (apiItem: any): any => {
-  const raw =
-    apiItem.profilePicture ??
-    apiItem.profilePictureUrl ??
-    apiItem.avatar ??
-    "";
-  const resolved = resolveProfilePicture(raw) ?? "";
-  return {
-    ...apiItem,
-    profilePicture: resolved,
-    avatar: resolved,
-    userName:
-      apiItem.userName ??
-      apiItem.username ??
-      apiItem.user?.userName ??
-      apiItem.fullName ??
-      "",
-  };
-};
 
 export interface AgentListStore {
   agents: AgentProfile[];
@@ -33,6 +13,44 @@ export interface AgentListStore {
   setLoading: (val: boolean) => void;
   setError: (err: string | null) => void;
 }
+
+const getAge = (dob?: string | null) => {
+  if (!dob) return "N/A";
+  const date = new Date(dob);
+  return Math.floor(
+    (Date.now() - date.getTime()) / (1000 * 60 * 60 * 24 * 365),
+  ).toString();
+};
+
+const getDisplayName = (
+  firstName?: string | null,
+  lastName?: string | null,
+  userName?: string | null,
+) => `${firstName ?? ""} ${lastName ?? ""}`.trim() || userName || "Unknown";
+
+const apiImage = (apiItem: any) => {
+  const raw = apiItem.profilePicture ?? apiItem.profilePictureUrl ?? apiItem.avatar ?? "";
+  return resolveProfilePicture(raw) ?? "";
+};
+
+const mapApiAgent = (apiItem: any): any => ({
+  ...apiItem,
+  profilePicture: apiImage(apiItem),
+  avatar: apiImage(apiItem),
+  age: apiItem.age ? apiItem.age.toString() : getAge(apiItem.dateOfBirth ?? apiItem.dob),
+  userName:
+    apiItem.userName ??
+    apiItem.username ??
+    apiItem.user?.userName ??
+    apiItem.fullName ??
+    apiItem.email?.split("@")[0] ??
+    "",
+  name: getDisplayName(
+    apiItem.firstName,
+    apiItem.lastName,
+    apiItem.userName ?? apiItem.username ?? apiItem.user?.userName ?? apiItem.email?.split("@")[0],
+  ),
+});
 
 export const createAgentListSlice: StateCreator<
   AgentListStore,
@@ -48,10 +66,22 @@ export const createAgentListSlice: StateCreator<
     try {
       set({ isLoading: true });
 
-      const res = await getAllAgents();
+      const res = await getAgentsList();
 
-      const raw: any[] = res?.data || [];
-      const Agents = raw.map(mapApiAgent);
+      let rawList: any[] = [];
+      if (Array.isArray(res)) {
+        rawList = res;
+      } else if (res?.data && Array.isArray(res.data)) {
+        rawList = res.data;
+      } else if (res?.agents && Array.isArray(res.agents)) {
+        rawList = res.agents;
+      } else if (res?.users && Array.isArray(res.users)) {
+        rawList = res.users;
+      } else if (res?.results && Array.isArray(res.results)) {
+        rawList = res.results;
+      }
+
+      const Agents = rawList.map(mapApiAgent);
 
       if (Array.isArray(Agents) && Agents.length > 0) {
         set({

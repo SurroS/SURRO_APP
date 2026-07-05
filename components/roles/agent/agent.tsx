@@ -35,6 +35,7 @@ export default function AgentHomeScreen() {
   const { agentProfile, isLoading, fetchProfile, updateProfile } = useAgentProfile();
   const { user } = useAuth();
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
   // Calculate profile completion progress
   const progress = calculateProfileProgress(agentProfile as any);
@@ -49,6 +50,7 @@ export default function AgentHomeScreen() {
   // Show modal if profile is missing or incomplete
   useEffect(() => {
     if (!isLoading) {
+      setHasLoadedOnce(true);
       if (progress >= 100) { setShowProfileModal(false); return; }
       const hasProfile = !!agentProfile;
       const needsCompletion = hasProfile && progress < 100;
@@ -204,7 +206,7 @@ export default function AgentHomeScreen() {
       </ScrollView>
 
       {/* Profile Completion Modal */}
-      {progress < 100 && (
+      {hasLoadedOnce && progress < 100 && (
         <ProfileCompletionModal
           visible={showProfileModal}
           onClose={() => setShowProfileModal(false)}

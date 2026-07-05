@@ -1,5 +1,5 @@
 // store/profile/agents/listTypes.ts
-import { AgentProfile } from "@/store/profile/agent/types";
+import { AgentProfile } from "@/types/agent";
 
 // --- Agent List State ---
 export interface AgentListState {

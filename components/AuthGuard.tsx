@@ -26,7 +26,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
             } else if (!isAuthenticated && !isAccessingEditBio) {
                 // User is not authenticated, navigate to auth flow
                 // Only redirect if not accessing the editBio route (which could be part of onboarding completion)
-                router.replace('/role-selection');
+                router.replace('/onboarding/role-selection');
             }
         }
     }, [isAuthenticated, user?.role, isLoading, isAccessingEditBio]);

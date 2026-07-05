@@ -12,13 +12,11 @@ import type {
  */
 export async function createConversation(
   otherUserId: string,
-  surrogateId?: string,
-  accessId?: string,
 ): Promise<Conversation> {
   try {
-    console.log(" Creating conversation with:", { otherUserId, surrogateId, accessId });
+    console.log(" Creating conversation with user:", otherUserId);
 
-    const body: CreateConversationRequest = { otherUserId, surrogateId, accessId };
+    const body: CreateConversationRequest = { otherUserId };
 
     const res = await authenticatedPost("/chat/conversation", body);
 
@@ -70,7 +68,7 @@ export async function GetAllChat() {
   } catch (error) {
     const info = explainAxiosError(error);
     console.error(" Failed to fetch chat library", info);
-    return [];
+    throw info;
   }
 }
 
@@ -85,6 +83,7 @@ export async function markMessagesAsRead(messageIds: string[]) {
   } catch (err) {
     const info = explainAxiosError(err);
     console.error(" Mark as read failed:", info);
+    throw info;
   }
 }
 

@@ -78,18 +78,12 @@ export default function SurrogateProfileScreen() {
       return;
     }
 
-    const chatParams = {
-      otherUserId: surrogate?.userId ?? surrogate?.user?.id,
-      surrogateId: surrogate?.id,
-      accessId: (surrogate as any)?.currentAccessId,
-    };
-    console.log("[ChatNav] Navigating to conversation with params:", chatParams);
-    console.log("[ChatNav] surrogate keys:", Object.keys(surrogate || {}).join(", "));
-    console.log("[ChatNav] surrogate.userId:", surrogate?.userId, "surrogate.user?.id:", surrogate?.user?.id, "surrogate.id:", surrogate?.id);
+    const otherUserId = surrogate?.userId ?? surrogate?.user?.id;
+    console.log("[ChatNav] Navigating to conversation, otherUserId:", otherUserId);
 
     router.push({
       pathname: "/(tabs)/chat/conversation",
-      params: chatParams,
+      params: { otherUserId },
     });
   };
 

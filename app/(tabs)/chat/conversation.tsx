@@ -42,7 +42,9 @@ const normalizeMessage = (msg: any, fallbackId?: string): Message => ({
 });
 
 export default function ChatBoxScreen() {
-  const { otherUserId, surrogateId, accessId } = useLocalSearchParams<Record<string, string>>();
+  const params = useLocalSearchParams<Record<string, string>>();
+  const otherUserId = params.otherUserId;
+  const routeConvoId = params.conversationId || params.id;
   const currentUser = useAuthStore((s) => s.user);
   const currentUserId = currentUser?.id;
   const navigation = useNavigation();
@@ -55,7 +57,7 @@ export default function ChatBoxScreen() {
     };
   }, [navigation]);
 
-  const [conversationId, setConversationId] = useState<string>();
+  const [conversationId, setConversationId] = useState<string | undefined>(routeConvoId || undefined);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState<"connecting" | "connected" | "error">("connecting");
@@ -64,28 +66,37 @@ export default function ChatBoxScreen() {
   const flatRef = useRef<FlatList<Message>>(null);
 
   /* -----------------------------------------
-   * CREATE CONVERSATION + LOAD MESSAGES
+   * LOAD MESSAGES (two paths)
    * ----------------------------------------*/
   useEffect(() => {
-    if (!otherUserId) return;
-
-    const loadConversation = async () => {
+    const load = async () => {
       setLoading(true);
       setConnectionStatus("connecting");
-      try {
-        console.log("[ChatConvo] Route params:", { otherUserId, surrogateId, accessId });
-        console.log("[ChatConvo] Calling createConversation with:", { otherUserId, surrogateId, accessId });
-        const convo = await createConversation(otherUserId, surrogateId, accessId);
 
-        if (!convo?.id) {
-          throw new Error("Conversation creation failed");
+      try {
+        let convoId = routeConvoId;
+
+        // Path A: from chat list — conversation already exists
+        // Path B: from profile — create or retrieve conversation
+        if (!convoId && otherUserId) {
+          console.log("[ChatConvo] Creating conversation with:", otherUserId);
+          const convo = await createConversation(otherUserId);
+          if (!convo?.id) throw new Error("Conversation creation failed");
+          convoId = convo.id;
+          setConversationId(convoId);
+          setCachedConversation(otherUserId, convoId);
         }
 
-        setConversationId(convo.id);
-        setCachedConversation(otherUserId, convo.id);
+        if (!convoId) {
+          setConnectionStatus("error");
+          setConnectionError("No conversation to load");
+          setLoading(false);
+          return;
+        }
+
         setConnectionStatus("connected");
 
-        const fetched = await fetchMessages(convo.id);
+        const fetched = await fetchMessages(convoId);
 
         if (Array.isArray(fetched) && fetched.length > 0) {
           setMessages(fetched.map((m) => normalizeMessage(m)));
@@ -107,8 +118,8 @@ export default function ChatBoxScreen() {
       }
     };
 
-    loadConversation();
-  }, [otherUserId]);
+    load();
+  }, [routeConvoId, otherUserId]);
 
   /* -----------------------------------------
    * MARK INCOMING MESSAGES AS READ
@@ -180,13 +191,19 @@ export default function ChatBoxScreen() {
 
     // If no conversation yet, try to create one
     if (!currentConvoId) {
+      if (!otherUserId) {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === tempId ? { ...m, failed: true, status: undefined } : m)),
+        );
+        return;
+      }
       try {
-        console.log("[ChatConvo:send] Creating conversation:", { otherUserId, surrogateId, accessId });
-        const convo = await createConversation(otherUserId!, surrogateId, accessId);
+        console.log("[ChatConvo:send] Creating conversation with:", otherUserId);
+        const convo = await createConversation(otherUserId);
         if (convo?.id) {
           currentConvoId = convo.id;
           setConversationId(currentConvoId);
-          setCachedConversation(otherUserId!, currentConvoId);
+          setCachedConversation(otherUserId, currentConvoId);
           setConnectionStatus("connected");
         } else {
           throw new Error("Conversation creation failed");

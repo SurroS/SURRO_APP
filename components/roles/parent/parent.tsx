@@ -25,6 +25,7 @@ export default function ParentScreen() {
   const { parentProfile, fetchProfile, isLoading } = useParentProfile();
   const { user } = useAuth();
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   const progress = calculateProfileProgress(parentProfile);
@@ -39,6 +40,9 @@ export default function ParentScreen() {
 
 
   useEffect(() => {
+    if (!isLoading) {
+      setHasLoadedOnce(true);
+    }
     if (!parentProfile || isLoading) return;
     if (progress >= 100) { setShowProfileModal(false); return; }
     const hasProfile = !!parentProfile;
@@ -173,7 +177,7 @@ export default function ParentScreen() {
         </YStack>
       </ScrollView>
 
-      {progress < 100 && (
+      {hasLoadedOnce && progress < 100 && (
         <ProfileCompletionModal
           visible={showProfileModal}
           onClose={() => setShowProfileModal(false)}

@@ -1,14 +1,14 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet, TextInput, View, FlatList, TouchableOpacity, Keyboard } from "react-native";
 import { YStack, Text, Button } from "tamagui";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import colors from "@/hooks/colors";
 import { Toast } from "toastify-react-native";
-import { ToastType } from "toastify-react-native/utils/interfaces";
 import { useBankAccounts } from "@/hooks/payment/useBankAccounts";
 import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 import { NIGERIAN_BANKS } from "@/utils/nigerianBanks";
+import type { AddBankAccountRequest } from "@/types/walletTypes";
 
 type FieldErrors = {
   holderName?: string;
@@ -35,16 +35,28 @@ const validateAccountNumber = (num: string): string | undefined => {
 
 export default function AddBankAccountScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<Record<string, string>>();
+
+  const accountId = params.accountId;
+  const isEdit = !!accountId;
+
   const { addAccount, isSubmitting } = useBankAccounts();
 
-  const [holderName, setHolderName] = useState("");
-  const [bankName, setBankName] = useState("");
-  const [bankInput, setBankInput] = useState("");
+  const [holderName, setHolderName] = useState(params.holderName ?? "");
+  const [bankName, setBankName] = useState(params.bankName ?? "");
+  const [bankInput, setBankInput] = useState(params.bankName ?? "");
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [accountNumber, setAccountNumber] = useState("");
+  const [accountNumber, setAccountNumber] = useState(params.accountNumber ?? "");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const bankInputRef = useRef<TextInput>(null);
+
+  useEffect(() => {
+    if (isEdit) {
+      const bank = NIGERIAN_BANKS.find((b) => b.name === params.bankName);
+      if (bank) setBankName(bank.name);
+    }
+  }, []);
 
   const filteredBanks = bankInput.trim()
     ? NIGERIAN_BANKS.filter((b) =>
@@ -96,24 +108,26 @@ export default function AddBankAccountScreen() {
   };
 
   const handleSubmit = async () => {
+    if (isEdit) return;
+
     const errs = validate();
     setErrors(errs);
     setTouched({ holderName: true, bankName: true, accountNumber: true });
     if (Object.keys(errs).length > 0) return;
 
+    const bank = NIGERIAN_BANKS.find((b) => b.name === bankName);
+    const payload: AddBankAccountRequest = {
+      bankName,
+      holderName: holderName.trim(),
+      accountNumber: accountNumber.replace(/\s/g, ""),
+      bankCode: bank?.code ?? "",
+    };
     try {
-      await addAccount({ holderName, bankName, accountNumber, accountType: "", routingNumber: "" });
-      Toast.show({
-        text1: "Bank account added successfully",
-        type: "customSuccess" as ToastType,
-      });
+      await addAccount(payload);
+      Toast.show({ text1: "Bank account added successfully", type: "success" });
       router.back();
     } catch {
-      Toast.show({
-        text1: "Failed to add account. Try again.",
-        type: "customError" as ToastType,
-        text2: "something went wrong, try again later",
-      });
+      Toast.show({ text1: "Failed to add account", type: "error", text2: "try again later" });
     }
   };
 
@@ -121,9 +135,11 @@ export default function AddBankAccountScreen() {
     <KeyboardAvoidingWrapper>
       <SafeAreaView style={styles.container}>
         <YStack padding="$4" gap="$3" justifyContent="center">
-          <Text style={styles.header}>Connect your bank account</Text>
+          <Text style={styles.header}>
+            {isEdit ? "Edit Bank Account" : "Connect your bank account"}
+          </Text>
           <Text style={styles.subHeader}>
-            This is where your withdrawals will be deposited
+            {isEdit ? "Update your account details" : "This is where your withdrawals will be deposited"}
           </Text>
 
           {/* Holder Name */}
@@ -222,16 +238,27 @@ export default function AddBankAccountScreen() {
             </Text>
           </YStack>
 
-          <Button
-            backgroundColor={colors.primary}
-            borderRadius={12}
-            color="#fff"
-            onPress={handleSubmit}
-            disabled={isSubmitting || !isFormValid()}
-            opacity={isSubmitting || !isFormValid() ? 0.6 : 1}
-          >
-            {isSubmitting ? "Saving..." : "Continue"}
-          </Button>
+          {isEdit ? (
+            <Button
+              backgroundColor="#F0F0F0"
+              borderRadius={12}
+              color="#999"
+              disabled
+            >
+              Edit not available yet
+            </Button>
+          ) : (
+            <Button
+              backgroundColor={colors.primary}
+              borderRadius={12}
+              color="#fff"
+              onPress={handleSubmit}
+              disabled={isSubmitting || !isFormValid()}
+              opacity={isSubmitting || !isFormValid() ? 0.6 : 1}
+            >
+              {isSubmitting ? "Saving..." : "Continue"}
+            </Button>
+          )}
         </YStack>
       </SafeAreaView>
     </KeyboardAvoidingWrapper>

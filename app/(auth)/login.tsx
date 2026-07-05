@@ -58,10 +58,6 @@ export default function LoginScreen() {
       }
       if (!idToken) throw new Error("Google returned null idToken");
 
-      console.log("====== GOOGLE LOGIN SUCCESS ======");
-      console.log("ID Token:", idToken);
-      console.log("User Info:", userInfo.user);
-
       await googleLogin({
         idToken,
         role: signupFormData?.role,
@@ -169,7 +165,7 @@ export default function LoginScreen() {
 
         <TouchableOpacity
           style={styles.forgotPasswordButton}
-          onPress={() => router.push("/forgot-password")}
+          onPress={() => router.push("/(auth)/forgot-password")}
         >
           <Text style={styles.forgotPasswordText}>Forgot password?</Text>
         </TouchableOpacity>

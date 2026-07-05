@@ -1,36 +1,8 @@
-// stores/agent/agent.types.ts
-
-export interface Agent {
-  id: string;
-  name: string;
-  location: string;
-  specialization?: string;
-}
-
-export interface AgentListState {
-  agents: Agent[];
-  isLoading: boolean;
-  error: string | null;
-}
-
 export interface AgentSocials {
   facebook?: string;
   x?: string;
   instagram?: string;
   tiktok?: string;
-}
-export interface AgentProfileState {
-  agentProfile?: AgentProfile | null;
-  agents?: AgentProfile[]; // <-- added for list caching / previews
-  isLoading: boolean;
-  error: string | null;
-}
-
-export interface AgentPerformance {
-  successfulMatches: number;
-  averageRating: number;
-  responseTime: string;
-  activeCases: number;
 }
 
 export interface AgentAdditionalDetails {
@@ -49,6 +21,19 @@ export interface AgentServices {
 export interface AgentCertification {
   title: string;
   status: "Verified" | "Pending" | "Expired";
+}
+
+export interface AgentPerformance {
+  successfulMatches: number;
+  averageRating: number;
+  responseTime: string;
+  activeCases: number;
+}
+
+export interface CoverageAreas {
+  countries?: string[];
+  states?: string[];
+  LGAs?: string[];
 }
 
 export interface AgentProfile {
@@ -79,9 +64,10 @@ export interface AgentProfile {
   address?: string;
   languages?: string[];
   services?: string[];
-  certifications?: { title: string; status: "Verified" | "Pending" | "Expired" }[];
+  certifications?: AgentCertification[];
   additionalDetails?: AgentAdditionalDetails;
   performance?: AgentPerformance;
+  coverageAreas?: CoverageAreas;
   age?: number;
   gallery?: string[];
   createdAt?: string;
@@ -95,10 +81,16 @@ export interface AgentProfile {
     kycStatus: string;
     referralCode?: string;
   };
-  wallet: Wallet;
+  wallet: {
+    id: string;
+    userId: string;
+    balance: number;
+    currency: string;
+    createdAt?: string;
+    updatedAt?: string;
+  };
   subscription?: any;
   subscriptionStatus?: string;
-  // deprecated fields kept for backward compat
   firstName?: string;
   lastName?: string;
   countryOfOrigin?: string;
@@ -117,26 +109,5 @@ export interface AgentProfile {
   stateOfResidence?: string;
   socials?: AgentSocials;
   avatar?: string;
+  name?: string;
 }
-export interface Wallet {
-  id: string;
-  userId: string;
-  balance: number;
-  currency: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface AgentProfileActions {
-  setAgentProfile: (profile: AgentProfile) => void;
-  updateAgentProfile: (changes: Partial<AgentProfile>) => Promise<void>;
-  clearAgentProfile: () => void;
-
-  // list actions
-  setAgents: (data: AgentProfile[]) => void;
-  fetchAgents: (showToast?: boolean) => Promise<void>;
-  setLoading: (val: boolean) => void;
-  setError: (err: string | null) => void;
-}
-
-export type AgentProfileStore = AgentProfileState & AgentProfileActions;

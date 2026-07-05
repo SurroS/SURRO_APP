@@ -97,8 +97,7 @@ export const parentToUIProfile = (p: any): UIProfile => {
     socials: [
       { platform: "Facebook", handle: p.facebookProfile },
       { platform: "Instagram", handle: p.instagramProfile },
-      { platform: "X", handle: p.twitterProfile },
-      { platform: "TikTok", handle: p.tiktokProfile },
+      { platform: "Twitter", handle: p.twitterProfile },
     ].filter((s) => s.handle),
   };
 };
@@ -110,6 +109,7 @@ export const uiProfileToParent = (u: UIProfile) => ({
   about: u.aboutMe,
   facebookProfile: u.socials?.find((s) => s.platform === "Facebook")?.handle,
   instagramProfile: u.socials?.find((s) => s.platform === "Instagram")?.handle,
-  twitterProfile: u.socials?.find((s) => s.platform === "X")?.handle,
-  tiktokProfile: u.socials?.find((s) => s.platform === "TikTok")?.handle,
+  twitterProfile:
+    u.socials?.find((s) => s.platform === "Twitter")?.handle ||
+    u.socials?.find((s) => s.platform === "X")?.handle,
 });

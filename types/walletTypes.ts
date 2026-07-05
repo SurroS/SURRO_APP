@@ -50,3 +50,27 @@ export interface WalletResponse {
   updatedAt: string;
   transactions: WalletTransactionData[];
 }
+
+export interface BankAccount {
+  id: string;
+  bankName: string;
+  holderName: string;
+  accountNumber: string;
+  bankCode: string;
+  isDefault: boolean;
+  createdAt: string;
+}
+
+export interface AddBankAccountRequest {
+  bankName: string;
+  holderName: string;
+  accountNumber: string;
+  bankCode: string;
+}
+
+export interface UpdateBankAccountRequest {
+  bankName?: string;
+  holderName?: string;
+  accountNumber?: string;
+  bankCode?: string;
+}

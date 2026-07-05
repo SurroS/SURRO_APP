@@ -10,7 +10,8 @@ export interface ChatUser {
 export interface Conversation {
   id: string;
   participants: Participants[];
-  lastMessage?: { content: string; createdAt: string };
+  lastMessage?: { content: string; createdAt: string; senderId: string };
+  unreadCount: number;
 }
 
 export type MessageStatus = "SENDING" | "SENT" | "DELIVERED" | "READ";
@@ -32,8 +33,6 @@ export interface Message {
 
 export interface CreateConversationRequest {
   otherUserId: string;
-  surrogateId?: string;
-  accessId?: string;
 }
 
 export interface SendMessageRequest {

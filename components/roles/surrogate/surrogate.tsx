@@ -25,6 +25,7 @@ export default function SurrogateScreen() {
   const { user } = useAuth();
 
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   // Calculate profile progress
   const progress = calculateProfileProgress(surrogateProfile);
 
@@ -38,6 +39,7 @@ export default function SurrogateScreen() {
   // Show modal if no profile or progress < 100%
   useEffect(() => {
     if (!isLoading) {
+      setHasLoadedOnce(true);
       if (progress >= 100) { setShowProfileModal(false); return; }
       const hasProfile = surrogateProfile !== null;
       const needsCompletion = hasProfile && progress < 100;
@@ -144,7 +146,7 @@ export default function SurrogateScreen() {
         </YStack>
 
         {/* Profile Completion Modal */}
-        {progress < 100 && (
+        {hasLoadedOnce && progress < 100 && (
           <ProfileCompletionModal
             visible={showProfileModal}
             onClose={() => setShowProfileModal(false)}

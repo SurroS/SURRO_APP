@@ -1,5 +1,5 @@
 import { SurrogateProfile } from "@/types/profile";
-import { AgentProfile } from "@/store/profile/agent/types";
+import { AgentProfile } from "@/types/agent";
 import { ParentProfile } from "@/store/profile/parent/types";
 
 type AnyProfile = SurrogateProfile | AgentProfile | ParentProfile;
@@ -107,7 +107,7 @@ export const calculateProfileProgress = (
         "instagramProfile",
         "twitterProfile",
         "threadsProfile",
-        "ticktok",
+        "tiktokProfile",
       ],
       10,
     );
@@ -219,7 +219,7 @@ const SOCIAL_FIELDS = [
   "instagramProfile",
   "twitterProfile",
   "threadsProfile",
-  "ticktok",
+  "tiktokProfile",
 ];
 
 export function getMissingFields(profile: AnyProfile | null): MissingFieldGroup[] {

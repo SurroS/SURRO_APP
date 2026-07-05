@@ -54,7 +54,7 @@ export const getUnlockFee = (role: string): Promise<UnlockFeeResponse> =>
   authenticatedGet(`/unlocks/fees/${role}`);
 
 export const createUnlock = (targetUserId: string, role?: string): Promise<UnlockResponse> =>
-  authenticatedPost(`/unlocks`, { targetUserId });
+  authenticatedPost(`/unlocks`, { targetUserId, role });
 
 export const getUnlockStatus = (targetUserId: string): Promise<UnlockStatusResponse> =>
   authenticatedGet(`/unlocks/status/${targetUserId}`);

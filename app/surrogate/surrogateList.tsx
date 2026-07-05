@@ -100,7 +100,7 @@ export default function SurrogateList() {
     fetchSavedSurrogates().then((saved) => {
       const ids = saved.map((s: any) => (s.surrogate ?? s).id ?? s.surrogateId).filter(Boolean);
       setSavedIds(ids);
-    }).catch(() => {});
+    }).catch((e) => console.warn("[SurrogateList] Failed to fetch saved:", e));
   }, []);
 
   useEffect(() => {
@@ -109,7 +109,7 @@ export default function SurrogateList() {
       try {
         if (isParent) await fetchMatches();
         else await fetchSurrogates();
-      } catch {}
+      } catch (e) { console.warn("[SurrogateList] Initial load failed:", e); }
       setInitialLoadDone(true);
     };
     load();
@@ -172,7 +172,7 @@ export default function SurrogateList() {
         await saveParentSurrogate({ surrogateId });
         addSavedId(surrogateId);
       }
-    } catch {}
+      } catch (e) { console.warn("[SurrogateList] Save/remove failed:", e); }
   }, [savedIds, saveParentSurrogate, removeSavedSurrogate, addSavedId, removeSavedId]);
 
   const handleViewProfile = useCallback(

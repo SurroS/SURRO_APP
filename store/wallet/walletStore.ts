@@ -20,6 +20,7 @@ interface WalletState {
   balance: number;
   currency: WalletCurrency;
   loading: boolean;
+  loadingBalance: boolean;
   error: string | null;
   lastUpdatedAt: string | null;
   transactions: WalletTransactionData[];
@@ -49,6 +50,7 @@ export const useWalletStore = create<WalletState>((set, get) => ({
   balance: 0,
   currency: "NGN",
   loading: false,
+  loadingBalance: false,
   error: null,
   lastUpdatedAt: null,
   transactions: [],
@@ -85,18 +87,18 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     token: string | null = null
   ) => {
     try {
-      set({ loading: true });
+      set({ loadingBalance: true });
       const res = await getWalletBalance(userId, token);
 
       set({
         balance: res.balance,
         currency: res.currency as WalletCurrency,
-        loading: false,
+        loadingBalance: false,
         lastUpdatedAt: new Date().toISOString(),
       });
     } catch (err: any) {
       set({
-        loading: false,
+        loadingBalance: false,
         error: err?.message ?? "Failed to fetch wallet balance",
       });
     }

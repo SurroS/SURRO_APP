@@ -74,12 +74,14 @@ export const uploadAvatar = async (data: any) => {
 // ----------------------------------------------------
 // AGENTS
 // ----------------------------------------------------
-export const getAllAgents = () => getUsersByRole("AGENT");
+export const getAllAgents = () => authenticatedGet("/agents");
+
+export const getAgentsList = () => authenticatedGet("/agents");
 
 export const getAgentById = async (id: string) => {
-  console.log(`[Agents] GET /users/${id}`);
-  const user = await getUserById(id);
-  return { data: user };
+  console.log(`[Agents] GET /agents/${id}`);
+  const res = await authenticatedGet(`/agents/${id}`);
+  return res;
 };
 
 export const createAgentProfile = (data: any) =>

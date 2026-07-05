@@ -62,7 +62,7 @@ export const uploadGalleryImage = async (imageData: FormData) => {
   // Clear cache after upload to force refresh
   await clearCache();
 
-  return response;
+  return response.data;
 };
 
 export const getGalleryImages = async (useCache: boolean = true) => {

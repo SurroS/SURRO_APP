@@ -89,3 +89,6 @@ yarn-error.*
 
 # @end expo-cli
 .opencode
+
+# Service account keys
+surro-app-473400-063ee393c442.json

@@ -117,11 +117,11 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
   selectAll: () => {
     const ids = get().notifications.map((n) => n.id);
     console.log("[Notif] selectAll:", ids.length);
-    return { selected: ids };
+    set({ selected: ids });
   },
 
   clearSelection: () => {
     console.log("[Notif] clearSelection");
-    return { selected: [] };
+    set({ selected: [] });
   },
 }));

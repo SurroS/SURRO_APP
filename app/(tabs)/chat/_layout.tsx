@@ -11,14 +11,6 @@ export default function ChatLayout() {
         }}
       />
       <Stack.Screen
-        name="chatBox"
-        options={{
-          headerTitle: "ChatBox",
-          headerShown: false,
-          headerTitleStyle: { fontWeight: "bold" },
-        }}
-      />
-      <Stack.Screen
         name="conversation"
         options={{
           headerTitle: "Conversation",

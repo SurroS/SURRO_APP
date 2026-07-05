@@ -36,7 +36,7 @@ export default function RootLayout() {
       try {
         const NavigationBar = require("expo-navigation-bar");
         NavigationBar.setButtonStyleAsync("dark");
-      } catch (_) {}
+      } catch (_) { console.warn("Failed to set nav bar style"); }
     }
   }, []);
 

@@ -80,7 +80,7 @@ export default function ForgotPasswordScreen() {
           message="Password reset instructions sent to your email."
           onClose={() => {
             setAlertVisible(false);
-            router.push("/otp");
+            router.push("/(auth)/otp");
           }}
         />
       </SafeAreaView>
