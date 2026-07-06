@@ -42,6 +42,7 @@ export const updateSurrogateProfile = (data: any) =>
 
 export const getSurrogateProfile = async () => {
   const res = await authenticatedGet("/surrogates/profile/me");
+  console.log("[profileApi] /surrogates/profile/me response:", JSON.stringify(res, null, 2));
   return res;
 };
 
@@ -85,7 +86,11 @@ export const createAgentProfile = (data: any) =>
 export const updateAgentProfile = (data: any) =>
   authenticatedPatch("/agents/profile", data);
 
-export const getAgentProfile = () => authenticatedGet("/agents/profile/me");
+export const getAgentProfile = async () => {
+  const res = await authenticatedGet("/agents/profile/me");
+  console.log("[profileApi] /agents/profile/me response:", JSON.stringify(res, null, 2));
+  return res;
+};
 
 // ----------------------------------------------------
 // PARENTS
@@ -114,8 +119,11 @@ export const deleteSavedParentSurrogateMatch = (surrogateId: string) =>
 export const updateParentMatchPreference = (data: any) =>
   authenticatedPost("/intended-parents/match-preferences", data);
 
-export const getParentProfile = () =>
-  authenticatedGet("/intended-parents/profile/me");
+export const getParentProfile = async () => {
+  const res = await authenticatedGet("/intended-parents/profile/me");
+  console.log("[profileApi] /intended-parents/profile/me response:", JSON.stringify(res, null, 2));
+  return res;
+};
 
 // Legacy wrapper for backward compatibility (remove after updating all usages)
 export const makeAuthenticatedProfileRequest = async (
