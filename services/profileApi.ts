@@ -60,7 +60,7 @@ export const uploadEndometriumImage = async (data: any) => {
 // AVATAR UPLOAD
 // ----------------------------------------------------
 export const uploadAvatar = async (data: any) => {
-  const response = await httpClient.post("/profile/avatar", data, {
+  const response = await httpClient.post("/profiles/avatar", data, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
