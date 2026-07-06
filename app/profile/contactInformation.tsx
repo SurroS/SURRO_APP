@@ -99,8 +99,8 @@ export default function ContactInformationScreen() {
     setPhone2(stripDialCode(profile?.phone2 ?? ""));
     setEmergency(stripDialCode(profile?.emergencyPhone ?? profile?.emergencyContactPhone ?? ""));
     setRelationship(profile?.emergencyContactRelationship ?? "");
-    setStreet(profile?.address ?? "");
-    setZip(profile?.zipcode ?? "");
+    setStreet(profile?.homeAddress ?? profile?.address ?? "");
+    setZip(profile?.zipCode ?? profile?.zipcode ?? "");
 
     if (Role === "AGENT") {
       setResidenceState(profile?.state ?? "");

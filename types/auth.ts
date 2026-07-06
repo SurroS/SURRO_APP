@@ -1,3 +1,11 @@
+export interface ReferredUser {
+  id: string;
+  userName: string;
+  email: string;
+  status: "PENDING" | "QUALIFIED" | "REWARDED";
+  createdAt: string;
+}
+
 export interface User {
   id: string;
   userId: string;
@@ -16,10 +24,7 @@ export interface User {
   profilePictureUrl?: string | null;
   kycStatus: "NOT_STARTED" | "PENDING" | "APPROVED" | "REJECTED";
   referralCode: string;
-  referral?: {
-    notRedeemed?: string[];
-    redeemed?: string[];
-  };
+  hasReferred?: ReferredUser[];
   referredById?: string | null;
   wallet: Wallet;
   name?: string;

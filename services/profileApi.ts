@@ -60,7 +60,7 @@ export const uploadEndometriumImage = async (data: any) => {
 // AVATAR UPLOAD
 // ----------------------------------------------------
 export const uploadAvatar = async (data: any) => {
-  const response = await httpClient.post("/profiles/avatar", data, {
+  const response = await httpClient.post("/profile/avatar", data, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -71,8 +71,6 @@ export const uploadAvatar = async (data: any) => {
 // ----------------------------------------------------
 // AGENTS
 // ----------------------------------------------------
-export const getAllAgents = () => authenticatedGet("/agents");
-
 export const getAgentsList = () => authenticatedGet("/agents");
 
 export const getAgentById = async (id: string) => {
@@ -100,9 +98,6 @@ export const createParentProfile = (data: any) =>
 
 export const updateParentProfile = (data: any) =>
   authenticatedPatch("/intended-parents/profile", data);
-
-export const updateParentSurrogateMatch = (data: any) =>
-  authenticatedPut("/intended-parents/match-preferences", data);
 
 export const fetchParentMatch = (data: any) =>
   authenticatedGet("/intended-parents/matches", { params: data });

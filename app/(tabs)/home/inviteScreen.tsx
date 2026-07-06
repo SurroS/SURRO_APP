@@ -1,7 +1,7 @@
 import { ScreenHeader } from "@/components/auth";
 import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Image,
   Linking,
@@ -9,6 +9,7 @@ import {
   ScrollView,
   StyleSheet,
   Modal,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Text, XStack, YStack, View } from "tamagui";
@@ -16,23 +17,28 @@ import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 
 import { useAuth } from "@/hooks/useAuth";
+import { fetchReferrals, redeemReferralRewards } from "@/services/referralApi";
 import { useWalletStore } from "@/store/wallet/walletStore";
 import colors from "@/hooks/colors";
-import { fundWallet } from "@/services/walletApi";
 
 const whatsapp = require("@/assets/images/whatsapp.png");
 const xIcon = require("@/assets/images/x_icon.png");
 const facebook = require("@/assets/images/facebook.png");
 const mail = require("@/assets/images/mail.png");
 
+const REFERRAL_REWARD_AMOUNT = 1000;
+
 export default function InviteScreen() {
   const router = useRouter();
-  const { user, token } = useAuth();
-  const { credit, loading } = useWalletStore();
+  const { user } = useAuth();
+  const fetchWallet = useWalletStore((s) => s.fetchWallet);
 
   const insets = useSafeAreaInsets();
   const [copied, setCopied] = useState(false);
   const [redeemOpen, setRedeemOpen] = useState(false);
+  const [referrals, setReferrals] = useState<any[]>([]);
+  const [loadingReferrals, setLoadingReferrals] = useState(true);
+  const [redeeming, setRedeeming] = useState(false);
 
   const referralCode = user?.referralCode;
 
@@ -48,10 +54,35 @@ ${inviteLink}
 Referral code: ${referralCode}`;
   }, [inviteLink, referralCode]);
 
-  const notRedeemed = user?.referral?.notRedeemed ?? ["@Prime", "@Stupenia"];
+  // Load referrals from API
+  const loadReferrals = useCallback(async () => {
+    try {
+      setLoadingReferrals(true);
+      const data = await fetchReferrals();
+      setReferrals(data);
+    } catch (err: any) {
+      console.error("[InviteScreen] Failed to load referrals:", err);
+      // Fall back to hasReferred from user profile if API fails
+      if (user?.hasReferred?.length) {
+        setReferrals(user.hasReferred);
+      }
+    } finally {
+      setLoadingReferrals(false);
+    }
+  }, [user?.hasReferred]);
 
-  const REFERRAL_REWARD_AMOUNT = 1000;
-  const totalAmount = notRedeemed.length * REFERRAL_REWARD_AMOUNT;
+  useEffect(() => {
+    loadReferrals();
+  }, [loadReferrals]);
+
+  // Only pending/qualified referrals count toward redeemable rewards
+  const pendingReferrals = referrals.filter(
+    (r) => r.status === "PENDING" || r.status === "QUALIFIED"
+  );
+  const qualifiedReferrals = referrals.filter(
+    (r) => r.status === "QUALIFIED"
+  );
+  const totalAmount = qualifiedReferrals.length * REFERRAL_REWARD_AMOUNT;
 
   const handleCopy = async () => {
     await Clipboard.setStringAsync(inviteMessage);
@@ -119,37 +150,37 @@ Referral code: ${referralCode}`;
     ];
   }, [user]);
 
-  const [redeeming, setRedeeming] = useState(false);
-
   const handleRedeemToWallet = async () => {
-    if (!user?.id) {
+    if (qualifiedReferrals.length === 0) {
       Toast.show({
-        text1: "User not authenticated",
-        type: "customError" as ToastType,
-        text2: "please try to login again.",
+        text1: "No redeemable referrals",
+        type: "customWarning" as ToastType,
+        text2: "Wait for your referrals to complete qualifying actions.",
       });
       return;
     }
 
     try {
       setRedeeming(true);
-
-      await fundWallet(user.id, totalAmount, user?.token, {
-        description: `Referral rewards (${notRedeemed.length} referrals)`,
-        currency: user.wallet.currency,
-      });
+      const result = await redeemReferralRewards();
+      await fetchWallet();
+      setRedeemOpen(false);
       Toast.show({
-        text1: "Unable to Redeem at this time",
+        text1: "Rewards redeemed!",
         type: "customSuccess" as ToastType,
-        text2: "`₦${totalAmount.toLocaleString()} credited to your wallet`",
+        text2: `₦${result.creditedAmount.toLocaleString()} credited to your wallet`,
       });
+      loadReferrals();
     } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Unable to redeem at this time";
       Toast.show({
-        text1: "Unable to Redeem at this time",
+        text1: "Redeem failed",
         type: "customError" as ToastType,
-        text2: "Please try again soon.",
+        text2: message,
       });
-      console.log("error reedeming [Refferal] :", error);
     } finally {
       setRedeeming(false);
     }
@@ -270,34 +301,64 @@ Referral code: ${referralCode}`;
           <Text fontSize={16} fontWeight="700" color={colors.primary}>
             Total: ₦{totalAmount.toLocaleString()}
           </Text>
+          <Text fontSize={12} color="#888" marginBottom={12}>
+            {qualifiedReferrals.length} qualified referral
+            {qualifiedReferrals.length !== 1 ? "s" : ""} · ₦
+            {REFERRAL_REWARD_AMOUNT.toLocaleString()} each
+          </Text>
 
-          <YStack marginTop={16} gap={8}>
-            {notRedeemed.length === 0 ? (
-              <Text color={colors.text} alignSelf="center">
-                No pending referrals
-              </Text>
-            ) : (
-              notRedeemed.map((userName: string, index: number) => (
-                <View
-                  key={index}
-                  padding={12}
-                  borderRadius={10}
-                  backgroundColor="#F5F5F5"
-                >
-                  <Text color={colors.text}>{userName}</Text>
-                </View>
-              ))
-            )}
-          </YStack>
+          {loadingReferrals ? (
+            <YStack padding={20} alignItems="center">
+              <ActivityIndicator size="small" color="#0E0E55" />
+            </YStack>
+          ) : (
+            <YStack marginTop={8} gap={8} maxHeight={240}>
+              {pendingReferrals.length === 0 ? (
+                <Text color={colors.text} alignSelf="center" marginVertical={12}>
+                  No pending referrals
+                </Text>
+              ) : (
+                pendingReferrals.map((ref: any, index: number) => (
+                  <View
+                    key={ref.id ?? index}
+                    padding={12}
+                    borderRadius={10}
+                    backgroundColor={ref.status === "QUALIFIED" ? "#E8F5E9" : "#F5F5F5"}
+                    flexDirection="row"
+                    alignItems="center"
+                    justifyContent="space-between"
+                  >
+                    <Text color={colors.text}>{ref.userName || ref.email || "Unknown"}</Text>
+                    <View
+                      paddingHorizontal={8}
+                      paddingVertical={2}
+                      borderRadius={8}
+                      backgroundColor={
+                        ref.status === "QUALIFIED" ? "#22C55E" : "#F59E0B"
+                      }
+                    >
+                      <Text color="#fff" fontSize={11} fontWeight="600">
+                        {ref.status === "QUALIFIED" ? "Ready" : "Pending"}
+                      </Text>
+                    </View>
+                  </View>
+                ))
+              )}
+            </YStack>
+          )}
 
           <Button
             backgroundColor={colors.primary}
             borderRadius={12}
-            disabled={redeeming}
+            marginTop={16}
+            disabled={redeeming || qualifiedReferrals.length === 0}
+            opacity={qualifiedReferrals.length === 0 ? 0.5 : 1}
             onPress={handleRedeemToWallet}
           >
             <Text fontWeight="600">
-              {redeeming ? "Processing..." : "Redeem to Wallet"}
+              {redeeming
+                ? "Processing..."
+                : `Redeem ₦${totalAmount.toLocaleString()}`}
             </Text>
           </Button>
         </View>
