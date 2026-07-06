@@ -45,8 +45,6 @@ export default function RoleSelection() {
       role: selectedRole,
       isVerified: false,
     });
-    console.log("Role from role", selectedRole);
-    console.log("User from role", user);
     router.push("/(auth)/signup");
   };
 

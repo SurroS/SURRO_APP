@@ -24,21 +24,18 @@ export default function Index() {
 
     if (!isLoading) {
       if (isAuthenticated && user?.role) {
-        // Normalize role (backend might return underscores)
         const normalizedRole = user.role.replace("_", "-").toUpperCase();
 
         if (normalizedRole in roleMapping) {
           const path = roleMapping[normalizedRole as RoleKey];
-          console.log(" Redirecting to role path:", path);
-          router.replace("/(tabs)/home"); // Go to role-specific tab
+          router.replace("/(tabs)/home");
           return;
         }
       }
 
-      // If not authenticated or role unknown → screen1 (first time) or login
       router.replace(hasSeenOnboarding ? "/(auth)/login" : "/onboarding/screen1");
     }
-  }, [hasHydrated, isAuthenticated, user?.role, isLoading]);
+  }, [hasHydrated, isAuthenticated, user?.role, isLoading, hasSeenOnboarding]);
 
   // Show a splash/loading screen while store hydrates or loading
   if (!hasHydrated || isLoading) {

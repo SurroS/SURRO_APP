@@ -34,7 +34,6 @@ export default function SurrogateProfileScreen() {
   const [showChatModal, setShowChatModal] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
   const { user, token } = useAuthStore();
-  console.log("current User:", user);
 
   const { balance, fetchBalance } = useWalletStore();
 
@@ -60,12 +59,12 @@ export default function SurrogateProfileScreen() {
   // Load backend profile
   useEffect(() => {
     loadSurrogate();
-  }, []);
+  }, [loadSurrogate]);
   useEffect(() => {
     if (user) {
       fetchBalance(user.id, token || null);
     }
-  }, [user]);
+  }, [user, token, fetchBalance]);
 
   const handleChat = () => {
     if (isProcessing) return;
@@ -79,7 +78,6 @@ export default function SurrogateProfileScreen() {
     }
 
     const otherUserId = surrogate?.userId ?? surrogate?.user?.id;
-    console.log("[ChatNav] Navigating to conversation, otherUserId:", otherUserId);
 
     router.push({
       pathname: "/(tabs)/chat/conversation",
@@ -99,10 +97,8 @@ export default function SurrogateProfileScreen() {
       setLoading(true);
 
       const response = await getSurrogateById(surrogateId);
-      console.log("[SurrogateProfile] Full API response:", JSON.stringify(response, null, 2));
 
       const profile = response?.profile ?? response?.data?.profile ?? response?.data ?? response;
-      console.log("[SurrogateProfile] Extracted profile keys:", Object.keys(profile || {}).join(", "));
       if (profile?.profilePicture) {
         profile.profilePicture = resolveProfilePicture(profile.profilePicture);
       }
@@ -307,7 +303,7 @@ export default function SurrogateProfileScreen() {
               }
               handleChat();
             }}
-            isVerified={surrogate?.user?.isVerified || surrogate?.user?.kycStatus === "APPROVED"}
+            isVerified={surrogate?.user?.kycStatus === "APPROVED"}
           />
 
           {/* ABOUT */}

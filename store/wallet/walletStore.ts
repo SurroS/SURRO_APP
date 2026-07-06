@@ -62,8 +62,6 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     try {
       set({ loading: true });
       const res = await getWallet();
-      console.log("[WalletStore] getWallet result:", JSON.stringify(res, null, 2));
-
       set({
         balance: res.balance,
         currency: res.currency as WalletCurrency,
@@ -142,12 +140,9 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     token: string | null = null,
     opts: { description?: string; currency?: WalletCurrency } = {}
   ) => {
-    console.log("[WalletStore] debit start:", { userId, amount, currency: opts?.currency, description: opts?.description });
     try {
       set({ loading: true });
       const result = await debitWallet(userId, amount, token, opts);
-
-      console.log("[WalletStore] debit success:", { newBalance: result.balance });
 
       set({
         balance: result.balance,

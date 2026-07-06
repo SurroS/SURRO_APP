@@ -36,7 +36,6 @@ export default function OTPScreen() {
   }, [setOtpFromString]);
 
   const handleVerify = async () => {
-    console.log("handleVerify =", validateOtp());
     if (!validateOtp()) {
       return;
     }
@@ -50,8 +49,6 @@ export default function OTPScreen() {
       return;
     }
 
-    console.log("handleVerify =", getOtpCode());
-    console.log("handleVerify =", tempEmail);
     try {
       await verifyOtp({
         email: tempEmail,

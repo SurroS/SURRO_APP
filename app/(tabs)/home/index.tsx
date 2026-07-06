@@ -50,7 +50,7 @@ export default function HomeIndex() {
       setProfileReady(true);
     };
     load();
-  }, []);
+  }, [role, fetchNotifications, fetchSurrogate, fetchAgent, fetchParent]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);

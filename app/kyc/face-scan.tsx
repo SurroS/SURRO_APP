@@ -50,7 +50,6 @@ export default function FaceScanScreen() {
       setImageUri(photo.uri);
       setIsCameraOpen(false);
     } catch (error) {
-      console.log("Error taking picture:", error);
     }
   };
 

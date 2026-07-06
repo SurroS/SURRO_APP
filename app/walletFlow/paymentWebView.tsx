@@ -32,8 +32,6 @@ export default function PaymentWebViewScreen() {
 
   const handleNavChange = (navState: any) => {
     const { url } = navState;
-    console.log("[PaymentWebView] Navigation:", url);
-
     if (url.includes("reference=") && !verifiedRef.current) {
       verifiedRef.current = true;
       setVerifying(true);
@@ -41,10 +39,8 @@ export default function PaymentWebViewScreen() {
       const refMatch = url.match(/[?&]reference=([^&]+)/);
       const extractedRef = refMatch ? decodeURIComponent(refMatch[1]) : reference;
 
-      console.log("[PaymentWebView] Paystack redirect detected, verifying ref:", extractedRef);
       verifyPayment(extractedRef)
         .then((res) => {
-          console.log("[PaymentWebView] Verification successful:", JSON.stringify(res, null, 2));
           setVerifying(false);
           router.replace("/walletFlow/paymentSuccess");
         })
@@ -54,7 +50,6 @@ export default function PaymentWebViewScreen() {
           router.replace("/walletFlow/paymentFailed");
         });
     } else if (url.includes("payment-failure") && !verifiedRef.current) {
-      console.log("[PaymentWebView] Payment failed, redirecting");
       router.replace("/walletFlow/paymentFailed");
     }
   };

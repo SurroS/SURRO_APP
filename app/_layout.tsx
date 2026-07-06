@@ -38,7 +38,7 @@ export default function RootLayout() {
         NavigationBar.setButtonStyleAsync("dark");
       } catch (_) { console.warn("Failed to set nav bar style"); }
     }
-  }, []);
+  }, [isAuthenticated, loadNotificationPrefs, initSystemNotifications, checkInactivity, getAllCountries]);
 
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({

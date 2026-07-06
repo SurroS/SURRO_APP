@@ -35,7 +35,7 @@ export default function ParentScreen() {
     if (!parentProfile && !isLoading) {
       fetchProfile();
     }
-  }, []);
+  }, [parentProfile, isLoading, fetchProfile]);
 
 
 
@@ -77,7 +77,7 @@ export default function ParentScreen() {
             avatarUrl={parentProfile?.profilePicture}
             location={parentProfile?.countryOfResidence}
             dateOfBirth={parentProfile?.dateOfBirth?.slice(0, 10)}
-            isVerified={parentProfile?.user?.isVerified || parentProfile?.user?.kycStatus === "APPROVED"}
+            isVerified={parentProfile?.user?.kycStatus === "APPROVED"}
           />
 
           <Accordion
@@ -171,7 +171,7 @@ export default function ParentScreen() {
 
             <YStack width={"48%"} gap={10}>
               <HomeResourceCard />
-              <Referral style={{ width: "100%", height: 160 }} />
+              <Referral style={{ width: "100%", height: 200 }} />
             </YStack>
           </XStack>
         </YStack>

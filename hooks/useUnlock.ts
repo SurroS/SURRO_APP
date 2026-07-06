@@ -105,16 +105,7 @@ export function useUnlock({
     setError(null);
 
     try {
-      console.log("[useUnlock] Creating unlock (server handles payment)...", {
-        userId: user.id,
-        targetUserId,
-        targetRole,
-        feeAmount: fee.amount,
-        feeCurrency: fee.currency,
-      });
-
       await createUnlock(targetUserId, targetRole);
-      console.log("[useUnlock] Unlock created successfully");
 
       setIsUnlocked(true);
       setExpiresAt(
@@ -140,7 +131,6 @@ export function useUnlock({
       });
 
       if (err?.status === 409) {
-        console.log("[useUnlock] Unlock already exists, treating as success");
         setIsUnlocked(true);
         setExpiresAt(
           new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),

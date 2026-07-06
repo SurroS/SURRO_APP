@@ -30,7 +30,6 @@ export function useChatSimple(otherUserId?: string) {
         setConversationId(convo.id);
       } catch (err) {
         const info = explainAxiosError(err);
-        console.log("Conversation creation failed", info);
         setError(info.message || "Failed to create conversation");
       } finally {
         setLoading(false);
@@ -53,7 +52,6 @@ export function useChatSimple(otherUserId?: string) {
         setMessages(msgs);
       } catch (err) {
         const info = explainAxiosError(err);
-        console.log("Fetch messages failed", info);
         setError(info.message || "Failed to fetch messages");
       } finally {
         setLoading(false);
@@ -86,7 +84,6 @@ export function useChatSimple(otherUserId?: string) {
       );
     } catch (err) {
       const info = explainAxiosError(err);
-      console.log("Send message failed", info);
       // mark temp message as failed
       setMessages((prev) =>
         prev.map((m) => (m.id === tempMsg.id ? { ...m, failed: true } : m))

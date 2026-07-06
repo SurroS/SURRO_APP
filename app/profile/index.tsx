@@ -264,7 +264,6 @@ export default function EditBioView() {
   // -------------------------------
   const handleSaveBio = async (data: typeof uiProfile) => {
     logProfileFlow("UI_INPUT", data);
-    console.log("profile from Edit bioscreen", uiProfile);
 
     try {
       switch (Role) {

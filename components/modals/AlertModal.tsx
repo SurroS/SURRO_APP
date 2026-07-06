@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface AlertButton {
   text: string;
@@ -22,6 +23,7 @@ const AlertModal: React.FC<AlertModalProps> = ({
   buttons,
   onClose,
 }) => {
+  const insets = useSafeAreaInsets();
   const handlePress = (btn: AlertButton) => {
     btn.onPress?.();
     onClose?.();
@@ -35,7 +37,7 @@ const AlertModal: React.FC<AlertModalProps> = ({
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingBottom: 24 + insets.bottom }]}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.message}>{message}</Text>
           {buttons && buttons.length > 0 ? (

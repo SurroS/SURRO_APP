@@ -17,6 +17,8 @@ export interface WalletTransactionPayload {
   currency: WalletCurrency;
 }
 
+export type TransactionStatus = "SUCCESS" | "PENDING" | "FAILED" | "PROCESSING";
+
 export interface WalletTransactionData {
   id: string;
   userId: UserId;
@@ -26,6 +28,9 @@ export interface WalletTransactionData {
   description: string;
   currency: WalletCurrency;
   createdAt: string;
+  status?: TransactionStatus;
+  gateway?: string;
+  reference?: string;
 }
 
 export interface WalletTransactionResponse {
@@ -73,4 +78,9 @@ export interface UpdateBankAccountRequest {
   holderName?: string;
   accountNumber?: string;
   bankCode?: string;
+}
+
+export interface WithdrawRequest {
+  accountId: string;
+  amount: number;
 }

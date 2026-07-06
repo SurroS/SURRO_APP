@@ -43,7 +43,7 @@ const WalletCard = ({ style }: { style?: any }) => {
     if (user?.id) {
       fetchBalance(user.id);
     }
-  }, [user?.id]);
+  }, [user?.id, fetchBalance]);
 
   const displayBalance = hidden
     ? "******"

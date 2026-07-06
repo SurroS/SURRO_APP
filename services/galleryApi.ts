@@ -70,13 +70,11 @@ export const getGalleryImages = async (useCache: boolean = true) => {
   if (useCache && (await isCacheValid())) {
     const cachedImages = await getCache();
     if (cachedImages) {
-      console.log("📸 Using cached gallery images");
       return { data: { images: cachedImages, total: cachedImages.length } };
     }
   }
 
   // Fetch from API
-  console.log("📸 Fetching gallery images from API");
   const response = await authenticatedGet("/gallery");
 
   // Backend returns an array directly, transform to expected structure

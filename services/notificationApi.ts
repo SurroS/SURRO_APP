@@ -23,7 +23,7 @@ export interface ReminderSettings {
 
 export async function registerPushToken(
   token: string,
-  platform: "ios" | "android",
+  platform: "IOS" | "ANDROID",
 ): Promise<void> {
   await authenticatedPost("/notifications/push-token", { token, platform });
 }

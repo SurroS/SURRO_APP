@@ -60,7 +60,6 @@ export const ProfileExample = () => {
   const handleCreateProfile = async () => {
     try {
       await createProfile(formData as SurrogateProfile);
-      console.log("Profile created successfully");
     } catch (error) {
       console.error("Failed to create profile:", error);
     }
@@ -75,7 +74,6 @@ export const ProfileExample = () => {
       };
 
       await updateProfile(updateData);
-      console.log("Profile updated successfully");
     } catch (error) {
       console.error("Failed to update profile:", error);
     }
@@ -92,7 +90,6 @@ export const ProfileExample = () => {
         chronicIllnesses: ["None"],
       };
       await updateMedicalProfile(medicalData);
-      console.log("Medical profile updated successfully");
     } catch (error) {
       console.error("Failed to update medical profile:", error);
     }

@@ -46,7 +46,6 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
 
   addLocal: (n) => {
     const id = generateId();
-    console.log("[Notif] addLocal:", { id, title: n.title, type: n.type, role: n.role });
     set((state) => ({
       notifications: [
         {
@@ -62,21 +61,17 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
   },
 
   fetchNotifications: async () => {
-    console.log("[Notif] fetchNotifications: start");
     set({ isLoadingNotifications: true });
     try {
       const backend = await getNotifications();
       const mapped = backend.map(mapBackendNotification);
-      console.log("[Notif] fetchNotifications: mapped", mapped.length, "notifications");
       set({ notifications: mapped, isLoadingNotifications: false });
     } catch (err) {
-      console.log("[Notif] fetchNotifications: error", err);
       set({ isLoadingNotifications: false });
     }
   },
 
   markRead: async (id) => {
-    console.log("[Notif] markRead:", id);
     try {
       await apiMarkRead(id);
       set((state) => ({
@@ -85,30 +80,24 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
         ),
       }));
     } catch (err) {
-      console.log("[Notif] markRead API error:", err);
     }
   },
 
   deleteNotification: (id) => {
-    console.log("[Notif] deleteNotification:", id);
     set((state) => ({
       notifications: state.notifications.filter((n) => n.id !== id),
       selected: state.selected.filter((s) => s !== id),
     }));
-    apiDeleteNotification(id).catch((err) =>
-      console.log("[Notif] deleteNotification API error:", err)
-    );
+    apiDeleteNotification(id).catch((err) => { });
   },
 
   selectNotification: (id) =>
     set((state) => {
       if (state.selected.includes(id)) return {};
-      console.log("[Notif] selectNotification:", id);
       return { selected: [...state.selected, id] };
     }),
 
   deselectNotification: (id) => {
-    console.log("[Notif] deselectNotification:", id);
     set((state) => ({
       selected: state.selected.filter((s) => s !== id),
     }));
@@ -116,12 +105,10 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
 
   selectAll: () => {
     const ids = get().notifications.map((n) => n.id);
-    console.log("[Notif] selectAll:", ids.length);
     set({ selected: ids });
   },
 
   clearSelection: () => {
-    console.log("[Notif] clearSelection");
     set({ selected: [] });
   },
 }));

@@ -81,7 +81,7 @@ export default function AgentGuestView() {
             isNegotiable={agent?.negotiable === "Yes" || agent?.negotiable === true}
             isUnlocked={true}
             hideActions
-            isVerified={agent?.user?.isVerified || agent?.user?.kycStatus === "APPROVED"}
+            isVerified={agent?.user?.kycStatus === "APPROVED"}
           />
 
           {/* --- ABOUT --- */}

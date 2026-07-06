@@ -69,7 +69,7 @@ export default function SurrogateScreen() {
             dateOfBirth={surrogateProfile?.dateOfBirth?.split("T")[0]}
             isAvailable={surrogateProfile?.isAvailable}
             onToggleAvailability={toggleAvailability}
-            isVerified={surrogateProfile?.user?.isVerified || surrogateProfile?.user?.kycStatus === "APPROVED"}
+            isVerified={surrogateProfile?.user?.kycStatus === "APPROVED"}
           />
 
           {/* Accordion for About + Contact */}
@@ -134,7 +134,7 @@ export default function SurrogateScreen() {
 
             <YStack width={"48%"} gap={10}>
               <HomeResourceCard />
-              <Referral style={{ width: "100%", height: 160 }} />
+              <Referral style={{ width: "100%", height: 200 }} />
             </YStack>
           </XStack>
 

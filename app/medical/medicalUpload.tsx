@@ -34,14 +34,14 @@ export default function MedicalUpload() {
     if (!surrogateProfile) {
       fetchProfile();
     }
-  }, []);
+  }, [surrogateProfile, fetchProfile]);
 
   // Prefill existing image once profile data arrives (only if user hasn't interacted)
   useEffect(() => {
     if (medical?.endometriumUploadUrl && !medicalReport && !hasInteracted.current) {
       setMedicalReport({ uri: medical.endometriumUploadUrl });
     }
-  }, [medical?.endometriumUploadUrl]);
+  }, [medical?.endometriumUploadUrl, medicalReport]);
 
   const handleFileSelect = (file: FileObject | null) => {
     hasInteracted.current = true;

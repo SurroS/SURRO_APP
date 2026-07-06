@@ -130,25 +130,18 @@ export const createSurrogateSlice: StateCreator<
 
       const res = await getSurrogatesList();
 
-      console.log("[Surrogates] API raw response:", JSON.stringify(res).slice(0, 500));
-
       let rawList: any[] = [];
 
       if (Array.isArray(res)) {
         rawList = res;
-        console.log("[Surrogates] Response is a direct array, length:", res.length);
       } else if (res?.data && Array.isArray(res.data)) {
         rawList = res.data;
-        console.log("[Surrogates] Response wrapped in .data, length:", res.data.length);
       } else if (res?.matches && Array.isArray(res.matches)) {
         rawList = res.matches;
-        console.log("[Surrogates] Response wrapped in .matches, length:", res.matches.length);
       } else if (res?.users && Array.isArray(res.users)) {
         rawList = res.users;
-        console.log("[Surrogates] Response wrapped in .users, length:", res.users.length);
       } else if (res?.results && Array.isArray(res.results)) {
         rawList = res.results;
-        console.log("[Surrogates] Response wrapped in .results, length:", res.results.length);
       } else {
         console.warn("[Surrogates] Unknown response shape, first keys:", Object.keys(res || {}).join(", "));
       }

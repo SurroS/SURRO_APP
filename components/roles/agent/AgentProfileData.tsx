@@ -10,7 +10,6 @@ const AgentProfileDataView = () => {
     if (agentProfile) {
       try {
         await updateAgentProfile({ isAvailable: !agentProfile.isAvailable });
-        console.log("Status updated:", !agentProfile.isAvailable);
       } catch (error) {
         console.error("Failed to update status:", error);
       }

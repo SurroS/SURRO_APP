@@ -17,7 +17,7 @@ import {
   Linking,
   Pressable,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import Entypo from "@expo/vector-icons/Entypo";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -83,6 +83,7 @@ const REPORT_REASONS = [
 ];
 
 export default function NetworkScreen() {
+  const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const role = user?.role;
   const isSurrogate = role === "SURROGATE";
@@ -409,7 +410,7 @@ export default function NetworkScreen() {
         onRequestClose={closeReportModal}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContainer, { marginBottom: Math.max(keyboardHeight - 20, 0) }]}>
+          <View style={[styles.modalContainer, { marginBottom: Math.max(keyboardHeight - 20, 0), paddingBottom: Math.max(32, insets.bottom) }]}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Report Unresponsive User</Text>
               <TouchableOpacity onPress={closeReportModal}>
@@ -526,7 +527,7 @@ export default function NetworkScreen() {
         onRequestClose={() => setShowCallModal(false)}
       >
         <Pressable style={styles.callModalOverlay} onPress={() => setShowCallModal(false)}>
-          <Pressable style={styles.callModalContent}>
+          <Pressable style={[styles.callModalContent, { paddingBottom: 20 + insets.bottom }]}>
             <Text style={styles.callModalTitle}>Select Number to Call</Text>
             {callNumbers.map((num, idx) => (
               <TouchableOpacity

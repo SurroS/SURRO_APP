@@ -58,7 +58,6 @@ export default function AgentProfileScreen() {
   // -----------------------------
   useEffect(() => {
     if (!id) return;
-    console.log("OtherId from Profile Pre:", id);
     const fetchAgent = async () => {
       try {
         const res = await getAgentById(id as string);
@@ -98,7 +97,7 @@ export default function AgentProfileScreen() {
     if (user) {
       fetchBalance(user.id, token || null);
     }
-  }, [user]);
+  }, [user, token, fetchBalance]);
 
   // -----------------------------
   // Payment Handlers
@@ -217,7 +216,7 @@ export default function AgentProfileScreen() {
                handleChat();
              }}
              isUnlocked={isUnlocked}
-             isVerified={agent?.user?.isVerified || agent?.user?.kycStatus === "APPROVED"}
+             isVerified={agent?.user?.kycStatus === "APPROVED"}
            />
 
           {/* --- ABOUT --- */}

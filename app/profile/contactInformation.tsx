@@ -66,24 +66,20 @@ export default function ContactInformationScreen() {
 
     if (!Role) return;
 
-    // Always trigger fetch — stale-while-revalidate handles:
-    // - Cached: returns instantly, silently refreshes in background
-    // - No cache: shows loading, fetches from API
     if (Role === "SURROGATE") fetchProfile();
     else if (Role === "INTENDED_PARENT") fetchParentProfile();
     else if (Role === "AGENT") fetchAgentProfile();
-  }, [Role]);
-
-  // Strip dial code safely and always return string
-  const stripDialCode = (phone?: string | null): string => {
-    if (!phone || !country?.dialCode) return "";
-    return phone.startsWith(country.dialCode)
-      ? phone.slice(country.dialCode.length)
-      : phone;
-  };
+  }, [Role, fetchProfile, fetchParentProfile, fetchAgentProfile, getAllCountries, setCountries]);
 
   // Populate form based on role
   useEffect(() => {
+    const stripDialCode = (phone?: string | null): string => {
+      if (!phone || !country?.dialCode) return "";
+      return phone.startsWith(country.dialCode)
+        ? phone.slice(country.dialCode.length)
+        : phone;
+    };
+
     const profile =
       Role === "SURROGATE"
         ? surrogateProfile
@@ -94,7 +90,6 @@ export default function ContactInformationScreen() {
         : null;
 
     if (!profile) {
-      console.log("[ContactInfo] No profile to populate from, role:", Role);
       return;
     }
 
@@ -133,6 +128,7 @@ export default function ContactInformationScreen() {
     countries,
     Role,
     country?.dialCode,
+    getStatesByCountry,
   ]);
 
   const handleSelectCountry = async (selected: any) => {

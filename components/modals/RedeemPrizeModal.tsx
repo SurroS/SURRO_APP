@@ -15,6 +15,7 @@ import {
   Keyboard,
   Dimensions,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import ReferralCard, { Referral } from "@/components/ReferralCard";
 import SearchBox from "@/components/SearchBox";
@@ -47,6 +48,7 @@ const RedeemPrizeModal: React.FC<Props> = ({
   referrals = dummyReferrals,
 }) => {
   const [activeTab, setActiveTab] = useState<"redeem" | "pending">("redeem");
+  const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -152,11 +154,12 @@ const RedeemPrizeModal: React.FC<Props> = ({
                   bottom={0}
                   left={0}
                   right={0}
-                  height={FOOTER_HEIGHT}
+                  height={FOOTER_HEIGHT + insets.bottom}
                   justifyContent="center"
                   alignItems="center"
                   backgroundColor={colors.background}
                   padding={12}
+                  paddingBottom={12 + insets.bottom}
                 >
                   <Button
                     onPress={onClose}

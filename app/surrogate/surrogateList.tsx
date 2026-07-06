@@ -101,7 +101,7 @@ export default function SurrogateList() {
       const ids = saved.map((s: any) => (s.surrogate ?? s).id ?? s.surrogateId).filter(Boolean);
       setSavedIds(ids);
     }).catch((e) => console.warn("[SurrogateList] Failed to fetch saved:", e));
-  }, []);
+  }, [isParent]);
 
   useEffect(() => {
     if (initialLoadDone || isLoading || surrogates.length > 0) return;
@@ -113,7 +113,7 @@ export default function SurrogateList() {
       setInitialLoadDone(true);
     };
     load();
-  }, []);
+  }, [isParent]);
 
   const handleModeChange = useCallback(async (mode: ViewMode) => {
     setViewMode(mode);

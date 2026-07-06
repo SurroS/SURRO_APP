@@ -1,9 +1,9 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import { TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { Text, YStack, XStack, ScrollView, View } from "tamagui";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 
 import colors from "@/hooks/colors";
 import { useAuth } from "@/hooks/useAuth";
@@ -50,18 +50,17 @@ const WalletScreen = () => {
     ? "******"
     : `${currencyCode} ${totalBalance.toFixed(2)}`;
 
-  // Fetch wallet
-  useEffect(() => {
-    console.log("[WalletScreen] Fetching wallet for role:", role);
-    fetchWallet()
-      .then(() => console.log("[WalletScreen] Wallet fetched successfully"))
-      .catch((err) => console.error("[WalletScreen] Wallet fetch error:", err));
-    if (user?.id) {
-      fetchBalance(user.id)
-        .then(() => console.log("[WalletScreen] Balance fetched via /wallet/balance"))
-        .catch((err) => console.error("[WalletScreen] Balance fetch error:", err));
-    }
-  }, []);
+  // Fetch wallet on every focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchWallet()
+        .catch((err) => console.error("[WalletScreen] Wallet fetch error:", err));
+      if (user?.id) {
+        fetchBalance(user.id)
+          .catch((err) => console.error("[WalletScreen] Balance fetch error:", err));
+      }
+    }, [user?.id, fetchWallet, fetchBalance])
+  );
 
   const mapTx = (tx: WalletTransactionData) => ({
     id: tx.id,
@@ -69,6 +68,8 @@ const WalletScreen = () => {
     date: formatDate(tx.createdAt),
     amount: tx.amount,
     type: tx.type === "CREDIT" ? "credit" : "debit",
+    status: tx.status,
+    gateway: tx.gateway,
   });
 
   const sortedTransactions = [...transactions].sort(
@@ -124,7 +125,6 @@ const WalletScreen = () => {
               label="Top up"
               icon="add"
               onPress={() => {
-                console.log("[WalletScreen] Navigating to payment method");
                 router.push("/walletFlow/paymentMethod");
               }}
             />
@@ -132,7 +132,6 @@ const WalletScreen = () => {
               label="Withdraw"
               icon="remove"
               onPress={() => {
-                console.log("[WalletScreen] Navigating to withdrawal");
                 router.push("/walletFlow/withdrawal");
               }}
             />
@@ -189,6 +188,8 @@ const WalletScreen = () => {
                 date={tx.date}
                 amount={tx.amount}
                 type={tx.type}
+                status={tx.status}
+                gateway={tx.gateway}
               />
             ))}
           </ScrollView>

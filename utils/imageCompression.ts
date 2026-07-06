@@ -52,7 +52,6 @@ export const compressImage = async (
 
   try {
     const originalSize = await getFileSize(uri);
-    console.log(`📸 Original image size: ${formatFileSize(originalSize)}`);
 
     const result = await ImageManipulator.manipulateAsync(
       uri,
@@ -71,11 +70,6 @@ export const compressImage = async (
     );
 
     const compressedSize = await getFileSize(result.uri);
-    const reduction = originalSize > 0 ? ((originalSize - compressedSize) / originalSize * 100).toFixed(1) : 0;
-    
-    console.log(`📸 Compressed image size: ${formatFileSize(compressedSize)}`);
-    console.log(`📸 Size reduction: ${reduction}%`);
-    console.log(`📸 Dimensions: ${result.width}x${result.height}`);
 
     return {
       uri: result.uri,

@@ -14,13 +14,9 @@ export async function createConversation(
   otherUserId: string,
 ): Promise<Conversation> {
   try {
-    console.log(" Creating conversation with user:", otherUserId);
-
     const body: CreateConversationRequest = { otherUserId };
 
     const res = await authenticatedPost("/chat/conversation", body);
-
-    console.log(" Conversation created:", res);
     return res as Conversation;
   } catch (err) {
     const info = explainAxiosError(err);
@@ -38,13 +34,9 @@ export async function fetchMessages(
   skip = 0,
 ): Promise<Message[]> {
   try {
-    console.log(" Fetching messages for conversation:", conversationId);
-
     const res = await authenticatedGet(`/chat/messages/${conversationId}`, {
       params: { take, skip },
     });
-
-    console.log(" Messages fetched:", res);
     return res?.data ?? (Array.isArray(res) ? res : []);
   } catch (err) {
     const info = explainAxiosError(err);
@@ -58,11 +50,7 @@ export async function fetchMessages(
  */
 export async function GetAllChat() {
   try {
-    console.log(" Fetching chat library...");
-
     const res = await authenticatedGet("/chat");
-
-    console.log(" Chat library fetched:", res);
 
     return res?.data ?? [];
   } catch (error) {
@@ -77,7 +65,7 @@ export async function GetAllChat() {
  */
 export async function markMessagesAsRead(messageIds: string[]) {
   try {
-    console.log(" Marking messages as read:", messageIds);
+
 
     await authenticatedPatch("/chat/messages/read", { messageIds });
   } catch (err) {
@@ -93,17 +81,9 @@ export async function sendMessage(
   attachmentUrl?: string,
 ): Promise<Message> {
   try {
-    console.log("➡ Sending message:", {
-      conversationId,
-      content,
-      attachmentUrl,
-    });
-
     const body: SendMessageRequest = { conversationId, content, attachmentUrl };
 
     const res = await authenticatedPost("/chat/message", body);
-
-    console.log(" Message sent:", res);
     return res.data as Message;
   } catch (err) {
     const info = explainAxiosError(err);

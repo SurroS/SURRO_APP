@@ -239,17 +239,13 @@ export default function PersonalInformationScreen() {
           country: country.name,
         };
         if (userName) profileData.userName = userName;
-        console.log("[personalDetails] dob raw value:", JSON.stringify(dob));
         if (dob) {
           const dateStr = dob.split("/").reverse().join("-");
-          console.log("[personalDetails] parsed dateStr:", dateStr);
           const d = new Date(dateStr);
-          console.log("[personalDetails] Date object:", d.toString(), "ISO:", d.toISOString(), "valid:", !isNaN(d.getTime()));
           if (!isNaN(d.getTime())) {
             profileData.dateOfBirth = dateStr;
           }
         }
-        console.log("[personalDetails] AGENT profileData:", JSON.stringify(profileData));
         await updateAgentProfile(profileData);
       }
 

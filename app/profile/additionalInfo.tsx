@@ -64,7 +64,7 @@ export default function AdditionalInfoScreen() {
     if (!parentProfile) {
       fetchParentProfile();
     }
-  }, []);
+  }, [parentProfile, fetchParentProfile]);
 
   const firstOf = (arr: any) => Array.isArray(arr) && arr.length > 0 ? arr[0] : "";
 

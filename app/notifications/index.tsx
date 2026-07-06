@@ -27,7 +27,7 @@ const NotificationsScreen = () => {
 
   useEffect(() => {
     fetchNotifications();
-  }, []);
+  }, [fetchNotifications]);
 
   const [viewingNotification, setViewingNotification] =
     useState<AppNotification | null>(null);

@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import {
   calculateProfileProgress,
@@ -30,6 +31,7 @@ export default function ProfileCompletionModal<TProfile>({
   redirectPath,
   profileTypeName = "Profile",
 }: ProfileCompletionModalProps<TProfile>) {
+  const insets = useSafeAreaInsets();
   const progress = calculateProfileProgress(profile as any);
   const hasProfile = !!profile;
   const missingGroups = hasProfile ? getMissingFields(profile as any) : [];
@@ -57,7 +59,7 @@ export default function ProfileCompletionModal<TProfile>({
       statusBarTranslucent
     >
       <View style={styles.overlay}>
-        <View style={styles.card}>
+        <View style={[styles.card, { paddingBottom: 24 + insets.bottom }]}>
           <Ionicons name="person-circle" size={56} color="#0E0E55" />
 
           <Text style={styles.title}>{title}</Text>

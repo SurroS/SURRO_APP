@@ -28,8 +28,6 @@ export default function PaymentModeScreen() {
   const params = useLocalSearchParams<Record<string, string>>();
   const gateway = params.gateway as PaymentGateway;
 
-  console.log("[PaymentMode] Gateway from params:", gateway);
-
   const modes = modesByGateway[gateway] || [];
 
   return (

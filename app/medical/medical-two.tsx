@@ -66,8 +66,6 @@ export default function MedicalDetailsStep2() {
   useEffect(() => {
     if (!medical) return;
 
-    console.log("[MedicalStep2] Prefill medical data:", JSON.stringify(medical, null, 2));
-
     // Chronic illness
     setHasChronicIllness(medical.hasChronicIllness ? "Yes" : "No");
     setChronicIllnesses(medical.chronicIllnesses ?? []);
@@ -91,11 +89,8 @@ export default function MedicalDetailsStep2() {
         hadMiscarriage === "Yes" ? numberOfMiscarriages : 0,
     };
 
-    console.log("[MedicalStep2] Save payload:", JSON.stringify(payload, null, 2));
-
     try {
       const response = await updateMedicalProfile(payload as any);
-      console.log("[MedicalStep2] Save response:", JSON.stringify(response, null, 2));
 
       Toast.show({
         text1: "Medical details saved",

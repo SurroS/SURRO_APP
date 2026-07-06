@@ -76,10 +76,7 @@ export default function ChatBoxScreen() {
       try {
         let convoId = routeConvoId;
 
-        // Path A: from chat list — conversation already exists
-        // Path B: from profile — create or retrieve conversation
         if (!convoId && otherUserId) {
-          console.log("[ChatConvo] Creating conversation with:", otherUserId);
           const convo = await createConversation(otherUserId);
           if (!convo?.id) throw new Error("Conversation creation failed");
           convoId = convo.id;
@@ -119,7 +116,7 @@ export default function ChatBoxScreen() {
     };
 
     load();
-  }, [routeConvoId, otherUserId]);
+  }, [routeConvoId, otherUserId, setCachedConversation, normalizeMessage]);
 
   /* -----------------------------------------
    * MARK INCOMING MESSAGES AS READ
@@ -139,7 +136,7 @@ export default function ChatBoxScreen() {
         ),
       );
     }
-  }, [messages, currentUserId]);
+    }, [messages, currentUserId, markMessagesAsRead]);
 
   /* -----------------------------------------
    * message status
@@ -198,7 +195,6 @@ export default function ChatBoxScreen() {
         return;
       }
       try {
-        console.log("[ChatConvo:send] Creating conversation with:", otherUserId);
         const convo = await createConversation(otherUserId);
         if (convo?.id) {
           currentConvoId = convo.id;

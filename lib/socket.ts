@@ -12,11 +12,9 @@ export const connectSocket = (token: string): Socket => {
     });
 
     socket.on("connect", () => {
-      console.log("Connected to WebSocket");
     });
 
     socket.on("disconnect", () => {
-      console.log("Disconnected from WebSocket");
     });
   }
   return socket;

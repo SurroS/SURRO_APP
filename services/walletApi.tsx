@@ -106,4 +106,12 @@ export const deleteBankAccount = async (id: string): Promise<void> => {
   await authenticatedDelete(`/wallet/bank/accounts/${id}`);
 };
 
+export const withdrawWallet = async (
+  accountId: string,
+  amount: number,
+): Promise<any> => {
+  const response = await authenticatedPost("/wallet/withdraw", { accountId, amount });
+  return response?.data ?? response;
+};
+
 

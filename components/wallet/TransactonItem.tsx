@@ -2,25 +2,34 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import colors from "@/hooks/colors";
+import type { TransactionStatus } from "@/types/walletTypes";
 
 interface TransactionItemProps {
   title: string;
   date: string;
   amount: number;
   type: any;
+  status?: TransactionStatus;
   gateway?: "STRIPE" | "PAYSTACK" | "FLUTTERWAVE" | "INTERSWITCH";
-  iconName?: string; // optional manual icon override
+  iconName?: string;
 }
+
+const STATUS_LABELS: Record<TransactionStatus, { label: string; bg: string; fg: string }> = {
+  SUCCESS: { label: "Success", bg: "#DCFCE7", fg: "#166534" },
+  PENDING: { label: "Pending", bg: "#FEF3C7", fg: "#92400E" },
+  PROCESSING: { label: "Processing", bg: "#DBEAFE", fg: "#1E40AF" },
+  FAILED: { label: "Failed", bg: "#FEE2E2", fg: "#991B1B" },
+};
 
 const TransactionItem: React.FC<TransactionItemProps> = ({
   title,
   date,
   amount,
   type,
+  status,
   gateway,
   iconName,
 }) => {
-  // this Choose default icon based on gateway or transaction type
   const getIcon = (): string => {
     if (iconName) return iconName;
 
@@ -39,6 +48,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
   };
 
   const iconColor = type === "credit" ? "#22C55E" : "#EF4444";
+  const statusInfo = status ? STATUS_LABELS[status] : null;
 
   return (
     <View style={styles.container}>
@@ -54,9 +64,18 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
         <Text style={styles.date}>{date}</Text>
       </View>
 
-      <Text style={[styles.amount, { color: iconColor }]}>
-        {type === "credit" ? "+" : "-"}₦{amount.toLocaleString()}
-      </Text>
+      <View style={styles.rightSection}>
+        {statusInfo && (
+          <View style={[styles.badge, { backgroundColor: statusInfo.bg }]}>
+            <Text style={[styles.badgeText, { color: statusInfo.fg }]}>
+              {statusInfo.label}
+            </Text>
+          </View>
+        )}
+        <Text style={[styles.amount, { color: iconColor }]}>
+          {type === "credit" ? "+" : "-"}₦{amount.toLocaleString()}
+        </Text>
+      </View>
     </View>
   );
 };
@@ -79,6 +98,19 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 13,
     color: colors.secondaryGray,
+  },
+  rightSection: {
+    alignItems: "flex-end",
+    gap: 4,
+  },
+  badge: {
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: "600",
   },
   amount: {
     fontSize: 16,

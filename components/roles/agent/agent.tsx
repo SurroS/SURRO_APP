@@ -45,7 +45,7 @@ export default function AgentHomeScreen() {
     if (!agentProfile) {
       fetchProfile();
     }
-  }, []);
+  }, [agentProfile, fetchProfile]);
 
   // Show modal if profile is missing or incomplete
   useEffect(() => {
@@ -86,7 +86,7 @@ export default function AgentHomeScreen() {
               onToggleAvailability={async (next) => {
                 await updateProfile({ isAvailable: next });
               }}
-              isVerified={agentProfile?.user?.isVerified || agentProfile?.user?.kycStatus === "APPROVED"}
+              isVerified={agentProfile?.user?.kycStatus === "APPROVED"}
             />
           </SafeRender>
 
@@ -190,7 +190,7 @@ export default function AgentHomeScreen() {
                 <HomeResourceCard />
               </SafeRender>
               <SafeRender fallback={<Text>Loading referral...</Text>}>
-                <Referral style={{ width: "100%", height: 160 }} />
+                <Referral style={{ width: "100%", height: 200 }} />
               </SafeRender>
             </YStack>
           </XStack>

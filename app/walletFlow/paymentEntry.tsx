@@ -58,11 +58,7 @@ export default function PaymentEntryScreen() {
         channel: mode,
       };
 
-      console.log("[PaymentEntry] Initiating payment with payload:", JSON.stringify(payload, null, 2));
-
       const response = await initiatePaymentFrontend(payload, token);
-
-      console.log("[PaymentEntry] Init response:", JSON.stringify(response, null, 2));
 
       const authorizationUrl = response?.data?.authorization_url || response?.authorization_url;
       const reference = response?.data?.reference || response?.reference;
@@ -72,14 +68,14 @@ export default function PaymentEntryScreen() {
         throw new Error("Invalid payment initialization response.");
       }
 
-      console.log("[PaymentEntry] Navigating to WebView with URL:", authorizationUrl, "Reference:", reference);
       pushWebViewScreen(authorizationUrl, gateway, mode, reference);
     } catch (err: any) {
       console.error("[PaymentEntry] Payment init error:", err?.response?.data || err?.message || err);
-      Toast.error(
-        err?.response?.data?.message ||
-          "Payment error. Failed to initiate payment.",
-      );
+      Toast.show({
+        text1: "Payment error",
+        type: "customError" as ToastType,
+        text2: err?.response?.data?.message || "Failed to initiate payment.",
+      });
     } finally {
       setLoading(false);
     }

@@ -36,6 +36,7 @@
     },
     "android": {
       "package": "com.surrosantara.mobile",
+      "googleServicesFile": "./google-services.json",
       "permissions": [
         "android.permission.USE_BIOMETRIC",
         "android.permission.USE_FINGERPRINT",
@@ -91,6 +92,13 @@
         "expo-document-picker",
         {
           "iCloudContainerEnvironment": "Production"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "androidMode": "production",
+          "androidCollapsedTitle": "Surro"
         }
       ]
     ],

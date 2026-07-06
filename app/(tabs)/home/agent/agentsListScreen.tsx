@@ -80,7 +80,7 @@ export default function AgentList() {
     if (agents && cardIndex >= agents.length) {
       setCardIndex(0);
     }
-  }, [agents.length]);
+  }, [cardIndex, agents.length]);
 
   // ------------------------------------------
   // Swipe handler
@@ -143,7 +143,6 @@ export default function AgentList() {
       pathname: "/agent/agentProfileScreen",
       params: { id: current.id },
     });
-    console.log("OtherId from A.list:", current.id);
   };
 
   // ------------------------------------------

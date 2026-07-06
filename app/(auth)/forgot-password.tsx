@@ -35,9 +35,6 @@ export default function ForgotPasswordScreen() {
           "Password reset instructions sent to your email! Please try again.",
       });
       console.error("Forgot password error:", err);
-      console.log(updateEmail);
-      console.log(validateForm);
-      console.log(email);
       // Error is already handled by the auth store
     }
   };

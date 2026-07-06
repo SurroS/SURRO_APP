@@ -130,7 +130,7 @@ export default function CardStack({
     if (cardIndex >= filteredItems.length && filteredItems.length > 0) {
       setCardIndex(0);
     }
-  }, [filteredItems.length]);
+  }, [cardIndex, filteredItems.length]);
 
   const goToNextCard = useCallback(() => {
     setCardIndex((prev) => prev + 1);
@@ -507,7 +507,7 @@ export default function CardStack({
       {/* No Results Modal */}
       <Modal visible={showNoResultsModal} transparent animationType="fade">
         <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignItems: "center", padding: 32 }}>
-          <View style={{ backgroundColor: "#fff", borderRadius: 16, padding: 28, alignItems: "center", width: "100%", gap: 14 }}>
+          <View style={{ backgroundColor: "#fff", borderRadius: 16, padding: 28, paddingBottom: 28 + (insets.bottom || 0), alignItems: "center", width: "100%", gap: 14 }}>
             <Ionicons name="search-outline" size={40} color={colors.primary} />
             <Text style={{ fontSize: 18, fontWeight: "700", color: "#0E0E55" }}>No Results Found</Text>
             <Text style={{ fontSize: 14, color: "#666", textAlign: "center", lineHeight: 20 }}>

@@ -30,9 +30,7 @@ export const getSurrogatesList = () =>
   authenticatedGet("/surrogates");
 
 export const getSurrogateById = async (id: string) => {
-  console.log(`[Surrogates] GET /surrogates/${id}`);
   const res = await authenticatedGet(`/surrogates/${id}`);
-  console.log("[Surrogates] getSurrogateById raw response:", JSON.stringify(res, null, 2));
   return res;
 };
 
@@ -44,7 +42,6 @@ export const updateSurrogateProfile = (data: any) =>
 
 export const getSurrogateProfile = async () => {
   const res = await authenticatedGet("/surrogates/profile/me");
-  console.log("RAW getSurrogateProfile response:", JSON.stringify(res, null, 2));
   return res;
 };
 
@@ -55,7 +52,6 @@ export const uploadEndometriumImage = async (data: any) => {
   const res = await authenticatedPatch("/surrogates/profile/medical/upload-endometrium", data, {
     headers: { "Content-Type": "multipart/form-data" },
   });
-  console.log("[profileApi] uploadEndometriumImage response:", JSON.stringify(res, null, 2));
   return res;
 };
 
@@ -79,7 +75,6 @@ export const getAllAgents = () => authenticatedGet("/agents");
 export const getAgentsList = () => authenticatedGet("/agents");
 
 export const getAgentById = async (id: string) => {
-  console.log(`[Agents] GET /agents/${id}`);
   const res = await authenticatedGet(`/agents/${id}`);
   return res;
 };

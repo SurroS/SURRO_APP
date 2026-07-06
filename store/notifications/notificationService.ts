@@ -6,9 +6,7 @@ import { AppNotification } from "./types";
 const NOTIFICATION_CHANNEL = "default";
 
 export const initSystemNotifications = async () => {
-  console.log("[Notif] initSystemNotifications: requesting permission...");
   const { status } = await Notifications.requestPermissionsAsync();
-  console.log("[Notif] Permission status:", status);
   if (status !== "granted") {
     console.warn("[Notif] Permission not granted, skipping handler setup");
     return;
@@ -22,7 +20,6 @@ export const initSystemNotifications = async () => {
       vibrationPattern: [0, 250, 250, 250],
       lightColor: "#FF231F7F",
     });
-    console.log("[Notif] Android notification channel created");
   }
 
   Notifications.setNotificationHandler({
@@ -34,17 +31,13 @@ export const initSystemNotifications = async () => {
       shouldSetBadge: true,
     }),
   });
-  console.log("[Notif] Notification handler registered");
 };
 
 export const pushNotification = async (
   notification: Omit<AppNotification, "id" | "read" | "createdAt" | "source">
 ) => {
-  console.log("[Notif] pushNotification:", JSON.stringify(notification));
-
   // In-app
   useNotificationStore.getState().addLocal(notification);
-  console.log("[Notif] In-app notification added");
 
   // System
   await Notifications.scheduleNotificationAsync({
@@ -56,5 +49,4 @@ export const pushNotification = async (
     },
     trigger: { seconds: 1 },
   });
-  console.log("[Notif] System notification scheduled");
 };

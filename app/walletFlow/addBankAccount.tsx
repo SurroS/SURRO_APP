@@ -5,6 +5,7 @@ import { YStack, Text, Button } from "tamagui";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import colors from "@/hooks/colors";
 import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 import { useBankAccounts } from "@/hooks/payment/useBankAccounts";
 import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 import { NIGERIAN_BANKS } from "@/utils/nigerianBanks";
@@ -124,10 +125,10 @@ export default function AddBankAccountScreen() {
     };
     try {
       await addAccount(payload);
-      Toast.show({ text1: "Bank account added successfully", type: "success" });
+      Toast.show({ text1: "Bank account added successfully", type: "customSuccess" as ToastType });
       router.back();
     } catch {
-      Toast.show({ text1: "Failed to add account", type: "error", text2: "try again later" });
+      Toast.show({ text1: "Failed to add account", type: "customError" as ToastType, text2: "try again later" });
     }
   };
 

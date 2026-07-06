@@ -3,7 +3,6 @@ import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
-  Alert,
   Image,
   Linking,
   Pressable,
@@ -11,6 +10,7 @@ import {
   StyleSheet,
   Modal,
 } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Text, XStack, YStack, View } from "tamagui";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
@@ -20,16 +20,17 @@ import { useWalletStore } from "@/store/wallet/walletStore";
 import colors from "@/hooks/colors";
 import { fundWallet } from "@/services/walletApi";
 
+const whatsapp = require("@/assets/images/whatsapp.png");
+const xIcon = require("@/assets/images/x_icon.png");
+const facebook = require("@/assets/images/facebook.png");
+const mail = require("@/assets/images/mail.png");
+
 export default function InviteScreen() {
   const router = useRouter();
   const { user, token } = useAuth();
   const { credit, loading } = useWalletStore();
 
-  const whatsapp = require("@/assets/images/whatsapp.png");
-  const x = require("@/assets/images/x_icon.png");
-  const facebook = require("@/assets/images/facebook.png");
-  const mail = require("@/assets/images/mail.png");
-
+  const insets = useSafeAreaInsets();
   const [copied, setCopied] = useState(false);
   const [redeemOpen, setRedeemOpen] = useState(false);
 
@@ -49,7 +50,6 @@ Referral code: ${referralCode}`;
 
   const notRedeemed = user?.referral?.notRedeemed ?? ["@Prime", "@Stupenia"];
 
-  //CHANGE VALUE LATER
   const REFERRAL_REWARD_AMOUNT = 1000;
   const totalAmount = notRedeemed.length * REFERRAL_REWARD_AMOUNT;
 
@@ -108,7 +108,6 @@ Referral code: ${referralCode}`;
       ];
     }
 
-    // SURROGATE (default)
     return [
       "Invite someone interested in surrogacy.",
       "They register and verify their account.",
@@ -144,15 +143,6 @@ Referral code: ${referralCode}`;
         type: "customSuccess" as ToastType,
         text2: "`₦${totalAmount.toLocaleString()} credited to your wallet`",
       });
-
-      /**
-       * IMPORTANT:
-       * At this point you MUST:
-       * - mark referrals as redeemed in backend
-       * - or refetch user profile
-       *
-       * currently fake state updates here.
-       */
     } catch (error: any) {
       Toast.show({
         text1: "Unable to Redeem at this time",
@@ -166,9 +156,9 @@ Referral code: ${referralCode}`;
   };
 
   return (
-    <>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <ScrollView
-        style={{ flex: 1, backgroundColor: "#fff" }}
+        style={{ flex: 1 }}
         contentContainerStyle={{ padding: 16 }}
       >
         <View marginVertical={20}>
@@ -205,7 +195,7 @@ Referral code: ${referralCode}`;
         <XStack justifyContent="space-around">
           {[
             { key: "whatsapp", icon: whatsapp, label: "WhatsApp" },
-            { key: "x", icon: x, label: "X" },
+            { key: "x", icon: xIcon, label: "X" },
             { key: "facebook", icon: facebook, label: "Facebook" },
             { key: "mail", icon: mail, label: "Mail" },
           ].map(({ key, icon, label }) => (
@@ -221,7 +211,7 @@ Referral code: ${referralCode}`;
             </Pressable>
           ))}
         </XStack>
-        {/* //       {/* How it works */}
+
         <YStack marginTop={30} gap={12}>
           <Text color={colors.text} fontSize={16} fontWeight="800">
             How it works
@@ -267,7 +257,7 @@ Referral code: ${referralCode}`;
           onPress={() => setRedeemOpen(false)}
         />
 
-        <View style={styles.bottomSheet}>
+        <View style={[styles.bottomSheet, { paddingBottom: 20 + insets.bottom }]}>
           <Text
             color={colors.text}
             fontSize={18}
@@ -312,7 +302,7 @@ Referral code: ${referralCode}`;
           </Button>
         </View>
       </Modal>
-    </>
+    </SafeAreaView>
   );
 }
 

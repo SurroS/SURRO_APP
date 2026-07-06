@@ -33,7 +33,6 @@ export default function ChatMessageBubble({ message, isMine, onRetry }: Props) {
         {/* ATTACHMENT */}
         {message.attachmentUrl ? (
           <TouchableOpacity
-            onPress={() => console.log("open attachment")}
             style={styles.attachmentBox}
           >
             <Text style={styles.attachmentText}>📎 Attachment</Text>

@@ -9,7 +9,6 @@ let Device: { isDevice: boolean } | null = null;
 try {
   Device = require("expo-device");
 } catch {
-  console.log("[PushNotifications] expo-device not available");
 }
 
 export function usePushNotifications() {
@@ -24,8 +23,7 @@ export function usePushNotifications() {
     registerForPushNotificationsAsync().then((token) => {
       if (token) {
         setExpoPushToken(token);
-        const platform = Platform.OS as "ios" | "android";
-        registerPushToken(token, platform).catch((err) =>
+        registerPushToken(token, Platform.OS.toUpperCase() as "ANDROID" | "IOS").catch((err) =>
           console.error("[PushNotifications] Failed to register token:", err),
         );
       }
@@ -33,10 +31,6 @@ export function usePushNotifications() {
 
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
-        console.log(
-          "[PushNotifications] Received:",
-          notification.request.content.data,
-        );
       });
 
     responseListener.current =
@@ -62,7 +56,6 @@ export function usePushNotifications() {
 
 async function registerForPushNotificationsAsync(): Promise<string | null> {
   if (Device && !Device.isDevice) {
-    console.log("[PushNotifications] Must use physical device for push");
     return null;
   }
 
@@ -74,7 +67,6 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
   }
 
   if (finalStatus !== "granted") {
-    console.log("[PushNotifications] Permission not granted");
     return null;
   }
 
@@ -82,8 +74,12 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
     const tokenData = await Notifications.getExpoPushTokenAsync();
     console.log("[PushNotifications] Expo push token:", tokenData.data);
     return tokenData.data;
-  } catch (err) {
-    console.error("[PushNotifications] Error getting token:", err);
+  } catch (err: any) {
+    if (err?.message?.includes("FirebaseApp is not initialized")) {
+      console.warn("[PushNotifications] Firebase not configured — add google-services.json for Android push");
+    } else {
+      console.error("[PushNotifications] Error getting token:", err);
+    }
     return null;
   }
 }

@@ -43,6 +43,8 @@ export interface ProfileActions {
 
 export type ProfileStore = ProfileState & ProfileActions;
 
+let _fetchSeq = 0;
+
 export const createProfileSlice: StateCreator<ProfileStore> = (set, get) => ({
   surrogateProfile: null,
   medicalProfile: null,
@@ -77,7 +79,6 @@ export const createProfileSlice: StateCreator<ProfileStore> = (set, get) => ({
 
       const response = await updateSurrogateProfile(profileData);
       const profile = response?.data?.profile || response?.data || response;
-      console.log("Profile from actions :", profile);
 
       set({
         surrogateProfile: profile,
@@ -85,7 +86,6 @@ export const createProfileSlice: StateCreator<ProfileStore> = (set, get) => ({
         error: null,
       });
     } catch (error: any) {
-      console.log("Profile from actions :", profileData);
       set({
         isLoading: false,
         error: error.response?.data?.message || "Failed to update profile",
@@ -95,13 +95,13 @@ export const createProfileSlice: StateCreator<ProfileStore> = (set, get) => ({
   },
 
   fetchProfile: async (forceRefresh = false) => {
+    const currentSeq = ++_fetchSeq;
     const state = get();
 
-    // Stale-while-revalidate: if cached data exists and not forced, show it
-    // immediately while silently refreshing in the background
     if (state.surrogateProfile && !forceRefresh) {
       try {
         const response = await getSurrogateProfile();
+        if (currentSeq !== _fetchSeq) return;
         const profile = response?.profile || response;
         const medicalProfile = profile?.medical || null;
         set({
@@ -125,6 +125,7 @@ export const createProfileSlice: StateCreator<ProfileStore> = (set, get) => ({
       set({ isLoading: !state.surrogateProfile, error: null });
 
       const response = await getSurrogateProfile();
+      if (currentSeq !== _fetchSeq) return;
       const profile = response?.profile || response;
       const medicalProfile = profile?.medical || null;
 

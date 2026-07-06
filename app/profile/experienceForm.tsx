@@ -205,7 +205,6 @@ export default function ExperienceForm() {
         payload.experienceLevel = "rookie";
       }
 
-      console.log("Submitting payload:", JSON.stringify(payload, null, 2));
       await updateProfile(payload);
 
       setShowSuccessModal(true);

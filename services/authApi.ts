@@ -1,4 +1,4 @@
-import { authenticatedPost, publicPost } from "./httpClient";
+import { authenticatedGet, authenticatedPost, publicPost } from "./httpClient";
 
 // Authentication API functions
 // Note: Login/signup don't require authentication, so we use publicPost
@@ -36,6 +36,13 @@ const authApi = {
 
   refreshToken: async () => {
     return authenticatedPost("/auth/refresh-token");
+  },
+
+  getCurrentUser: async () => {
+    console.log("[authApi] Fetching /auth/me");
+    const res = await authenticatedGet("/auth/me");
+    console.log("[authApi] /auth/me response:", JSON.stringify(res, null, 2));
+    return res;
   },
 
   logout: async () => {

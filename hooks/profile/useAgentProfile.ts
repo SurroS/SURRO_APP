@@ -35,13 +35,11 @@ export const useAgentProfile = () => {
       return cachedAgentProfile;
     }
 
-    console.log("[AgentProfile] Fetching profile from API...");
     setIsLoading(true);
     setError(null);
 
     try {
       const res = await getAgentProfile();
-      console.log("[AgentProfile] API response:", JSON.stringify(res, null, 2));
       const profile = res?.profile || res;
       if (profile?.profilePicture) {
         profile.profilePicture = resolveProfilePicture(profile.profilePicture);
@@ -60,7 +58,6 @@ export const useAgentProfile = () => {
       }
       cachedAgentProfile = profile;
       setAgentProfile(profile);
-      console.log("[AgentProfile] Profile loaded:", profile ? "YES" : "NO");
       if (profile?.profilePicture) {
         useAuthStore.getState().setUser({
           avatar: profile.profilePicture,
@@ -81,7 +78,6 @@ export const useAgentProfile = () => {
       }
     } finally {
       setIsLoading(false);
-      console.log("[AgentProfile] Fetch done");
     }
   }, []);
 
@@ -89,7 +85,6 @@ export const useAgentProfile = () => {
   // CREATE PROFILE
   // -------------------------
   const createProfile = async (data: any) => {
-    console.log("[AgentProfile] Creating profile...");
     setIsLoading(true);
     setError(null);
 
@@ -128,7 +123,6 @@ export const useAgentProfile = () => {
   // UPDATE PROFILE
   // -------------------------
   const updateProfile = async (data: any) => {
-    console.log("[AgentProfile] Updating profile...");
     setIsLoading(true);
     setError(null);
 

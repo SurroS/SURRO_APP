@@ -23,7 +23,6 @@ export const useSurrogateProfile = () => {
   // -------------------------
   const fetchProfile = useCallback(async (forceRefresh = false) => {
     if (cachedProfile && !forceRefresh) {
-      console.log("[SurrogateProfile] Using cached profile");
       setSurrogateProfile(cachedProfile);
       return cachedProfile;
     }
@@ -32,15 +31,12 @@ export const useSurrogateProfile = () => {
     setError(null);
 
     try {
-      console.log("[SurrogateProfile] Fetching profile from API...");
       const res = await getSurrogateProfile();
-      console.log("[SurrogateProfile] API response:", JSON.stringify(res).slice(0, 400));
       cachedProfile = res?.profile || res;
       if (cachedProfile?.profilePicture) {
         cachedProfile.profilePicture = resolveProfilePicture(cachedProfile.profilePicture);
       }
       setSurrogateProfile(cachedProfile);
-      console.log("[SurrogateProfile] Profile loaded:", cachedProfile ? "YES" : "NO");
       if (cachedProfile?.profilePicture) {
         useAuthStore.getState().setUser({
           avatar: cachedProfile.profilePicture,
@@ -64,10 +60,8 @@ export const useSurrogateProfile = () => {
   const createProfile = async (data: SurrogateProfileUpdate) => {
     cachedProfile = null;
     setIsLoading(true);
-    console.log("[SurrogateProfile] Creating profile...");
     try {
       const res = await createSurrogateProfile(data);
-      console.log("[SurrogateProfile] Create success:", JSON.stringify(res).slice(0, 200));
       cachedProfile = res?.profile || res;
       if (cachedProfile?.profilePicture) {
         cachedProfile.profilePicture = resolveProfilePicture(cachedProfile.profilePicture);
@@ -83,10 +77,8 @@ export const useSurrogateProfile = () => {
   // -------------------------
   const updateProfile = async (data: SurrogateUpdatePayload) => {
     setIsLoading(true);
-    console.log("[SurrogateProfile] Updating profile...");
     try {
       const res = await updateSurrogateProfile(data);
-      console.log("[SurrogateProfile] Update success:", JSON.stringify(res).slice(0, 200));
       const updated = res?.profile || res;
       if (updated?.profilePicture) {
         updated.profilePicture = resolveProfilePicture(updated.profilePicture);

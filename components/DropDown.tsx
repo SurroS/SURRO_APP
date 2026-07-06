@@ -10,6 +10,7 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { YStack, Label } from "tamagui";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import colors from "@/hooks/colors";
 import { Check } from "@tamagui/lucide-icons";
 
@@ -40,6 +41,7 @@ const Dropdown = ({
   multiple = false,
   displayKey,
 }: DropdownProps) => {
+  const insets = useSafeAreaInsets();
   const [visible, setVisible] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -133,6 +135,7 @@ const Dropdown = ({
                   width: "100%",
                   maxHeight: "72%",
                   padding: 16,
+                  paddingBottom: 16 + insets.bottom,
                 }}
               >
                 {/* Search Bar */}

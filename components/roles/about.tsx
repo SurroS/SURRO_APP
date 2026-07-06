@@ -8,8 +8,6 @@ type AboutProps = {
 };
 
 const About = ({ aboutMe }: AboutProps) => {
-  console.log("[About] aboutMe:", aboutMe);
-
   const hasContent = typeof aboutMe === "string" && aboutMe.trim().length > 0;
 
   return (

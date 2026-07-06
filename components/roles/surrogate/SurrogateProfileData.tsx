@@ -10,7 +10,6 @@ const SurrogateProfileDataView = () => {
     if (surrogateProfile) {
       try {
         await updateProfile({ isAvailable: !surrogateProfile.isAvailable });
-        console.log("Status updated:", !surrogateProfile.isAvailable);
       } catch (error) {
         console.error("Failed to update status:", error);
       }

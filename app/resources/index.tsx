@@ -5,7 +5,7 @@ import { Search, Filter } from "@tamagui/lucide-icons";
 import { ScreenHeader } from "@/components/auth";
 import ResourceCard from "@/components/resources/ResourceCard";
 import { router } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import HelpServiceButton from "@/components/HelpServiceButton";
 import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 import colors from "@/hooks/colors";
@@ -15,6 +15,7 @@ import type { Resource } from "@/types/resources";
 const TYPES = ["article", "video", "pdf"];
 
 export default function ResourceCentre() {
+  const insets = useSafeAreaInsets();
   const [tab, setTab] = useState("general");
   const [search, setSearch] = useState("");
   const [filterVisible, setFilterVisible] = useState(false);
@@ -168,7 +169,7 @@ export default function ResourceCentre() {
         <Modal visible={filterVisible} transparent animationType="slide" onRequestClose={() => setFilterVisible(false)}>
           <Pressable style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.4)" }} onPress={() => setFilterVisible(false)}>
             <Pressable style={{ flex: 1, justifyContent: "flex-end" }} onPress={() => {}}>
-              <View backgroundColor="#FFF" borderTopLeftRadius={20} borderTopRightRadius={20} padding={24}>
+              <View backgroundColor="#FFF" borderTopLeftRadius={20} borderTopRightRadius={20} padding={24} paddingBottom={24 + insets.bottom}>
                 <XStack justifyContent="space-between" alignItems="center" marginBottom={16}>
                   <Text fontWeight="700" fontSize={17} color="#000">Filter by</Text>
                   <Pressable onPress={() => setFilterVisible(false)} hitSlop={8}>

@@ -1,5 +1,5 @@
 import { Gift } from "@tamagui/lucide-icons";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import { StyleSheet } from "react-native";
 import { Button, Card, Text, XStack, YStack } from "tamagui";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,9 +7,10 @@ import colors from "@/hooks/colors";
 
 const Referral = ({ style }: { style?: any }) => {
   const { user } = useAuth();
+  const router = useRouter();
 
   const handleInvite = () => {
-    router.push("inviteScreen");
+    router.push("/(tabs)/home/inviteScreen");
   };
 
   return (

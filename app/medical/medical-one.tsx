@@ -60,9 +60,6 @@ export default function MedicalDetailsStep1() {
   useEffect(() => {
     if (!surrogateProfile && !medical) return;
 
-    console.log("Hydrate effect — surrogateProfile:", JSON.stringify(surrogateProfile, null, 2));
-    console.log("Hydrate effect — medical:", JSON.stringify(medical, null, 2));
-
     // Check both medical object and root surrogateProfile for genotype/bloodGroup
     const genotypeValue = 
       medical?.genotype || 
@@ -74,11 +71,9 @@ export default function MedicalDetailsStep1() {
       "";
 
     if (genotypeValue) {
-      console.log("Setting genotype to:", genotypeValue);
       setGenotype(genotypeValue);
     }
     if (bloodGroupValue) {
-      console.log("Setting bloodGroup to:", bloodGroupValue);
       setBloodGroup(bloodGroupValue);
     }
     
