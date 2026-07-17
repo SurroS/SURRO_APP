@@ -15,41 +15,42 @@ const FRAME_RATIO = 1.586;
 
 export default function KYCUploadScreen() {
   const params = useLocalSearchParams<Record<string, string>>();
-  const { idType } = params;
+  const { idType, side, frontUri: passedFrontUri } = params;
+  const currentSide: "front" | "back" = (side as "front" | "back") || "front";
 
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
-  const [capturedFront, setCapturedFront] = useState<string | null>(null);
-  const [capturedBack, setCapturedBack] = useState<string | null>(null);
   const [alertVisible, setAlertVisible] = useState(false);
-  const [step, setStep] = useState<"front" | "back">("front");
+
+  const isPassport = idType === "passport";
 
   useEffect(() => {
     if (!permission) requestPermission();
   }, [permission]);
+
+  useEffect(() => {
+    if (isPassport && currentSide === "back") {
+      router.back();
+    }
+  }, [isPassport, currentSide]);
 
   const handleCapture = async () => {
     if (!cameraRef.current) return;
 
     try {
       const photo = await cameraRef.current.takePictureAsync({ quality: 1 });
-      if (step === "front") {
-        setCapturedFront(photo.uri);
-        if (idType === "passport") {
-          router.push({
-            pathname: "/kyc/preview",
-            params: { idType, frontUri: photo.uri },
-          });
-        } else {
-          setStep("back");
-        }
-      } else {
-        setCapturedBack(photo.uri);
-        router.push({
-          pathname: "/kyc/preview",
-          params: { idType, frontUri: capturedFront || "", backUri: photo.uri },
-        });
+      const previewParams: Record<string, string> = {
+        idType: idType || "",
+        side: currentSide,
+        uri: photo.uri,
+      };
+      if (passedFrontUri) {
+        previewParams.frontUri = passedFrontUri;
       }
+      router.push({
+        pathname: "/kyc/id-preview",
+        params: previewParams,
+      });
     } catch (error) {
       console.error("Camera capture error:", error);
       setAlertVisible(true);
@@ -66,10 +67,8 @@ export default function KYCUploadScreen() {
 
   const readableId =
     idType === "national_id" ? "National ID Card"
-    : idType === "drivers_license" ? "Driver’s License"
+    : idType === "drivers_license" ? "Driver's License"
     : "Passport";
-
-  const isPassport = idType === "passport";
 
   return (
     <SafeAreaView style={styles.container}>
@@ -78,27 +77,10 @@ export default function KYCUploadScreen() {
       </YStack>
 
       <YStack flex={1} paddingHorizontal={20} paddingTop={16}>
-        {/* Step indicator */}
-        {!isPassport && (
-          <View style={styles.stepRow}>
-            {["front", "back"].map((s, i) => (
-              <React.Fragment key={s}>
-                <View style={[
-                  styles.dot,
-                  (step === s || (step === "back" && i === 0)) && styles.dotActive,
-                ]} />
-                {i === 0 && (
-                  <View style={[styles.line, step === "back" && styles.lineActive]} />
-                )}
-              </React.Fragment>
-            ))}
-          </View>
-        )}
-
         <Text style={styles.title}>
           {isPassport
             ? "Capture your passport"
-            : step === "front"
+            : currentSide === "front"
             ? `Front side of your ${readableId}`
             : `Back side of your ${readableId}`}
         </Text>
@@ -148,35 +130,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.white,
   },
-
-  stepRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 14,
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: colors.border,
-  },
-  dotActive: {
-    backgroundColor: colors.primary,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  line: {
-    width: 48,
-    height: 2,
-    backgroundColor: colors.border,
-    marginHorizontal: 6,
-  },
-  lineActive: {
-    backgroundColor: colors.primary,
-  },
-
   title: {
     fontSize: 17,
     fontWeight: "600",
@@ -184,7 +137,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 16,
   },
-
   cameraBox: {
     flex: 1,
     borderRadius: 16,
@@ -196,7 +148,6 @@ const styles = StyleSheet.create({
   camera: {
     flex: 1,
   },
-
   overlay: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: "center",
@@ -241,7 +192,6 @@ const styles = StyleSheet.create({
     borderRightWidth: 3,
     borderBottomRightRadius: 4,
   },
-
   guideText: {
     position: "absolute",
     bottom: 14,
@@ -254,7 +204,6 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     overflow: "hidden",
   },
-
   bottomArea: {
     alignItems: "center",
     paddingVertical: 16,

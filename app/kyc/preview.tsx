@@ -22,6 +22,11 @@ export default function KYCPicturePreview() {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
+  const readableId =
+    idType === "national_id" ? "National ID Card"
+    : idType === "drivers_license" ? "Driver's License"
+    : "Passport";
+
   const getFileName = (uri: string, defaultName: string): string => {
     const parts = uri.split("/");
     const fileName = parts[parts.length - 1];
@@ -80,6 +85,29 @@ export default function KYCPicturePreview() {
     }
   };
 
+  const handleRetakeFront = () => {
+    router.push({
+      pathname: "/kyc/id-preview",
+      params: {
+        idType: idType || "",
+        side: "front",
+        uri: frontUri || "",
+      },
+    });
+  };
+
+  const handleRetakeBack = () => {
+    router.push({
+      pathname: "/kyc/id-preview",
+      params: {
+        idType: idType || "",
+        side: "back",
+        uri: backUri || "",
+        frontUri: frontUri || "",
+      },
+    });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <YStack marginLeft={28}>
@@ -89,23 +117,32 @@ export default function KYCPicturePreview() {
         <YStack paddingHorizontal={20} paddingTop={20} alignItems="center">
           <Text style={styles.title}>Confirm your ID photos</Text>
           <Text style={styles.subtitle}>
-            Make sure your {idType} images are clearly visible and readable.
+            Make sure your {readableId} images are clearly visible and readable.
           </Text>
 
+          <Text style={styles.sideLabel}>Front side</Text>
           <Image source={{ uri: frontUri }} style={styles.previewImage} />
-          {backUri && (
-            <Image source={{ uri: backUri }} style={styles.previewImage} />
-          )}
-
           <TouchableOpacity
-            onPress={() => router.back()}
-            style={[styles.actionButton, styles.retakeButton]}
+            onPress={handleRetakeFront}
+            style={styles.inlineRetakeBtn}
             activeOpacity={0.8}
           >
-            <Text style={[styles.actionText, { color: colors.primary }]}>
-              Retake
-            </Text>
+            <Text style={styles.inlineRetakeText}>Retake front</Text>
           </TouchableOpacity>
+
+          {backUri && (
+            <>
+              <Text style={styles.sideLabel}>Back side</Text>
+              <Image source={{ uri: backUri }} style={styles.previewImage} />
+              <TouchableOpacity
+                onPress={handleRetakeBack}
+                style={styles.inlineRetakeBtn}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.inlineRetakeText}>Retake back</Text>
+              </TouchableOpacity>
+            </>
+          )}
 
           <TouchableOpacity
             onPress={handleSubmit}
@@ -117,7 +154,7 @@ export default function KYCPicturePreview() {
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={[styles.actionText, { color: "#fff" }]}>
-                Confirm & Continue
+                Confirm & Send
               </Text>
             )}
           </TouchableOpacity>
@@ -150,13 +187,31 @@ const styles = StyleSheet.create({
     textAlign: "center",
     width: "90%",
   },
+  sideLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#0E0E55",
+    alignSelf: "flex-start",
+    marginBottom: 6,
+  },
   previewImage: {
     width: "100%",
     height: 220,
     borderRadius: 12,
-    marginBottom: 20,
+    marginBottom: 8,
     resizeMode: "contain",
     backgroundColor: "#f9f9f9",
+  },
+  inlineRetakeBtn: {
+    alignSelf: "flex-start",
+    marginBottom: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+  },
+  inlineRetakeText: {
+    fontSize: 13,
+    color: colors.primary,
+    fontWeight: "500",
   },
   actionButton: {
     width: "100%",
@@ -165,11 +220,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 14,
-  },
-  retakeButton: {
-    backgroundColor: "#F2F2F6",
-    borderWidth: 1,
-    borderColor: colors.primary,
   },
   submitButton: {
     backgroundColor: colors.primary,

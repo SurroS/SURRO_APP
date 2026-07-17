@@ -16,11 +16,15 @@ export interface UnlockResponse {
     currency: string;
     createdAt: string;
     expiresAt: string;
+    version?: number;
   };
+  unlockedByOther?: boolean;
 }
 
 export interface UnlockStatusResponse {
   unlocked: boolean;
+  unlockedBy?: string;
+  version?: number;
   createdAt?: string;
   expiresAt?: string;
 }
@@ -53,8 +57,8 @@ export interface UnlocksListResponse {
 export const getUnlockFee = (role: string): Promise<UnlockFeeResponse> =>
   authenticatedGet(`/unlocks/fees/${role}`);
 
-export const createUnlock = (targetUserId: string, role?: string): Promise<UnlockResponse> =>
-  authenticatedPost(`/unlocks`, { targetUserId, role });
+export const createUnlock = (targetUserId: string): Promise<UnlockResponse> =>
+  authenticatedPost(`/unlocks`, { targetUserId });
 
 export const getUnlockStatus = (targetUserId: string): Promise<UnlockStatusResponse> =>
   authenticatedGet(`/unlocks/status/${targetUserId}`);

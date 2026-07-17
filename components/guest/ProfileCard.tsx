@@ -9,8 +9,8 @@ const VERIFY_ICON = require("../../assets/images/verify-icon.png");
 
 const ProfileCard = () => {
   const { surrogateProfile } = useSurrogateProfile();
-  const fullName = surrogateProfile?.firstName || "Guest Name";
-  const username = surrogateProfile?.firstName && surrogateProfile?.lastName ? `@${(surrogateProfile.firstName || "").split(" ")[0]}` : "@guest";
+  const fullName = surrogateProfile?.userName || surrogateProfile?.firstName || "Guest Name";
+  const username = surrogateProfile?.userName ? `@${surrogateProfile.userName}` : "@guest";
   const location =
     surrogateProfile?.stateOfResidence ||
     surrogateProfile?.stateOfOrigin ||

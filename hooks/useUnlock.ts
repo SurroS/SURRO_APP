@@ -9,19 +9,30 @@ import {
 
 const DEV_SKIP_PAYMENT = false;
 
+const globalProcessingMap = new Map<string, boolean>();
+
 interface UseUnlockOptions {
   targetUserId: string | null | undefined;
   targetRole?: string;
+}
+
+export interface UnlockResult {
+  success: boolean;
+  error?: string;
+  unlockedByOther?: boolean;
+  version?: number;
 }
 
 interface UseUnlockReturn {
   isUnlocked: boolean;
   isProcessing: boolean;
   isLoading: boolean;
+  unlockedByOther: boolean;
   fee: UnlockFeeResponse | null;
   expiresAt: string | null;
   error: string | null;
-  unlock: () => Promise<{ success: boolean; error?: string }>;
+  version: number | null;
+  unlock: () => Promise<UnlockResult>;
   refresh: () => Promise<void>;
 }
 
@@ -30,14 +41,34 @@ export function useUnlock({
   targetRole,
 }: UseUnlockOptions): UseUnlockReturn {
   const [isUnlocked, setIsUnlocked] = useState(false);
+  const [unlockedByOther, setUnlockedByOther] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [fee, setFee] = useState<UnlockFeeResponse | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [version, setVersion] = useState<number | null>(null);
 
   const { user, token } = useAuthStore();
   const isProcessingRef = useRef(false);
+  const targetUserIdRef = useRef(targetUserId);
+
+  useEffect(() => {
+    targetUserIdRef.current = targetUserId;
+  }, [targetUserId]);
+
+  const acquireGlobalLock = useCallback((): boolean => {
+    const key = targetUserIdRef.current;
+    if (!key) return false;
+    if (globalProcessingMap.get(key)) return false;
+    globalProcessingMap.set(key, true);
+    return true;
+  }, []);
+
+  const releaseGlobalLock = useCallback(() => {
+    const key = targetUserIdRef.current;
+    if (key) globalProcessingMap.delete(key);
+  }, []);
 
   const refresh = useCallback(async () => {
     if (!targetUserId) {
@@ -61,6 +92,13 @@ export function useUnlock({
       ]);
 
       setIsUnlocked(statusResult.unlocked);
+
+      if (statusResult.unlockedBy) {
+        setUnlockedByOther(statusResult.unlockedBy !== user?.userId);
+      }
+      if (statusResult.version != null) {
+        setVersion(statusResult.version);
+      }
       if (statusResult.expiresAt) {
         setExpiresAt(statusResult.expiresAt);
       }
@@ -73,18 +111,16 @@ export function useUnlock({
     } finally {
       setIsLoading(false);
     }
-  }, [targetUserId, targetRole]);
+  }, [targetUserId, targetRole, user?.userId]);
 
   useEffect(() => {
     refresh();
   }, [refresh]);
 
-  const unlock = useCallback(async (): Promise<{
-    success: boolean;
-    error?: string;
-  }> => {
+  const unlock = useCallback(async (): Promise<UnlockResult> => {
     if (DEV_SKIP_PAYMENT) {
       setIsUnlocked(true);
+      setUnlockedByOther(false);
       setExpiresAt(
         new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
       );
@@ -100,19 +136,39 @@ export function useUnlock({
     }
     if (isUnlocked) return { success: false, error: "Already unlocked" };
 
+    if (!acquireGlobalLock()) {
+      return {
+        success: false,
+        error: "Another unlock is in progress for this profile",
+      };
+    }
+
     isProcessingRef.current = true;
     setIsProcessing(true);
     setError(null);
 
     try {
-      await createUnlock(targetUserId, targetRole);
+      const result = await createUnlock(targetUserId);
 
       setIsUnlocked(true);
-      setExpiresAt(
-        new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-      );
+      setUnlockedByOther(false);
 
-      return { success: true };
+      if (result.unlock.version != null) {
+        setVersion(result.unlock.version);
+      }
+      if (result.unlock.expiresAt) {
+        setExpiresAt(result.unlock.expiresAt);
+      } else {
+        setExpiresAt(
+          new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+        );
+      }
+
+      return {
+        success: true,
+        version: result.unlock.version,
+        unlockedByOther: !!result.unlockedByOther,
+      };
     } catch (err: any) {
       const rawMessage =
         err?.details?.message ?? err?.message ?? null;
@@ -132,10 +188,25 @@ export function useUnlock({
 
       if (err?.status === 409) {
         setIsUnlocked(true);
-        setExpiresAt(
-          new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-        );
-        return { success: true };
+        setUnlockedByOther(true);
+
+        const conflictData = err?.details;
+        if (conflictData?.version != null) {
+          setVersion(conflictData.version);
+        }
+        if (conflictData?.expiresAt) {
+          setExpiresAt(conflictData.expiresAt);
+        } else {
+          setExpiresAt(
+            new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+          );
+        }
+
+        return {
+          success: true,
+          unlockedByOther: true,
+          error: "This profile has already been unlocked by another user",
+        };
       }
 
       setError(message);
@@ -146,16 +217,19 @@ export function useUnlock({
     } finally {
       isProcessingRef.current = false;
       setIsProcessing(false);
+      releaseGlobalLock();
     }
-  }, [targetUserId, user, fee, isUnlocked, token]);
+  }, [targetUserId, user, fee, isUnlocked, token, acquireGlobalLock, releaseGlobalLock]);
 
   return {
     isUnlocked,
     isProcessing,
     isLoading,
+    unlockedByOther,
     fee,
     expiresAt,
     error,
+    version,
     unlock,
     refresh,
   };

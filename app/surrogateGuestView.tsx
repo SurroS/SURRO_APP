@@ -50,8 +50,8 @@ export default function SurrogateGuestView() {
 
   const headerData = {
     name:
-      `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim() ||
       profile?.userName ||
+      `${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim() ||
       "No name",
     username: profile?.userName ?? "unknown",
     location:

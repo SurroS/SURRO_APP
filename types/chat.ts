@@ -3,13 +3,21 @@ import { User } from "./auth";
 export interface ChatUser {
   id: string;
   name: string;
+  userName?: string;
   role: "SURROGATE" | "INTENDED_PARENT" | "AGENT" | "SUPPORT" | string;
   avatarUrl?: string;
 }
 
 export interface Conversation {
   id: string;
-  participants: Participants[];
+  participant: {
+    id: string;
+    name: string;
+    userName?: string;
+    avatar: string | null;
+    role: string;
+  };
+  participants?: Participants[];
   lastMessage?: { content: string; createdAt: string; senderId: string };
   unreadCount: number;
 }
@@ -21,6 +29,7 @@ export interface Message {
   sender?: {
     id: string;
     name: string;
+    userName?: string;
     role?: string;
   };
   content?: string;
@@ -32,7 +41,7 @@ export interface Message {
 }
 
 export interface CreateConversationRequest {
-  otherUserId: string;
+  partnerId: string;
 }
 
 export interface SendMessageRequest {
@@ -42,9 +51,9 @@ export interface SendMessageRequest {
 }
 
 export interface Participants {
-  id: string;
   avatarUrl: string;
   name: string;
+  userName?: string;
   conversationId: string | undefined;
   userId: string;
   role: "INTENDED_PARENT" | "SURROGATE" | "AGENT";
@@ -53,6 +62,7 @@ export interface Participants {
 export interface Sender {
   id: string;
   name: string;
+  userName?: string;
   role?: string;
 }
 

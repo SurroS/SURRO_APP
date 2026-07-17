@@ -175,8 +175,8 @@ export default function SurrogateProfileScreen() {
 
   const headerData = {
     name:
-      `${surrogate?.firstName ?? ""} ${surrogate?.lastName ?? ""}`.trim() ||
       surrogate?.userName ||
+      `${surrogate?.firstName ?? ""} ${surrogate?.lastName ?? ""}`.trim() ||
       "No name",
 
     username: surrogate?.userName ?? "unknown",

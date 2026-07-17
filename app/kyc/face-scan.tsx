@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, TouchableOpacity, Image, ActivityIndicator, Dimensions } from "react-native";
+import { StyleSheet, TouchableOpacity, Image, ActivityIndicator, Dimensions, View } from "react-native";
 import { YStack, Text } from "tamagui";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import colors from "@/hooks/colors";

@@ -28,7 +28,7 @@ export const explainAxiosError = (error: any): string => {
       case 404:
         return "The requested resource was not found.";
       case 409:
-        return data?.message || "A conflict occurred. Please try again.";
+        return data?.message || "This action has already been completed. No changes were made.";
       case 422:
         return data?.message || "Validation failed. Please check your input.";
       case 429:

@@ -13,7 +13,6 @@ import { router } from "expo-router";
 import {
   calculateProfileProgress,
   getMissingFields,
-  MissingFieldGroup,
 } from "@/utils/profileHelpers";
 
 interface ProfileCompletionModalProps<TProfile = any> {
@@ -28,13 +27,15 @@ export default function ProfileCompletionModal<TProfile>({
   visible,
   onClose,
   profile,
-  redirectPath,
+  redirectPath = "/profile",
   profileTypeName = "Profile",
 }: ProfileCompletionModalProps<TProfile>) {
   const insets = useSafeAreaInsets();
   const progress = calculateProfileProgress(profile as any);
   const hasProfile = !!profile;
   const missingGroups = hasProfile ? getMissingFields(profile as any) : [];
+
+  const firstMissingRoute = missingGroups[0]?.route || redirectPath;
 
   const title = hasProfile
     ? `Complete Your Profile`
@@ -46,7 +47,12 @@ export default function ProfileCompletionModal<TProfile>({
 
   const handleComplete = () => {
     onClose();
-    router.navigate(redirectPath as any);
+    router.navigate(firstMissingRoute as any);
+  };
+
+  const handleRowPress = (route: string) => {
+    onClose();
+    router.navigate(route as any);
   };
 
   return (
@@ -68,16 +74,24 @@ export default function ProfileCompletionModal<TProfile>({
           {missingGroups.length > 0 && (
             <>
               <View style={styles.divider} />
-              <Text style={styles.missingHeader}>Missing items</Text>
+              <Text style={styles.missingHeader}>Missing items — tap to fix</Text>
               <ScrollView style={styles.missingList} nestedScrollEnabled>
                 {missingGroups.map((group, i) => (
-                  <View key={i} style={styles.missingRow}>
+                  <TouchableOpacity
+                    key={i}
+                    style={styles.missingRow}
+                    onPress={() => group.route && handleRowPress(group.route)}
+                    activeOpacity={group.route ? 0.7 : 1}
+                  >
                     <Text style={styles.bullet}>{"\u2022"}</Text>
                     <View style={styles.missingContent}>
                       <Text style={styles.categoryLabel}>{group.category}:</Text>
                       <Text style={styles.fieldLabel}>{group.fields.join(", ")}</Text>
                     </View>
-                  </View>
+                    {group.route && (
+                      <Ionicons name="chevron-forward" size={16} color="#999" />
+                    )}
+                  </TouchableOpacity>
                 ))}
               </ScrollView>
             </>
@@ -152,9 +166,9 @@ const styles = StyleSheet.create({
   },
   missingRow: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
     marginBottom: 6,
-    paddingRight: 8,
+    paddingRight: 4,
   },
   bullet: {
     fontSize: 14,

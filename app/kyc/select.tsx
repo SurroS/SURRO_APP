@@ -19,7 +19,7 @@ export default function KYCSelectIDScreen() {
     if (!selected) return;
     router.push({
       pathname: "/kyc/uploads",
-      params: { idType: selected },
+      params: { idType: selected, side: "front" },
     });
   };
 
