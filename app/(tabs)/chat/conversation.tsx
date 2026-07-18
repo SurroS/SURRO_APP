@@ -5,8 +5,12 @@ import {
   Text as RNText,
   StyleSheet,
   ActivityIndicator,
+  TouchableOpacity,
+  SafeAreaView,
 } from "react-native";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLocalSearchParams, useNavigation, router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { Avatar } from "tamagui";
 import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 import ChatInput from "@/components/chat/ChatInput";
 import { useAuthStore } from "@/store/auth";
@@ -22,6 +26,13 @@ import { setCachedConversation } from "@/utils/chatCache";
 /* -----------------------------------------
  * Helpers
  * ----------------------------------------*/
+
+const roleLabel = (role?: string): string => {
+  if (role === "SURROGATE") return "Surrogate";
+  if (role === "INTENDED_PARENT") return "Parent";
+  if (role === "AGENT") return "Agent";
+  return role ?? "";
+};
 
 const normalizeMessage = (msg: any, fallbackId?: string): Message => ({
   id:
@@ -44,6 +55,9 @@ const normalizeMessage = (msg: any, fallbackId?: string): Message => ({
 export default function ChatBoxScreen() {
   const params = useLocalSearchParams<Record<string, string>>();
   const otherUserId = params.otherUserId;
+  const otherName = params.otherName;
+  const otherRole = params.otherRole;
+  const otherAvatar = params.otherAvatar;
   const routeConvoId = params.conversationId || params.id;
   const currentUser = useAuthStore((s) => s.user);
   const currentUserId = currentUser?.id;
@@ -305,6 +319,36 @@ export default function ChatBoxScreen() {
   return (
     <KeyboardAvoidingWrapper>
       <View style={styles.container}>
+        <SafeAreaView style={styles.safeHeader}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+              <Ionicons name="chevron-back" size={24} color="#0E0E55" />
+            </TouchableOpacity>
+            <View style={styles.headerCenter}>
+              <Avatar circular size={36}>
+                {otherAvatar ? <Avatar.Image src={otherAvatar} /> : null}
+                <Avatar.Fallback backgroundColor="#E0E0E0">
+                  <RNText style={styles.headerAvatarText}>
+                    {(otherName?.charAt(0) ?? "?").toUpperCase()}
+                  </RNText>
+                </Avatar.Fallback>
+              </Avatar>
+              <View style={styles.headerInfo}>
+                <RNText style={styles.headerTitle} numberOfLines={1}>
+                  {otherName || "Chat"}
+                </RNText>
+                {otherRole ? (
+                  <View style={styles.headerRoleBadge}>
+                    <RNText style={styles.headerRoleText}>
+                      {roleLabel(otherRole)}
+                    </RNText>
+                  </View>
+                ) : null}
+              </View>
+            </View>
+            <View style={styles.backBtn} />
+          </View>
+        </SafeAreaView>
         {renderStatusBanner()}
         <FlatList
           ref={flatRef}
@@ -324,7 +368,45 @@ export default function ChatBoxScreen() {
  * Styles
  * ----------------------------------------*/
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", paddingTop: 45 },
+  container: { flex: 1, backgroundColor: "#fff" },
+
+  safeHeader: { backgroundColor: "#fff", paddingTop: 30 },
+
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 8,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  backBtn: { width: 40, alignItems: "center" },
+  headerCenter: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  headerAvatarText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#555",
+  },
+  headerInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flex: 1,
+  },
+  headerTitle: { fontSize: 16, fontWeight: "600", color: "#0E0E55" },
+  headerRoleBadge: {
+    backgroundColor: "#F0F0F0",
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  headerRoleText: { fontSize: 10, fontWeight: "500", color: "#555" },
 
   banner: {
     flexDirection: "row",

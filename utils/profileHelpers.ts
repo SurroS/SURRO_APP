@@ -170,6 +170,12 @@ export const calculateProfileProgress = (
     applyGroup(["facebookProfile", "instagramProfile"], 10);
   }
 
+  // KYC verification (shared across all roles)
+  maxScore += 5;
+  if ((profile as any)?.user?.kycStatus === "APPROVED") {
+    score += 5;
+  }
+
   // Normalize and cap
   const percentage = Math.round((score / maxScore) * 100);
   return Math.min(100, Math.max(0, percentage));
@@ -301,6 +307,15 @@ export function getMissingFields(profile: AnyProfile | null): MissingFieldGroup[
 
     addGroupCheck("Socials", ["facebookProfile", "instagramProfile"],
       "/profile/contactInformation", "At least one social profile");
+  }
+
+  // KYC verification (shared across all roles)
+  if ((profile as any)?.user?.kycStatus !== "APPROVED") {
+    groups.push({
+      category: "KYC Verification",
+      fields: [(profile as any)?.user?.kycStatus === "REJECTED" ? "Rejected — resubmit" : "Complete KYC"],
+      route: "/kyc",
+    });
   }
 
   return groups;

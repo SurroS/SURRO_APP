@@ -16,6 +16,7 @@ import { useAppActivity } from "@/hooks/useAppActivity";
 import { useNotificationPreferences } from "@/store/notifications/preferencesStore";
 import { useAuthStore } from "@/store/auth";
 import { getAllCountries } from "@/utils/countries";
+import { bootstrapApp } from "@/services/appBootstrapper";
 import SessionGate from "@/components/SessionGate";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 
@@ -30,7 +31,10 @@ export default function RootLayout() {
     initSystemNotifications();
     checkInactivity();
     getAllCountries(); // preload countries cache for filter modal
-    if (isAuthenticated) loadNotificationPrefs();
+    if (isAuthenticated) {
+      loadNotificationPrefs();
+      bootstrapApp();
+    }
 
     if (Platform.OS === "android") {
       try {

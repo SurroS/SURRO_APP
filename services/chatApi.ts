@@ -14,7 +14,7 @@ export async function createConversation(
   otherUserId: string,
 ): Promise<Conversation> {
   try {
-    const body: CreateConversationRequest = { otherUserId };
+    const body: CreateConversationRequest = { partnerId: otherUserId };
 
     const res = await authenticatedPost("/chat/conversation", body);
     return res as Conversation;
@@ -52,7 +52,7 @@ export async function GetAllChat() {
   try {
     const res = await authenticatedGet("/chat");
 
-    return res?.data ?? [];
+    return Array.isArray(res) ? res : (res?.data ?? []);
   } catch (error) {
     const info = explainAxiosError(error);
     console.error(" Failed to fetch chat library", info);
@@ -65,13 +65,10 @@ export async function GetAllChat() {
  */
 export async function markMessagesAsRead(messageIds: string[]) {
   try {
-
-
     await authenticatedPatch("/chat/messages/read", { messageIds });
   } catch (err) {
     const info = explainAxiosError(err);
-    console.error(" Mark as read failed:", info);
-    throw info;
+    console.warn("Mark as read failed (non-fatal):", info);
   }
 }
 
@@ -84,7 +81,7 @@ export async function sendMessage(
     const body: SendMessageRequest = { conversationId, content, attachmentUrl };
 
     const res = await authenticatedPost("/chat/message", body);
-    return res.data as Message;
+    return res as Message;
   } catch (err) {
     const info = explainAxiosError(err);
     console.error(" Send message failed:", info);

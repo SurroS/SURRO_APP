@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -12,19 +12,30 @@ import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import HelpServiceButton from "@/components/HelpServiceButton";
-import { secureGet } from "@/utils/storage";
 import { GetAllChat } from "@/services/chatApi";
+import { useAuthStore } from "@/store/auth";
+import { useChatStore } from "@/store/chatStore";
 import type { Conversation, Participants } from "@/types/chat";
 
-const ROLES = [
-  { key: "ALL", label: "All" },
-  { key: "SURROGATE", label: "Surrogate" },
-  { key: "INTENDED_PARENT", label: "Parent" },
-  { key: "AGENT", label: "Agent" },
-] as const;
+function normalizeParticipant(p: any): Participants {
+  return {
+    userId: p.userId ?? p.id ?? "",
+    name: p.userName ?? p.name ?? p.username ?? p.displayName ?? p.fullName ?? "",
+    avatarUrl: p.avatarUrl ?? p.avatar ?? p.profilePicture ?? "",
+    role: p.role ?? "",
+    conversationId: p.conversationId,
+  } as Participants;
+}
 
 function getOtherParticipant(conversation: Conversation, myId: string | null): Participants | undefined {
-  return conversation.participants?.find((p) => p.id !== myId) ?? conversation.participants?.[0];
+  // Backend returns `participant` (singular object), not `participants` (array)
+  if (conversation.participant) {
+    return normalizeParticipant(conversation.participant);
+  }
+  const participants = (conversation.participants as any[])?.map(normalizeParticipant);
+  if (!participants?.length) return undefined;
+  const other = participants.find((p) => p.userId !== myId);
+  return other ?? participants[0];
 }
 
 function timeAgo(dateStr?: string): string {
@@ -51,41 +62,49 @@ function roleLabel(role?: string): string {
 
 export default function ChatListScreen() {
   const router = useRouter();
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [myId, setMyId] = useState<string | null>(null);
+  const setChatUnreadCount = useAuthStore((s) => s.setChatUnreadCount);
+  const chatStore = useChatStore();
+  const [conversations, setConversations] = useState<Conversation[]>(chatStore.conversations);
+  const [isLoading, setIsLoading] = useState(!chatStore.initialized);
+  const currentUser = useAuthStore((s) => s.user);
+  const myId = currentUser?.id ?? null;
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("ALL");
+  const [refreshing, setRefreshing] = useState(false);
 
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    const uid = await secureGet("userId");
-    setMyId(uid ?? null);
+  const fetchData = useCallback(async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    else setIsLoading(true);
 
     try {
       const result = await GetAllChat();
       if (Array.isArray(result)) {
+        console.log("Chat conversations:", JSON.stringify(result[0]?.participants, null, 2));
+        chatStore.setConversations(result);
         setConversations(result);
+        const total = result.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0);
+        setChatUnreadCount(total);
       }
     } catch (err) {
       console.warn("Chat list failed:", err);
     } finally {
       setIsLoading(false);
+      setRefreshing(false);
     }
-  }, []);
+  }, [currentUser?.id]);
 
+  // Skip re-fetch on focus if already initialized (preloaded by bootstrapper)
   useFocusEffect(
     useCallback(() => {
-      fetchData();
-    }, [fetchData]),
+      if (!chatStore.initialized) {
+        fetchData();
+      }
+    }, [chatStore.initialized, fetchData]),
   );
 
   const filtered = conversations.filter((c) => {
     const other = getOtherParticipant(c, myId);
     const name = other?.name ?? "";
-    const matchesSearch = name.toLowerCase().includes(search.toLowerCase());
-    const matchesRole = roleFilter === "ALL" || other?.role === roleFilter;
-    return matchesSearch && matchesRole;
+    return name.toLowerCase().includes(search.toLowerCase());
   });
 
   const renderItem = ({ item }: { item: Conversation }) => {
@@ -99,7 +118,13 @@ export default function ChatListScreen() {
         onPress={() =>
           router.push({
             pathname: "/(tabs)/chat/conversation",
-            params: { conversationId: item.id },
+            params: {
+              conversationId: item.id,
+              otherName: other?.name ?? "",
+              otherRole: other?.role ?? "",
+              otherAvatar: other?.avatarUrl ?? "",
+              otherUserId: other?.userId ?? "",
+            },
           })
         }
       >
@@ -115,7 +140,6 @@ export default function ChatListScreen() {
             </Avatar.Fallback>
           </Avatar>
 
-          {isUnread && <View style={styles.unreadDot} />}
         </View>
 
         <View style={styles.chatContent}>
@@ -178,21 +202,6 @@ export default function ChatListScreen() {
           )}
         </View>
 
-        {/* Role filter chips */}
-        <View style={styles.filterRow}>
-          {ROLES.map((r) => (
-            <TouchableOpacity
-              key={r.key}
-              style={[styles.filterChip, roleFilter === r.key && styles.filterChipActive]}
-              onPress={() => setRoleFilter(r.key)}
-            >
-              <Text style={[styles.filterChipText, roleFilter === r.key && styles.filterChipTextActive]}>
-                {r.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
         {/* List */}
         {isLoading ? (
           <ActivityIndicator size="large" color="#0E0E55" style={{ marginTop: 40 }} />
@@ -201,12 +210,14 @@ export default function ChatListScreen() {
             data={filtered}
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
+            refreshing={refreshing}
+            onRefresh={() => fetchData(true)}
             contentContainerStyle={styles.listContent}
             ListEmptyComponent={
               <View style={styles.emptyWrap}>
                 <Ionicons name="chatbubbles-outline" size={48} color="#ccc" />
                 <Text style={styles.emptyText}>
-                  {search || roleFilter !== "ALL"
+                  {search
                     ? "No matching conversations"
                     : "No conversations yet"}
                 </Text>
@@ -245,30 +256,6 @@ const styles = StyleSheet.create({
   searchIcon: { marginRight: 8 },
   searchInput: { flex: 1, fontSize: 14, color: "#111", padding: 0 },
 
-  /* Filter chips */
-  filterRow: {
-    flexDirection: "row",
-    gap: 8,
-    marginBottom: 12,
-  },
-  filterChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: "#F0F0F0",
-  },
-  filterChipActive: {
-    backgroundColor: "#0E0E55",
-  },
-  filterChipText: {
-    fontSize: 13,
-    fontWeight: "500",
-    color: "#666",
-  },
-  filterChipTextActive: {
-    color: "#FFF",
-  },
-
   /* List */
   listContent: { paddingBottom: 80 },
 
@@ -291,18 +278,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#555",
   },
-  unreadDot: {
-    position: "absolute",
-    top: -2,
-    right: -2,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: "#0E0E55",
-    borderWidth: 2,
-    borderColor: "#FFF",
-  },
-
   /* Content */
   chatContent: { flex: 1 },
   chatTopRow: {
@@ -340,7 +315,7 @@ const styles = StyleSheet.create({
   },
   roleBadgeText: { fontSize: 10, fontWeight: "500", color: "#555" },
   unreadBadge: {
-    backgroundColor: "#0E0E55",
+    backgroundColor: "red",
     borderRadius: 10,
     minWidth: 20,
     height: 20,

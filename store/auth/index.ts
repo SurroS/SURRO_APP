@@ -29,6 +29,8 @@ interface HydrationState {
   setForceLogout: (value: boolean) => void;
   sessionExpired: boolean;
   setSessionExpired: (value: boolean) => void;
+  chatUnreadCount: number;
+  setChatUnreadCount: (count: number) => void;
 }
 
 type FullAuthStore = AuthStore & HydrationState;
@@ -64,6 +66,10 @@ export const useAuthStore = create<FullAuthStore>()(
       // Session expired modal flag
       sessionExpired: false,
       setSessionExpired: (value: boolean) => set({ sessionExpired: value }),
+
+      // Chat unread count for tab badge
+      chatUnreadCount: 0,
+      setChatUnreadCount: (count: number) => set({ chatUnreadCount: count }),
     }),
     {
       name: "auth-storage",

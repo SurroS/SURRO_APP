@@ -48,13 +48,13 @@ const AdEarnCard = ({ style }: { style?: any }) => {
         <YStack flex={1} gap="$2">
           <XStack alignItems="center" gap="$2">
             <Text fontSize={20}>📺</Text>
-            <Text fontSize="$3" fontWeight="600" color="#0E0E55">
+            <Text fontSize="$4" fontWeight="600" color="#0E0E55">
               Watch & Earn
             </Text>
           </XStack>
 
           <YStack flex={1} justifyContent="center" gap="$1">
-            <Text fontSize="$2" color="#666">
+            <Text fontSize="$3" color="#666">
               {loading
                 ? "Loading..."
                 : stats
@@ -63,7 +63,7 @@ const AdEarnCard = ({ style }: { style?: any }) => {
             </Text>
 
             {stats && (
-              <Text fontSize="$2" fontWeight="600" color={colors.primary}>
+              <Text fontSize="$3" fontWeight="600" color={colors.primary}>
                 ₦{stats.earnedToday} earned
               </Text>
             )}
@@ -86,7 +86,7 @@ const AdEarnCard = ({ style }: { style?: any }) => {
             borderRadius={20}
             alignSelf="center"
           >
-            <Text fontSize="$2" fontWeight="600" color="#fff">
+            <Text fontSize="$3" fontWeight="600" color="#fff">
               Watch Now
             </Text>
           </XStack>

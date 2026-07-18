@@ -7,6 +7,8 @@ import { useAuthStore } from "@/store/auth";
 
 export default function TabsLayout() {
   const forceLogout = useAuthStore((s) => s.forceLogout);
+  const chatUnread = useAuthStore((s) => s.chatUnreadCount);
+  const user = useAuthStore((s) => s.user);
 
   // ---- Full-screen blocker on 401 force logout ----
   if (forceLogout) {
@@ -44,6 +46,8 @@ export default function TabsLayout() {
         name="chat"
         options={{
           title: "Chat",
+          tabBarBadge: chatUnread > 0 ? chatUnread : undefined,
+          tabBarBadgeStyle: { backgroundColor: "red", fontSize: 11, fontWeight: "700" },
           tabBarIcon: ({ focused, size }) => (
             <MessageSquare
               size={size}

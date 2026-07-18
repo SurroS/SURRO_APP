@@ -88,6 +88,13 @@ export default function NetworkScreen() {
   const role = user?.role;
   const isSurrogate = role === "SURROGATE";
 
+  // Redirect surrogates away — network tab not applicable
+  useEffect(() => {
+    if (isSurrogate) {
+      router.replace("/(tabs)/home");
+    }
+  }, [isSurrogate]);
+
   const [unlocks, setUnlocks] = useState<UnlockListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);

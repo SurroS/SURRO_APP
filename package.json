@@ -14,7 +14,9 @@
     "build:preview:android": "powershell -ExecutionPolicy Bypass -File scripts/eas-build.ps1 -Profile preview -Platform android",
     "build:preview:ios": "powershell -ExecutionPolicy Bypass -File scripts/eas-build.ps1 -Profile preview -Platform ios",
     "build:prod:android": "powershell -ExecutionPolicy Bypass -File scripts/eas-build.ps1 -Profile production -Platform android",
-    "build:prod:ios": "powershell -ExecutionPolicy Bypass -File scripts/eas-build.ps1 -Profile production -Platform ios"
+    "build:prod:ios": "powershell -ExecutionPolicy Bypass -File scripts/eas-build.ps1 -Profile production -Platform ios",
+    "submit:android": "eas submit --platform android --profile production --non-interactive",
+    "submit:ios": "eas submit --platform ios --profile production --non-interactive"
   },
   "dependencies": {
     "@expo/metro-runtime": "^6.1.2",

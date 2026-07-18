@@ -1,7 +1,5 @@
 param(
     [Parameter(Mandatory=$true)]
-    [string]$Profile,
-    [Parameter(Mandatory=$true)]
     [string]$Platform
 )
 
@@ -18,7 +16,5 @@ if (-not $env:EXPO_TOKEN) {
     exit 1
 }
 
-Write-Host "Building with profile: $Profile, platform: $Platform"
-
-$autoSubmit = if ($Profile -eq "production") { "--auto-submit" } else { "" }
-eas build --profile $Profile --platform $Platform --non-interactive $autoSubmit
+Write-Host "Submitting for platform: $Platform"
+eas submit --platform $Platform --profile production --non-interactive

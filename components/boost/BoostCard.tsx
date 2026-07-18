@@ -60,7 +60,7 @@ const BoostCard = ({ style }: { style?: any }) => {
         <YStack flex={1} gap="$2">
           <XStack alignItems="center" gap="$2">
             <Text fontSize={20}>🚀</Text>
-            <Text fontSize="$3" fontWeight="600" color="#0E0E55">
+            <Text fontSize="$4" fontWeight="600" color="#0E0E55">
               Boost Profile
             </Text>
           </XStack>
@@ -68,21 +68,21 @@ const BoostCard = ({ style }: { style?: any }) => {
           <YStack flex={1} justifyContent="center" gap="$1">
             {boosted ? (
               <>
-                <Text fontSize="$2" fontWeight="600" color={colors.primary}>
+                <Text fontSize="$3" fontWeight="600" color={colors.primary}>
                   ✅ Boosted
                 </Text>
                 {expiresAt && (
-                  <Text fontSize="$2" color="#666">
+                  <Text fontSize="$3" color="#666">
                     {formatRemaining(expiresAt)}
                   </Text>
                 )}
-                <Text fontSize="$2" color={colors.primary} textDecorationLine="underline">
+                <Text fontSize="$3" color={colors.primary} textDecorationLine="underline">
                   Tap to extend
                 </Text>
               </>
             ) : (
               <>
-                <Text fontSize="$2" color="#666">
+                <Text fontSize="$3" color="#666">
                   Get 3x more views
                 </Text>
                 {!loading && plans.length > 0 && (
@@ -95,7 +95,7 @@ const BoostCard = ({ style }: { style?: any }) => {
                         paddingHorizontal={6}
                         borderRadius={8}
                       >
-                        <Text fontSize={10} color="#666">
+                        <Text fontSize={12} color="#666">
                           {p.label}
                         </Text>
                       </XStack>
@@ -113,7 +113,7 @@ const BoostCard = ({ style }: { style?: any }) => {
             borderRadius={20}
             alignSelf="center"
           >
-            <Text fontSize="$2" fontWeight="600" color="#fff">
+            <Text fontSize="$3" fontWeight="600" color="#fff">
               {boosted ? "Extend" : "Boost Now"}
             </Text>
           </XStack>

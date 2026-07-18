@@ -59,27 +59,4 @@ export const getKYCStatus = async () => {
   return authenticatedGet("/kyc/status");
 };
 
-// Legacy wrapper for backward compatibility (remove after updating all usages)
-export const makeAuthenticatedKYCRequest = async (
-  method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE",
-  endpoint: string,
-  data?: any,
-) => {
-  console.warn(
-    "[kycApi] makeAuthenticatedKYCRequest is deprecated. Use authenticatedGet/Post/Put/Delete directly.",
-  );
 
-  switch (method) {
-    case "GET":
-      return authenticatedGet(endpoint, data ? { params: data } : undefined);
-    case "POST":
-      return httpClient.post(endpoint, data);
-    case "PATCH":
-    case "PUT":
-      return httpClient.put(endpoint, data);
-    case "DELETE":
-      return httpClient.delete(endpoint);
-    default:
-      throw new Error(`Unsupported HTTP method: ${method}`);
-  }
-};

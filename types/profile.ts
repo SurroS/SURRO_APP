@@ -53,7 +53,7 @@ export interface SurrogateProfile {
     googleId?: string | null;
     appleId?: string | null;
     profilePictureUrl?: string | null;
-    kycStatus: string;
+    kycStatus: "NOT_STARTED" | "PENDING" | "APPROVED" | "REJECTED";
     referralCode: string;
     referredById?: string | null;
   };

@@ -1,5 +1,6 @@
 import authApi from "@/services/authApi";
 import { publicPost } from "@/services/httpClient";
+import { resetBootstrap } from "@/services/appBootstrapper";
 import {
   ChangePasswordRequest,
   GoogleAuth,
@@ -32,7 +33,7 @@ const DEV_AUTH_USER: User = {
   updatedAt: new Date().toISOString(),
   isOnline: true,
   lastSeen: new Date().toISOString(),
-  kycStatus: "APPROVED",
+  kycStatus: "NOT_STARTED",
   referralCode: "DEV",
   wallet: {
     id: "dev-wallet",
@@ -426,6 +427,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
 
   logout: () => {
     secureDelete("auth_token");
+    resetBootstrap();
 
     set({
       user: null,

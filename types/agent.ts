@@ -78,7 +78,7 @@ export interface AgentProfile {
     role: string;
     isVerified: boolean;
     isApproved: boolean;
-    kycStatus: string;
+    kycStatus: "NOT_STARTED" | "PENDING" | "APPROVED" | "REJECTED";
     referralCode?: string;
   };
   wallet: {
