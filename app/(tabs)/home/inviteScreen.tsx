@@ -224,16 +224,16 @@ Referral code: ${referralCode}`;
         </Text>
 
         <XStack justifyContent="space-around">
-          {[
-            { key: "whatsapp", icon: whatsapp, label: "WhatsApp" },
-            { key: "x", icon: xIcon, label: "X" },
-            { key: "facebook", icon: facebook, label: "Facebook" },
-            { key: "mail", icon: mail, label: "Mail" },
-          ].map(({ key, icon, label }) => (
+          {([
+            { key: "whatsapp" as const, icon: whatsapp, label: "WhatsApp" },
+            { key: "x" as const, icon: xIcon, label: "X" },
+            { key: "facebook" as const, icon: facebook, label: "Facebook" },
+            { key: "mail" as const, icon: mail, label: "Mail" },
+          ] as const).map(({ key, icon, label }) => (
             <Pressable
               key={key}
               style={styles.pressable}
-              onPress={() => handleShare(key as any)}
+              onPress={() => handleShare(key)}
             >
               <Image source={icon} style={styles.socialIcon} />
               <Text color={colors.text} fontSize={13}>

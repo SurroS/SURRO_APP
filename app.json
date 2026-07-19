@@ -49,17 +49,18 @@
       ]
     },
     "plugins": [
-      [
-        "expo-build-properties",
-        {
-          "ios": {
-            "newArchEnabled": true
-          },
-          "android": {
-            "newArchEnabled": true
+        [
+          "expo-build-properties",
+          {
+            "ios": {
+              "newArchEnabled": true
+            },
+            "android": {
+              "newArchEnabled": true,
+              "enableProguardInReleaseBuilds": true
+            }
           }
-        }
-      ],
+        ],
       "expo-router",
       "expo-font",
       [

@@ -39,9 +39,7 @@ const authApi = {
   },
 
   getCurrentUser: async () => {
-    console.log("[authApi] Fetching /auth/me");
     const res = await authenticatedGet("/auth/me");
-    console.log("[authApi] /auth/me response:", JSON.stringify(res, null, 2));
     return res;
   },
 

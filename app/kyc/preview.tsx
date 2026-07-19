@@ -64,7 +64,7 @@ export default function KYCPicturePreview() {
           }
         : undefined;
 
-      await submitKYC(idFront, idBack);
+      await submitKYC(idFront, idBack, undefined, idType);
 
       setIsModalVisible(true);
 
@@ -72,7 +72,7 @@ export default function KYCPicturePreview() {
         setIsModalVisible(false);
         router.push({
           pathname: "/kyc/face-scan-rules",
-          params: { idFrontUri: frontUri },
+          params: { idFrontUri: frontUri, idType: idType || "" },
         });
       }, 2000);
     } catch (error: any) {
@@ -154,7 +154,7 @@ export default function KYCPicturePreview() {
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={[styles.actionText, { color: "#fff" }]}>
-                Confirm & Send
+                Submit
               </Text>
             )}
           </TouchableOpacity>

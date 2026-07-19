@@ -1,36 +1,23 @@
 import { authenticatedGet, authenticatedPost } from "./httpClient";
+import type { SubscriptionPricingResponse, SubscriptionStatus, ActivateSubscriptionResponse } from "@/types/subscription";
 
-export interface SubscriptionPlan {
-  id: string;
-  label: string;
-  months: number;
-  cost: number;
-}
+export const getSubscriptionPricing = async (): Promise<SubscriptionPricingResponse> => {
+  try {
+    const r = await authenticatedGet<SubscriptionPricingResponse>("/subscription/plans");
+    return r?.data ?? r ?? { plans: [] };
+  } catch { return { plans: [] }; }
+};
 
-export interface SubscriptionPricingResponse {
-  plans: SubscriptionPlan[];
-}
+export const getSubscriptionStatus = async (): Promise<SubscriptionStatus> => {
+  try {
+    const r = await authenticatedGet<SubscriptionStatus>("/subscription/active");
+    return r?.data ?? r ?? { isSubscribed: false };
+  } catch { return { isSubscribed: false }; }
+};
 
-export interface SubscriptionStatus {
-  isSubscribed: boolean;
-  planId?: string;
-  expiresAt?: string;
-}
-
-export interface ActivateSubscriptionResponse {
-  expiresAt: string;
-  cost: number;
-  newBalance: number;
-}
-
-export const getSubscriptionPricing = () =>
-  authenticatedGet<SubscriptionPricingResponse>("/profile/subscription/pricing")
-    .then((r) => r?.data ?? r);
-
-export const getSubscriptionStatus = () =>
-  authenticatedGet<SubscriptionStatus>("/profile/subscription/active")
-    .then((r) => r?.data ?? r);
-
-export const activateSubscription = (planId: string) =>
-  authenticatedPost<ActivateSubscriptionResponse>("/profile/subscription/activate", { planId })
-    .then((r) => r?.data ?? r);
+export const activateSubscription = async (planId: string): Promise<ActivateSubscriptionResponse> => {
+  try {
+    const r = await authenticatedPost<ActivateSubscriptionResponse>("/subscription/activate", { planId });
+    return r?.data ?? r;
+  } catch { throw new Error("Subscription not available"); }
+};

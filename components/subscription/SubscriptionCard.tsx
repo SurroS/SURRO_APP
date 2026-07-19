@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { Card, Text, XStack, YStack } from "tamagui";
 import { router } from "expo-router";
-import { getSubscriptionPricing, getSubscriptionStatus, type SubscriptionPlan } from "@/services/subscriptionApi";
+import { getSubscriptionPricing, getSubscriptionStatus } from "@/services/subscriptionApi";
+import type { SubscriptionPlan } from "@/types/subscription";
 import colors from "@/hooks/colors";
 
 const SubscriptionCard = ({ style }: { style?: any }) => {
@@ -63,7 +64,6 @@ const SubscriptionCard = ({ style }: { style?: any }) => {
               Subscription
             </Text>
           </XStack>
-
           <YStack flex={1} justifyContent="center" gap="$1">
             {subscribed ? (
               <>
@@ -82,7 +82,7 @@ const SubscriptionCard = ({ style }: { style?: any }) => {
             ) : (
               <>
                 <Text fontSize="$2" color="#666">
-                  Stay listed as an active agent
+                  Subscribe to unlock features
                 </Text>
                 {!loading && plans.length > 0 && (
                   <XStack gap={4} flexWrap="wrap" marginTop={2}>
@@ -95,7 +95,7 @@ const SubscriptionCard = ({ style }: { style?: any }) => {
                         borderRadius={8}
                       >
                         <Text fontSize={10} color="#666">
-                          {p.label}
+                          {p.name}
                         </Text>
                       </XStack>
                     ))}
@@ -104,7 +104,6 @@ const SubscriptionCard = ({ style }: { style?: any }) => {
               </>
             )}
           </YStack>
-
           <XStack
             backgroundColor={subscribed ? "#4CAF50" : colors.primary}
             paddingVertical={6}

@@ -82,8 +82,7 @@ export const useAuthStore = create<FullAuthStore>()(
         hasSeenOnboarding: state.hasSeenOnboarding,
       }),
       onRehydrateStorage: () => {
-        console.log("🌀 Rehydration starting...");
-        return (state, error) => {
+                return (state, error) => {
           if (error) console.error("❌ Rehydration failed:", error);
           else state?.setHasHydrated(true);
         };

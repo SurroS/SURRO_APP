@@ -40,7 +40,6 @@ httpClient.interceptors.request.use(
       console.error("[httpClient] Failed to get auth token:", error);
     }
 
-    console.log(`[httpClient] ${config.method?.toUpperCase()} ${config.url}`);
     return config;
   },
   (error) => {

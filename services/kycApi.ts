@@ -7,24 +7,23 @@ import { KYCSubmitResponse } from "@/types/kyc";
  * @param idFront - Front side of ID document (required)
  * @param idBack - Back side of ID document (optional)
  * @param faceScan - Face scan/selfie image (optional)
+ * @param idType - Type of ID document (national_id, drivers_license, passport)
  * @returns KYC submission response
  */
 export const submitKYC = async (
   idFront: { uri: string; type: string; name: string },
   idBack?: { uri: string; type: string; name: string },
   faceScan?: { uri: string; type: string; name: string },
+  idType?: string,
 ): Promise<KYCSubmitResponse> => {
-  // Create FormData for multipart/form-data
   const formData = new FormData();
 
-  // Append front ID image (required)
   formData.append("idFront", {
     uri: idFront.uri,
     type: idFront.type || "image/jpeg",
     name: idFront.name || "idFront.jpg",
   } as any);
 
-  // Append back ID image (optional)
   if (idBack) {
     formData.append("idBack", {
       uri: idBack.uri,
@@ -33,7 +32,6 @@ export const submitKYC = async (
     } as any);
   }
 
-  // Append face scan image (optional)
   if (faceScan) {
     formData.append("faceScan", {
       uri: faceScan.uri,
@@ -42,7 +40,10 @@ export const submitKYC = async (
     } as any);
   }
 
-  // Use httpClient directly for multipart/form-data (bypasses JSON Content-Type)
+  if (idType) {
+    formData.append("idType", idType);
+  }
+
   const response = await httpClient.post("/kyc/submit", formData, {
     headers: {
       "Content-Type": "multipart/form-data",

@@ -63,14 +63,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
 
       const { user, accessToken, requiresOtp } = response;
 
-      // Debug: Log the token type and value
-      console.log("Token received:", {
-        accessToken,
-        type: typeof accessToken,
-        isString: typeof accessToken === "string",
-      });
-
-      if (requiresOtp) {
+            if (requiresOtp) {
         set({
           isLoading: false,
           requiresOtp: true,
@@ -107,8 +100,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
   },
 
   register: async (credentials: RegisterCredentials) => {
-    console.log("Credentials =", { credentials });
-    const data = {
+        const data = {
       email: credentials.email,
       password: credentials.password,
       role: credentials.role,
@@ -124,27 +116,21 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
         tempEmail: credentials.email,
         error: null,
       });
-      console.log("Credentials =", { data });
-    } catch (error: any) {
+          } catch (error: any) {
       set({
         isLoading: false,
         error: error.response?.data?.message || "Registration failed",
       });
-      console.log("Credentials =", { data });
-      throw error;
+            throw error;
     }
   },
 
   verifyOtp: async (verification: OtpVerification) => {
-    console.log("verifyOtp =", verification);
-
-    try {
+        try {
       set({ isLoading: true, error: null });
 
       const response = await authApi.verifyOTP(verification);
-      console.log("OTP verification response =", response);
-
-      // OTP verification only returns a message, no user/token
+            // OTP verification only returns a message, no user/token
       // User needs to login after verification
       router.replace("/(auth)/login");
       set({
@@ -154,9 +140,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
         error: null,
       });
     } catch (error: any) {
-      console.log("error =", error);
-
-      set({
+            set({
         isLoading: false,
         error: error.response?.data?.message || "OTP verification failed",
       });
@@ -258,9 +242,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
       throw new Error("Dev login is only available in development mode");
     }
 
-    console.log("[DEV] Signing in with dev credentials");
-
-    set((state) => {
+        set((state) => {
       // Get the selected role from current state, default to SURROGATE
       const selectedRole = (state as any).selectedRole || "SURROGATE";
 
@@ -287,32 +269,19 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      console.log("Starting Google login with:", {
-        hasIdToken: !!googleAuth?.idToken,
-        role: googleAuth?.role ?? "none (login only)",
-      });
-      console.log("Google login request payload:", {
-        idToken: googleAuth.idToken,
-        role: googleAuth.role,
-      });
-
-      const response = await publicPost("/auth/google", {
+                  const response = await publicPost("/auth/google", {
         idToken: googleAuth.idToken, // Correct field name
         role: googleAuth.role, // Optional, only needed during signup
       });
 
-      console.log("Google login raw response:", response);
-
-      if (!response) {
+            if (!response) {
         console.error("Google login endpoint returned empty payload");
         throw new Error("Invalid response from Google auth endpoint");
       }
 
       const { user, accessToken, requiresOtp } = response;
 
-      console.log("Google Auth Response:", response);
-
-      if (requiresOtp) {
+            if (requiresOtp) {
         set({
           isLoading: false,
           requiresOtp: true,
@@ -338,8 +307,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
 
       if (accessToken && typeof accessToken === "string") {
         await secureSet("auth_token", accessToken);
-        console.log("🔒 Token securely saved:", accessToken);
-      }
+              }
     } catch (error: any) {
       console.error("Google Login Error details:", {
         message: error.message,
@@ -359,31 +327,17 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      console.log("Starting Apple login request with identityToken:", {
+            const response = await publicPost("/auth/apple", {
         identityToken: appleToken,
       });
 
-      const response = await publicPost("/auth/apple", {
-        identityToken: appleToken,
-      });
-
-      console.log("Apple login raw response:", response);
-
-      if (!response) {
+            if (!response) {
         throw new Error("Invalid response from Apple auth endpoint");
       }
 
       const { user, accessToken, requiresOtp } = response;
 
-      // Debug: Log the token type and value
-      console.log("Apple Auth Response:", response);
-      console.log("Token received:", {
-        accessToken,
-        type: typeof accessToken,
-        isString: typeof accessToken === "string",
-      });
-
-      if (requiresOtp) {
+                  if (requiresOtp) {
         set({
           isLoading: false,
           requiresOtp: true,

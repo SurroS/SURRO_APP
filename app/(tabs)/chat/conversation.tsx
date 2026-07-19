@@ -27,6 +27,9 @@ import { setCachedConversation } from "@/utils/chatCache";
  * Helpers
  * ----------------------------------------*/
 
+const shortId = (id: string): string =>
+  id.length > 8 ? id.slice(0, 8) : id;
+
 const roleLabel = (role?: string): string => {
   if (role === "SURROGATE") return "Surrogate";
   if (role === "INTENDED_PARENT") return "Parent";
@@ -45,7 +48,7 @@ const normalizeMessage = (msg: any, fallbackId?: string): Message => ({
   createdAt: msg?.createdAt ?? new Date().toISOString(),
   sender: {
     id: msg?.sender?.id ?? "system",
-    name: msg?.sender?.name ?? "System",
+    name: msg?.sender?.userName ?? shortId(msg?.sender?.id ?? "system"),
     role: msg?.sender?.role,
   },
   status: msg?.status ?? "SENT",
@@ -191,7 +194,7 @@ export default function ChatBoxScreen() {
       createdAt: new Date().toISOString(),
       sender: {
         id: currentUserId!,
-        name: currentUser?.name ?? "Me",
+        name: currentUser?.userName ?? shortId(currentUserId!),
       },
       status: "SENDING",
     };

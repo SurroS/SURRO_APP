@@ -17,7 +17,7 @@ const FACE_OVAL_SIZE = 220;
 
 export default function FaceScanScreen() {
   const params = useLocalSearchParams<Record<string, string>>();
-  const { idFrontUri } = params;
+  const { idFrontUri, idType } = params;
   const { submitKYC, isLoading } = useKYC();
 
   const [imageUri, setImageUri] = useState<string | null>(null);
@@ -88,7 +88,7 @@ export default function FaceScanScreen() {
         name: "faceScan.jpg",
       };
 
-      await submitKYC(idFront, undefined, faceScan);
+      await submitKYC(idFront, undefined, faceScan, idType);
 
       setModalVisible(true);
 

@@ -42,7 +42,6 @@ export const updateSurrogateProfile = (data: any) =>
 
 export const getSurrogateProfile = async () => {
   const res = await authenticatedGet("/surrogates/profile/me");
-  console.log("[profileApi] /surrogates/profile/me response:", JSON.stringify(res, null, 2));
   return res;
 };
 
@@ -86,7 +85,6 @@ export const updateAgentProfile = (data: any) =>
 
 export const getAgentProfile = async () => {
   const res = await authenticatedGet("/agents/profile/me");
-  console.log("[profileApi] /agents/profile/me response:", JSON.stringify(res, null, 2));
   return res;
 };
 
@@ -116,7 +114,6 @@ export const updateParentMatchPreference = (data: any) =>
 
 export const getParentProfile = async () => {
   const res = await authenticatedGet("/intended-parents/profile/me");
-  console.log("[profileApi] /intended-parents/profile/me response:", JSON.stringify(res, null, 2));
   return res;
 };
 

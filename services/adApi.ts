@@ -25,8 +25,10 @@ export async function getCurrentAd(): Promise<CurrentAd | null> {
 }
 
 export async function getDailyAdStats(): Promise<DailyAdStats> {
-  const response = await authenticatedGet("/ads/daily-stats");
-  return response?.data ?? response;
+  try {
+    const response = await authenticatedGet("/ads/daily-stats");
+    return response?.data ?? response ?? { adsWatchedToday: 0, earnedToday: 0, dailyMax: 0 };
+  } catch { return { adsWatchedToday: 0, earnedToday: 0, dailyMax: 0 }; }
 }
 
 export async function claimAdReward(adId: string): Promise<ClaimAdResponse> {

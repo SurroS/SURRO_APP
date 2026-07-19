@@ -72,7 +72,6 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
 
   try {
     const tokenData = await Notifications.getExpoPushTokenAsync();
-    console.log("[PushNotifications] Expo push token:", tokenData.data);
     return tokenData.data;
   } catch (err: any) {
     if (err?.message?.includes("FirebaseApp is not initialized")) {

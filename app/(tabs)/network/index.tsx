@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -29,7 +29,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { getSurrogateById, getAgentById, getUserById } from "@/services/profileApi";
-import AdBanner from "@/components/ads/AdBanner";
 import BoostCarousel from "@/components/boost/BoostCarousel";
 import HelpServiceButton from "@/components/HelpServiceButton";
 
@@ -85,15 +84,13 @@ const REPORT_REASONS = [
 export default function NetworkScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const role = user?.role;
-  const isSurrogate = role === "SURROGATE";
 
-  // Redirect surrogates away — network tab not applicable
+  // Safety guard for deep-link access by surrogates
   useEffect(() => {
-    if (isSurrogate) {
+    if (user?.role === "SURROGATE") {
       router.replace("/(tabs)/home");
     }
-  }, [isSurrogate]);
+  }, [user?.role]);
 
   const [unlocks, setUnlocks] = useState<UnlockListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -394,9 +391,7 @@ export default function NetworkScreen() {
             colors={[colors.primary]}
           />
         }
-        ListHeaderComponent={
-          isSurrogate ? <AdBanner /> : <BoostCarousel />
-        }
+        ListHeaderComponent={<BoostCarousel />}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>

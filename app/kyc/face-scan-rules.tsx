@@ -9,12 +9,12 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 export default function KycFaceScanScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<Record<string, string>>();
-  const { idFrontUri } = params;
+  const { idFrontUri, idType } = params;
   
   const handleTakePicture = () => {
     router.push({
       pathname: "/kyc/face-scan",
-      params: { idFrontUri },
+      params: { idFrontUri, idType },
     });
   };
 

@@ -1,38 +1,18 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-  SafeAreaView,
-  ScrollView,
-  Platform,
-  StatusBar,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, SafeAreaView, ScrollView, Platform, StatusBar } from "react-native";
 import { router } from "expo-router";
 import Entypo from "@expo/vector-icons/Entypo";
 import Feather from "@expo/vector-icons/Feather";
 import colors from "@/hooks/colors";
-import {
-  getSubscriptionPricing,
-  activateSubscription,
-  type SubscriptionPlan,
-} from "@/services/subscriptionApi";
+import { getSubscriptionPricing, activateSubscription } from "@/services/subscriptionApi";
+import type { SubscriptionPlan } from "@/types/subscription";
 import { useWalletStore } from "@/store/wallet/walletStore";
 import { useAuth } from "@/hooks/useAuth";
-
-const FEATURES = [
-  "Listed as an active agent on SurroSantara",
-  "Priority visibility in search results",
-  "Direct contact with intended parents",
-  "Access to advanced analytics",
-];
 
 export default function SubscriptionScreen() {
   const { user } = useAuth();
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [activating, setActivating] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -48,12 +28,8 @@ export default function SubscriptionScreen() {
       setLoading(true);
       const data = await getSubscriptionPricing();
       const all = data.plans || [];
-      const monthly = all.find(
-        (p) => p.id === "sub_1_months" || p.months === 1
-      );
-      const yearly = all.find(
-        (p) => p.id === "sub_12_months" || p.months === 12
-      );
+      const monthly = all.find((p) => p.interval === "MONTHLY");
+      const yearly = all.find((p) => p.interval === "YEARLY");
       const filtered = [monthly, yearly].filter(Boolean) as SubscriptionPlan[];
       setPlans(filtered.length ? filtered : all);
     } catch {
@@ -63,12 +39,15 @@ export default function SubscriptionScreen() {
     }
   };
 
-  const handleActivate = async () => {
-    if (!selectedPlan) return;
+  const selected = plans.find((p) => p.id === selectedPlanId);
+  const selectedRegion = selected?.regions?.[0];
+  const currencySymbol = selectedRegion?.symbol ?? "₦";
 
+  const handleActivate = async () => {
+    if (!selectedPlanId) return;
     try {
       setActivating(true);
-      const result = await activateSubscription(selectedPlan);
+      const result = await activateSubscription(selectedPlanId);
       setExpiresAt(result.expiresAt);
       setSuccess(true);
       if (user?.id) fetchBalance(user.id);
@@ -79,19 +58,12 @@ export default function SubscriptionScreen() {
     }
   };
 
-  const handleDone = () => {
-    router.back();
-  };
+  const handleDone = () => router.back();
 
   if (success) {
     const formatted = expiresAt
-      ? new Date(expiresAt).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        })
+      ? new Date(expiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
       : "";
-
     return (
       <View style={styles.container}>
         <SafeAreaView style={styles.safeContent}>
@@ -101,13 +73,9 @@ export default function SubscriptionScreen() {
             </View>
             <Text style={styles.successTitle}>Subscription Active!</Text>
             <Text style={styles.successSubtext}>
-              You are now listed as an active agent{formatted ? ` until ${formatted}` : ""}.
+              Your plan is now active{formatted ? ` until ${formatted}` : ""}.
             </Text>
-            <TouchableOpacity
-              style={styles.doneButton}
-              onPress={handleDone}
-              activeOpacity={0.8}
-            >
+            <TouchableOpacity style={styles.doneButton} onPress={handleDone} activeOpacity={0.8}>
               <Text style={styles.doneButtonText}>Done</Text>
             </TouchableOpacity>
           </View>
@@ -116,7 +84,7 @@ export default function SubscriptionScreen() {
     );
   }
 
-  const selected = plans.find((p) => p.id === selectedPlan);
+  const monthlyPlan = plans.find((p) => p.interval === "MONTHLY");
 
   return (
     <View style={styles.container}>
@@ -127,128 +95,98 @@ export default function SubscriptionScreen() {
         <Text style={styles.headerTitle}>Subscription Plans</Text>
         <View style={styles.backButton} />
       </View>
-
       <SafeAreaView style={styles.safeContent}>
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-        >
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <Text style={styles.headline}>
-            Stay listed as an active agent and connect with intended parents.
+            Choose a plan to stay active and connect.
           </Text>
-
           {loading ? (
-            <ActivityIndicator
-              size="large"
-              color={colors.primary}
-              style={{ marginTop: 40 }}
-            />
+            <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 40 }} />
           ) : (
-            <>
-              <View style={styles.plansContainer}>
-                {plans.map((plan) => {
-                  const isYearly = plan.months === 12 || plan.id === "sub_12_months";
-                  const isSelected = selectedPlan === plan.id;
-                  const monthlyPrice = isYearly && plan.months > 0
-                    ? Math.round(plan.cost / plan.months)
-                    : null;
+            <View style={styles.plansContainer}>
+              {plans.map((plan) => {
+                const planRegion = plan.regions?.[0];
+                const planPrice = planRegion?.price;
+                const planSymbol = planRegion?.symbol ?? currencySymbol;
+                const isYearly = plan.interval === "YEARLY";
+                const isSelected = selectedPlanId === plan.id;
+                const monthlyBreakdown = isYearly && plan.intervalCount > 0 && planPrice != null
+                  ? `${planSymbol}${Math.round(planPrice / plan.intervalCount).toLocaleString()}/month`
+                  : null;
 
-                  return (
-                    <TouchableOpacity
-                      key={plan.id}
-                      style={[
-                        styles.planCard,
-                        isSelected && styles.planCardSelected,
-                        isYearly && styles.planCardYearly,
-                      ]}
-                      onPress={() => setSelectedPlan(plan.id)}
-                      activeOpacity={0.8}
-                    >
-                      {isYearly && (
-                        <View style={styles.badge}>
-                          <Text style={styles.badgeText}>Best Value</Text>
-                        </View>
-                      )}
+                let savingsPct: number | null = null;
+                if (isYearly && monthlyPlan) {
+                  const mp = monthlyPlan.regions?.[0]?.price;
+                  if (mp && mp > 0) {
+                    savingsPct = Math.round((1 - (planPrice ?? 0) / (mp * plan.intervalCount)) * 100);
+                  }
+                }
 
-                      <View style={styles.planTop}>
-                        <View style={styles.planInfo}>
-                          <Text
-                            style={[
-                              styles.planLabel,
-                              isSelected && styles.planLabelSelected,
-                            ]}
-                          >
-                            {plan.label}
-                          </Text>
-                          <View style={styles.radioOuter}>
-                            {isSelected && <View style={styles.radioInner} />}
-                          </View>
-                        </View>
-
-                        <Text
-                          style={[
-                            styles.planCost,
-                            isSelected && styles.planCostSelected,
-                          ]}
-                        >
-                          ₦{plan.cost.toLocaleString()}
-                        </Text>
-
-                        {monthlyPrice && (
-                          <Text style={styles.monthlyBreakdown}>
-                            ₦{monthlyPrice.toLocaleString()}/month
-                          </Text>
-                        )}
+                return (
+                  <TouchableOpacity
+                    key={plan.id}
+                    style={[styles.planCard, isSelected && styles.planCardSelected, isYearly && styles.planCardYearly]}
+                    onPress={() => setSelectedPlanId(plan.id)}
+                    activeOpacity={0.8}
+                  >
+                    {isYearly && (
+                      <View style={styles.badge}>
+                        <Text style={styles.badgeText}>Best Value</Text>
                       </View>
-
-                      {isYearly && (
-                        <View style={styles.savingsBadge}>
-                          <Feather name="zap" size={14} color="#fff" />
-                          <Text style={styles.savingsText}>
-                            Save {Math.round((1 - plan.cost / (plans.find((p) => p.months === 1 || p.id === "sub_1_months")?.cost ?? 1) / 12) * 100)}% vs monthly
-                          </Text>
+                    )}
+                    <View style={styles.planTop}>
+                      <View style={styles.planInfo}>
+                        <Text style={[styles.planLabel, isSelected && styles.planLabelSelected]}>
+                          {plan.name}
+                        </Text>
+                        <View style={styles.radioOuter}>
+                          {isSelected && <View style={styles.radioInner} />}
                         </View>
-                      )}
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-
-              <View style={styles.featuresCard}>
-                <Text style={styles.featuresTitle}>What's included</Text>
-                {FEATURES.map((f, i) => (
-                  <View key={i} style={styles.featureRow}>
-                    <Feather name="check-circle" size={18} color={colors.primary} />
-                    <Text style={styles.featureText}>{f}</Text>
-                  </View>
-                ))}
-              </View>
-            </>
+                      </View>
+                      <Text style={[styles.planCost, isSelected && styles.planCostSelected]}>
+                        {planPrice != null ? `${planSymbol}${planPrice.toLocaleString()}` : ""}
+                      </Text>
+                      {monthlyBreakdown && <Text style={styles.monthlyBreakdown}>{monthlyBreakdown}</Text>}
+                    </View>
+                    {savingsPct != null && savingsPct > 0 && (
+                      <View style={styles.savingsBadge}>
+                        <Feather name="zap" size={14} color="#fff" />
+                        <Text style={styles.savingsText}>Save {savingsPct}% vs monthly</Text>
+                      </View>
+                    )}
+                    {plan.features.filter((f) => f.enabled).length > 0 && (
+                      <View style={styles.featuresSection}>
+                        {plan.features.filter((f) => f.enabled).map((f) => (
+                          <View key={f.key} style={styles.featureRow}>
+                            <Feather name="check-circle" size={16} color={colors.primary} />
+                            <Text style={styles.featureText}>{f.label}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           )}
-
           <TouchableOpacity
-            style={[
-              styles.activateButton,
-              (!selectedPlan || activating) && styles.activateButtonDisabled,
-            ]}
+            style={[styles.activateButton, (!selectedPlanId || activating) && styles.activateButtonDisabled]}
             onPress={handleActivate}
-            disabled={!selectedPlan || activating}
+            disabled={!selectedPlanId || activating}
             activeOpacity={0.8}
           >
             {activating ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
               <Text style={styles.activateButtonText}>
-                {selected
-                  ? `Pay ₦${selected.cost.toLocaleString()}`
+                {selected && selectedRegion?.price != null
+                  ? `Pay ${selectedRegion.symbol ?? "₦"}${selectedRegion.price.toLocaleString()}`
                   : "Select a Plan"}
               </Text>
             )}
           </TouchableOpacity>
-
           <Text style={styles.footerText}>
-            Your subscription helps keep SurroSantara running and ensures
-            you get matched with the best intended parents.
+            Your subscription helps keep SurroSantara running and ensures you get the best experience.
           </Text>
         </ScrollView>
       </SafeAreaView>
@@ -257,237 +195,76 @@ export default function SubscriptionScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-  safeContent: {
-    flex: 1,
-  },
+  container: { flex: 1, backgroundColor: "#f5f5f5" },
+  safeContent: { flex: 1 },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingTop:
-      Platform.OS === "android"
-        ? (StatusBar.currentHeight ?? 24) + 8
-        : 56,
+    paddingTop: Platform.OS === "android" ? (StatusBar.currentHeight ?? 24) + 8 : 56,
     paddingBottom: 12,
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#000",
-  },
-  content: {
-    padding: 16,
-    paddingBottom: 40,
-  },
+  backButton: { width: 40, height: 40, justifyContent: "center", alignItems: "center" },
+  headerTitle: { fontSize: 18, fontWeight: "700", color: "#000" },
+  content: { padding: 16, paddingBottom: 40 },
   headline: {
-    fontSize: 14,
-    color: "#666",
-    textAlign: "center",
-    lineHeight: 20,
-    marginBottom: 24,
-    marginTop: 8,
-    paddingHorizontal: 8,
+    fontSize: 14, color: "#666", textAlign: "center", lineHeight: 20,
+    marginBottom: 24, marginTop: 8, paddingHorizontal: 8,
   },
-  plansContainer: {
-    gap: 16,
-    marginBottom: 20,
-  },
+  plansContainer: { gap: 16, marginBottom: 20 },
   planCard: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 2,
-    borderColor: "#eee",
-    position: "relative",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    backgroundColor: "#fff", borderRadius: 16, padding: 20,
+    borderWidth: 2, borderColor: "#eee", position: "relative",
+    shadowColor: "#000", shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,
   },
-  planCardSelected: {
-    borderColor: colors.primary,
-    backgroundColor: "#F8F9FF",
-  },
-  planCardYearly: {
-    borderColor: "#E8F0FE",
-  },
+  planCardSelected: { borderColor: colors.primary, backgroundColor: "#F8F9FF" },
+  planCardYearly: { borderColor: "#E8F0FE" },
   badge: {
-    position: "absolute",
-    top: -10,
-    right: 20,
-    backgroundColor: "#4CAF50",
-    paddingHorizontal: 14,
-    paddingVertical: 4,
-    borderRadius: 12,
+    position: "absolute", top: -10, right: 20,
+    backgroundColor: "#4CAF50", paddingHorizontal: 14, paddingVertical: 4, borderRadius: 12,
   },
-  badgeText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "700",
-  },
-  planTop: {
-    gap: 4,
-  },
-  planInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  planLabel: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: "#333",
-  },
-  planLabelSelected: {
-    color: colors.primary,
-  },
+  badgeText: { color: "#fff", fontSize: 12, fontWeight: "700" },
+  planTop: { gap: 4 },
+  planInfo: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  planLabel: { fontSize: 17, fontWeight: "700", color: "#333" },
+  planLabelSelected: { color: colors.primary },
   radioOuter: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2,
-    borderColor: "#ccc",
-    justifyContent: "center",
-    alignItems: "center",
+    width: 22, height: 22, borderRadius: 11, borderWidth: 2,
+    borderColor: "#ccc", justifyContent: "center", alignItems: "center",
   },
-  radioInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: colors.primary,
-  },
-  planCost: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: "#000",
-    marginTop: 8,
-  },
-  planCostSelected: {
-    color: colors.primary,
-  },
-  monthlyBreakdown: {
-    fontSize: 13,
-    color: "#888",
-    marginTop: 2,
-  },
+  radioInner: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.primary },
+  planCost: { fontSize: 28, fontWeight: "800", color: "#000", marginTop: 8 },
+  planCostSelected: { color: colors.primary },
+  monthlyBreakdown: { fontSize: 13, color: "#888", marginTop: 2 },
   savingsBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "#E8F5E9",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    marginTop: 12,
-    alignSelf: "flex-start",
+    flexDirection: "row", alignItems: "center", gap: 6,
+    backgroundColor: "#E8F5E9", paddingVertical: 6, paddingHorizontal: 12,
+    borderRadius: 8, marginTop: 12, alignSelf: "flex-start",
   },
-  savingsText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#2E7D32",
-  },
-  featuresCard: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  featuresTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#000",
-    marginBottom: 14,
-  },
-  featureRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 10,
-  },
-  featureText: {
-    fontSize: 14,
-    color: "#444",
-    flex: 1,
-  },
+  savingsText: { fontSize: 12, fontWeight: "600", color: "#2E7D32" },
+  featuresSection: { marginTop: 14, borderTopWidth: 1, borderTopColor: "#f0f0f0", paddingTop: 12 },
+  featureRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 6 },
+  featureText: { fontSize: 13, color: "#444", flex: 1 },
   activateButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 16,
-    borderRadius: 25,
-    alignItems: "center",
-    marginBottom: 16,
+    backgroundColor: colors.primary, paddingVertical: 16, borderRadius: 25, alignItems: "center", marginBottom: 16,
   },
-  activateButtonDisabled: {
-    opacity: 0.4,
-  },
-  activateButtonText: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: "#fff",
-  },
-  footerText: {
-    fontSize: 12,
-    color: "#aaa",
-    textAlign: "center",
-    lineHeight: 18,
-    paddingHorizontal: 20,
-  },
-  successContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
-  },
+  activateButtonDisabled: { opacity: 0.4 },
+  activateButtonText: { fontSize: 17, fontWeight: "700", color: "#fff" },
+  footerText: { fontSize: 12, color: "#aaa", textAlign: "center", lineHeight: 18, paddingHorizontal: 20 },
+  successContainer: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
   successIconWrap: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: "#4CAF50",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 20,
+    width: 72, height: 72, borderRadius: 36, backgroundColor: "#4CAF50",
+    justifyContent: "center", alignItems: "center", marginBottom: 20,
   },
-  successTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#000",
-    marginBottom: 8,
-  },
-  successSubtext: {
-    fontSize: 15,
-    color: "#666",
-    textAlign: "center",
-    lineHeight: 22,
-    marginBottom: 32,
-  },
+  successTitle: { fontSize: 24, fontWeight: "700", color: "#000", marginBottom: 8 },
+  successSubtext: { fontSize: 15, color: "#666", textAlign: "center", lineHeight: 22, marginBottom: 32 },
   doneButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 14,
-    paddingHorizontal: 48,
-    borderRadius: 25,
+    backgroundColor: colors.primary, paddingVertical: 14, paddingHorizontal: 48, borderRadius: 25,
   },
-  doneButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#fff",
-  },
+  doneButtonText: { fontSize: 16, fontWeight: "700", color: "#fff" },
 });

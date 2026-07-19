@@ -55,7 +55,7 @@ export const fundWallet = async (
     type: "CREDIT",
     amount,
     description: extra?.description ?? "Wallet funding",
-    currency: (extra?.currency as any) ?? "NGN",
+    currency: extra?.currency ?? "NGN",
   };
 
   const data = await performWalletTransaction(payload, token);
@@ -76,7 +76,7 @@ export const debitWallet = async (
     type: "DEBIT",
     amount,
     description: extra?.description ?? "Service payment",
-    currency: (extra?.currency as any) ?? "NGN",
+    currency: extra?.currency ?? "NGN",
   };
 
   const data = await performWalletTransaction(payload, token);

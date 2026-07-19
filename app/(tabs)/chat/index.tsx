@@ -17,10 +17,14 @@ import { useAuthStore } from "@/store/auth";
 import { useChatStore } from "@/store/chatStore";
 import type { Conversation, Participants } from "@/types/chat";
 
+function shortId(id: string): string {
+  return id.length > 8 ? id.slice(0, 8) : id;
+}
+
 function normalizeParticipant(p: any): Participants {
   return {
     userId: p.userId ?? p.id ?? "",
-    name: p.userName ?? p.name ?? p.username ?? p.displayName ?? p.fullName ?? "",
+    name: p.userName ?? p.username ?? shortId(p.userId ?? p.id ?? p.userId ?? ""),
     avatarUrl: p.avatarUrl ?? p.avatar ?? p.profilePicture ?? "",
     role: p.role ?? "",
     conversationId: p.conversationId,
@@ -32,7 +36,7 @@ function getOtherParticipant(conversation: Conversation, myId: string | null): P
   if (conversation.participant) {
     return normalizeParticipant(conversation.participant);
   }
-  const participants = (conversation.participants as any[])?.map(normalizeParticipant);
+  const participants = conversation.participants?.map(normalizeParticipant);
   if (!participants?.length) return undefined;
   const other = participants.find((p) => p.userId !== myId);
   return other ?? participants[0];
@@ -78,7 +82,6 @@ export default function ChatListScreen() {
     try {
       const result = await GetAllChat();
       if (Array.isArray(result)) {
-        console.log("Chat conversations:", JSON.stringify(result[0]?.participants, null, 2));
         chatStore.setConversations(result);
         setConversations(result);
         const total = result.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0);

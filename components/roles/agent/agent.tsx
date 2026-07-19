@@ -180,7 +180,7 @@ export default function AgentHomeScreen() {
               <SafeRender fallback={<Text>Loading progress...</Text>}>
                 <ProgressMeter
                   progress={progress}
-                  style={{ width: "100%", height: 160 }}
+                  style={{ width: "100%", height: 200 }}
                 />
               </SafeRender>
             </YStack>

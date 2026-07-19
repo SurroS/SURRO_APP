@@ -128,7 +128,7 @@ export default function SurrogateScreen() {
               <WalletCard style={{ width: "100%", height: 100 }} />
               <ProgressMeter
                 progress={progress}
-                style={{ width: "100%", height: 160 }}
+                style={{ width: "100%", height: 200 }}
               />
             </YStack>
 

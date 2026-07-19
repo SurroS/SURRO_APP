@@ -9,6 +9,7 @@ export interface KYCSubmitRequest {
     type: string;
     name: string;
   };
+  idType?: string;
 }
 
 export interface KYCSubmitResponse {

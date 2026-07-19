@@ -19,6 +19,8 @@ export default function TabsLayout() {
     );
   }
 
+  const isSurrogate = user?.role === "SURROGATE";
+
   return (
     <Tabs
       screenOptions={{
@@ -61,6 +63,7 @@ export default function TabsLayout() {
         name="network"
         options={{
           title: "Network",
+          href: isSurrogate ? null : undefined,
           tabBarIcon: ({ focused, size }) => (
             <Entypo
               name="users"

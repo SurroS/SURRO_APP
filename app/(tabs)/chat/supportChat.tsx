@@ -296,7 +296,7 @@ const matchCategory = (input: string, categories: CategoryDef[]): CategoryDef | 
 export default function SupportChatScreen() {
   const { user } = useAuth();
   const role = user?.role?.trim();
-  const userName = user?.name || user?.username || user?.firstName;
+  const userName = user?.userName ?? user?.username ?? (user?.userId ? `User#${user.userId.slice(0, 6)}` : "User");
   const categories = getCategoriesForRole(role);
   const categoryLabels = categories.map((c) => c.label);
   const navigation = useNavigation();
