@@ -37,7 +37,7 @@ export async function fetchMessages(
     const res = await authenticatedGet(`/chat/messages/${conversationId}`, {
       params: { take, skip },
     });
-    return res?.data ?? (Array.isArray(res) ? res : []);
+    return Array.isArray(res) ? res : (res?.data ?? []);
   } catch (err) {
     const info = explainAxiosError(err);
     console.error(" Fetch messages failed:", info);

@@ -71,7 +71,7 @@ export function useChatSimple(otherUserId?: string) {
     const tempMsg = {
       id: Math.random().toString(),
       content: text,
-      sender: { id: user?.id, name: user?.username },
+      sender: { id: user?.id, name: user?.userName },
       createdAt: new Date().toISOString(),
       failed: false,
     };

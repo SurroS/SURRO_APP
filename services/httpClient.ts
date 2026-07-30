@@ -6,6 +6,7 @@ import axios, {
 } from "axios";
 import { secureGet } from "@/utils/storage";
 import { APIErrorCode } from "@/types/api";
+import { Toast } from "toastify-react-native";
 
 export interface APIError extends Error {
   name: "APIError";
@@ -92,7 +93,6 @@ httpClient.interceptors.response.use(
 
     // Show toast for network errors
     if (!error.response) {
-      const { Toast } = require("toastify-react-native");
       Toast.show({
         text1: "Network error",
         text2: "Please check your internet connection",
