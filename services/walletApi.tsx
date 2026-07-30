@@ -24,8 +24,8 @@ export const getWalletBalance = async (
   const data = response?.data ?? response;
 
   return {
-    balance: data.balance,
-    currency: data.currency,
+    balance: data?.balance ?? 0,
+    currency: data?.currency ?? "NGN",
   };
 };
 

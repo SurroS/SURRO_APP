@@ -18,9 +18,14 @@ export interface APIError extends Error {
 // Guard against repeated 401 handling (prevents infinite logout loop)
 let isLoggingOut = false;
 
-// Create axios instance with default config
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+
+if (!API_BASE_URL) {
+  console.error("[httpClient] EXPO_PUBLIC_API_URL is not set — all API calls will fail");
+}
+
 const httpClient: AxiosInstance = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL,
+  baseURL: API_BASE_URL,
   timeout: 30000,
   headers: {
     "Content-Type": "application/json",

@@ -58,7 +58,7 @@ export default function PaymentWebViewScreen() {
     <SafeAreaView style={styles.container}>
       <YStack padding="$4" paddingBottom="$2">
         <Text style={styles.header}>
-          {gateway.toUpperCase()} - {mode.toUpperCase()}
+          {gateway?.toUpperCase() ?? "N/A"} - {mode?.toUpperCase() ?? "N/A"}
         </Text>
       </YStack>
 

@@ -32,7 +32,7 @@ export default function PaymentEntryScreen() {
   const { token } = useAuth();
 
   const gateway: PaymentGateway | "AUTO" =
-    (params.gateway.toLocaleUpperCase() as PaymentGateway) || "AUTO";
+    (params.gateway?.toLocaleUpperCase() as PaymentGateway) || "AUTO";
   const mode: PaymentMode | "card" = (params.mode as PaymentMode) || "card";
 
   const [amount, setAmount] = useState<string>("");

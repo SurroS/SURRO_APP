@@ -57,8 +57,7 @@
             },
             "android": {
               "newArchEnabled": true,
-              "enableProguardInReleaseBuilds": true,
-              "extraProguardRules": "-keep class expo.modules.kotlin.types.** { *; }"
+              "enableProguardInReleaseBuilds": false
             }
           }
         ],

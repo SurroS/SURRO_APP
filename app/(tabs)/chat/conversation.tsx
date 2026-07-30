@@ -14,6 +14,7 @@ import { Avatar } from "tamagui";
 import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 import ChatInput from "@/components/chat/ChatInput";
 import { useAuthStore } from "@/store/auth";
+import { useChatStore } from "@/store/chatStore";
 import {
   fetchMessages,
   createConversation,
@@ -139,7 +140,7 @@ export default function ChatBoxScreen() {
    * MARK INCOMING MESSAGES AS READ
    * ----------------------------------------*/
   useEffect(() => {
-    if (!messages.length || !currentUserId) return;
+    if (!messages.length || !currentUserId || !conversationId) return;
 
     const unreadIds = messages
       .filter((m) => m.sender?.id !== currentUserId && m.status !== "READ")
@@ -152,8 +153,16 @@ export default function ChatBoxScreen() {
           unreadIds.includes(m.id) ? { ...m, status: "READ" as const } : m,
         ),
       );
+
+      const chatStore = useChatStore.getState();
+      const updated = chatStore.conversations.map((c) =>
+        c.id === conversationId ? { ...c, unreadCount: 0 } : c,
+      );
+      chatStore.setConversations(updated);
+      const total = updated.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0);
+      useAuthStore.getState().setChatUnreadCount(total);
     }
-    }, [messages, currentUserId, markMessagesAsRead]);
+    }, [messages, currentUserId, markMessagesAsRead, conversationId]);
 
   /* -----------------------------------------
    * message status

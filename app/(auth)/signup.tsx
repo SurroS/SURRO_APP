@@ -187,23 +187,35 @@ export default function SignupScreen() {
             />
           )}
 
-          <TouchableOpacity
-            style={styles.termsRow}
-            onPress={() => updateField("termsAccepted", !signupFormData.termsAccepted)}
-            activeOpacity={0.7}
-          >
-            <View style={[styles.checkbox, signupFormData.termsAccepted && styles.checkboxChecked]}>
-              {signupFormData.termsAccepted && (
-                <Ionicons name="checkmark" size={14} color="#fff" />
-              )}
-            </View>
+          <View style={styles.termsRow}>
+            <TouchableOpacity
+              onPress={() => updateField("termsAccepted", !signupFormData.termsAccepted)}
+              activeOpacity={0.7}
+              style={styles.checkboxTouchable}
+            >
+              <View style={[styles.checkbox, signupFormData.termsAccepted && styles.checkboxChecked]}>
+                {signupFormData.termsAccepted && (
+                  <Ionicons name="checkmark" size={14} color="#fff" />
+                )}
+              </View>
+            </TouchableOpacity>
             <Text style={styles.termsText}>
               I agree to the{" "}
-              <Text style={styles.termsLink}>Terms of Service</Text>{" "}
+              <Text
+                style={styles.termsLink}
+                onPress={() => router.push({ pathname: "/legal/webview", params: { url: "https://surro-dashboard.netlify.app/terms", title: "Terms of Service" } })}
+              >
+                Terms of Service
+              </Text>{" "}
               and{" "}
-              <Text style={styles.termsLink}>Privacy Policy</Text>
+              <Text
+                style={styles.termsLink}
+                onPress={() => router.push({ pathname: "/legal/webview", params: { url: "https://surro-dashboard.netlify.app/privacy", title: "Privacy Policy" } })}
+              >
+                Privacy Policy
+              </Text>
             </Text>
-          </TouchableOpacity>
+          </View>
 
           {errors.termsAccepted && (
             <Text style={styles.errorText}>{errors.termsAccepted}</Text>
@@ -264,6 +276,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
+  },
+  checkboxTouchable: {
+    alignItems: "center",
+    justifyContent: "center",
   },
   checkboxChecked: {
     backgroundColor: "#0E0E55",

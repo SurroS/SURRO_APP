@@ -35,6 +35,7 @@
       },
       "env": {
         "APP_ENV": "production",
+        "EXPO_PUBLIC_APP_ENV": "production",
         "EXPO_PUBLIC_API_URL": "https://surroserver-production.up.railway.app/api/v1",
         "GOOGLE_IOS_CLIENT_ID": "321354387399-u4qsn500nvnj8738hnr3imnpp7rkg7t4.apps.googleusercontent.com",
         "GOOGLE_WEB_CLIENT_ID": "321354387399-8mh3tsrl9ji8a6164si406unp6uilq52.apps.googleusercontent.com"
