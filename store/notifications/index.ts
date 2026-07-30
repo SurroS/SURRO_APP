@@ -64,7 +64,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
     set({ isLoadingNotifications: true });
     try {
       const backend = await getNotifications();
-      const mapped = backend.map(mapBackendNotification);
+      const mapped = Array.isArray(backend) ? backend.map(mapBackendNotification) : [];
       set({ notifications: mapped, isLoadingNotifications: false });
     } catch (err) {
       set({ isLoadingNotifications: false });

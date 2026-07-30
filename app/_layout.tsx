@@ -7,6 +7,7 @@ import { TamaguiProvider } from "tamagui";
 import ToastManager from "toastify-react-native";
 import config from "@/tamagui.config";
 import toastConfig from "@/components/toastConfig";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useEffect } from "react";
 import { Platform } from "react-native";
@@ -60,9 +61,11 @@ export default function RootLayout() {
           config={config}
           defaultTheme={colorScheme === "dark" ? "dark" : "light"}
         >
-          <SessionGate>
-            <Stack screenOptions={{ headerShown: false }} />
-          </SessionGate>
+          <ErrorBoundary>
+            <SessionGate>
+              <Stack screenOptions={{ headerShown: false }} />
+            </SessionGate>
+          </ErrorBoundary>
           <StatusBar style="auto" />
           <ToastManager
             config={toastConfig}

@@ -379,8 +379,8 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
     }
   },
 
-  logout: () => {
-    secureDelete("auth_token");
+  logout: async () => {
+    await secureDelete("auth_token");
     resetBootstrap();
 
     set({

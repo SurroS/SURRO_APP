@@ -4,11 +4,10 @@ import { useChatStore } from "@/store/chatStore";
 import { useNotificationStore } from "@/store/notifications";
 import { useWalletStore } from "@/store/wallet/walletStore";
 
-let _bootstrapped = false;
+let _bootstrapping: Promise<void> | null = null;
 
 export async function bootstrapApp() {
-  if (_bootstrapped) return;
-  _bootstrapped = true;
+  if (_bootstrapping) return _bootstrapping;
 
   const user = useAuthStore.getState().user;
   if (!user) return;
@@ -36,9 +35,11 @@ export async function bootstrapApp() {
     useWalletStore.getState().fetchWallet().catch(() => {}),
   );
 
-  await Promise.allSettled(promises);
+  _bootstrapping = Promise.allSettled(promises);
+  await _bootstrapping;
+  _bootstrapping = null;
 }
 
 export function resetBootstrap() {
-  _bootstrapped = false;
+  _bootstrapping = null;
 }

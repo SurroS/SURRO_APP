@@ -78,13 +78,22 @@ export default function MedicalDetailsStep1() {
     }
     
     if (medical) {
-      // Backend uses: pregnant, children, caesarean
+      const pregnantVal = medical.pregnant;
       setPregnancyExperience(
-        medical.pregnant ? "Yes" : medical.pregnant === false ? "No" : ""
+        pregnantVal === true || pregnantVal === "Yes" || pregnantVal === "true"
+          ? "Yes"
+          : pregnantVal === false || pregnantVal === "No" || pregnantVal === "false"
+            ? "No"
+            : ""
       );
       setNumberOfChildren(medical.children ?? 0);
+      const caesareanVal = medical.caesarean;
       setCeasareanSection(
-        medical.caesarean ? "Yes" : medical.caesarean === false ? "No" : ""
+        caesareanVal === true || caesareanVal === "Yes" || caesareanVal === "true"
+          ? "Yes"
+          : caesareanVal === false || caesareanVal === "No" || caesareanVal === "false"
+            ? "No"
+            : ""
       );
       setNumberOfCs(medical.numberOfCs ?? 0);
     }

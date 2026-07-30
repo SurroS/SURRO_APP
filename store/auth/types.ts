@@ -22,7 +22,7 @@ export interface AuthActions {
   googleLogin: (request: GoogleAuth) => Promise<void>;
   appleLogin: (request: AppleAuth) => Promise<void>;
   devLogin: () => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   clearError: () => void;
   setUser: (user: Partial<User>) => void;
   setToken: (token: string) => void;
