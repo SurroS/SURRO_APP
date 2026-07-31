@@ -2,7 +2,7 @@ import { useProfileStore } from "@/store/profile/surrogate";
 
 export const useProfile = () => {
   const {
-    surrogateProfile,
+    surrogateProfile, 
     medicalProfile,
     isLoading,
     error,
@@ -18,7 +18,7 @@ export const useProfile = () => {
 
   return {
     // State
-    surrogateProfile,
+    surrogateProfile, 
     medicalProfile,
     isLoading,
     error,

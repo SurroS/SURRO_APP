@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Button, Text, YStack, XStack } from 'tamagui';
 import { useGallery } from '@/hooks/useGallery';
-import { Image as RNImage, Alert } from 'react-native';
+import { Image as RNImage } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import AlertModal from '@/components/modals/AlertModal';
 
 // Example component showing how to use the gallery APIs
 export const GalleryExample = () => {
@@ -19,6 +20,17 @@ export const GalleryExample = () => {
     } = useGallery();
 
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [alertVisible, setAlertVisible] = useState(false);
+    const [alertConfig, setAlertConfig] = useState<{
+        title: string;
+        message: string;
+        buttons?: { text: string; style?: "default" | "cancel" | "destructive"; onPress?: () => void }[];
+    }>({ title: "", message: "" });
+
+    const showAlert = (title: string, message: string, buttons?: { text: string; style?: "default" | "cancel" | "destructive"; onPress?: () => void }[]) => {
+        setAlertConfig({ title, message, buttons });
+        setAlertVisible(true);
+    };
 
     const handlePickImage = async () => {
         try {
@@ -26,7 +38,7 @@ export const GalleryExample = () => {
             const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
             if (permissionResult.granted === false) {
-                Alert.alert('Permission required', 'Permission to access camera roll is required!');
+                showAlert('Permission required', 'Permission to access camera roll is required!');
                 return;
             }
 
@@ -51,17 +63,17 @@ export const GalleryExample = () => {
 
                 // Upload image
                 await uploadImage(formData);
-                Alert.alert('Success', 'Image uploaded successfully!');
+                showAlert('Success', 'Image uploaded successfully!');
             }
         } catch (error) {
             console.error('Error picking/uploading image:', error);
-            Alert.alert('Error', 'Failed to upload image');
+            showAlert('Error', 'Failed to upload image');
         }
     };
 
     const handleDeleteImage = async (imageId: string) => {
         try {
-            Alert.alert(
+            showAlert(
                 'Delete Image',
                 'Are you sure you want to delete this image?',
                 [
@@ -71,24 +83,24 @@ export const GalleryExample = () => {
                         style: 'destructive',
                         onPress: async () => {
                             await deleteImage(imageId);
-                            Alert.alert('Success', 'Image deleted successfully!');
+                            showAlert('Success', 'Image deleted successfully!');
                         },
                     },
                 ]
             );
         } catch (error) {
             console.error('Error deleting image:', error);
-            Alert.alert('Error', 'Failed to delete image');
+            showAlert('Error', 'Failed to delete image');
         }
     };
 
     const handleRefreshCache = async () => {
         try {
             await refreshCache();
-            Alert.alert('Success', 'Gallery cache refreshed!');
+            showAlert('Success', 'Gallery cache refreshed!');
         } catch (error) {
             console.error('Error refreshing cache:', error);
-            Alert.alert('Error', 'Failed to refresh cache');
+            showAlert('Error', 'Failed to refresh cache');
         }
     };
 
@@ -186,5 +198,12 @@ export const GalleryExample = () => {
                 </Text>
             </YStack>
         </YStack>
+        <AlertModal
+            visible={alertVisible}
+            title={alertConfig.title}
+            message={alertConfig.message}
+            buttons={alertConfig.buttons}
+            onClose={() => setAlertVisible(false)}
+        />
     );
 };

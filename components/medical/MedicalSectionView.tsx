@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   Image,
   TouchableOpacity,
-  Linking,
+  Modal,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { WebView } from "react-native-webview";
 import { Entypo } from "@expo/vector-icons";
 import colors from "@/hooks/colors";
 
@@ -46,21 +48,10 @@ export default function MedicalSection({
   reportVisible,
   unlockReport,
 }: Props) {
+  const [showReport, setShowReport] = useState(false);
+
   const renderArray = (arr?: string[]) =>
     arr && arr.length > 0 ? arr.join(", ") : "-";
-
-  const openFile = (uri: string | undefined) => {
-    // For PDFs/images
-
-    data.medicalReport.endsWith(".pdf") ? (
-      <Text style={{ color: colors.white }}>View Lab result</Text>
-    ) : (
-      <Image source={{ uri: data.medicalReport }} style={styles.reportImage} />
-    );
-    Linking.openURL(uri).catch((err) =>
-      console.error("Failed to open file", err)
-    );
-  };
 
   return (
     <View style={[styles.container, containerStyle]}>
@@ -144,11 +135,11 @@ export default function MedicalSection({
         </Text>
       </View>
 
-      {reportVisible && data.medicalReport ? (
+      {reportVisible  ? (
         <>
           <Text style={styles.label}>Lab Result</Text>
           <TouchableOpacity
-            onPress={() => openFile(data.medicalReport)}
+            onPress={() => setShowReport(true)}
             style={styles.fileButton}
           >
             <Text style={{ color: colors.white }}>View Lab result</Text>
@@ -160,6 +151,22 @@ export default function MedicalSection({
           <Entypo name="lock" size={18} color="gray" />
         </TouchableOpacity>
       )}
+
+      <Modal visible={showReport} animationType="slide" onRequestClose={() => setShowReport(false)}>
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Lab Result</Text>
+            <TouchableOpacity onPress={() => setShowReport(false)}>
+              <Entypo name="cross" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
+          <WebView
+            source={{ uri: data.medicalReport ?? "" }}
+            style={{ flex: 1 }}
+            startInLoadingState
+          />
+        </SafeAreaView>
+      </Modal>
     </View>
   );
 }
@@ -207,6 +214,24 @@ const styles = StyleSheet.create({
     height: 200,
     borderRadius: 8,
     marginTop: 8,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#000",
   },
   lockedReport: {
     padding: 20,

@@ -34,7 +34,7 @@ const NumberInputSelect = ({
   return (
     <YStack gap="$2">
       {label && (
-        <Text fontWeight="600"fontSize={15} color={colors.text}>
+        <Text fontWeight="600"fontSize={13} color={colors.text}>
           {label}
         </Text>
       )}

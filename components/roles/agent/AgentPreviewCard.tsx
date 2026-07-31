@@ -10,7 +10,6 @@ const AgentPreview = ({ style }: { style?: any }) => {
   const { agents, isLoading, fetchAgents } = useAgentListStore();
 
   useEffect(() => {
-    console.log("Agents =", agents);
     fetchAgents(true).catch((err: any) => {
       Toast.show({
         text1: "Failed to load agents",
@@ -20,16 +19,14 @@ const AgentPreview = ({ style }: { style?: any }) => {
     });
   }, [fetchAgents]);
 
+  // Only accept agents with valid avatars
   const validAgents =
-    Array.isArray(agents) && agents.length > 0
-      ? agents.filter((a) => a && a.avatar)
-      : [];
+  Array.isArray(agents) && agents.length > 0 ? agents : [];
 
-  const displayAvatars =
-    validAgents.length > 0
-      ? validAgents.slice(0, 3).map((a) => a.avatar)
-      : [require("@/assets/images/emptyGallery.png")];
-
+const displayAvatars =
+  validAgents.length > 0
+    ? validAgents.slice(0, 3).map((a) => (a.avatar ?? a.profilePicture ?? require("@/assets/images/emptyGallery.png")))
+    : [require("@/assets/images/emptyGallery.png")];
   return (
     <Card
       bordered
@@ -46,26 +43,31 @@ const AgentPreview = ({ style }: { style?: any }) => {
         </Text>
       </XStack>
 
-      {/* Avatars Stack */}
-      <YStack alignItems="center" justifyContent="center" flex={1} width="100%">
+      {/* Avatar Overlap Stack */}
+      <YStack
+        alignItems="center"
+        justifyContent="center"
+        width="100%"
+        height={110} // FIX: proper container height
+        overflow="visible"
+      >
         {displayAvatars.map((img, index) => (
           <RNImage
             key={index}
             source={typeof img === "string" ? { uri: img } : img}
-            style={{
-              width: "85%",
-              height: "100%",
-              position: "absolute",
-              left: index * 8,
-              zIndex: displayAvatars.length - index,
-              shadowColor: "#000",
-              shadowOpacity: 0.5,
-              shadowOffset: { width: 0, height: 2 },
-              shadowRadius: 3,
-              backgroundColor: "#f5f5f5",
-              borderRadius: 5,
-              transform: [{ rotate: "-8deg" }],
-            }}
+            style={[
+              styles.avatar,
+              {
+                left: index * 15, // spread slightly
+                zIndex: displayAvatars.length - index,
+                transform: [
+                  {
+                    rotate:
+                      index === 0 ? "-6deg" : index === 1 ? "3deg" : "-3deg",
+                  },
+                ],
+              },
+            ]}
             resizeMode="cover"
           />
         ))}
@@ -78,11 +80,23 @@ export default AgentPreview;
 
 const styles = StyleSheet.create({
   card: {
-    overflow: "hidden",
+    overflow: "visible",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
     shadowOpacity: 0.15,
     shadowRadius: 3,
+  },
+
+  avatar: {
+    width: 85, // FIX: Remove "85%" height stretch
+    height: 110,
+    position: "absolute",
+    borderRadius: 10,
+    backgroundColor: "#f5f5f5",
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
   },
 });

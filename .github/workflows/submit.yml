@@ -1,0 +1,51 @@
+name: Build & Submit to Stores
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Platform to build and submit
+        required: true
+        default: both
+        type: choice
+        options:
+          - android
+          - ios
+          - both
+  push:
+    tags:
+      - "v*"
+
+env:
+  EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL || 'https://surroserver-production.up.railway.app/api/v1' }}
+  APP_ENV: production
+
+jobs:
+  build-and-submit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - run: npm ci
+
+      - name: Build & Submit Android
+        if: inputs.platform == 'android' || inputs.platform == 'both'
+        run: eas build --platform android --profile production --auto-submit --non-interactive
+
+      - name: Build & Submit iOS
+        if: inputs.platform == 'ios' || inputs.platform == 'both'
+        run: eas build --platform ios --profile production --auto-submit --non-interactive
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          ASC_APP_ID: ${{ secrets.ASC_APP_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}

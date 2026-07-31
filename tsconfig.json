@@ -33,7 +33,7 @@
     "**/*.ts",
     "**/*.tsx",
     "**/*.d.ts"
-  ],
+, "helpers"  ],
   "exclude": [
     "node_modules",
     "babel.config.js"

@@ -1,13 +1,67 @@
 import { StateCreator } from "zustand";
 import { Surrogate, SurrogateStore } from "./types";
-import { getUsersByRole } from "@/services/profileApi";
+import { getSurrogatesList, fetchParentMatch } from "@/services/profileApi";
+import { resolveProfilePicture } from "@/utils/resolveMediaUrl";
 
-const fallbackSurrogates: Surrogate[] = [
-  { id: "1", name: "Jane Doe", avatar: require("@/assets/images/image1.jpg"), age: "20", country: "Nigeria" },
-  { id: "2", name: "Mary Ann", avatar: require("@/assets/images/image21.jpg"), age: "20", country: "Nigeria" },
-  { id: "3", name: "Tina Joe", avatar: require("@/assets/images/image3.jpg"), age: "20", country: "Nigeria" },
-];
+// -----------------------------------------------------
+// Helpers
+// -----------------------------------------------------
+const getAge = (dob?: string | null) => {
+  if (!dob) return "N/A";
+  const date = new Date(dob);
+  return Math.floor(
+    (Date.now() - date.getTime()) / (1000 * 60 * 60 * 24 * 365),
+  ).toString();
+};
 
+const getDisplayName = (
+  firstName?: string | null,
+  lastName?: string | null,
+  userName?: string | null,
+) => `${firstName ?? ""} ${lastName ?? ""}`.trim() || userName || "Unknown";
+
+const apiImage = (apiItem: any) => {
+  const raw = apiItem.profilePicture ?? apiItem.profilePictureUrl ?? apiItem.avatar ?? "";
+  return resolveProfilePicture(raw) ?? "";
+};
+
+const mapApiSurrogate = (apiItem: any): Surrogate => ({
+  id: apiItem.id || apiItem.userId || "",
+  userName:
+    apiItem.userName ?? apiItem.username ?? apiItem.user?.userName ?? apiItem.email?.split("@")[0] ?? "",
+  name: getDisplayName(
+    apiItem.firstName,
+    apiItem.lastName,
+    apiItem.userName ?? apiItem.username ?? apiItem.user?.userName ?? apiItem.email?.split("@")[0],
+  ),
+  firstName: apiItem.firstName ?? "",
+  lastName: apiItem.lastName ?? "",
+  age: apiItem.age
+    ? apiItem.age.toString()
+    : getAge(apiItem.dateOfBirth ?? apiItem.dob),
+  country: apiItem.countryOfResidence ?? apiItem.country ?? "",
+  stateOfResidence:
+    apiItem.stateOfResidence ?? apiItem.state ?? apiItem.address?.state ?? "",
+  lga: apiItem.lga ?? apiItem.address?.lga ?? "",
+  image: apiImage(apiItem),
+  avatar: apiImage(apiItem),
+  contactPhone:
+    apiItem.contactPhone ??
+    apiItem.phone1 ??
+    apiItem.phone ??
+    apiItem.phoneNumber ??
+    "",
+  contactEmail:
+    apiItem.contactEmail ?? apiItem.email ?? apiItem.user?.email ?? "",
+  bio: apiItem.bio ?? apiItem.aboutMe ?? "",
+  experienceLevel: apiItem.experienceLevel ?? "New",
+  genotype: apiItem.medical?.genotype ?? apiItem.genotype ?? undefined,
+  bloodGroup: apiItem.medical?.bloodGroup ?? apiItem.bloodGroup ?? undefined,
+});
+
+// -----------------------------------------------------
+// Slice
+// -----------------------------------------------------
 export const createSurrogateSlice: StateCreator<
   SurrogateStore,
   [],
@@ -17,32 +71,97 @@ export const createSurrogateSlice: StateCreator<
   surrogates: [],
   isLoading: false,
   error: null,
+  savedIds: new Set<string>(),
 
-  async fetchSurrogates(showToast = false) {
+  setSurrogates: (data) => set({ surrogates: data }),
+
+  setLoading: (val) => set({ isLoading: val }),
+
+  setError: (err) => set({ error: err }),
+
+  clearSurrogates: () => set({ surrogates: [], error: null }),
+
+  fetchSavedIds: async () => {
+    // noop placeholder - actual saved list comes from parent profile hooks
+    set({});
+  },
+
+  setSavedIds: (ids: string[] | Set<string>) => {
+    const next = ids instanceof Set ? ids : new Set(ids);
+    set({ savedIds: next });
+  },
+
+  addSavedId: (id: string) => {
+    set((s: any) => ({ savedIds: new Set([...(s.savedIds || []), id]) }));
+  },
+
+  removeSavedId: (id: string) => {
+    set((s: any) => {
+      const next = new Set(s.savedIds || []);
+      next.delete(id);
+      return { savedIds: next };
+    });
+  },
+
+  async fetchMatches() {
+    try {
+      set({ isLoading: true });
+      const res = await fetchParentMatch({});
+      let rawList: any[] = [];
+      if (Array.isArray(res)) {
+        rawList = res;
+      } else if (res?.data && Array.isArray(res.data)) {
+        rawList = res.data;
+      } else if (res?.matches && Array.isArray(res.matches)) {
+        rawList = res.matches;
+      }
+      const surrogates: Surrogate[] = rawList.map(mapApiSurrogate);
+      set({ surrogates, isLoading: false, error: null });
+    } catch (err: any) {
+      console.error("[Surrogates] Fetch matches error:", err?.response?.data || err?.message || err);
+      set({ isLoading: false, error: err?.message ?? "Failed to load matches" });
+      throw err;
+    }
+  },
+
+  async fetchSurrogates() {
     try {
       set({ isLoading: true });
 
-      const response = await getUsersByRole("SURROGATE");
-      
-      // let surrogates: Surrogate[] = response?.data.users || [];
-      let surrogates: Surrogate[] =  [];
-      console.log("SURROGATE ACCOUNT IDs:", surrogates.map((u) => u.id));
-      // Use fallback if API returns empty
-      if (!Array.isArray(surrogates) || surrogates.length === 0) {
-        surrogates = fallbackSurrogates;
-        console.log("Surrogate call =",response)
+      const res = await getSurrogatesList();
+
+      let rawList: any[] = [];
+
+      if (Array.isArray(res)) {
+        rawList = res;
+      } else if (res?.data && Array.isArray(res.data)) {
+        rawList = res.data;
+      } else if (res?.matches && Array.isArray(res.matches)) {
+        rawList = res.matches;
+      } else if (res?.users && Array.isArray(res.users)) {
+        rawList = res.users;
+      } else if (res?.results && Array.isArray(res.results)) {
+        rawList = res.results;
+      } else {
+        console.warn("[Surrogates] Unknown response shape, first keys:", Object.keys(res || {}).join(", "));
       }
 
-      set({ surrogates, isLoading: false, error: null });
-    } catch (error: any) {
-      // fallback if API call fails
-      set({ surrogates: fallbackSurrogates, isLoading: false, error: error?.message || "Failed to fetch surrogates" });
-      console.log("Surrogate call =",this.surrogates)
-      throw error;
-    } 
-  },
+      const surrogates: Surrogate[] = rawList.map(mapApiSurrogate);
 
-  setSurrogates: (data) => set({ surrogates: data }),
-  setLoading: (val) => set({ isLoading: val }),
-  setError: (err) => set({ error: err }),
+      set({
+        surrogates,
+        isLoading: false,
+        error: null,
+      });
+    } catch (err: any) {
+      console.error("[Surrogates] Fetch error:", err?.response?.data || err?.message || err);
+
+      set({
+        isLoading: false,
+        error: err?.message ?? "Failed to load surrogates",
+      });
+
+      throw err;
+    }
+  },
 });

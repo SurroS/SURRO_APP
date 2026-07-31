@@ -1,32 +1,40 @@
-import type { Notification } from "@/components/notifications/NotificationItem";
+import type { AppNotification } from "@/store/notifications/types";
 
-export const notifications: Notification[] = [
+export const notifications: AppNotification[] = [
   {
     id: "1",
-    type: "profile",
     title: "Profile setup",
-    message: "You need to update your profile information",
-    time: "1hr",
+    body: "You need to update your profile information",
+    type: "PROFILE_SETUP",
+    source: "LOCAL",
+    read: false,
+    createdAt: Date.now(),
   },
   {
     id: "2",
-    type: "message",
     title: "Message",
-    message: "You have 1 unread message",
-    time: "1hr",
+    body: "You have 1 unread message",
+    type: "GENERAL",
+    source: "LOCAL",
+    read: false,
+    createdAt: Date.now(),
   },
   {
     id: "3",
-    type: "profileSetup",
     title: "Profile setup",
-    message: "You have successfully set up your profile",
-    time: "1hr",
+    body: "You have successfully set up your profile",
+    type: "PROFILE_SETUP",
+    source: "LOCAL",
+    read: false,
+    createdAt: Date.now(),
   },
   {
     id: "4",
-    type: "views",
     title: "Profile views",
-    message: "Your profile was viewed once today",
-    time: "1hr",
+    body: "Your profile was viewed once today",
+    type: "PROFILE_VIEWS",
+    source: "LOCAL",
+    read: false,
+    createdAt: Date.now(),
   },
 ];

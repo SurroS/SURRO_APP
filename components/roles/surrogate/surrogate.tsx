@@ -4,35 +4,45 @@ import { ChevronDown } from "@tamagui/lucide-icons";
 import { router } from "expo-router";
 import Animated from "react-native-reanimated";
 import { Accordion, Text, XStack, YStack } from "tamagui";
-import About from "../about";
-import Contact from "../contact";
-import Gallery from "../gallery";
-import ProfileData from "../surrogate/SurrogateProfile-data";
-import ProgressMeter from "../progressCircle";
-import Referral from "../referral";
-import WalletCard from "../wallet";
-import { useProfile } from "@/hooks/useProfile";
+import About from "@/components/roles/about";
+import Contact from "@/components/roles/contact";
+import Gallery from "@/components/roles/gallery";
+import ProgressMeter from "@/components/roles/progressCircle";
+import Referral from "@/components/roles/referral";
+import WalletCard from "@/components/roles/wallet";
+import { useSurrogateProfile } from "@/hooks/profile/useSurrogateProfile";
 import { calculateProfileProgress } from "@/utils/profileHelpers";
-import ProfileCompletionModal from "../ProfileCompletionModal";
+import ProfileCompletionModal from "@/components/roles/ProfileCompletionModal";
+import ProfileData from "@/components/profileDetails/ProfileData";
+import { useAuth } from "@/hooks/useAuth";
+import HomeResourceCard from "@/components/resources/HomeResourceCard";
+import AdEarnCard from "@/components/ads/AdEarnCard";
+import BoostCard from "@/components/boost/BoostCard";
 
 export default function SurrogateScreen() {
-  const { fetchProfile, surrogateProfile, isLoading } = useProfile();
+  const { surrogateProfile, isLoading, fetchProfile, toggleAvailability } =
+    useSurrogateProfile();
+  const { user } = useAuth();
 
   const [showProfileModal, setShowProfileModal] = useState(false);
-
-  // Fetch profile on component mount
-  useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
-
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   // Calculate profile progress
   const progress = calculateProfileProgress(surrogateProfile);
 
-  // Show modal if no profile or progress < 70%
+  // Fetch profile on mount if not loaded
+  useEffect(() => {
+    if (!surrogateProfile) {
+      fetchProfile();
+    }
+  }, []);
+
+  // Show modal if no profile or progress < 100%
   useEffect(() => {
     if (!isLoading) {
+      setHasLoadedOnce(true);
+      if (progress >= 100) { setShowProfileModal(false); return; }
       const hasProfile = surrogateProfile !== null;
-      const needsCompletion = hasProfile && progress < 70;
+      const needsCompletion = hasProfile && progress < 100;
 
       if (!hasProfile || needsCompletion) {
         setShowProfileModal(true);
@@ -42,9 +52,25 @@ export default function SurrogateScreen() {
 
   return (
     <>
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
         <YStack flex={1} gap="$3">
-          <ProfileData />
+          <ProfileData
+            name={
+              surrogateProfile?.userName ||
+              `${surrogateProfile?.firstName ?? ""} ${
+                surrogateProfile?.lastName ?? ""
+              }`.trim()
+            }
+            avatarUrl={surrogateProfile?.profilePicture}
+            location={surrogateProfile?.countryOfResidence}
+            dateOfBirth={surrogateProfile?.dateOfBirth?.split("T")[0]}
+            isAvailable={surrogateProfile?.isAvailable}
+            onToggleAvailability={toggleAvailability}
+            isVerified={surrogateProfile?.user?.kycStatus === "APPROVED"}
+          />
 
           {/* Accordion for About + Contact */}
           <Accordion
@@ -58,15 +84,26 @@ export default function SurrogateScreen() {
               <AccordionTriggerWithChevron title="Profile Information" />
               <Accordion.Content backgroundColor="white" padding="$3">
                 <YStack gap="$3">
-                  <About />
-                  <Contact />
+                  <About aboutMe={surrogateProfile?.aboutMe} />
+                  <Contact
+                    phoneNumber={surrogateProfile?.phone1}
+                    email={user?.email}
+                    socials={{
+                      facebook: surrogateProfile?.facebookProfile,
+                      instagram: surrogateProfile?.instagramProfile,
+                      twitter: surrogateProfile?.twitterProfile,
+                      tiktok: surrogateProfile?.tiktokProfile,
+                    }}
+                  />
                 </YStack>
               </Accordion.Content>
             </Accordion.Item>
           </Accordion>
 
           <Pressable
-            onPress={() => router.push("/(tabs)/home/surrogateGuestView")}
+            onPress={() =>
+              router.push("/surrogateGuestView")
+            }
           >
             <Text
               color="black"
@@ -78,7 +115,9 @@ export default function SurrogateScreen() {
               View profile as guest
             </Text>
           </Pressable>
-          {/* Floating Card Section */}
+          <Gallery style={{ height: 210, marginTop: 10 }} />
+
+          {/* Floating Card Section - 2x2 grid */}
           <XStack
             flexWrap="wrap"
             justifyContent="flex-end"
@@ -88,24 +127,33 @@ export default function SurrogateScreen() {
             <YStack width={"48%"} gap={10}>
               <WalletCard style={{ width: "100%", height: 100 }} />
               <ProgressMeter
-                style={{ width: "100%", height: 210 }}
                 progress={progress}
+                style={{ width: "100%", height: 200 }}
               />
             </YStack>
 
-            <YStack width={"48%"} gap={10} flexGrow={1}>
-              <Gallery style={{ width: "100%", height: 210 }} />
-              <Referral style={{ width: "100%", height: 160, padding: 4 }} />
+            <YStack width={"48%"} gap={10}>
+              <HomeResourceCard />
+              <Referral style={{ width: "100%", height: 200 }} />
             </YStack>
+          </XStack>
+
+          {/* Promotion row - AdEarnCard + BoostCard */}
+          <XStack gap={10} marginTop={10}>
+            <AdEarnCard style={{ flex: 1 }} />
+            <BoostCard style={{ flex: 1 }} />
           </XStack>
         </YStack>
 
         {/* Profile Completion Modal */}
-        <ProfileCompletionModal
-          visible={showProfileModal}
-          onClose={() => setShowProfileModal(false)}
-          profile={surrogateProfile}
-        />
+        {hasLoadedOnce && progress < 100 && (
+          <ProfileCompletionModal
+            visible={showProfileModal}
+            onClose={() => setShowProfileModal(false)}
+            profile={surrogateProfile}
+            redirectPath="/profile"
+          />
+        )}
       </ScrollView>
     </>
   );
@@ -145,4 +193,5 @@ const styles = StyleSheet.create({
   container: {
     paddingBottom: 40,
   },
+
 });

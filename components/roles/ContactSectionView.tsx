@@ -1,14 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   Linking,
   TouchableOpacity,
-  Alert,
+  Modal,
+  Pressable,
 } from "react-native";
 import * as Clipboard from "expo-clipboard";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, Entypo } from "@expo/vector-icons";
+import colors from "@/hooks/colors";
+import { Toast } from "toastify-react-native";
+import { ToastType } from "toastify-react-native/utils/interfaces";
 
 interface SocialLink {
   Facebook?: string;
@@ -28,18 +32,34 @@ interface ContactData {
   lGA?: string;
   relationship?: string;
   social?: SocialLink;
+  email?: string; // public contact email
 }
 
 interface Props {
   data: ContactData;
   containerStyle?: object;
+  isUnlocked?: boolean;
+  onChat?: () => void;
+  hideActions?: boolean;
 }
 
-export default function ContactSection({ data, containerStyle }: Props) {
+export default function ContactSection({ data, containerStyle, isUnlocked, onChat, hideActions }: Props) {
+  const [showCallModal, setShowCallModal] = useState(false);
+
+  const numbers = [data.phone1, data.phone2, data.emergency].filter(Boolean);
+
   const renderSocialLink = (label: string, url?: string) => {
     if (!url) return null;
+    const normalizedUrl = url.match(/^https?:\/\//) ? url : `https://${url}`;
     return (
-      <TouchableOpacity onPress={() => Linking.openURL(url)}>
+      <TouchableOpacity onPress={async () => {
+        try {
+          const supported = await Linking.canOpenURL(normalizedUrl);
+          if (supported) {
+            await Linking.openURL(normalizedUrl);
+          }
+        } catch {}
+      }}>
         <Text style={styles.socialText}>
           {label}: {url}
         </Text>
@@ -47,22 +67,41 @@ export default function ContactSection({ data, containerStyle }: Props) {
     );
   };
 
+  const renderEmail = (email?: string) => {
+    if (!email) return null;
+    return (
+      <TouchableOpacity onPress={async () => {
+        try {
+          await Linking.openURL(`mailto:${email}`);
+        } catch {}
+      }}>
+        <Text style={[styles.value, { textDecorationLine: "underline", color: "#0A2A66" }]}>{email}</Text>
+      </TouchableOpacity>
+    );
+  };
+
   const handleCopyContact = async () => {
-    const phones = [data.phone1, data.phone2, data.emergency]
-      .filter(Boolean)
-      .join(", ");
+    const phones = numbers.join(", ");
     if (!phones) {
-      Alert.alert("No contact info to copy");
+      Toast.show({
+        text1: "No contact info",
+        type: "customWarning" as ToastType,
+      });
       return;
     }
     await Clipboard.setStringAsync(phones);
-    Alert.alert("Contact copied", phones);
+    Toast.show({
+      text1: "Contact copied",
+      type: "customSuccess" as ToastType,
+    });
   };
 
   const handleQuickDial = () => {
-    const numbers = [data.phone1, data.phone2, data.emergency].filter(Boolean);
     if (numbers.length === 0) {
-      Alert.alert("No phone number available");
+      Toast.show({
+        text1: "No phone number",
+        type: "customWarning" as ToastType,
+      });
       return;
     }
 
@@ -71,19 +110,43 @@ export default function ContactSection({ data, containerStyle }: Props) {
       return;
     }
 
-    // Multiple numbers → let user pick
-    Alert.alert(
-      "Select Number to Call",
-      "Choose which number to dial",
-      numbers.map((num) => ({
-        text: num,
-        onPress: () => Linking.openURL(`tel:${num}`),
-      }))
-    );
+    setShowCallModal(true);
   };
 
   return (
-    <View style={[styles.container, containerStyle]}>
+    <>
+      <Modal
+        visible={showCallModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowCallModal(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setShowCallModal(false)}>
+          <Pressable style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Select Number to Call</Text>
+            {numbers.map((num, idx) => (
+              <TouchableOpacity
+                key={`call-${idx}`}
+                style={styles.modalOption}
+                onPress={() => {
+                  setShowCallModal(false);
+                  Linking.openURL(`tel:${num}`);
+                }}
+              >
+                <Ionicons name="call-outline" size={18} color="#0A2A66" />
+                <Text style={styles.modalOptionText}>{num}</Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity
+              style={styles.modalCancel}
+              onPress={() => setShowCallModal(false)}
+            >
+              <Text style={styles.modalCancelText}>Cancel</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
+      <View style={[styles.container, containerStyle]}>
       <Text style={styles.title}>Contact Information</Text>
 
       <View style={styles.row}>
@@ -134,6 +197,13 @@ export default function ContactSection({ data, containerStyle }: Props) {
         </View>
       )}
 
+      {data.email && (
+        <View style={styles.row}>
+          <Text style={styles.label}>Email:</Text>
+          {renderEmail(data.email)}
+        </View>
+      )}
+
       {data.social && (
         <View style={styles.socialContainer}>
           <Text style={styles.socialTitle}>Social Links</Text>
@@ -144,20 +214,34 @@ export default function ContactSection({ data, containerStyle }: Props) {
         </View>
       )}
 
-      <View style={styles.buttonRow}>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={handleCopyContact}
-        >
-          <Text style={styles.buttonText}>Copy Contact</Text>
-        </TouchableOpacity>
+      {!hideActions && (
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={handleCopyContact}
+          >
+            <Ionicons name="copy-outline" size={16} color={colors.primary} />
+            <Text style={styles.buttonText}>Copy</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionButton} onPress={handleQuickDial}>
-          <Ionicons name="call" size={16} color={"white"} />
-          <Text style={styles.buttonText}>Call Now</Text>
-        </TouchableOpacity>
-      </View>
+          {onChat && (
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={onChat}
+            >
+              <Entypo name="chat" size={16} color={colors.primary} />
+              <Text style={styles.buttonText}>Chat</Text>
+            </TouchableOpacity>
+          )}
+
+          <TouchableOpacity style={styles.actionButton} onPress={handleQuickDial}>
+            <Ionicons name="call" size={16} color={colors.primary} />
+            <Text style={styles.buttonText}>Call</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
+    </>
   );
 }
 
@@ -208,17 +292,67 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
-    backgroundColor: "#0A2A66",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: colors.primary,
     paddingVertical: 10,
-    paddingHorizontal: 15,
+    paddingHorizontal: 8,
     borderRadius: 8,
     marginHorizontal: 4,
     alignItems: "center",
     flexDirection: "row",
+    justifyContent: "center",
+    gap: 4,
   },
   buttonText: {
-    color: "#ffffff",
+    color: colors.primary,
     fontWeight: "600",
-    marginLeft:15
+    fontSize: 13,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#222",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  modalOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  modalOptionText: {
+    fontSize: 15,
+    color: "#0A2A66",
+    fontWeight: "500",
+  },
+  modalCancel: {
+    marginTop: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+  },
+  modalCancelText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#666",
   },
 });

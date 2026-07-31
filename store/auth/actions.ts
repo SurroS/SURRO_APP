@@ -1,7 +1,10 @@
-import authApi, { makeAuthenticatedAuthRequest } from "@/services/authApi";
+import authApi from "@/services/authApi";
+import { publicPost } from "@/services/httpClient";
+import { resetBootstrap } from "@/services/appBootstrapper";
 import {
   ChangePasswordRequest,
-  GoogleAppleAuth,
+  GoogleAuth,
+  AppleAuth,
   LoginCredentials,
   OtpVerification,
   RegisterCredentials,
@@ -14,8 +17,35 @@ import { router } from "expo-router";
 import { StateCreator } from "zustand";
 import { AuthStore } from "./types";
 
+const DEV_AUTH_EMAIL = "dev@surro.local";
+const DEV_AUTH_PASSWORD = "DevSurro123!";
+const DEV_AUTH_TOKEN = "dev-auth-token";
+
+const DEV_AUTH_USER: User = {
+  id: "dev-user",
+  userId: "dev-user",
+  email: DEV_AUTH_EMAIL,
+  token: DEV_AUTH_TOKEN,
+  role: "SURROGATE",
+  isVerified: true,
+  isApproved: true,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  isOnline: true,
+  lastSeen: new Date().toISOString(),
+  kycStatus: "NOT_STARTED",
+  referralCode: "DEV",
+  wallet: {
+    id: "dev-wallet",
+    userId: "dev-user",
+    balance: 0,
+    currency: "NGN",
+  },
+};
+
 export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
   user: null,
+  userId: "",
   token: null,
   isAuthenticated: false,
   isLoading: false,
@@ -29,18 +59,11 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      const response = await authApi.post("/auth/login", credentials);
+      const response = await authApi.login(credentials);
 
-      const { user, accessToken, requiresOtp } = response.data;
+      const { user, accessToken, requiresOtp } = response;
 
-      // Debug: Log the token type and value
-      console.log("Token received:", {
-        accessToken,
-        type: typeof accessToken,
-        isString: typeof accessToken === "string",
-      });
-
-      if (requiresOtp) {
+            if (requiresOtp) {
         set({
           isLoading: false,
           requiresOtp: true,
@@ -50,8 +73,13 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
         return;
       }
 
+      if (!user) {
+        throw new Error("Authentication response missing user data");
+      }
+
       set({
         user,
+        userId: user.id || "",
         token: accessToken,
         isAuthenticated: true,
         isLoading: false,
@@ -72,8 +100,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
   },
 
   register: async (credentials: RegisterCredentials) => {
-    console.log("Credentials =", { credentials });
-    const data = {
+        const data = {
       email: credentials.email,
       password: credentials.password,
       role: credentials.role,
@@ -82,34 +109,28 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      await authApi.post("/auth/register", data);
+      await authApi.signup(data);
       set({
         isLoading: false,
         requiresOtp: true,
         tempEmail: credentials.email,
         error: null,
       });
-      console.log("Credentials =", { data });
-    } catch (error: any) {
+          } catch (error: any) {
       set({
         isLoading: false,
         error: error.response?.data?.message || "Registration failed",
       });
-      console.log("Credentials =", { data });
-      throw error;
+            throw error;
     }
   },
 
   verifyOtp: async (verification: OtpVerification) => {
-    console.log("verifyOtp =", verification);
-
-    try {
+        try {
       set({ isLoading: true, error: null });
 
-      const response = await authApi.post("/auth/verify-otp", verification);
-      console.log("OTP verification response =", response.data);
-
-      // OTP verification only returns a message, no user/token
+      const response = await authApi.verifyOTP(verification);
+            // OTP verification only returns a message, no user/token
       // User needs to login after verification
       router.replace("/(auth)/login");
       set({
@@ -119,9 +140,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
         error: null,
       });
     } catch (error: any) {
-      console.log("error =", error);
-
-      set({
+            set({
         isLoading: false,
         error: error.response?.data?.message || "OTP verification failed",
       });
@@ -133,7 +152,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      await authApi.post("/auth/resend-otp", { email });
+      await authApi.resendOTP({ email });
 
       set({
         isLoading: false,
@@ -152,7 +171,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      await authApi.post("/auth/forgot-password", request);
+      await authApi.forgotPassword(request);
       set({
         isLoading: false,
         requiresOtp: true,
@@ -171,8 +190,8 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
   resetPassword: async (request: ResetPasswordConfirm) => {
     try {
       set({ isLoading: true, error: null });
-      await authApi.post("/auth/reset-password", request);
-  
+      await authApi.resetPassword(request);
+
       set({
         isLoading: false,
         requiresOtp: false,
@@ -188,118 +207,153 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
     }
   },
 
- changePassword: async (request: ChangePasswordRequest) => {
-  try {
-    set({ isLoading: true, error: null });
-
-    const { token } = get();
-    if (!token) {
-      throw new Error("No authentication token available");
-    }
-
-    //  Exclude frontend-only field
-    const { newPasswordConfirmation, ...apiRequest } = request;
-
-    await makeAuthenticatedAuthRequest(
-      token,
-      "/auth/change-password",
-      apiRequest // send only the required fields
-    );
-
-    set({
-      isLoading: false,
-      error: null,
-    });
-  } catch (error: any) {
-    set({
-      isLoading: false,
-      error: error.response?.data?.message || "Password change failed",
-    });
-    throw error;
-  }
-},
-
-
- googleLogin: async (googleAuth: { idToken: string; role?: string }) => {
-  try {
-    set({ isLoading: true, error: null });
-
-    console.log("Starting Google login with:", {
-      hasIdToken: !!googleAuth?.idToken,
-      role: googleAuth?.role ?? "none (login only)",
-    });
-
-    const response = await authApi.post("/auth/google", {
-      idToken: googleAuth.idToken, // Correct field name
-      role: googleAuth.role,       // Optional, only needed during signup
-    });
-
-    const { user, accessToken, requiresOtp } = response.data;
-
-    console.log("Google Auth Response:", response.data);
-
-    if (requiresOtp) {
-      set({
-        isLoading: false,
-        requiresOtp: true,
-        tempEmail: user.email,
-        error: null,
-      });
-      return;
-    }
-
-    set({
-      user,
-      token: accessToken,
-      isAuthenticated: true,
-      isLoading: false,
-      requiresOtp: false,
-      error: null,
-    });
-
-    if (accessToken && typeof accessToken === "string") {
-      await secureSet("auth_token", accessToken);
-      console.log("🔒 Token securely saved:", accessToken);
-    }
-  } catch (error: any) {
-    console.log("Google Login Error:", error.response?.data || error.message);
-    set({
-      isLoading: false,
-      error: error.response?.data?.message || "Google login failed",
-    });
-    throw error;
-  }
-},
-
-
-  appleLogin: async (appleToken: GoogleAppleAuth) => {
+  changePassword: async (request: ChangePasswordRequest) => {
     try {
       set({ isLoading: true, error: null });
 
-      const response = await authApi.post("/auth/apple", {
-        identityToken: appleToken,
-      });
-      const { user, accessToken, requiresOtp } = response.data;
+      const { token } = get();
+      if (!token) {
+        throw new Error("No authentication token available");
+      }
 
-      // Debug: Log the token type and value
-      console.log("Token received:", {
-        accessToken,
-        type: typeof accessToken,
-        isString: typeof accessToken === "string",
+      //  Exclude frontend-only field
+      const { newPasswordConfirmation, ...apiRequest } = request;
+
+      await authApi.authedRequest(
+        "/auth/change-password",
+        apiRequest, // send only { newPassword }
+      );
+
+      set({
+        isLoading: false,
+        error: null,
+      });
+    } catch (error: any) {
+      set({
+        isLoading: false,
+        error: error.response?.data?.message || "Password change failed",
+      });
+      throw error;
+    }
+  },
+
+  devLogin: async () => {
+    if (!__DEV__) {
+      throw new Error("Dev login is only available in development mode");
+    }
+
+        set((state) => {
+      // Get the selected role from current state, default to SURROGATE
+      const selectedRole = (state as any).selectedRole || "SURROGATE";
+
+      const devUser = {
+        ...DEV_AUTH_USER,
+        role: selectedRole,
+      };
+
+      return {
+        user: devUser,
+        userId: devUser.id,
+        token: DEV_AUTH_TOKEN,
+        isAuthenticated: true,
+        isLoading: false,
+        requiresOtp: false,
+        error: null,
+      };
+    });
+
+    await secureSet("auth_token", DEV_AUTH_TOKEN);
+  },
+
+  googleLogin: async (googleAuth: GoogleAuth) => {
+    try {
+      set({ isLoading: true, error: null });
+
+                  const response = await publicPost("/auth/google", {
+        idToken: googleAuth.idToken, // Correct field name
+        role: googleAuth.role, // Optional, only needed during signup
       });
 
-      if (requiresOtp) {
+            if (!response) {
+        console.error("Google login endpoint returned empty payload");
+        throw new Error("Invalid response from Google auth endpoint");
+      }
+
+      const { user, accessToken, requiresOtp } = response;
+
+            if (requiresOtp) {
         set({
           isLoading: false,
           requiresOtp: true,
-          tempEmail: user.email,
+          tempEmail: user?.email,
           error: null,
         });
         return;
       }
 
+      if (!user) {
+        throw new Error("User data missing from Google auth response");
+      }
+
       set({
         user,
+        userId: user.id || "",
+        token: accessToken,
+        isAuthenticated: true,
+        isLoading: false,
+        requiresOtp: false,
+        error: null,
+      });
+
+      if (accessToken && typeof accessToken === "string") {
+        await secureSet("auth_token", accessToken);
+              }
+    } catch (error: any) {
+      console.error("Google Login Error details:", {
+        message: error.message,
+        responseData: error.response?.data,
+        responseStatus: error.response?.status,
+        responseHeaders: error.response?.headers,
+      });
+      set({
+        isLoading: false,
+        error: error.response?.data?.message || "Google login failed",
+      });
+      throw error;
+    }
+  },
+
+  appleLogin: async (appleToken: AppleAuth) => {
+    try {
+      set({ isLoading: true, error: null });
+
+            const response = await publicPost("/auth/apple", {
+        identityToken: appleToken,
+      });
+
+            if (!response) {
+        throw new Error("Invalid response from Apple auth endpoint");
+      }
+
+      const { user, accessToken, requiresOtp } = response;
+
+                  if (requiresOtp) {
+        set({
+          isLoading: false,
+          requiresOtp: true,
+          tempEmail: user?.email,
+          error: null,
+        });
+        return;
+      }
+
+      if (!user) {
+        throw new Error("User data missing from Apple auth response");
+      }
+
+      set({
+        user,
+        userId: user.id || "",
         token: accessToken,
         isAuthenticated: true,
         isLoading: false,
@@ -311,6 +365,12 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
         await secureSet("auth_token", accessToken);
       }
     } catch (error: any) {
+      console.error("Apple Login Error details:", {
+        message: error.message,
+        responseData: error.response?.data,
+        responseStatus: error.response?.status,
+        responseHeaders: error.response?.headers,
+      });
       set({
         isLoading: false,
         error: error.response?.data?.message || "Apple login failed",
@@ -319,11 +379,13 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
     }
   },
 
-  logout: () => {
-    secureDelete("auth_token");
+  logout: async () => {
+    await secureDelete("auth_token");
+    resetBootstrap();
 
     set({
       user: null,
+      userId: "",
       token: null,
       isAuthenticated: false,
       isLoading: false,
@@ -333,6 +395,7 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
       referralCode: null,
       error: null,
     });
+
   },
 
   clearError: () => set({ error: null }),

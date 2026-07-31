@@ -39,7 +39,7 @@ export default function DateInput({
   return (
     <View style={{ width }}>
       {label && (
-        <Label fontWeight="600" fontSize={15} color={colors.text}>
+        <Label fontWeight="600" fontSize={13} color={colors.text}>
           {label}
         </Label>
       )}
@@ -59,7 +59,7 @@ export default function DateInput({
 
 const styles = StyleSheet.create({
   input: {
-    height: 46,
+    height: 40,
     paddingHorizontal: 12,
     fontSize: 16,
     color: "#000",

@@ -1,5 +1,11 @@
 import { StateCreator } from "zustand";
-import { getParentProfile, createParentProfile, updateParentProfile } from "@/services/profileApi";
+import {
+  getParentProfile,
+  createParentProfile as createParentProfileApi,
+  updateParentProfile as updateParentProfileApi,
+  saveParentSurrogateMatch as saveParentSurrogateApi,
+  updateParentMatchPreference as updateParentMatchPreferenceApi
+} from "@/services/profileApi";
 import { ParentProfileStore } from "./types";
 
 export const createParentProfileSlice: StateCreator<ParentProfileStore> = (set, get) => ({
@@ -13,7 +19,7 @@ export const createParentProfileSlice: StateCreator<ParentProfileStore> = (set, 
     set({ isLoading: true, error: null });
     try {
       const res = await getParentProfile();
-      set({ parentProfile: res.data.data, isLoading: false });
+      set({ parentProfile: res, isLoading: false });
     } catch (err: any) {
       set({ error: err.message, isLoading: false });
     }
@@ -22,8 +28,8 @@ export const createParentProfileSlice: StateCreator<ParentProfileStore> = (set, 
   createParentProfile: async (data) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await createParentProfile(data);
-      set({ parentProfile: res.data.data, isLoading: false });
+      const res = await createParentProfileApi(data);
+      set({ parentProfile: res, isLoading: false });
     } catch (err: any) {
       set({ error: err.message, isLoading: false });
     }
@@ -32,10 +38,34 @@ export const createParentProfileSlice: StateCreator<ParentProfileStore> = (set, 
   updateParentProfile: async (data) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await updateParentProfile(data);
-      set({ parentProfile: res.data.data, isLoading: false });
+      const res = await updateParentProfileApi(data);
+      set({ parentProfile: res, isLoading: false });
     } catch (err: any) {
       set({ error: err.message, isLoading: false });
+    }
+  },
+
+  saveParentSurrogate: async (surrogateData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const res = await saveParentSurrogateApi(surrogateData);
+      set({ isLoading: false });
+      return res;
+    } catch (err: any) {
+      set({ error: err.message, isLoading: false });
+      throw err;
+    }
+  },
+
+  updateParentMatchPreference: async (preferenceData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const res = await updateParentMatchPreferenceApi(preferenceData);
+      set({ isLoading: false });
+      return res;
+    } catch (err: any) {
+      set({ error: err.message, isLoading: false });
+      throw err;
     }
   },
 

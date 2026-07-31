@@ -1,41 +1,54 @@
-import React from 'react'
-import { XStack, YStack, Image } from 'tamagui'
+import React from "react";
+import { XStack, YStack } from "tamagui";
+import { Image as RNImage, ImageSourcePropType } from "react-native";
 
-// Local image imports (adjust extensions if needed)
-import gallery1 from '@/assets/images/image2.png'
-import gallery2 from '@/assets/images/image2.png'
+import placeholderImg from "@/assets/images/noImage.png";
 
-const galleryImages = [gallery1, gallery2]
-
-const GallerySection = () => {
-  return (
-    <XStack
-      gap="$3"
-      flexWrap="wrap"          // Allows wrapping on smaller screens
-      justifyContent="space-between"
-    >
-      {galleryImages.map((img, idx) => (
-        <YStack
-          key={idx}
-          width="48%"           // Two images per row
-          borderRadius={12}
-          overflow="hidden"
-          marginBottom="$3"     // Space between rows
-        >
-          <Image
-  source={img}
-  width="90%"
-  height={120}
-  resizeMode="cover"
-  style={{
-    borderRadius: 12,
-    alignSelf: "center", // center it horizontally
-  }}
-/>
-        </YStack>
-      ))}
-    </XStack>
-  )
+interface GalleryImage {
+  id: string;
+  url: string;
 }
 
-export default GallerySection
+interface GallerySectionProps {
+  images?: GalleryImage[];
+}
+
+const GallerySection: React.FC<GallerySectionProps> = ({ images }) => {
+  if (!images || images.length === 0) return null;
+
+  const galleryImages = images.slice(0, 4); // max 4 images
+
+  return (
+    <XStack gap="$3" flexWrap="wrap" justifyContent="space-between">
+      {galleryImages.map((item) => {
+        const source: ImageSourcePropType =
+          item.url && item.url.startsWith("http")
+            ? { uri: item.url }
+            : placeholderImg;
+
+        return (
+          <XStack
+            key={item.id}
+            height={300}
+            borderRadius={12}
+            overflow="hidden"
+            marginBottom="$3"
+          >
+            <RNImage
+              source={source}
+              style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: 12,
+                alignSelf: "center",
+              }}
+              resizeMode="cover"
+            />
+          </XStack>
+        );
+      })}
+    </XStack>
+  );
+};
+
+export default GallerySection;

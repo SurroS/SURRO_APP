@@ -17,7 +17,6 @@ const ReferralCard: React.FC<Props> = ({ referral }) => {
   const [open, setOpen] = useState(false);
 
   const handleRedeem = () => {
-    console.log(`Redeeming referral ${referral.name}`);
     setOpen(false);
   };
 

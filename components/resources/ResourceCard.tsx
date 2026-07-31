@@ -35,7 +35,7 @@ const ResourceCard = ({
   const handleOpenPDF = () => {
     if (sourceUrl) {
       router.push({
-        pathname: "/(tabs)/resources/documentViewer",
+        pathname: "/resources/documentViewer",
         params: { url: sourceUrl, title },
       });
     }

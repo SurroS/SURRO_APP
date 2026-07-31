@@ -8,18 +8,23 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
-import { InputField } from "../../components/auth/InputField";
-import { OrDivider } from "../../components/auth/OrDivider";
-import { PrimaryButton } from "../../components/auth/PrimaryButton";
-import { ScreenHeader } from "../../components/navigation/ScreenHeader";
-import { SocialButton } from "../../components/auth/SocialButton";
-import { useSignupForm } from "../../hooks/auth/useSignupForm";
+import { InputField } from "@/components/auth/InputField";
+import { OrDivider } from "@/components/auth/OrDivider";
+import { PrimaryButton } from "@/components/auth/PrimaryButton";
+import { ScreenHeader } from "@/components/navigation/ScreenHeader";
+import { SocialButton } from "@/components/auth/SocialButton";
+import { useSignupForm } from "@/hooks/auth/useSignupForm";
 
-import { GoogleSignin, statusCodes } from "@react-native-google-signin/google-signin";
+import {
+  GoogleSignin,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 
 // Configure Google Sign-In
 GoogleSignin.configure({
@@ -31,13 +36,16 @@ GoogleSignin.configure({
 
 export default function SignupScreen() {
   const router = useRouter();
-  const { signupFormData, errors, updateField, validateForm } = useSignupForm();
+  const { signupFormData, errors, passwordRules, updateField, validateForm } = useSignupForm();
   const { register, googleLogin, isLoading } = useAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   // Handle Google Sign-Up
   const handleGoogleSignup = async () => {
+    setGoogleLoading(true);
     try {
       await GoogleSignin.hasPlayServices();
+      await GoogleSignin.signOut();
       const userInfo = await GoogleSignin.signIn();
 
       let idToken = userInfo.idToken;
@@ -47,11 +55,6 @@ export default function SignupScreen() {
       }
       if (!idToken) throw new Error("Google returned null idToken");
 
-      console.log("====== GOOGLE SIGNUP SUCCESS ======");
-      console.log("ID Token:", idToken);
-      console.log("User Info:", userInfo.user);
-
-      // Call your backend action
       await googleLogin({
         idToken,
         role: signupFormData?.role,
@@ -62,8 +65,7 @@ export default function SignupScreen() {
         type: "customSuccess" as ToastType,
         text2: "Welcome!",
       });
-
-      router.replace("/onboarding/learn-surrogacy-journey");
+      router.replace("/(tabs)/home");
     } catch (error: any) {
       console.error("Google Sign-In error:", error);
 
@@ -92,6 +94,8 @@ export default function SignupScreen() {
           text2: "An unexpected error occurred.",
         });
       }
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -146,6 +150,23 @@ export default function SignupScreen() {
             errorMessage={errors.password}
           />
 
+          {signupFormData.password.length > 0 && (
+            <View style={styles.passwordRules}>
+              {passwordRules.map((rule, i) => (
+                <View key={i} style={styles.passwordRuleRow}>
+                  <Ionicons
+                    name={rule.met ? "checkmark-circle" : "ellipse-outline"}
+                    size={16}
+                    color={rule.met ? "#4CAF50" : "#999"}
+                  />
+                  <Text style={[styles.passwordRuleText, rule.met && styles.passwordRuleMet]}>
+                    {rule.label}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
+
           <InputField
             label="Confirm Password"
             value={signupFormData.passwordConfirmation}
@@ -166,6 +187,40 @@ export default function SignupScreen() {
             />
           )}
 
+          <View style={styles.termsRow}>
+            <TouchableOpacity
+              onPress={() => updateField("termsAccepted", !signupFormData.termsAccepted)}
+              activeOpacity={0.7}
+              style={styles.checkboxTouchable}
+            >
+              <View style={[styles.checkbox, signupFormData.termsAccepted && styles.checkboxChecked]}>
+                {signupFormData.termsAccepted && (
+                  <Ionicons name="checkmark" size={14} color="#fff" />
+                )}
+              </View>
+            </TouchableOpacity>
+            <Text style={styles.termsText}>
+              I agree to the{" "}
+              <Text
+                style={styles.termsLink}
+                onPress={() => router.push({ pathname: "/legal/webview", params: { url: "https://surro-dashboard.netlify.app/terms", title: "Terms of Service" } })}
+              >
+                Terms of Service
+              </Text>{" "}
+              and{" "}
+              <Text
+                style={styles.termsLink}
+                onPress={() => router.push({ pathname: "/legal/webview", params: { url: "https://surro-dashboard.netlify.app/privacy", title: "Privacy Policy" } })}
+              >
+                Privacy Policy
+              </Text>
+            </Text>
+          </View>
+
+          {errors.termsAccepted && (
+            <Text style={styles.errorText}>{errors.termsAccepted}</Text>
+          )}
+
           <PrimaryButton
             title="Sign up"
             onPress={handleSignup}
@@ -178,6 +233,7 @@ export default function SignupScreen() {
             title="Continue with Google"
             icon={require("../../assets/images/google.png")}
             onPress={handleGoogleSignup}
+            loading={googleLoading}
           />
 
           <TouchableOpacity
@@ -205,4 +261,57 @@ const styles = StyleSheet.create({
   },
   loginLink: { marginTop: 20, alignSelf: "center" },
   loginLinkText: { color: "#0E0E55", fontWeight: "bold" },
+  termsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 16,
+    marginBottom: 4,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: "#ccc",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  checkboxTouchable: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxChecked: {
+    backgroundColor: "#0E0E55",
+    borderColor: "#0E0E55",
+  },
+  termsText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#555",
+    lineHeight: 18,
+  },
+  termsLink: {
+    color: "#0E0E55",
+    fontWeight: "600",
+    textDecorationLine: "underline",
+  },
+  passwordRules: {
+    marginTop: -10,
+    marginBottom: 16,
+    paddingHorizontal: 4,
+  },
+  passwordRuleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  passwordRuleText: {
+    fontSize: 13,
+    color: "#999",
+    marginLeft: 6,
+  },
+  passwordRuleMet: {
+    color: "#4CAF50",
+  },
 });

@@ -1,6 +1,8 @@
 import { useRouter } from "expo-router";
-import { Alert, ScrollView, StyleSheet, Text } from "react-native";
+import { ScrollView, StyleSheet, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useState } from "react";
+import AlertModal from "@/components/modals/AlertModal";
 import { InputField } from "@/components/auth/InputField";
 import { PrimaryButton } from "@/components/auth/PrimaryButton";
 import { ScreenHeader } from "@/components/navigation/ScreenHeader";
@@ -9,11 +11,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 import { useResetPasswordForm } from "@/hooks/auth";
+import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
   const { email, error, updateEmail, validateForm } = useForgotPasswordForm();
   const { forgotPassword, isLoading, resetPassword} = useAuth();
+  const [alertVisible, setAlertVisible] = useState(false);
 
   const handleForgotPassword = async () => {
     if (!validateForm()) {
@@ -22,11 +26,7 @@ export default function ForgotPasswordScreen() {
 
     try {
       await forgotPassword({ email });
-      Alert.alert("Success", "Password reset instructions sent to your email.");
-      console.log(updateEmail);
-      console.log(validateForm);
-      console.log(email); 
-      // Navigation will be handled by the auth store state changes
+      setAlertVisible(true);
     } catch (err) {
       Toast.show({
         text1: "Password reset instructions sent to your email.",
@@ -35,16 +35,14 @@ export default function ForgotPasswordScreen() {
           "Password reset instructions sent to your email! Please try again.",
       });
       console.error("Forgot password error:", err);
-      console.log(updateEmail);
-      console.log(validateForm);
-      console.log(email);
       // Error is already handled by the auth store
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
+    <KeyboardAvoidingWrapper>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.container}>
         <ScreenHeader
           title="Forgot Password"
           style={{ size: "$4" }}
@@ -72,8 +70,18 @@ export default function ForgotPasswordScreen() {
           onPress={handleForgotPassword}
           loading={isLoading}
         />
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+        <AlertModal
+          visible={alertVisible}
+          title="Success"
+          message="Password reset instructions sent to your email."
+          onClose={() => {
+            setAlertVisible(false);
+            router.push("/(auth)/otp");
+          }}
+        />
+      </SafeAreaView>
+    </KeyboardAvoidingWrapper>
   );
 }
 

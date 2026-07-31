@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useRef } from "react";
+import { useCallback, useState } from "react";
 import {
   Image,
   ScrollView,
@@ -14,29 +14,28 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/hooks/useAuth";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
-import { PrimaryButton } from "../../components/auth/PrimaryButton";
-import { ScreenHeader } from "../../components/navigation/ScreenHeader";
-import { useOtpForm } from "../../hooks/auth/useOtpForm";
+import { PrimaryButton } from "@/components/auth/PrimaryButton";
+import { ScreenHeader } from "@/components/navigation/ScreenHeader";
+import { useOtpForm } from "@/hooks/auth/useOtpForm";
+import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
+
+const OTP_LENGTH = 6;
 
 export default function OTPScreen() {
   const router = useRouter();
-  const { otp, error, updateOtpDigit, validateOtp, getOtpCode } = useOtpForm();
-  const { verifyOtp, resendOtp, tempEmail, isLoading, clearError } = useAuth();
+  const { otp, error, updateOtpDigit, setOtpFromString, validateOtp, getOtpCode } = useOtpForm();
+  const { verifyOtp, resendOtp, tempEmail, isLoading } = useAuth();
 
-  // Refs for focusing inputs
-  const inputs = useRef<(TextInput | null)[]>([]);
+  const [otpCode, setOtpCode] = useState("");
+  const [isResending, setIsResending] = useState(false);
 
-  const handleChange = (text: string, index: number) => {
-    updateOtpDigit(index, text);
-
-    // Auto focus next input if not last
-    if (text && index < otp.length - 1) {
-      inputs.current[index + 1]?.focus();
-    }
-  };
+  const handleOtpChange = useCallback((text: string) => {
+    const digits = text.replace(/[^0-9]/g, "").slice(0, OTP_LENGTH);
+    setOtpCode(digits);
+    setOtpFromString(digits);
+  }, [setOtpFromString]);
 
   const handleVerify = async () => {
-    console.log("handleVerify =", validateOtp());
     if (!validateOtp()) {
       return;
     }
@@ -50,8 +49,6 @@ export default function OTPScreen() {
       return;
     }
 
-    console.log("handleVerify =", getOtpCode());
-    console.log("handleVerify =", tempEmail);
     try {
       await verifyOtp({
         email: tempEmail,
@@ -63,15 +60,8 @@ export default function OTPScreen() {
   };
 
   const handleResendOtp = async () => {
-    if (!tempEmail) {
-      Toast.show({
-        text1: "No email found. Please restart the process.",
-        type: "customError" as ToastType,
-        text2: "No email found. Please restart the process!",
-      });
-      return;
-    }
-
+    if (!tempEmail || isResending) return;
+    setIsResending(true);
     try {
       await resendOtp(tempEmail);
       Toast.show({
@@ -86,12 +76,15 @@ export default function OTPScreen() {
         type: "customError" as ToastType,
         text2: "Failed to resend OTP. Please try again!",
       });
+    } finally {
+      setIsResending(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
+    <KeyboardAvoidingWrapper>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <ScreenHeader title="Enter OTP" onBackPress={() => router.back()} />
 
         <Image
@@ -105,20 +98,25 @@ export default function OTPScreen() {
         </Text>
 
         <View style={styles.otpContainer}>
+          <TextInput
+            style={styles.hiddenInput}
+            keyboardType="number-pad"
+            maxLength={OTP_LENGTH}
+            value={otpCode}
+            onChangeText={handleOtpChange}
+            autoFocus
+            caretHidden
+          />
           {otp.map((digit, index) => (
-            <TextInput
+            <View
               key={index}
-              ref={(ref) => {
-                if (ref) {
-                  inputs.current[index] = ref;
-                }
-              }}
-              style={styles.otpInput}
-              keyboardType="numeric"
-              maxLength={1}
-              value={digit}
-              onChangeText={(text) => handleChange(text, index)}
-            />
+              style={[
+                styles.otpBox,
+                digit ? styles.otpBoxFilled : null,
+              ]}
+            >
+              <Text style={styles.otpDigit}>{digit}</Text>
+            </View>
           ))}
         </View>
 
@@ -130,14 +128,17 @@ export default function OTPScreen() {
           loading={isLoading}
         />
 
-        <TouchableOpacity style={styles.resendButton} onPress={handleResendOtp}>
+        <TouchableOpacity style={styles.resendButton} onPress={handleResendOtp} disabled={isResending}>
           <Text style={styles.resendText}>
             Didn&apos;t get the code?{" "}
-            <Text style={styles.resendLink}>Resend</Text>
+            <Text style={[styles.resendLink, isResending && { opacity: 0.5 }]}>
+              {isResending ? "Resending..." : "Resend"}
+            </Text>
           </Text>
         </TouchableOpacity>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </KeyboardAvoidingWrapper>
   );
 }
 
@@ -170,15 +171,36 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     width: "100%",
     alignSelf: "center",
+    position: "relative",
   },
-  otpInput: {
+  otpBox: {
     width: 50,
     height: 50,
     backgroundColor: "#EBEBEB",
     borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 0.5,
+    borderColor: "#D0D0D0",
+  },
+  otpBoxFilled: {
+    backgroundColor: "#EBEBEB",
+    borderWidth: 1,
+    borderColor: "#0E0E55",
+  },
+  otpDigit: {
     fontSize: 22,
-    textAlign: "center",
     color: "#333",
+    textAlign: "center",
+  },
+  hiddenInput: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0,
+    zIndex: 1,
   },
   errorText: {
     color: "red",

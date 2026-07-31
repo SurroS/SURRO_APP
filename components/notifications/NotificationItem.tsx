@@ -1,94 +1,129 @@
-// components/notifications/NotificationItem.tsx
 import React from "react";
-import { XStack, YStack, Text, Separator, Image } from "tamagui";
+import { TouchableOpacity, View } from "react-native";
+import { XStack, YStack, Text } from "tamagui";
+import { Ionicons } from "@expo/vector-icons";
+import { AppNotification } from "@/store/notifications/types";
 
-export type Notification = {
-  id: string;
-  type: "profile" | "message" | "profileSetup" | "views";
-  title: string;
-  message: string;
-  time: string;
-};
-
-// Local icon imports
-import messageIcon from "@/assets/images/message-icon.png";
-import profileSetup2 from "@/assets/images/profile-setup-2.png";
-import profileSetupIcon from "@/assets/images/profile-setup-icon.png";
-import profileView from "@/assets/images/profile-view.png";
+import colors from "@/hooks/colors";
 
 type Props = {
-  item: Notification;
+  item?: AppNotification;
+  selected?: boolean;
+  onPress?: () => void;
+  onLongPress?: () => void;
 };
 
-// Icon mapping (without colored circle)
-const iconStyles: Record<Notification["type"], { icon: any }> = {
-  profile: { icon: profileSetupIcon },
-  message: { icon: messageIcon },
-  profileSetup: { icon: profileSetup2 },
-  views: { icon: profileView },
+const iconConfig: Record<string, { name: keyof typeof Ionicons.glyphMap; bg: string }> = {
+  GENERAL: { name: "notifications-outline", bg: "#E3F2FD" },
+  PROFILE_SETUP: { name: "person-add-outline", bg: "#E8F5E9" },
+  PROFILE_VIEWS: { name: "eye-outline", bg: "#FFF3E0" },
+  PAYMENT: { name: "wallet-outline", bg: "#E8F5E9" },
+  REFERRAL: { name: "gift-outline", bg: "#FCE4EC" },
+  SURROGATE_BOOST: { name: "trending-up-outline", bg: "#E8F5E9" },
+  KYC: { name: "shield-checkmark-outline", bg: "#E3F2FD" },
+  PROFILE_BOOST: { name: "rocket-outline", bg: "#F3E5F5" },
+  INACTIVITY: { name: "time-outline", bg: "#FFF3E0" },
 };
 
-// Font sizes and line heights based on Figma design
-const FONT = {
-  title: { fontSize: 16, lineHeight: 26 }, // Body/Base: 16px, line-height 160%
-  message: { fontSize: 14, lineHeight: 21 }, // Body/Small Base: 14px, line-height 150%
+const relativeTime = (timestamp: number): string => {
+  const diff = Date.now() - timestamp;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days}d ago`;
+  return new Date(timestamp).toLocaleDateString();
 };
 
-const NotificationItem = ({ item }: Props) => {
-  const { icon } = iconStyles[item.type];
+const NotificationItem = ({ item, selected, onPress, onLongPress }: Props) => {
+  if (!item) return null;
+
+  const icon = iconConfig[item.type] ?? iconConfig.GENERAL;
 
   return (
-    <YStack>
+    <TouchableOpacity
+      onPress={onPress}
+      onLongPress={onLongPress}
+      activeOpacity={0.7}
+      style={{ marginHorizontal: 0 }}
+    >
       <XStack
-        alignItems="center"
-        justifyContent="space-between"
-        paddingVertical="$3"
-        paddingHorizontal="$4"
+        backgroundColor={selected ? "#EEF0FF" : "#fff"}
+        borderRadius={14}
+        paddingVertical={14}
+        paddingHorizontal={16}
+        gap={14}
+        alignItems="flex-start"
+        style={{
+          borderWidth: 1,
+          borderColor: selected ? colors.primary : "#f0f0f0",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.08,
+          shadowRadius: 4,
+          elevation: 3,
+        }}
       >
-        {/* Left section: Icon + text */}
-        <XStack alignItems="center" gap="$3" flex={1}>
-          {/* Icon  */}
-          <Image source={icon} width={22} height={22} resizeMode="contain" />
+        {/* Icon circle */}
+        <View
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: icon.bg,
+            justifyContent: "center",
+            alignItems: "center",
+            marginTop: 2,
+          }}
+        >
+          <Ionicons
+            name={icon.name}
+            size={20}
+            color={item.read ? "#888" : "#333"}
+          />
+        </View>
 
-          {/* Title and message */}
-          <YStack flex={1}>
+        {/* Content */}
+        <YStack flex={1} gap={4}>
+          <XStack justifyContent="space-between" alignItems="flex-start">
             <Text
-              fontFamily="Body/Base"
-              fontWeight="600" // Regular
-              fontSize={FONT.title.fontSize}
-              lineHeight={FONT.title.lineHeight}
-              color="#212121"
+              fontSize={15}
+              color="#1A1A1A"
+              fontWeight={item.read ? "500" : "700"}
+              flex={1}
+              numberOfLines={2}
             >
               {item.title}
             </Text>
-            <Text
-              fontFamily="Body/Small Base"
-              fontWeight="600" // Regular
-              fontSize={FONT.message.fontSize}
-              lineHeight={FONT.message.lineHeight}
-              color="#545453"
-              numberOfLines={2}
-            >
-              {item.message}
+            {!item.read && (
+              <View
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: 3.5,
+                  backgroundColor: "#E63946",
+                  marginTop: 6,
+                  marginLeft: 6,
+                }}
+              />
+            )}
+          </XStack>
+
+          {item.body ? (
+            <Text fontSize={13} color="#777" numberOfLines={2} lineHeight={18}>
+              {item.body}
             </Text>
-          </YStack>
-        </XStack>
+          ) : null}
 
-        {/* Right section: Time */}
-        <Text
-          fontFamily="Body/Small Base"
-          fontWeight="600"
-          fontSize={FONT.message.fontSize}
-          lineHeight={FONT.message.lineHeight}
-          color="#545453"
-        >
-          {item.time}
-        </Text>
+          <Text fontSize={11} color="#aaa" marginTop={2}>
+            {relativeTime(item.createdAt)}
+          </Text>
+        </YStack>
       </XStack>
-
-      {/* Subtle separator line */}
-      <Separator borderColor="$text" opacity={0.1} marginLeft={60} />
-    </YStack>
+    </TouchableOpacity>
   );
 };
 

@@ -1,15 +1,16 @@
 import React, { useState } from "react";
-import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { View, TextInput, TouchableOpacity, StyleSheet, Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SendHorizontal } from "@tamagui/lucide-icons";
-import colors from "@/hooks/colors";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
-  disabled:boolean
+  disabled: boolean;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
   const [text, setText] = useState("");
+  const insets = useSafeAreaInsets();
 
   const handleSend = () => {
     if (!text.trim()) return;
@@ -18,17 +19,21 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: insets.bottom > 0 ? insets.bottom : 6 }]}>
       <TextInput
         style={styles.input}
         placeholder="Type a message..."
-        placeholderTextColor={colors.text}
+        placeholderTextColor="#666666"
         multiline
         value={text}
         onChangeText={setText}
       />
-      <TouchableOpacity onPress={handleSend} style={styles.sendButton}
-      disabled={disabled}>
+
+      <TouchableOpacity
+        onPress={handleSend}
+        style={styles.sendButton}
+        disabled={disabled}
+      >
         <SendHorizontal size={22} color="#fff" />
       </TouchableOpacity>
     </View>
@@ -39,7 +44,8 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 10,
+    paddingHorizontal: 12,
+    paddingTop: 10,
     borderTopWidth: 1,
     borderColor: "#eee",
     backgroundColor: "#fff",

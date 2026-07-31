@@ -1,32 +1,36 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { Button } from "tamagui";
+import { Button, XStack } from "tamagui";
+import { Ionicons } from "@expo/vector-icons";
 import Entypo from "@expo/vector-icons/Entypo";
 import colors from "@/hooks/colors";
 
-
 interface Props {
   name: string;
-  username: string;
+  username?: string;
   location: string;
-  age: number;
+  age: number | string;
+  city?: string;
 
-  maritalStatus: string;
-  height: string; // "5ft 7in" or "170cm"
-  weight: string; // "70kg"
+  maritalStatus?: string;
+  height?: string;
+  weight?: string;
   currency?: any;
 
   compensation: number;
   isNegotiable: boolean;
 
-  onChatPress: () => void;
+  onChatPress?: () => void;
   isUnlocked: boolean;
+  hideActions?: boolean;
+  isVerified?: boolean;
 }
 
 export default function HeaderInfo({
   name,
   username,
   location,
+  city,
   age,
   maritalStatus,
   height,
@@ -36,39 +40,53 @@ export default function HeaderInfo({
   onChatPress,
   isUnlocked,
   currency,
+  hideActions,
+  isVerified,
 }: Props) {
+  const hasStats = maritalStatus || height || weight;
+
   return (
     <View style={styles.container}>
       {isUnlocked ? (
-        <Text style={styles.name}>{name}</Text>
+        <XStack alignItems="center" gap="$2">
+          <Text style={styles.name}>{name}</Text>
+          {isVerified && <Ionicons name="shield-checkmark" size={18} color="#1DA1F2" />}
+        </XStack>
       ) : (
-        <Text style={styles.username}>@{username}</Text>
+        <XStack alignItems="center" gap="$2">
+          <Text style={styles.username}>@{username || "no username"}</Text>
+          {isVerified && <Ionicons name="shield-checkmark" size={16} color="#1DA1F2" />}
+        </XStack>
       )}
 
       {/* LOCATION + AGE */}
       <View style={styles.locationRow}>
-        <Text style={styles.locationText}>{location}</Text>
+        <Text style={styles.locationText}>
+          {location} {city}
+        </Text>
         <Text style={styles.dot}>•</Text>
         <Text style={styles.locationText}>{age} Years</Text>
       </View>
 
-      {/* BODY STATS */}
+      {/* BODY STATS (only shown if any provided) */}
+      {hasStats && (
       <View style={styles.statsRow}>
         <View style={styles.statBox}>
           <Text style={styles.statLabel}>Marital Status</Text>
-          <Text style={styles.statValue}>{maritalStatus}</Text>
+          <Text style={styles.statValue}>{maritalStatus || "N/A"}</Text>
         </View>
 
         <View style={styles.statBox}>
           <Text style={styles.statLabel}>Height</Text>
-          <Text style={styles.statValue}>{height}</Text>
+          <Text style={styles.statValue}>{height || "N/A"}</Text>
         </View>
 
         <View style={styles.statBox}>
           <Text style={styles.statLabel}>Weight</Text>
-          <Text style={styles.statValue}>{weight}</Text>
+          <Text style={styles.statValue}>{weight || "N/A"}</Text>
         </View>
       </View>
+      )}
 
       {/* COMPENSATION */}
       <View style={styles.compensationWrapper}>
@@ -89,20 +107,21 @@ export default function HeaderInfo({
         </Text>
       </View>
 
-      {/* ACTION BUTTON */}
-      <Button
-        style={styles.chatButton}
-        iconAfter={
-          isUnlocked ? (
-            <Entypo name="lock-open" size={18} color="white" />
-          ) : (
-            <Entypo name="lock" size={18} color="white" />
-          )
-        }
-        onPress={onChatPress}
-      >
-        {isUnlocked ? "Chat now" : "Unlock to chat"}
-      </Button>
+      {!hideActions && onChatPress && (
+        <Button
+          style={styles.chatButton}
+          iconAfter={
+            isUnlocked ? (
+              <Entypo name="lock-open" size={18} color="white" />
+            ) : (
+              <Entypo name="lock" size={18} color="white" />
+            )
+          }
+          onPress={onChatPress}
+        >
+          {isUnlocked ? "Chat now" : "Unlock to chat"}
+        </Button>
+      )}
     </View>
   );
 }

@@ -88,6 +88,7 @@ yarn-error.*
 *.tsbuildinfo
 
 # @end expo-cli
-temp_auto_push.bat
-temp_interactive_push.bat
-branch_structure.json
+.opencode
+
+# Service account keys
+surro-app-473400-063ee393c442.json

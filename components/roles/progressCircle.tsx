@@ -35,7 +35,7 @@ const ProgressMeter = ({ style, progress = 0 }: ProgressMeterProps) => {
       </Text>
       <YStack alignItems="center" justifyContent="center" gap="$2">
         <AnimatedCircularProgress
-          size={80}
+          size={100}
           width={6}
           fill={progress}
           tintColor={progress < 100 ? "#ce9505ff" : "#0E0E55"}

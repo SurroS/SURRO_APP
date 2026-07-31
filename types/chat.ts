@@ -1,32 +1,47 @@
-// types/chat.ts
 import { User } from "./auth";
-export interface ChatUser extends User {
+
+export interface ChatUser {
   id: string;
   name: string;
-  role: "SURROGATE" | "INTENDED_PARENT" | "AGENT" //| "LAWYER" | "CLINIC";
+  userName?: string;
+  role: "SURROGATE" | "INTENDED_PARENT" | "AGENT" | "SUPPORT" | string;
   avatarUrl?: string;
 }
 
 export interface Conversation {
   id: string;
-  participants: ChatUser[];
-  lastMessage?: {
-    content: string;
-    createdAt: string;
+  participant: {
+    id: string;
+    name: string;
+    userName?: string;
+    avatar: string | null;
+    role: string;
   };
+  participants?: Participants[];
+  lastMessage?: { content: string; createdAt: string; senderId: string };
+  unreadCount: number;
 }
 
+export type MessageStatus = "SENDING" | "SENT" | "DELIVERED" | "READ";
 export interface Message {
   id: string;
-  conversationId: string;
-  sender: ChatUser;
-  content: string;
+  conversationId?: string | undefined;
+  sender?: {
+    id: string;
+    name: string;
+    userName?: string;
+    role?: string;
+  };
+  content?: string;
   attachmentUrl?: string;
   createdAt: string;
+  otherParticipant?: string;
+  status?: MessageStatus;
+  failed?: boolean;
 }
 
 export interface CreateConversationRequest {
-  otherUserId: string;
+  partnerId: string;
 }
 
 export interface SendMessageRequest {
@@ -34,3 +49,21 @@ export interface SendMessageRequest {
   content: string;
   attachmentUrl?: string;
 }
+
+export interface Participants {
+  avatarUrl: string;
+  name: string;
+  userName?: string;
+  conversationId: string | undefined;
+  userId: string;
+  role: "INTENDED_PARENT" | "SURROGATE" | "AGENT";
+}
+ 
+export interface Sender {
+  id: string;
+  name: string;
+  userName?: string;
+  role?: string;
+}
+
+

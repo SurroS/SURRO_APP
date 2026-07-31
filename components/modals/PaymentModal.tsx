@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal, View, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
-
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface Props {
   visible: boolean;
@@ -10,19 +10,22 @@ interface Props {
 }
 
 export default function PaymentModal({ visible, onClose, children, maxHeight }: Props) {
+  const insets = useSafeAreaInsets();
   return (
     <Modal
       visible={visible}
       animationType="slide"
       transparent
       onRequestClose={onClose}
+      presentationStyle="overFullScreen"
+      statusBarTranslucent
     >
       <TouchableOpacity
         style={styles.overlay}
         activeOpacity={1}
-        onPressOut={onClose} // tap outside to close
+        onPressOut={onClose}
       >
-        <View style={[styles.modalContent, maxHeight ? { maxHeight } : {}]}>
+        <View style={[styles.modalContent, maxHeight ? { maxHeight } : {}, { paddingBottom: insets.bottom || 16 }]}>
           {children}
         </View>
       </TouchableOpacity>
@@ -39,6 +42,7 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: "#fff",
     padding: 20,
+    paddingBottom: 34,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
   },

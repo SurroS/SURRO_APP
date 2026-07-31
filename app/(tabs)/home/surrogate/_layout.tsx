@@ -8,12 +8,7 @@ export default function surrogateLayout() {
         headerShown: false, 
       }}
     >
-      {/* Redirect entry (index) */} 
-      {/* <Stack.Screen name="index" />   */}
-      <Stack.Screen name="surrogateGuestView" />
-      <Stack.Screen name="surrogateList" />
-      <Stack.Screen name="surrogateProfileScreen" /> 
-      
+      {/* surrogateProfileScreen moved to /surrogate/surrogateProfileScreen */}
     </Stack>
   );
 }

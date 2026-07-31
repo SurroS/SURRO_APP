@@ -1,371 +1,296 @@
-// components/editBio/BioInputModal.tsx
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
+  ScrollView,
   TouchableOpacity,
   TextInput,
   StyleSheet,
   TouchableWithoutFeedback,
   Keyboard,
-  ScrollView,
-  Platform,
-  Animated,
-  EmitterSubscription,
+  ActivityIndicator,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { YStack, XStack, Text, Button } from "tamagui";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import colors from "@/hooks/colors";
-import PlatformInput from "./SocialSelector"; // adjust path if needed
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useProfile } from "@/hooks/useProfile";
-import { SurrogateProfileUpdate } from "@/types/profile";
+import PlatformInput from "./SocialSelector";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 
-type Social = { platform: string; handle: string };
-
-type EditProfileModalProps = {
-  visible: boolean;
-  onClose: () => void;
-  onSave?: (data: {
-    username: string;
-    about: string;
-    socials: Social[];
-  }) => void;
+export type Social = {
+  platform: string;
+  handle: string;
 };
 
-export default function BioInputModal({
+export type EditProfileModalProps = {
+  visible: boolean;
+  onClose: () => void;
+  onSave: (data: {
+    userName: string;
+    aboutMe: string;
+    socials: Social[];
+  }) => Promise<void>;
+  profile?: {
+    userName?: string;
+    aboutMe?: string;
+    socials?: Social[];
+  };
+  isLoading?: boolean;
+  role?: string;
+};
+
+export default function EditProfileModal({
   visible,
   onClose,
   onSave,
+  profile,
+  isLoading = false,
+  role,
 }: EditProfileModalProps) {
-  const { surrogateProfile, createProfile, updateProfile, isLoading } = useProfile();
-  const [username, setUsername] = React.useState("");
-  const [about, setAbout] = React.useState("");
-  const [socials, setSocials] = React.useState<Social[]>([]);
+  const insets = useSafeAreaInsets();
+  const scrollRef = useRef<ScrollView>(null);
+  const [username, setUsername] = useState("");
+  const [about, setAbout] = useState("");
+  const [socials, setSocials] = useState<Social[]>([]);
+  const [aboutInputHeight, setAboutInputHeight] = useState(80);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const aboutY = useRef(0);
+  const socialsY = useRef(0);
 
-  // keyboard state
-  const [keyboardHeight, setKeyboardHeight] = useState<number>(0);
-  const anim = useRef(new Animated.Value(0)).current; // animate translateY
-
-  // register keyboard listeners
   useEffect(() => {
-    let showSub: EmitterSubscription;
-    let hideSub: EmitterSubscription;
-
-    const onShow = (e: any) => {
-      const h = e.endCoordinates?.height ?? 0;
-      setKeyboardHeight(h);
-      Animated.timing(anim, {
-        toValue: h*0.5,
-        duration: 200,
-        useNativeDriver: true,
-      }).start();
-    };
-
-    const onHide = () => {
-      setKeyboardHeight(0);
-      Animated.timing(anim, {
-        toValue: 0,
-        duration: 180,
-        useNativeDriver: true,
-      }).start();
-    };
-
-    if (Platform.OS === "ios") {
-      showSub = Keyboard.addListener("keyboardWillShow", onShow);
-      hideSub = Keyboard.addListener("keyboardWillHide", onHide);
-    } else {
-      // android
-      showSub = Keyboard.addListener("keyboardDidShow", onShow);
-      hideSub = Keyboard.addListener("keyboardDidHide", onHide);
-    }
-
+    const showSub = Keyboard.addListener("keyboardDidShow", (e) =>
+      setKeyboardHeight(e.endCoordinates.height)
+    );
+    const hideSub = Keyboard.addListener("keyboardDidHide", () =>
+      setKeyboardHeight(0)
+    );
     return () => {
-      showSub?.remove();
-      hideSub?.remove();
+      showSub.remove();
+      hideSub.remove();
     };
-  }, [anim]);
+  }, []);
 
-  // Fetch profile when modal opens if not already loaded
-  // useEffect(() => {
-  //   if (visible && !surrogateProfile) {
-  //     fetchProfile();
-  //   }
-  // }, [visible, surrogateProfile, fetchProfile]);
-
-  // Initialize form fields from existing profile
   useEffect(() => {
-    if (visible && surrogateProfile) {
-      setUsername(surrogateProfile.userName || "");
-      setAbout(surrogateProfile.aboutMe || "");
-      
-      // Map profile social fields to socials array
-      const socialsArray: Social[] = [];
-      if (surrogateProfile.facebookProfile) {
-        socialsArray.push({ platform: "Facebook", handle: surrogateProfile.facebookProfile });
-      }
-      if (surrogateProfile.instagramProfile) {
-        socialsArray.push({ platform: "Instagram", handle: surrogateProfile.instagramProfile });
-      }
-      if (surrogateProfile.twitterProfile) {
-        socialsArray.push({ platform: "Twitter", handle: surrogateProfile.twitterProfile });
-      }
-      if (surrogateProfile.threadsProfile) {
-        socialsArray.push({ platform: "Threads", handle: surrogateProfile.threadsProfile });
-      }
-      setSocials(socialsArray);
-    } else if (visible && !surrogateProfile) {
-      // Reset form when creating new profile
-      setUsername("");
-      setAbout("");
-      setSocials([]);
-    }
-  }, [visible, surrogateProfile]);
+    if (!visible) return;
+    setUsername(profile?.userName || "");
+    setAbout(profile?.aboutMe || "");
+    setSocials(profile?.socials || []);
+  }, [visible]);
 
-  // reset state when closed (optional)
-  useEffect(() => {
-    if (!visible) {
-      setKeyboardHeight(0);
-      Animated.timing(anim, {
-        toValue: 0,
-        duration: 1,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [visible, anim]);
-
-  // socials handlers
   const handleAddSocial = (platform: string, handle: string) => {
-    if (socials.some((s) => s.platform === platform)) return;
-    setSocials((p) => [{ platform, handle }, ...p]);
+    setSocials((prev) => {
+      const exists = prev.find((s) => s.platform === platform);
+      if (exists) {
+        return prev.map((s) =>
+          s.platform === platform ? { platform, handle } : s,
+        );
+      }
+      return [...prev, { platform, handle }];
+    });
   };
 
-  const handleRemoveSocial = (platform: string) => {
-    setSocials((p) => p.filter((s) => s.platform !== platform));
-  };
+  const [usernameError, setUsernameError] = useState("");
 
   const handleSave = async () => {
-    try {
-      // Map socials array to individual profile fields
-      const facebookProfile = socials.find(s => s.platform === "Facebook")?.handle;
-      const instagramProfile = socials.find(s => s.platform === "Instagram")?.handle;
-      const twitterProfile = socials.find(s => s.platform === "Twitter")?.handle;
-      const threadsProfile = socials.find(s => s.platform === "Threads")?.handle;
-
-      if (surrogateProfile) {
-        // Update existing profile - only include fields with values
-        const updateData: SurrogateProfileUpdate = {};
-        
-        if (username) updateData.userName = username;
-        if (about) updateData.aboutMe = about;
-        if (facebookProfile) updateData.facebookProfile = facebookProfile;
-        if (instagramProfile) updateData.instagramProfile = instagramProfile;
-        if (twitterProfile) updateData.twitterProfile = twitterProfile;
-        if (threadsProfile) updateData.threadsProfile = threadsProfile;
-
-        await updateProfile(updateData);
-        
-        Toast.show({
-          text1: "Profile updated successfully",
-          type: "customSuccess" as ToastType,
-        });
-      } else {
-        // Create new profile - only include fields with values
-        const createData: any = {};
-        
-        if (username) createData.userName = username;
-        if (about) createData.aboutMe = about;
-        if (facebookProfile) createData.facebookProfile = facebookProfile;
-        if (instagramProfile) createData.instagramProfile = instagramProfile;
-        if (twitterProfile) createData.twitterProfile = twitterProfile;
-        if (threadsProfile) createData.threadsProfile = threadsProfile;
-
-        await createProfile(createData);
-        
-        Toast.show({
-          text1: "Profile created successfully",
-          type: "customSuccess" as ToastType,
-        });
-      }
-
-      // Call optional onSave callback if provided
-      if (onSave) {
-        onSave({ username, about, socials });
-      }
-      
-      onClose();
-    } catch (error: any) {
-      Toast.show({
-        text1: surrogateProfile ? "Failed to update profile" : "Failed to create profile",
-        text2: error.response?.data?.message || "Please try again",
-        type: "customError" as ToastType,
-      });
+    if (isLoading) return;
+    const trimmed = username.trim();
+    if (!/\d/.test(trimmed) || !/[^a-zA-Z0-9\s]/.test(trimmed)) {
+      setUsernameError("Username must include at least one number and one special character");
+      return;
     }
+    setUsernameError("");
+    await onSave({
+      userName: trimmed,
+      aboutMe: about.trim(),
+      socials: socials.filter((s) => s.handle && s.handle.trim().length > 0),
+    });
+    Toast.show({
+      text1: "Bio updated successfully",
+      type: "customSuccess" as ToastType,
+    });
+    onClose();
   };
 
   if (!visible) return null;
 
+  // Reduce the effective keyboard offset so the sheet doesn't move too high when
+  // the keyboard opens. Subtract 50px from the keyboard height (minimum 0).
+  const effectiveKeyboardOffset = Math.max(0, keyboardHeight - 50);
+
   return (
-    <SafeAreaView style={styles.full}>
-      {/* backdrop */}
+    <View style={[styles.full, { paddingBottom: insets.bottom || 16 }]}>
       <TouchableWithoutFeedback
+        disabled={isLoading}
         onPress={() => {
           Keyboard.dismiss();
-          onClose();
+          if (!isLoading) onClose();
         }}
       >
         <View style={styles.backdrop} />
       </TouchableWithoutFeedback>
-
-      {/* bottom sheet - translateY animated to avoid keyboard */}
-      <Animated.View
-        style={[styles.sheetWrapper, { transform: [{ translateY: anim }] }]}
-        pointerEvents="box-none"
-      >
+      <View style={styles.sheetWrapper}>
         <View style={styles.sheet}>
-          {/* header */}
           <XStack
             justifyContent="space-between"
             alignItems="center"
-            style={{ marginBottom: 8 }}
+            paddingHorizontal={20}
+            paddingTop={20}
           >
-            <Text fontSize={18} fontWeight="700" color={colors.primary}>
-              Edit Profile
+            <Text color={colors.text} fontSize={18} fontWeight="700">
+              Edit Bio
             </Text>
-
-            <TouchableOpacity onPress={onClose}>
-              <Text color={colors.primary}>Close</Text>
+            <TouchableOpacity disabled={isLoading} onPress={onClose}>
+              <Text color={isLoading ? "#999" : colors.primary}>Close</Text>
             </TouchableOpacity>
           </XStack>
-
           <ScrollView
-            style={{ flex: 1 }}
+            ref={scrollRef}
             contentContainerStyle={{
-              paddingBottom: Math.max(24, keyboardHeight + 24),
+              paddingHorizontal: 20,
+              // Use a slightly reduced keyboard height so the modal doesn't get pushed up too far
+              paddingBottom: effectiveKeyboardOffset + 20,
             }}
             keyboardShouldPersistTaps="handled"
           >
-            {/* Username */}
-            <YStack marginBottom={12}>
-              <Text
-                fontWeight="600"
-                color="#0E0E55"
-                marginBottom={6}
-                fontSize={14}
-              >
+            <YStack
+              marginTop={16}
+              onLayout={(e) => { aboutY.current = e.nativeEvent.layout.y; }}
+            >
+              <Text color={colors.text} fontWeight="600">
                 Username
               </Text>
               <TextInput
-                placeholder="@username, no real names"
                 value={username}
-                placeholderTextColor={"gray"}
-                onChangeText={setUsername}
+                editable={!isLoading}
+                onChangeText={(t) => { setUsername(t); setUsernameError(""); }}
+                placeholder="no real names hear"
+                placeholderTextColor="#999"
                 style={styles.input}
-                returnKeyType="next"
+                maxLength={10}
+                onFocus={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
               />
-            </YStack>
-
-            {/* About */}
-            <YStack marginBottom={12}>
-              <Text
-                fontWeight="600"
-                color="#0E0E55"
-                marginBottom={6}
-                fontSize={14}
-              >
-                About
+              <Text alignSelf="flex-end" fontSize={12} color={colors.textSecondary ?? "#666"} marginTop={4}>
+                {username.length}/10
               </Text>
-              <TextInput
-                multiline
-                placeholderTextColor={"gray"}
-                value={about}
-                onChangeText={(text) => {
-                  if (text.length <= 300) setAbout(text);
-                }}
-                style={[styles.input, styles.textArea]}
-                placeholder="Tell us how much this opportunity means to you..."
-                textAlignVertical="top"
+              {usernameError ? (
+                <Text fontSize={12} color={colors.danger} marginTop={4}>
+                  {usernameError}
+                </Text>
+              ) : null}
+            </YStack>
+             <YStack marginTop={16}>
+               <Text color={colors.text} fontWeight="600">
+                 About
+               </Text>
+               <TextInput
+                 multiline
+                 editable={!isLoading}
+                 value={about}
+                 onChangeText={(t) => t.length <= 300 && setAbout(t)}
+                 placeholder={role === "AGENT" ? "tell us why you want to be an agent" : "tell us why you need this, no one else can see this."}
+                 placeholderTextColor="#999"
+                 onContentSizeChange={(e) =>
+                   setAboutInputHeight(
+                     Math.min(Math.max(80, e.nativeEvent.contentSize.height), 200),
+                   )
+                 }
+                 style={[
+                   styles.input,
+                   { height: aboutInputHeight, paddingVertical: 10 },
+                 ]}
+                 onFocus={() => scrollRef.current?.scrollTo({ y: aboutY.current, animated: true })}
+               />
+               <Text alignSelf="flex-end" fontSize={12}>
+                 {about.length}/300
+               </Text>
+             </YStack>
+            <YStack marginTop={16}>
+              <Text color={colors.text} fontWeight="600" marginBottom={4}>
+                Socials
+              </Text>
+              <Text fontSize={13} color={colors.textSecondary ?? "#555"} marginBottom={4} lineHeight={18}>
+                Your social profiles help us verify your identity. This information is kept private and will not be shared with anyone.
+              </Text>
+              <Text fontSize={13} color={colors.textSecondary ?? "#555"} marginBottom={12} lineHeight={18}>
+                Please enter links to your social profiles (e.g. Facebook, Instagram).
+              </Text>
+              <YStack
+                onLayout={(e) => { socialsY.current = e.nativeEvent.layout.y; }}
+              >
+              <Text fontWeight="600" marginBottom={8}>
+                Add Social
+              </Text>
+              <PlatformInput
+                onAdd={handleAddSocial}
+                disabled={isLoading}
+                onInputFocus={() => scrollRef.current?.scrollTo({ y: socialsY.current, animated: true })}
               />
-              <Text
-                alignSelf="flex-end"
-                fontSize={12}
-                color={about.length < 300 ? colors.primary : colors.danger}
-                marginTop={6}
-              >
-                {about.length}/300
-              </Text>
-            </YStack>
 
-            {/* Socials */}
-            <Text
-              fontWeight="600"
-              color="#0E0E55"
-              fontSize={14}
-              marginBottom={8}
-            >
-              Add Socials
-            </Text>
-
-            <PlatformInput
-              onAdd={handleAddSocial}
-              initialPlatform="Instagram"
-            />
-
-            {/* List of added socials
-            {socials.length > 0 && (
-              <YStack marginTop={12} gap={8}>
-                {socials.map((s) => (
-                  <XStack
-                    key={s.platform}
-                    justifyContent="space-between"
-                    alignItems="center"
-                    style={styles.addedRow}
-                  >
-                    <XStack alignItems="center" gap={8}>
-                      <Text fontWeight="600" color="#0E0E55">
-                        {s.platform}:
+              {socials.length > 0 && (
+                <YStack marginTop={12}>
+                  {socials.map((s) => (
+                    <XStack
+                      key={s.platform}
+                      alignItems="center"
+                      gap="$2"
+                      backgroundColor="#F8F8FA"
+                      borderRadius={10}
+                      padding={10}
+                      marginBottom={8}
+                    >
+                      <Ionicons name="link" size={18} color="#666" />
+                      <Text flex={1} fontSize={14} color="#111">
+                        {s.platform}: <Text fontWeight="700">{s.handle}</Text>
                       </Text>
-                      <Text>{s.handle}</Text>
+                      <TouchableOpacity
+                        onPress={() =>
+                          setSocials((prev) =>
+                            prev.filter((x) => x.platform !== s.platform),
+                          )
+                        }
+                      >
+                        <Text color="#E63946" fontWeight="700">delete</Text>
+                      </TouchableOpacity>
                     </XStack>
-                  </XStack>
-                ))}
-              </YStack>
-            )} */}
-
+                  ))}
+                </YStack>
+              )}
+            </YStack>
+            </YStack>
             <Button
-              onPress={handleSave}
-              backgroundColor={colors.primary}
-              color="#fff"
-              borderRadius={10}
               height={50}
-              marginTop={18}
+              marginTop={20}
+              borderRadius={10}
+              backgroundColor={colors.primary}
               disabled={isLoading}
               opacity={isLoading ? 0.6 : 1}
+              onPress={handleSave}
             >
-              {isLoading ? "Saving..." : surrogateProfile ? "Update Profile" : "Create Profile"}
+              {isLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                "Save Changes"
+              )}
             </Button>
           </ScrollView>
         </View>
-      </Animated.View>
-    </SafeAreaView>
+      </View>
+    </View>
   );
-} 
+}
 
 const styles = StyleSheet.create({
   full: {
     position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    zIndex: 999
+    inset: 0,
+    zIndex: 999,
   },
   backdrop: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.45)",
   },
   sheetWrapper: {
-    // bottom sheet wrapper anchored to bottom
     position: "absolute",
     left: 0,
     right: 0,
@@ -375,26 +300,21 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    padding: 20,
-    maxHeight: "97%",
-    minHeight: 220,
+    maxHeight: "90%",
+    minHeight: 200,
   },
   input: {
-    borderColor: colors.primary,
     backgroundColor: "#F8F8FA",
     borderRadius: 8,
     paddingHorizontal: 10,
     height: 44,
-    color: colors.primary,
+    color: "#000",
   },
-  textArea: {
-    height: 120,
-    paddingVertical: 10,
-  },
-  addedRow: {
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-    backgroundColor: "#F8F8FA",
+  socialRow: {
+    backgroundColor: "#F6F6F8",
     borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 8,
   },
 });

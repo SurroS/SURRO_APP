@@ -1,6 +1,6 @@
 import { io, Socket } from "socket.io-client";
 
-const SOCKET_URL = "https://dev.surrosantara.space"; // backend ws endpoint
+const SOCKET_URL = process.env.EXPO_PUBLIC_SOCKET_URL || "https://dev.surrosantara.space";
 
 let socket: Socket | null = null;
 
@@ -12,11 +12,9 @@ export const connectSocket = (token: string): Socket => {
     });
 
     socket.on("connect", () => {
-      console.log("Connected to WebSocket");
     });
 
     socket.on("disconnect", () => {
-      console.log("Disconnected from WebSocket");
     });
   }
   return socket;

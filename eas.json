@@ -1,4 +1,4 @@
- {
+{
   "cli": {
     "version": ">= 3.16.3",
     "appVersionSource": "remote"
@@ -11,7 +11,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL":"https://dev.surrosantara.space/api/v1",
+        "EXPO_PUBLIC_API_URL": "https://surroserver-production.up.railway.app/api/v1",
         "GOOGLE_IOS_CLIENT_ID": "321354387399-u4qsn500nvnj8738hnr3imnpp7rkg7t4.apps.googleusercontent.com",
         "GOOGLE_WEB_CLIENT_ID": "321354387399-8mh3tsrl9ji8a6164si406unp6uilq52.apps.googleusercontent.com"
       }
@@ -22,7 +22,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL":"https://dev.surrosantara.space/api/v1",
+        "EXPO_PUBLIC_API_URL": "https://surroserver-production.up.railway.app/api/v1",
         "GOOGLE_IOS_CLIENT_ID": "321354387399-u4qsn500nvnj8738hnr3imnpp7rkg7t4.apps.googleusercontent.com",
         "GOOGLE_WEB_CLIENT_ID": "321354387399-8mh3tsrl9ji8a6164si406unp6uilq52.apps.googleusercontent.com",
         "APP_ENV": "preview"
@@ -35,13 +35,26 @@
       },
       "env": {
         "APP_ENV": "production",
-        "EXPO_PUBLIC_API_URL":"https://dev.surrosantara.space/api/v1",
+        "EXPO_PUBLIC_APP_ENV": "production",
+        "EXPO_PUBLIC_API_URL": "https://surroserver-production.up.railway.app/api/v1",
         "GOOGLE_IOS_CLIENT_ID": "321354387399-u4qsn500nvnj8738hnr3imnpp7rkg7t4.apps.googleusercontent.com",
         "GOOGLE_WEB_CLIENT_ID": "321354387399-8mh3tsrl9ji8a6164si406unp6uilq52.apps.googleusercontent.com"
       }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "android": {
+        "serviceAccountKeyPath": "./surro-app-473400-063ee393c442.json",
+        "track": "internal",
+        "releaseStatus": "completed"
+      },
+      "ios": {
+        "language": "en-US",
+        "appleId": "@env-var APPLE_ID",
+        "ascAppId": "@env-var ASC_APP_ID",
+        "appleTeamId": "@env-var APPLE_TEAM_ID"
+      }
+    }
   }
 }

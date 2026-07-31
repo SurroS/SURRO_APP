@@ -1,17 +1,33 @@
-import React from 'react';
-import Entypo from '@expo/vector-icons/Entypo';
-import { LibraryBig, MessageSquare, Settings } from "@tamagui/lucide-icons";
+import React from "react";
+import { ActivityIndicator, View, StyleSheet } from "react-native";
+import Entypo from "@expo/vector-icons/Entypo";
+import { MessageSquare, Settings } from "@tamagui/lucide-icons";
 import { Tabs } from "expo-router";
-import colors from "../../hooks/colors";
+import { useAuthStore } from "@/store/auth";
 
 export default function TabsLayout() {
+  const forceLogout = useAuthStore((s) => s.forceLogout);
+  const chatUnread = useAuthStore((s) => s.chatUnreadCount);
+  const user = useAuthStore((s) => s.user);
+
+  // ---- Full-screen blocker on 401 force logout ----
+  if (forceLogout) {
+    return (
+      <View style={styles.blocker}>
+        <ActivityIndicator size="large" color="#0E0E55" />
+      </View>
+    );
+  }
+
+  const isSurrogate = user?.role === "SURROGATE";
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: { borderTopWidth: 0, backgroundColor: colors.white },
-        tabBarActiveTintColor: colors.primary as any,
-        tabBarInactiveTintColor: colors.gray as any,
+        tabBarStyle: { borderTopWidth: 0, backgroundColor: "#FFFFFF" },
+        tabBarActiveTintColor: "#0E0E55",
+        tabBarInactiveTintColor: "#808080",
       }}
     >
       <Tabs.Screen
@@ -19,10 +35,11 @@ export default function TabsLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ focused, size }) => (
-            <Entypo name="home"
+            <Entypo
+              name="home"
               size={size}
-              color={(focused ? colors.primary : colors.gray) as any}
-              fill={(focused ? colors.primary : "transparent") as any}
+              color={focused ? "#0E0E55" : "#808080"}
+              fill={focused ? "#0E0E55" : "transparent"}
             />
           ),
         }}
@@ -31,24 +48,27 @@ export default function TabsLayout() {
         name="chat"
         options={{
           title: "Chat",
+          tabBarBadge: chatUnread > 0 ? chatUnread : undefined,
+          tabBarBadgeStyle: { backgroundColor: "red", fontSize: 11, fontWeight: "700" },
           tabBarIcon: ({ focused, size }) => (
             <MessageSquare
               size={size}
-              color={(focused ? colors.primary : colors.gray) as any}
-              fill={(focused ? colors.primary : "transparent") as any}
+              color={focused ? "#0E0E55" : "#808080"}
+              fill={focused ? "#0E0E55" : "transparent"}
             />
           ),
         }}
       />
       <Tabs.Screen
-        name="resources"
+        name="network"
         options={{
-          title: "Resources",
+          title: "Network",
+          href: isSurrogate ? null : undefined,
           tabBarIcon: ({ focused, size }) => (
-            <LibraryBig
+            <Entypo
+              name="users"
               size={size}
-              color={(focused ? colors.primary : colors.gray) as any}
-              fill={(focused ? colors.primary : "transparent") as any}
+              color={focused ? "#0E0E55" : "#808080"}
             />
           ),
         }}
@@ -60,8 +80,8 @@ export default function TabsLayout() {
           tabBarIcon: ({ focused, size }) => (
             <Settings
               size={size}
-              color={(focused ? colors.primary : colors.gray) as any}
-              fill={(focused ? colors.primary : "transparent") as any}
+              color={focused ? "#0E0E55" : "#808080"}
+              fill={focused ? "#0E0E55" : "transparent"}
             />
           ),
         }}
@@ -69,3 +89,12 @@ export default function TabsLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  blocker: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+  },
+});

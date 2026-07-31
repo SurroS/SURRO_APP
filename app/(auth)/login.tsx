@@ -1,18 +1,23 @@
 import { useSignupForm } from "@/hooks/auth";
 import { useAuth } from "@/hooks/useAuth";
-import { GoogleSignin, statusCodes } from "@react-native-google-signin/google-signin";
+import {
+  GoogleSignin,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
+import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
-import { InputField } from "../../components/auth/InputField";
-import { OrDivider } from "../../components/auth/OrDivider";
-import { PrimaryButton } from "../../components/auth/PrimaryButton";
-import { ScreenHeader } from "../../components/navigation/ScreenHeader";
-import { SocialButton } from "../../components/auth/SocialButton";
-import { useLoginForm } from "../../hooks/auth/useLoginForm";
+import { InputField } from "@/components/auth/InputField";
+import { OrDivider } from "@/components/auth/OrDivider";
+import { PrimaryButton } from "@/components/auth/PrimaryButton";
+import { ScreenHeader } from "@/components/navigation/ScreenHeader";
+import { SocialButton } from "@/components/auth/SocialButton";
+import { useLoginForm } from "@/hooks/auth/useLoginForm";
+import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -28,12 +33,21 @@ export default function LoginScreen() {
   const router = useRouter();
   const { formData, errors, updateField, validateForm } = useLoginForm();
   const { signupFormData } = useSignupForm();
-  const { login, googleLogin, isLoading } = useAuth();
+  const { login, googleLogin, devLogin, isLoading, setForceLogout } = useAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  // Clear force-logout blocker when login screen mounts
+  useEffect(() => { setForceLogout(false); }, []);
+
+  const DEV_AUTH_EMAIL = "dev@surro.local";
+  const DEV_AUTH_PASSWORD = "DevSurro123!";
 
   // Handle Google Sign-In
   const handleGoogleSignin = async () => {
+    setGoogleLoading(true);
     try {
       await GoogleSignin.hasPlayServices();
+      await GoogleSignin.signOut();
       const userInfo = await GoogleSignin.signIn();
 
       // Get idToken
@@ -44,11 +58,6 @@ export default function LoginScreen() {
       }
       if (!idToken) throw new Error("Google returned null idToken");
 
-      console.log("====== GOOGLE LOGIN SUCCESS ======");
-      console.log("ID Token:", idToken);
-      console.log("User Info:", userInfo.user);
-
-      // Call your backend login/signup
       await googleLogin({
         idToken,
         role: signupFormData?.role,
@@ -90,14 +99,26 @@ export default function LoginScreen() {
           text2: "An unexpected error occurred.",
         });
       }
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
   // Regular email/password login
   const handleLogin = async () => {
     if (!validateForm()) return;
+
     try {
-      await login(formData);
+      if (
+        __DEV__ &&
+        formData.email === DEV_AUTH_EMAIL &&
+        formData.password === DEV_AUTH_PASSWORD
+      ) {
+        await devLogin();
+      } else {
+        await login(formData);
+      }
+
       Toast.show({
         text1: "Logged in successfully",
         type: "customSuccess" as ToastType,
@@ -115,9 +136,10 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <ScreenHeader title="Log in" onBackPress={() => router.navigate("/")} />
+    <KeyboardAvoidingWrapper>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.container}>
+        <ScreenHeader title="Log in" />
 
         <InputField
           label="Username/Email"
@@ -143,7 +165,7 @@ export default function LoginScreen() {
 
         <TouchableOpacity
           style={styles.forgotPasswordButton}
-          onPress={() => router.push("/forgot-password")}
+          onPress={() => router.push("/(auth)/forgot-password")}
         >
           <Text style={styles.forgotPasswordText}>Forgot password?</Text>
         </TouchableOpacity>
@@ -160,18 +182,20 @@ export default function LoginScreen() {
           title="Continue with Google"
           icon={require("../../assets/images/google.png")}
           onPress={handleGoogleSignin}
+          loading={googleLoading}
         />
 
         <TouchableOpacity
           style={styles.signupLink}
-          onPress={() => router.push("/signup")}
+          onPress={() => router.push("/onboarding/how-did-you-hear")}
         >
           <Text style={styles.signupLinkText}>
             Don&apos;t have an account? Sign up
           </Text>
         </TouchableOpacity>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </KeyboardAvoidingWrapper>
   );
 }
 

@@ -1,36 +1,70 @@
-import axios from 'axios';
-import { secureGet } from '@/utils/storage';
+import { authenticatedGet, authenticatedPost, publicPost } from "./httpClient";
 
-const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8081';
+// Authentication API functions
+// Note: Login/signup don't require authentication, so we use publicPost
+// Other auth operations (like token refresh) use authenticatedPost
 
-const authApi = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
+const authApi = {
+  login: async (data: { email: string; password: string }) => {
+    return publicPost("/auth/login", data);
   },
-});
 
-export const makeAuthenticatedAuthRequest = async (
-  token: string,
-  endpoint: string,
-  data: any
-) => {
-  return authApi.post(endpoint, data, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  signup: async (data: { email: string; password: string; role: string }) => {
+    return publicPost("/auth/register", data);
+  },
+
+  verifyOTP: async (data: { email: string; code: string }) => {
+    return publicPost("/auth/verify-otp", data);
+  },
+
+  resendOTP: async (data: { email: string }) => {
+    return publicPost("/auth/resend-otp", data);
+  },
+
+  forgotPassword: async (data: { email: string }) => {
+    return publicPost("/auth/forgot-password", data);
+  },
+
+  resetPassword: async (data: {
+    email: string;
+    otp: string;
+    newPassword: string;
+    newPasswordConfirmation: string;
+  }) => {
+    return publicPost("/auth/reset-password", data);
+  },
+
+  refreshToken: async () => {
+    return authenticatedPost("/auth/refresh-token");
+  },
+
+  getCurrentUser: async () => {
+    const res = await authenticatedGet("/auth/me");
+    return res;
+  },
+
+  logout: async () => {
+    return authenticatedPost("/auth/logout");
+  },
+
+  // Legacy wrapper for backward compatibility (remove after updating all usages)
+  makeAuthenticatedAuthRequest: async (
+    token: string,
+    endpoint: string,
+    data: any,
+  ) => {
+    console.warn(
+      "[authApi] makeAuthenticatedAuthRequest is deprecated. Use authenticatedPost directly.",
+    );
+    return authenticatedPost(endpoint, data);
+  },
+
+  authedRequest: async (endpoint: string, data: any) => {
+    console.warn(
+      "[authApi] authedRequest is deprecated. Use authenticatedPost directly.",
+    );
+    return authenticatedPost(endpoint, data);
+  },
 };
-
-export const authedRequest = async (endpoint: string, data: any) => {
-  const token = await secureGet('auth_token')
-  return authApi.post(endpoint, data, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-  });
-}
 
 export default authApi;

@@ -1,4 +1,3 @@
-import colors from "@/hooks/colors";
 import React from "react";
 import { YStack, Text } from "tamagui";
 
@@ -22,7 +21,7 @@ export const Badge: React.FC<BadgeProps> = ({ label, variant }) => {
       borderRadius="$2"
       backgroundColor={badgeColors[variant]}
     >
-      <Text color={colors.background} fontWeight="$semibold" fontSize={12}>
+      <Text color="$white" fontWeight="$semibold" fontSize={12}>
         {label}
       </Text>
     </YStack>

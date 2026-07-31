@@ -1,18 +1,19 @@
-import React, { useState,useEffect } from "react";
-import { YStack, XStack, Text, Button, View } from "tamagui";
+import React, { useState } from "react";
+import { YStack, Text, Button, View } from "tamagui";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
-import { FilePreviewCard } from "@/components/medical/FilePreview";
+import ImageCropperModal from "@/components/ImageCropperModal";
 
 type UploadCardProps = {
   label: string;
   onFileSelect: (file: any) => void;
   file?: any;
+  isReupload?: boolean;
 };
 
-const StyledUploadCard = ({ label, onFileSelect, file }: UploadCardProps) => {
-  const [progress, setProgress] = useState(0);
-  const [uploading, setUploading] = useState(false);
+const StyledUploadCard = ({ label, onFileSelect, file, isReupload }: UploadCardProps) => {
+  const [cropperImageUri, setCropperImageUri] = useState<string | null>(null);
+  const [showCropper, setShowCropper] = useState(false);
 
   const handlePickFile = async () => {
     try {
@@ -20,7 +21,7 @@ const StyledUploadCard = ({ label, onFileSelect, file }: UploadCardProps) => {
         type: ["image/*", "application/pdf"],
       });
       if (result.canceled) return;
-      startUpload(result.assets[0]);
+      onFileSelect(result.assets[0]);
     } catch (error) {
       console.error("Error selecting file:", error);
     }
@@ -35,39 +36,25 @@ const StyledUploadCard = ({ label, onFileSelect, file }: UploadCardProps) => {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
       quality: 0.8,
     });
 
     if (!result.canceled) {
-      startUpload(result.assets[0]);
+      setCropperImageUri(result.assets[0].uri);
+      setShowCropper(true);
     }
   };
 
-  const startUpload = (file: any) => {
-    onFileSelect(file);
-    setProgress(0);
-    setUploading(true);
+  const handleCropComplete = (croppedUri: string) => {
+    onFileSelect({ uri: croppedUri, type: "image/jpeg", name: "cropped.jpg" });
+    setShowCropper(false);
+    setCropperImageUri(null);
   };
 
-  // Simulate upload progress
-  useEffect(() => {
-    let timer: ReturnType<typeof setInterval>; 
-    if (uploading && progress < 100) {
-      timer = setInterval(() => {
-        setProgress((p) => {
-          const next = p + Math.random() * 15; // add random increment
-          if (next >= 100) {
-            clearInterval(timer);
-            setUploading(false);
-            return 100;
-          }
-          return next;
-        });
-      }, 400);
-    }
-    return () => clearInterval(timer);
-  }, [uploading, progress]);
+  const handleCropperCancel = () => {
+    setShowCropper(false);
+    setCropperImageUri(null);
+  };
 
   return (
     <YStack gap="$2">
@@ -85,31 +72,28 @@ const StyledUploadCard = ({ label, onFileSelect, file }: UploadCardProps) => {
         backgroundColor="#FAFAFA"
         minHeight={140}
       >
-        {!file ? (
-          <>
-            <Text textAlign="center" color="#555">
-              Maximum size per file is 5MB
-            </Text>
-            <Text textAlign="center" color="#999" fontSize={13}>
-              File format: PDF / Image
-            </Text>
-            <Button
-              backgroundColor="#E9E2F7"
-              color="#4A00E0"
-              marginTop="$3"
-              onPress={handlePickFile}
-            >
-              Upload
-            </Button>
-          </>
-        ) : (
-          <FilePreviewCard
-            file={file}
-            progress={progress}
-            onRemove={() => onFileSelect(null)}
-          />
-        )}
+        <Text textAlign="center" color="#555">
+          Maximum size per file is 5MB
+        </Text>
+        <Text textAlign="center" color="#999" fontSize={13}>
+          File format: PDF / Image
+        </Text>
+        <Button
+          backgroundColor="#E9E2F7"
+          color="#4A00E0"
+          marginTop="$3"
+          onPress={handlePickFile}
+        >
+          {isReupload ? "Reupload" : "Upload"}
+        </Button>
       </View>
+
+      <ImageCropperModal
+        visible={showCropper}
+        imageUri={cropperImageUri || ""}
+        onCrop={handleCropComplete}
+        onCancel={handleCropperCancel}
+      />
     </YStack>
   );
 };

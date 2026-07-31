@@ -11,12 +11,13 @@ export const createKYCSlice: StateCreator<KYCStore> = (set) => ({
   submitKYC: async (
     idFront: { uri: string; type: string; name: string },
     idBack?: { uri: string; type: string; name: string },
-    faceScan?: { uri: string; type: string; name: string }
+    faceScan?: { uri: string; type: string; name: string },
+    idType?: string
   ) => {
     try {
       set({ isLoading: true, error: null });
 
-      const response = await submitKYCApi(idFront, idBack, faceScan);
+      const response = await submitKYCApi(idFront, idBack, faceScan, idType);
 
       set({
         status: {

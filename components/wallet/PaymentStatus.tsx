@@ -1,28 +1,25 @@
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  Easing,
-  StyleSheet,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { Text, YStack } from 'tamagui';
-import colors from "@/hooks/colors"
+import React, { useEffect, useRef, useState } from "react";
+import { Animated, Easing, StyleSheet, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { Text, YStack } from "tamagui";
+import colors from "@/hooks/colors";
 
 interface PaymentStatusScreenProps {
   onDone: () => void;
 }
 
-const PaymentStatusScreen: React.FC<PaymentStatusScreenProps> = ({ onDone }) => {
-  const [status, setStatus] = useState<'processing' | 'success'>('processing');
+const PaymentStatusScreen: React.FC<PaymentStatusScreenProps> = ({
+  onDone,
+}) => {
+  const [status, setStatus] = useState<"processing" | "success">("processing");
   const spinValue = useRef(new Animated.Value(0)).current;
   const animationRef = useRef<Animated.CompositeAnimation | null>(null);
 
   // Create interpolation for spinner rotation
   const spin = spinValue.interpolate({
     inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
+    outputRange: ["0deg", "360deg"],
   });
 
   // Start the spinning animation
@@ -34,7 +31,7 @@ const PaymentStatusScreen: React.FC<PaymentStatusScreenProps> = ({ onDone }) => 
         duration: 1500,
         easing: Easing.linear,
         useNativeDriver: true,
-      })
+      }),
     );
     animationRef.current.start();
   };
@@ -47,14 +44,14 @@ const PaymentStatusScreen: React.FC<PaymentStatusScreenProps> = ({ onDone }) => 
   };
 
   useEffect(() => {
-    if (status === 'processing') {
+    if (status === "processing") {
       startSpinning();
     } else {
       stopSpinning();
     }
 
     const timer = setTimeout(() => {
-      setStatus('success');
+      setStatus("success");
       setTimeout(() => {
         onDone();
       }, 500);
@@ -66,10 +63,10 @@ const PaymentStatusScreen: React.FC<PaymentStatusScreenProps> = ({ onDone }) => 
     };
   }, [status, onDone]);
 
-  const isProcessing = status === 'processing';
+  const isProcessing = status === "processing";
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
       <YStack
         width="100%"
         paddingHorizontal={20}
@@ -77,7 +74,7 @@ const PaymentStatusScreen: React.FC<PaymentStatusScreenProps> = ({ onDone }) => 
         marginBottom={40}
         alignItems="center"
       >
-        <Text fontSize={18} fontWeight="600" color={colors.headerText}>
+        <Text fontSize={18} fontWeight="600" color="#000000">
           Payment Processing
         </Text>
       </YStack>
@@ -102,7 +99,8 @@ const PaymentStatusScreen: React.FC<PaymentStatusScreenProps> = ({ onDone }) => 
             </View>
             <Text style={statusStyles.title}>Payment Successful</Text>
             <Text style={statusStyles.message}>
-              Your wallet has been topped up successfully. We’ve sent your receipt to your email.
+              Your wallet has been topped up successfully. We’ve sent your
+              receipt to your email.
             </Text>
           </>
         )}
@@ -117,9 +115,9 @@ const statusStyles = StyleSheet.create({
     height: 80,
     borderRadius: 40,
     borderWidth: 6,
-    borderColor: 'rgba(14, 14, 85, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderColor: "rgba(14, 14, 85, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 30,
     borderTopColor: colors.ACTION_NAVY_BLUE,
     borderLeftColor: colors.ACTION_NAVY_BLUE,
@@ -129,13 +127,13 @@ const statusStyles = StyleSheet.create({
     height: 80,
     borderRadius: 40,
     backgroundColor: colors.SUCCESS_GREEN,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 30,
   },
   title: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.headerText,
     marginBottom: 10,
   },
@@ -143,7 +141,7 @@ const statusStyles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
     color: colors.secondaryGray,
-    textAlign: 'center',
+    textAlign: "center",
     paddingHorizontal: 40,
   },
 });

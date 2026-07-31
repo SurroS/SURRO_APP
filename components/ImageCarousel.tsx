@@ -60,6 +60,8 @@ export function ImageCarousel({ images, unlocked }: Props) {
         showsHorizontalScrollIndicator={false}
         onScroll={handleScroll}
         scrollEventThrottle={16}
+        snapToInterval={SCREEN_WIDTH}
+        decelerationRate="fast"
       >
         {images.map((uri, index) => (
           <Pressable
@@ -72,6 +74,8 @@ export function ImageCarousel({ images, unlocked }: Props) {
               style={styles.image}
               resizeMode="cover"
             />
+
+            <View style={styles.bottomOverlay} />
 
             {!unlocked && (
               <BlurView
@@ -135,7 +139,7 @@ export function ImageCarousel({ images, unlocked }: Props) {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    height: 260,
+    height: "100%",
     position: "relative",
     justifyContent: "center",
     alignItems: "center",
@@ -151,6 +155,12 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
+  },
+  bottomOverlay: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0,0,0,0.3)",
   },
   blurOverlay: {
     position: "absolute",

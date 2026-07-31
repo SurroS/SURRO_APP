@@ -5,8 +5,8 @@ import { XStack, YStack, Text } from "tamagui";
 import { Image as RNImage, Pressable } from "react-native";
 
  
-const CONTAINER_H = 74;
-const ICON_SIZE = 40;
+const CONTAINER_H = 64;
+const ICON_SIZE = 36;
 
 type Props = {
   title: string;
@@ -25,7 +25,7 @@ export default function InfoRowCard({ title, subtitle, icon, onPress }: Props) {
       (typeof icon === "object" && icon?.render)
     ) {
       const IconComponent = icon;
-      return <IconComponent size={18} color="white" />;
+      return <IconComponent size={14} color="white" />;
     }
 
     // Already a React element
@@ -43,8 +43,8 @@ export default function InfoRowCard({ title, subtitle, icon, onPress }: Props) {
         alignItems="center"
         borderWidth={1}
         borderColor="#E5E7EB"
-        paddingVertical={14}
-        paddingHorizontal={16}
+        paddingVertical={12}
+        paddingHorizontal={12}
         borderRadius={8}
         gap="$3"
       >
@@ -73,7 +73,7 @@ export default function InfoRowCard({ title, subtitle, icon, onPress }: Props) {
         </YStack>
 
         {/* Chevron */}
-        <ChevronRight size={16} color={colors.black} />
+        <ChevronRight size={12} color={colors.black} />
       </XStack>
     </Pressable>
   );

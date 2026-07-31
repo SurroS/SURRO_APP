@@ -29,10 +29,13 @@ type RoleKey = (typeof ROLE_ITEMS)[number]["key"];
 export default function RoleSelection() {
   const router = useRouter();
   const [selectedRole, setSelectedRole] = useState<RoleKey | null>(null);
-  const { setUser, user } = useAuth();
+  const { setUser, setSelectedRole: setAuthSelectedRole, user } = useAuth();
 
   const onNext = () => {
     if (!selectedRole) return;
+
+    // Set the selected role in auth store
+    setAuthSelectedRole(selectedRole);
 
     // Create a temporary user object with the selected role
     setUser({
@@ -42,14 +45,11 @@ export default function RoleSelection() {
       role: selectedRole,
       isVerified: false,
     });
-    console.log("Role from role", selectedRole);
-    console.log("User from role", user);
-    // Navigate to "how did you hear" page
-    router.push("/onboarding/how-did-you-hear");
+    router.push("/(auth)/signup");
   };
 
   return (
-    <YStack flex={1} padding="$4" marginTop="$5" backgroundColor={colors.white}>
+    <YStack flex={1} padding="$4" marginTop="$5" backgroundColor="#FFFFFF">
       {/* Header */}
       <Text
         fontSize={22}
@@ -78,8 +78,8 @@ export default function RoleSelection() {
               alignItems="center"
               justifyContent="space-between"
             >
-              <XStack alignItems="center" gap={12} style={{ flex: 1 }}>
-                <Image source={item.image} />
+              <XStack alignItems="center" gap={8} style={{ flex: 1 }}>
+                <Image source={item.image} width={25} height={25} />
                 <Text
                   fontSize={16}
                   fontWeight="500"
@@ -91,9 +91,9 @@ export default function RoleSelection() {
               </XStack>
 
               <YStack
-                width={24}
-                height={24}
-                borderRadius={12}
+                width={18}
+                height={18}
+                borderRadius={9}
                 justifyContent="center"
                 alignItems="center"
                 borderWidth={2}
@@ -104,9 +104,9 @@ export default function RoleSelection() {
               >
                 {selectedRole === item.key && (
                   <YStack
-                    width={12}
-                    height={12}
-                    borderRadius={6}
+                    width={8}
+                    height={8}
+                    borderRadius={4}
                     backgroundColor={colors.primary}
                   />
                 )}
@@ -144,8 +144,8 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   card: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "#E9E9E9",

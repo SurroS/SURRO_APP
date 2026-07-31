@@ -1,10 +1,11 @@
-import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface SocialButtonProps {
     title: string;
     icon: any;
     onPress: () => void;
+    loading?: boolean;
     disabled?: boolean;
     style?: any;
 }
@@ -13,20 +14,39 @@ export const SocialButton: React.FC<SocialButtonProps> = ({
     title,
     icon,
     onPress,
+    loading = false,
     disabled = false,
     style,
-}) => (
-    <TouchableOpacity
-        style={[styles.button, style, disabled && styles.disabled]}
-        onPress={onPress}
-        disabled={disabled}
-    >
-        <View style={styles.content}>
-            <Image source={icon} style={styles.icon} />
-            <Text style={styles.text}>{title}</Text>
-        </View>
-    </TouchableOpacity>
-);
+}) => {
+    const [pressedOnce, setPressedOnce] = useState(false);
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handlePress = () => {
+        if (pressedOnce) return;
+        setPressedOnce(true);
+        onPress();
+        timerRef.current = setTimeout(() => setPressedOnce(false), 500);
+    };
+
+    const isDisabled = loading || disabled || pressedOnce;
+
+    return (
+        <TouchableOpacity
+            style={[styles.button, style, isDisabled && styles.disabled]}
+            onPress={handlePress}
+            disabled={isDisabled}
+        >
+            <View style={styles.content}>
+                {loading ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                    <Image source={icon} style={styles.icon} />
+                )}
+                <Text style={styles.text}>{loading ? 'Please wait...' : title}</Text>
+            </View>
+        </TouchableOpacity>
+    );
+};
 
 const styles = StyleSheet.create({
     button: {

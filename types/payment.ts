@@ -5,5 +5,5 @@ export interface PaymentRoutes {
   PaymentMethodScreen: {};
   PaymentModeScreen: { gateway: PaymentGateway };
   PaymentEntryScreen: { gateway: PaymentGateway; mode: PaymentMode };
-  PaymentWebViewScreen: { paymentUrl: string; gateway: PaymentGateway; mode: PaymentMode };
+  PaymentWebViewScreen: { paymentUrl: string; gateway: PaymentGateway; mode: PaymentMode; reference: string };
 }

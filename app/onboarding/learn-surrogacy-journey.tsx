@@ -5,7 +5,6 @@ import { Button, Text, View, YStack } from "tamagui";
 import { PrimaryButton, ScreenHeader } from "@/components/auth";
 import YoutubePlayer from "react-native-youtube-iframe";
 import { SafeAreaView } from "react-native-safe-area-context";
-import colors from "@/hooks/colors";
 
 export default function LearnSurrogacyJourneyScreen() {
   const router = useRouter();
@@ -24,12 +23,12 @@ export default function LearnSurrogacyJourneyScreen() {
         <ScreenHeader onBackPress={() => router.back()} />
 
         {/* Main content container */}
-        <YStack flex={1} alignItems="center"  gap="$6">
+        <YStack flex={1} alignItems="center" gap="$6">
           <Text
             fontSize="$5"
             fontWeight="600"
             textAlign="center"
-            color={colors.text}
+            color="#1E1E1E"
           >
             Learn About the Surrogacy Journey
           </Text>
@@ -40,7 +39,7 @@ export default function LearnSurrogacyJourneyScreen() {
             fontFamily="$body"
             fontWeight="400"
             textAlign="center"
-            color={colors.text}
+            color="#1E1E1E"
             marginTop={20}
           >
             Watch this short video to understand what it means to be a
@@ -77,7 +76,7 @@ export default function LearnSurrogacyJourneyScreen() {
             fontFamily="$body" // Using tamagui body font family
             fontWeight="400"
             textAlign="center"
-            color={colors.text}
+            color="#1E1E1E"
             marginTop={20}
           >
             You can skip this for now; the video will be saved in your Resources

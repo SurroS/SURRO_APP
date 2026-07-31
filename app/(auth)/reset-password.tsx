@@ -7,6 +7,7 @@ import { PrimaryButton } from "@/components/auth/PrimaryButton";
 import { ScreenHeader } from "@/components/navigation/ScreenHeader";
 import { useResetPasswordForm } from "@/hooks/auth/useResetPasswordForm";
 import { useAuth } from "@/hooks/useAuth";
+import KeyboardAvoidingWrapper from "@/components/keyboardAvoidingWrapper";
 import { Toast } from "toastify-react-native";
 import { ToastType } from "toastify-react-native/utils/interfaces";
 
@@ -49,8 +50,9 @@ export default function ResetPasswordScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
+    <KeyboardAvoidingWrapper>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.container}>
         <ScreenHeader
           title="Reset Password"
           onBackPress={() => router.back()}
@@ -98,8 +100,9 @@ export default function ResetPasswordScreen() {
           onPress={handleResetPassword}
           loading={isLoading}
         />
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </KeyboardAvoidingWrapper>
   );
 }
 

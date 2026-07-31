@@ -11,7 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import colors from "@/hooks/colors";
 import { DimensionValue } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export type Step = {
   label: string;
@@ -30,6 +30,7 @@ export default function ProgressStepsModal({
   onClose,
   steps,
 }: ProgressStepsModalProps) {
+  const insets = useSafeAreaInsets();
   // Compute % done
   const progress= useMemo(() => {
     const total = steps.length;
@@ -43,12 +44,14 @@ export default function ProgressStepsModal({
       animationType="slide"
       transparent
       onRequestClose={onClose}
+      presentationStyle="overFullScreen"
+      statusBarTranslucent
     >
       {/* Dim background */}
       <Pressable style={styles.overlay} onPress={onClose} />
 
       {/* Bottom sheet */}
-      <SafeAreaView style={styles.bottomSheet}>
+      <View style={[styles.bottomSheet, { paddingBottom: insets.bottom || 16 }]}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Finish setting up your account</Text>
@@ -86,7 +89,7 @@ export default function ProgressStepsModal({
             </TouchableOpacity>
           ))}
         </View>
-      </SafeAreaView>
+      </View>
     </Modal>
   );
 }

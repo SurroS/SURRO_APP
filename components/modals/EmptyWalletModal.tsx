@@ -8,6 +8,7 @@ import {
   Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface Props {
   visible: boolean;
@@ -16,17 +17,20 @@ interface Props {
 }
 
 export default function EmptyWalletModal({ visible, onClose, onTopUp }: Props) {
+  const insets = useSafeAreaInsets();
   return (
     <Modal
       visible={visible}
       transparent
       animationType="slide"
       onRequestClose={onClose}
+      presentationStyle="overFullScreen"
+      statusBarTranslucent
     >
       <View style={styles.overlay}>
         <Pressable style={{ flex: 1 }} onPress={onClose} />
 
-        <View style={styles.modalContainer}>
+        <View style={[styles.modalContainer, { paddingBottom: insets.bottom || 16 }]}>
           <Ionicons name="wallet-outline" size={42} color="#0A2A66" />
 
           <Text style={styles.title}>You have insufficient funds in your wallet</Text>
@@ -58,6 +62,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     backgroundColor: "#fff",
     padding: 25,
+    paddingBottom: 34,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     alignItems: "center",

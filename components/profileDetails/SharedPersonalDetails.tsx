@@ -4,19 +4,42 @@ import { YStack } from "tamagui";
 import TextInputField from "@/components/TextInputField";
 import Dropdown from "@/components/DropDown";
 import NumberInput from "@/components/NumberInput";
-import DateInput from "../DateInput";
+import DateInput from "@/components/DateInput";
+
+interface SharedPersonalFieldsProps {
+  fullName?: string;
+  lastName?: string;
+  country?: any;
+  stateOfOrigin?: string;
+  originStatesList?: string[];
+  dob?: string;
+  maritalStatus?: string;
+  countries?: Array<{ label: string; value: string }>;
+  setFirstName?: (value: string) => void;
+  setLastName?: (value: string) => void;
+  setCountry?: (value: string) => void;
+  setStateOfOrigin?: (value: string) => void;
+  setDob?: (value: string) => void;
+  setMaritalStatus?: (value: string) => void;
+}
 
 export default function SharedPersonalFields({
-  fullName, 
-  country,
-  dob,
-  maritalStatus,
-  countries,
-  setFirstName,
-  setCountry,
-  setDob,
-  setMaritalStatus,
-}:any) {
+  fullName = "",
+  lastName = "",
+  country = "",
+  stateOfOrigin = "",
+  originStatesList = [],
+  dob = "",
+  maritalStatus = "",
+  countries = [],
+  setFirstName = () => {},
+  setLastName = () => {},
+  setCountry = () => {},
+  setStateOfOrigin = () => {},
+  setDob = () => {},
+  setMaritalStatus = () => {},
+}: SharedPersonalFieldsProps) {
+  const countryName = typeof country === "object" && country ? country.name || country.label || "" : country;
   return (
     <YStack gap="$4">
       <TextInputField
@@ -25,14 +48,28 @@ export default function SharedPersonalFields({
         value={fullName}
         onChangeText={setFirstName}
       />
- 
+
+      <TextInputField
+        label="Last name"
+        placeholder="Last name"
+        value={lastName}
+        onChangeText={setLastName}
+      />
 
       <Dropdown
         label="Country of origin"
         placeholder="Select a country"
-        value={country?.name || ""}
+        value={countryName}
         options={countries}
-        onSelect={setCountry}
+        onSelect={(item) => setCountry(String(item))}
+      />
+
+      <Dropdown
+        label="State of Origin"
+        placeholder="Select a state"
+        value={stateOfOrigin}
+        options={originStatesList}
+        onSelect={(item) => setStateOfOrigin(String(item))}
       />
 
       <DateInput
@@ -46,8 +83,13 @@ export default function SharedPersonalFields({
         label="Marital status"
         placeholder="Select"
         value={maritalStatus}
-        options={["Single", "Married", "Divorced", "Widowed"]}
-        onSelect={setMaritalStatus}
+        options={[
+          { label: "Single", value: "Single" },
+          { label: "Married", value: "Married" },
+          { label: "Divorced", value: "Divorced" },
+          { label: "Widowed", value: "Widowed" },
+        ]}
+        onSelect={(item) => setMaritalStatus(String(item))}
       />
     </YStack>
   );
