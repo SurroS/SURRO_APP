@@ -29,7 +29,12 @@ export async function registerPushToken(
 }
 
 export async function getNotifications(): Promise<BackendNotification[]> {
-  return authenticatedGet("/notifications");
+  try {
+    return await authenticatedGet("/notifications");
+  } catch (error: any) {
+    if (error?.status !== 404 && error?.response?.status !== 404) throw error;
+    return authenticatedGet("/notification");
+  }
 }
 
 export async function getNotificationPreferences(): Promise<NotificationPreferences> {
@@ -53,9 +58,38 @@ export async function updateReminderSettings(
 }
 
 export async function markNotificationRead(id: string): Promise<void> {
-  await authenticatedPatch(`/notifications/${id}`, { isRead: true });
+  try {
+    await authenticatedPatch(`/notifications/${id}/read`, { isRead: true });
+    return;
+  } catch (firstErr: any) {
+    if (firstErr?.status !== 404 && firstErr?.response?.status !== 404) {
+      throw firstErr;
+    }
+    try {
+      await authenticatedPatch(`/notifications/${id}`, { isRead: true });
+      return;
+    } catch (secondErr: any) {
+      if (secondErr?.status !== 404 && secondErr?.response?.status !== 404) {
+        throw secondErr;
+      }
+      try {
+        await authenticatedPatch(`/notification/${id}/read`, { isRead: true });
+        return;
+      } catch (thirdErr: any) {
+        if (thirdErr?.status !== 404 && thirdErr?.response?.status !== 404) {
+          throw thirdErr;
+        }
+        await authenticatedPatch(`/notification/${id}`, { isRead: true });
+      }
+    }
+  }
 }
 
 export async function deleteNotification(id: string): Promise<void> {
-  await authenticatedDelete(`/notifications/${id}`);
+  try {
+    await authenticatedDelete(`/notifications/${id}`);
+  } catch (error: any) {
+    if (error?.status !== 404 && error?.response?.status !== 404) throw error;
+    await authenticatedDelete(`/notification/${id}`);
+  }
 }

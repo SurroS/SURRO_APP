@@ -64,6 +64,8 @@ export default function OTPScreen() {
     setIsResending(true);
     try {
       await resendOtp(tempEmail);
+      setOtpCode("");
+      setOtpFromString("");
       Toast.show({
         text1: "OTP code has been resent to your email.",
         type: "customSuccess" as ToastType,

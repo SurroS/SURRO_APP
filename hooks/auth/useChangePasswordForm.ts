@@ -9,6 +9,7 @@ export interface PasswordRule {
 
 const useChangePasswordForm = () => {
   const [formData, setFormData] = useState<ChangePasswordRequest>({
+    currentPassword: "",
     newPassword: "", 
     newPasswordConfirmation:""
   });
@@ -50,6 +51,7 @@ const useChangePasswordForm = () => {
 
   const resetForm = () => {
     setFormData({ 
+      currentPassword: "",
       newPassword: "",
       newPasswordConfirmation: "",
     });
@@ -66,4 +68,4 @@ const useChangePasswordForm = () => {
   };
 };
 
-export default useChangePasswordForm; 
+export default useChangePasswordForm;

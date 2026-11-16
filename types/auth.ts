@@ -87,6 +87,7 @@ export interface ResetPasswordConfirm {
 }
 
 export interface ChangePasswordRequest {
+  currentPassword?: string;
   newPassword: string;
   newPasswordConfirmation: string;
 }
@@ -94,10 +95,13 @@ export interface ChangePasswordRequest {
 export interface GoogleAuth {
   idToken: string;
   role?: string;
+  referralCode?: string;
 }
 
 export interface AppleAuth {
   identityToken: string;
+  role?: string;
+  referralCode?: string;
 }
 
 export interface GoogleAppleAuth {
