@@ -131,6 +131,11 @@ export default function NetworkScreen() {
       const data = await getUnlocks();
       setUnlocks(data.unlocks || []);
     } catch (err: any) {
+      if (err?.status === 404 || err?.response?.status === 404) {
+        setUnlocks([]);
+        setError(null);
+        return;
+      }
       setError(err?.message || "Failed to load unlocked profiles");
     } finally {
       setLoading(false);
@@ -395,7 +400,7 @@ export default function NetworkScreen() {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>
-              No connections yet
+              You don&apos;t have any connection yet
             </Text>
             <Text style={styles.emptySubtext}>
               Start unlocking profiles to build your network

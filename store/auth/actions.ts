@@ -328,7 +328,9 @@ export const createAuthSlice: StateCreator<AuthStore> = (set, get) => ({
       set({ isLoading: true, error: null });
 
             const response = await publicPost("/auth/apple", {
-        identityToken: appleToken,
+        idToken: appleToken.identityToken,
+        role: appleToken.role,
+        referralCode: appleToken.referralCode || undefined,
       });
 
             if (!response) {

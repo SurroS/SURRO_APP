@@ -19,6 +19,7 @@ export default function ChangePasswordScreen() {
   const { changePassword, isLoading } = useAuth();
 
   const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async () => {
@@ -57,7 +58,27 @@ export default function ChangePasswordScreen() {
           title="Change Password"
           onBackPress={() => router.back()}
         />
-        <YStack>
+         <YStack>
+        <Text style={styles.label}>Current Password (leave blank for social accounts)</Text>
+        <View style={styles.inputWrapper}>
+          <TextInput
+            secureTextEntry={!showCurrentPassword}
+            style={styles.input}
+            value={formData.currentPassword}
+            onChangeText={(text) => updateField("currentPassword", text)}
+          />
+          <TouchableOpacity
+            style={styles.eyeButton}
+            onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+          >
+            <Ionicons
+              name={showCurrentPassword ? "eye-off-outline" : "eye-outline"}
+              size={20}
+              color="#888"
+            />
+          </TouchableOpacity>
+        </View>
+
         <Text style={styles.label}>New Password</Text>
         <View style={styles.inputWrapper}>
           <TextInput
